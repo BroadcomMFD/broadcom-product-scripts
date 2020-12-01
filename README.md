@@ -14,5 +14,7 @@ This repository houses Zowe CLI sample scripts for use cases involving the follo
 - [CA View](https://www.npmjs.com/package/@broadcom/caview-for-zowe-cli)
 - [CA Workload Automation CA 7](https://www.npmjs.com/package/@broadcom/ca7-for-zowe-cli)
 
+**Note:** If you do not have access to the public registry, please obtain these plug-ins from [Broadcom's Free Zowe Download Site](https://validate.broadcom.com/key/ZoweDistributionLink).
+
 # Using
 Sample scripts for each product plug-in will be located in the directory that shares its name. For example, CA Endevor samples will be in the [ca-endevor](ca-endevor) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/zowe-cli-scripts/issues/new).
