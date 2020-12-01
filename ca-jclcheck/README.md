@@ -1,1 +1,1 @@
-# CA JCLCheck Workload Automation plug-in for Zowe CLI - Sample Scripts
+# CA JCLCheck Workload Automation Plug-in for Zowe CLI - Sample Scripts

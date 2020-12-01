@@ -1,1 +1,1 @@
-# CA OPS/MVS plug-in for Zowe CLI - Sample Scripts
+# CA OPS/MVS Plug-in for Zowe CLI - Sample Scripts

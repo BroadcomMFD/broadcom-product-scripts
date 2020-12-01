@@ -1,1 +1,1 @@
-# CA Spool plug-in for Zowe CLI - Sample Scripts
+# CA Spool Plug-in for Zowe CLI - Sample Scripts
