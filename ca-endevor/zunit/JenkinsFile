@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+    environment {
+        // Endevor Details
+        ENDEVOR_CONNECTION="--host mainframe.hostname.com --port 8080 --protocol http --reject-unauthorized false"
+        ENDEVOR_LOCATION="--instance ENDEVOR --sys TESTS --sub ZUNIT --env DEV --sn 1 "
+        ENDEVOR="$ENDEVOR_CONNECTION $ENDEVOR_LOCATION"
+
+        // z/OSMF Connection Details
+        ZOWE_OPT_HOST="mainframe.hostname.com"
+        ZOWE_OPT_PORT="1443"
+        ZOWE_OPT_REJECT_UNAUTHORIZED=false
+    }
+    stages {
+        stage('Fetch Test') {
+            steps {
+                sh 'node --version'
+                sh 'npm --version'
+                sh 'bright --version'
+                sh 'bright plugins list'
+                sh 'npm install gulp-cli -g'
+                sh 'npm install gulp@v3'
+                sh 'npm install'
+                //ZOWE_OPT_USERNAME & ZOWE_OPT_PASSWORD are used to interact with Endevor 
+                withCredentials([usernamePassword(credentialsId: 'tsoCreds', usernameVariable: 'ZOWE_OPT_USER', passwordVariable: 'ZOWE_OPT_PASS')]) {
+                    sh 'zowe endevor retrieve ele ZUTEST1 $ENDEVOR --typ ZUNIT --rm --to-dataset MYHLQ.ZUNIT.TESTS --to-member ZUTEST1 --nosignout'
+                }
+            }
+        }
+        stage('Decompress Test') {
+            steps {
+                //ZOWE_OPT_USER & ZOWE_OPT_PASS are used to interact with z/OSMF
+                withCredentials([usernamePassword(credentialsId: 'tsoCreds', usernameVariable: 'ZOWE_OPT_USER', passwordVariable: 'ZOWE_OPT_PASS')]) {
+                    sh 'zowe jobs submit ds "MYHLQ.ZUNIT.JCL(EXPAND)" --vasc'
+                }
+            }
+        }
+        stage('Run Test') {
+            steps {
+                //ZOWE_OPT_USER & ZOWE_OPT_PASS are used to interact with z/OSMF
+                withCredentials([usernamePassword(credentialsId: 'tsoCreds', usernameVariable: 'ZOWE_OPT_USER', passwordVariable: 'ZOWE_OPT_PASS')]) {
+                    sh 'zowe jobs submit ds "MYHLQ.ZUNIT.TESTS.EXPANDED.JCL(ZUTEST1)" --vasc'
+                }
+            }
+        }
+        stage('Clean Up') {
+            steps {
+                //ZOWE_OPT_USER & ZOWE_OPT_PASS are used to interact with z/OSMF
+                withCredentials([usernamePassword(credentialsId: 'tsoCreds', usernameVariable: 'ZOWE_OPT_USER', passwordVariable: 'ZOWE_OPT_PASS')]) {
+                    script {
+                        def output = "${sh(script:'zowe files list ds MYHLQ.ZUNIT.TESTS.EXPANDED', returnStdout: true).trim()}"
+                        fileList = output.split()
+                        fileList.each {
+                            sh "zowe files delete ds ${it} -f"   
+                        }
+                    }
+                }
+            }
+        }
+    } 
+}
