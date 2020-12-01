@@ -1,0 +1,1 @@
+# CA View plug-in for Zowe CLI - Sample Scripts

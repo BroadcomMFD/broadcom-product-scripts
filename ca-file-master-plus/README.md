@@ -1,0 +1,1 @@
+# CA File Master Plus plug-in for Zowe CLI - Sample Scripts

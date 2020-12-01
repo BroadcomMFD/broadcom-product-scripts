@@ -1,0 +1,1 @@
+# CA MAT Analyze plug-in for Zowe CLI - Sample Scripts

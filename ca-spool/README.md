@@ -1,0 +1,1 @@
+# CA Spool plug-in for Zowe CLI - Sample Scripts

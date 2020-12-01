@@ -1,0 +1,1 @@
+# CA Endevor Bridge for Git plug-in for Zowe CLI - Sample Scripts

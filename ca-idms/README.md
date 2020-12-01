@@ -1,0 +1,1 @@
+# CA IDMS plug-in for Zowe CLI - Sample Scripts

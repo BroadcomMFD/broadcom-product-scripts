@@ -1,0 +1,1 @@
+# CA Workload Automation CA 7 plug-in for Zowe CLI - Sample Scripts

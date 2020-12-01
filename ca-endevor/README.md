@@ -1,0 +1,1 @@
+# CA Endevor plug-in for Zowe CLI - Sample Scripts
