@@ -16,8 +16,8 @@ pipeline {
             steps {
                 sh 'node --version'
                 sh 'npm --version'
-                sh 'bright --version'
-                sh 'bright plugins list'
+                sh 'zowe --version'
+                sh 'zowe plugins list'
                 sh 'npm install gulp-cli -g'
                 sh 'npm install gulp@v3'
                 sh 'npm install'
