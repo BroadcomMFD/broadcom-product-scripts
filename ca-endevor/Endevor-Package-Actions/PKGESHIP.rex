@@ -8,8 +8,6 @@
 /*
    This REXX submits automatically 0 or more package shipping
    jobs.
-   Optionally, if the EndevorHooks value is Y, then invoke
-   the NDVRHOOK program to support Endevor Hooks
 */
 /*  WRITTEN BY DAN WALTHER */
 
@@ -110,33 +108,12 @@
 
 
 /* <---- Variable settings for each site          */
-
-/* if called by exit, then these are the Arguments....
-   ARG Parms ;
-
-   If USERID() = '???????' then Trace ?R
-   Notes.7  = Substr(PARMS,414,60) ;
-   If Substr(Notes.7,1,5) = 'TRACE' then Trace r
-   Package = Substr(PARMS,1,16) ;
-
-   Environ = Substr(PARMS,18,08) ;
-   Stage   = Substr(PARMS,27,01) ;
-   CREATE_USER = Substr(PARMS,29,08) ;
-   UPDATE_USER = Substr(PARMS,37,08) ;
-   CAST_USER = Substr(PARMS,45,08) ;
-   Notes.1  = Substr(PARMS,054,60) ;
-   Notes.2  = Substr(PARMS,114,60) ;
-   Notes.3  = Substr(PARMS,174,60) ;
-   Notes.4  = Substr(PARMS,234,60) ;
-   Notes.5  = Substr(PARMS,294,60) ;
-   Notes.6  = Substr(PARMS,354,60) ;
-   Notes.7  = Substr(PARMS,414,60) ;
-   Notes.8  = Substr(PARMS,474,60) ;
-   ShipOutput = Substr(PARMS,584,03) ;
-*/
-
 /* if called by zowe, then this  is  the Argument ....   */
    ARG Package;
+
+/* IF you want to use the package prefix to select packages          */
+/*     for shipments, then tailor and uncomment the next line:       */
+/* If Substr(Package,1,2) /= 'PR' then exit                          */
 
 /* If ShipOutput /= 'BAC' THEN ShipOutput = 'OUT' */
    TYPRUN = ' '
