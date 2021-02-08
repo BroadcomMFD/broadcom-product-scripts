@@ -1,7 +1,7 @@
 # Zowe Endevor Package Automation - Shipments for a Single Destination
-This procedure allows zowe commands to execute Endevor package shipments. For example,
+This procedure allows zowe commands to execute Endevor package shipments. 
 
-    `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
+For example: `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
     
 This procedure is a simpler version for cases when there is only one possible shipment destination. Typically the one shipment destination could be a prodcution destination that resides on a different mainframe than the Endevor life cycle that spawns the shipment.
 
@@ -40,6 +40,4 @@ Setup steps for the REXX-based objects for zowe package shipment automation:
     -   Enter the dataset name of the tailored JCL into the `Lpar-named-REXX` as the `MySEN2Library`. 
     -   Enter the member name of the tailred JCL into the `Lpar-named-REXX` as the `ModelMember`.
         
-    f)  Execute your zowe command, for example:
-    
-        `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
+    f)  Execute your zowe command, for example: `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
