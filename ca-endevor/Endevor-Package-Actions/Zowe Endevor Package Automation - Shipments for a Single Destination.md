@@ -34,11 +34,11 @@ Setup steps for the REXX-based objects for zowe package shipment automation:
     d)	`PKGESHIP.rex` – no changes are necessary. Although you may elect to turn off the Trace.
     
     e)	`SHIP#FTP.skl` – needs to be a tailored version of your package shipping JCL.
-        -   In Endevor, manually Submit a package shipment, and capture the JCL that was submitted. 
-        -   Replace specific values for Package, Destination, Date and time as shown in the `SHIP#FTP` example. 
-        -   Save the tailored JCL as a member of a dataset, using whatever dataset and member names you like.   
-        -   Enter the dataset name of the tailored JCL into the `Lpar-named-REXX` as the `MySEN2Library`. 
-        -   Enter the member name of the tailred JCL into the `Lpar-named-REXX` as the `ModelMember`.
+    -  In Endevor, manually Submit a package shipment, and capture the JCL that was submitted. 
+    -   Replace specific values for Package, Destination, Date and time as shown in the `SHIP#FTP` example.
+    -   Save the tailored JCL as a member of a dataset, using whatever dataset and member names you like. 
+    -   Enter the dataset name of the tailored JCL into the `Lpar-named-REXX` as the `MySEN2Library`. 
+    -   Enter the member name of the tailred JCL into the `Lpar-named-REXX` as the `ModelMember`.
         
     f)  Execute your zowe command, for example:
     
