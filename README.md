@@ -1,4 +1,4 @@
-# Zowe CLI Scripts
+# Zowe CLI Broadcom Product Scripts
 This repository houses Zowe CLI sample scripts for use cases involving the following Zowe Conformant Broadcom product plug-ins, available on public npm:
 
 - [CA Endevor](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli)
@@ -20,4 +20,4 @@ This repository houses Zowe CLI sample scripts for use cases involving the follo
 Sample scripts for each product plug-in will be located in the directory that shares its name. For example, CA Endevor samples will be in the [ca-endevor](ca-endevor) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/zowe-cli-scripts/issues/new).
 
 # Contributing
-**We are not accepting third-party contributions at this time.**
+**We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
