@@ -1,0 +1,124 @@
+//*******************************************************************           
+//*                                                                             
+//*   Copyright (C) 2021 Broadcom. All Rights Reserved.                          
+//*                                                                             
+//*  GCOBOL  PROCESSOR to COMPILE GEN Programs.                   
+//*          Invoke DB2 COPROCESSOR when Processor Group Name=LEMB2C5
+//*                           
+//*  STEP1  INITLIST  ALLOCATE TEMPORARY COMPILER AND OBJECT DATA SETS            
+//*                   OUTPUT DATA SETS FOR THE LISTINGS                                    
+//*  STEP2  COMPILE   INVOKE COMPILER AND IF REQUIRED THE COPROCESSOR                                        
+//*  STEP3  OBJCOPY   COPY THE OBJECT TO OBJLIB DATA SET               
+//*  STEP4  DBRMCOPY  COPY DBRM TO DBRMLIB DATA SET           
+//*  STEP5  CONLIST   STORE COMPILE LISTING IN THE LISTING DATA SET           
+//********************************************************************          
+//* GCOBOL for GEN Applications using Endevor. 
+//*	    COBOL compiler including the DB2 CoProcessor,        
+//*         COBOL elements with SQL MUST use Processor Group named 
+//*         LEMB2C5 to include the DBRMLIB,  
+//*         COBOL elements without SQL must use Processor Group  
+//*         name LEMBCX5.        
+//*
+//********************************************************************          
+//GCOBOL   PROC HLQ=&#HLQ.,                    HIGH LEVEL QUALIFIER              
+//              PFX=&HLQ..&#INVLOC.&&C1S#,     USE PREFIX SITE SYM              
+//              CPFX=&HLQ..&#INVLOC.&&C1S#,    COMMON SYSTEM Prefix
+//              VIO='SYSDA',                   UNIT= for utility data sets
+//              PARMCMP='APOST,NOSQLCCSID,DLL,NOEXPORTALL,OPT(2),ARCH(7),STGOPT',         
+//              CLECOMP=&#CLECOMP,             COBOL/LE complr  
+//              CLERUN=&#CLERUN,               COBOL/LE runtime library          
+//              CLERUN2=&#CLRRUN2,             COBOL/LE runtime 2 library        
+//              SDSNLOAD=&#SDSNLOAD,           DB2 load library                                  
+//              XOBJLIB1='NULLFILE',           External macro library              
+//              XOBJLIB2='NULLFILE',           External macro library              
+//              SEQLIST='N',                   Create sequential listing           
+//              LISTNM='&HLQ..C1SY..&C1ELEMENT..&C1CCID(1,8,$).LST'                         
+//*                                                                             
+//*====================================================================         
+//*        Allocate the output listing data sets                                
+//*====================================================================         
+//INITLIST EXEC PGM=BC1PDSIN                           
+//C1INIT01 DD   DSN=&&COBLST,DISP=(,PASS),                                      
+//              SPACE=(CYL,(1,5)),                                            
+//              DCB=(RECFM=FBA,LRECL=121,DSORG=PS)                              
+//C1INIT02 DD   DSN=&&COBOBJ,DISP=(,PASS,DELETE),                               
+//              SPACE=(CYL,(1,5),RLSE),                                         
+//              DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS)                   
+//*====================================================================         
+//*        Invoke Compiler                                                      
+//*====================================================================         
+//COMPILE  EXEC PGM=IGYCRTL,COND=(0,NE,INITLIST),MAXRC=4,                      
+//         PARM=&PARMCMP                           
+//*--------------------------------------------------------------------         
+//*        STEPLIB to requested compiler library                                
+//*--------------------------------------------------------------------         
+//STEPLIB  DD   DSN=&CLECOMP,DISP=SHR      COBOL compiler library               
+//         DD   DSN=&CLERUN,DISP=SHR       COBOL LE runtime library             
+//         DD   DSN=&CLERUN2,DISP=SHR      COBOL LE 2 runtime library          
+//         DD   DISP=SHR,DSN=&SDSNLOAD                                          
+//*                                                                             
+//*--------------------------------------------------------------------         
+//*        Expand libraries needed by Compiler.                                 
+//*--------------------------------------------------------------------         
+//SYSIN    DD   DSN=&C1BASELIB(&C1ELEMENT),DISP=SHR                             
+//SYSLIN   DD   DSN=&&COBOBJ,DISP=(OLD,PASS)                                    
+//SYSPUNCH DD   DUMMY                                                           
+//SYSUT1   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT2   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT3   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT4   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT5   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT6   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT7   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT8   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT9   DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT10  DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT11  DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT12  DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT13  DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT14  DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSUT15  DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//SYSMDECK DD   UNIT=&VIO,SPACE=(CYL,(1,2))                                     
+//*                     
+//SYSLIN   DD   DSN=&&COBOBJ,DISP=(OLD,PASS)                                    
+//*        - - - - - - - - - - - - - - - - - - - - - - -                        
+//IFSQL1 IF '&C1PRGRP' EQ 'LEMB2C5' THEN          
+//DBRMLIB  DD DSN=&&DBRMOUT(&C1ELEMENT),DISP=(,PASS),                           
+//            UNIT=&VIO,SPACE=(CYL,(1,1,5),RLSE),                               
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=6160)                              
+//IFSQL1 ENDIF                                                                  
+//*        - - - - - - - - - - - - - - - - - - - - - - - - -                    
+//SYSPRINT DD   DSN=&&COBLST,DISP=(OLD,PASS)                                    
+//SYSLIB   DD   DSN=&CPFX..COBCOPY,                                              
+//              DISP=SHR,MONITOR=COMPONENTS,ALLOC=PMAP                          
+//*====================================================================         
+//*        Copy object to .OBJLIB data set                                      
+//*====================================================================         
+//OBJCOPY  EXEC PGM=IEBGENER,COND=(5,LT)                                        
+//SYSPRINT DD   DUMMY                                                           
+//SYSUT1   DD   DSN=&&COBOBJ,DISP=(OLD,DELETE)                                  
+//SYSUT2   DD   DSN=&PFX..OBJLIB(&C1ELEMENT.),                                  
+//              DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE                     
+//SYSIN    DD   DUMMY                                                           
+//*                                                                             
+//*====================================================================         
+//*        Copy DBRM to .DBRMLIB data set                                       
+//*====================================================================         
+//IFSQL2 IF '&C1PRGRP' EQ 'LEMB2C5' THEN                                        
+//DBRMCOPY EXEC PGM=IEBGENER,COND=(5,LT)                                        
+//SYSPRINT DD   DUMMY                                                           
+//SYSUT1   DD   DSN=&&DBRMOUT(&C1ELEMENT),DISP=(OLD,DELETE)                     
+//SYSUT2   DD   DSN=&PFX..DBRMLIB(&C1ELEMENT.),                                 
+//              DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE                     
+//SYSIN    DD   DUMMY                                                           
+//IFSQL2 ENDIF                                                                  
+//*
+//*====================================================================         
+//*        Copy listing to .LISTLIB data set                                    
+//*====================================================================         
+//CONLIST  EXEC PGM=CONLIST,PARM=STORE,COND=EVEN,MAXRC=0                                
+//C1LLIBO  DD   DSN=&PFX..LISTLIB,                                              
+//              DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE                     
+//C1BANNER DD   UNIT=&VIO,SPACE=(TRK,(1,1)),                                    
+//              DCB=(RECFM=FBA,LRECL=121,BLKSIZE=6171,DSORG=PS)                 
+//LIST01   DD   DSN=&&COBLST,DISP=(OLD,DELETE)                                  
