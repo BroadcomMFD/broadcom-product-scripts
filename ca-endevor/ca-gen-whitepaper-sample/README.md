@@ -15,23 +15,23 @@ configuration those components.
 ## Looking for help?
 
 If you are having any trouble getting started with the scripts or running them, please
-[create an issue] (https://github.com/BroadcomMFD/zowe-cli-broadcom-product-scripts/issues) in this project.
+[create an issue](https://github.com/BroadcomMFD/zowe-cli-broadcom-product-scripts/issues) in this project.
 
 ## Set up
 
 ### Python
 
 You must have a valid Python 3 installation on the machine where the scripts execute. You can find instructions for how
-to install Python on your platform of choice by visiting https://www.python.org/downloads. There are also many resources
+to install Python on your platform of choice by visiting [Python downloads](https://www.python.org/downloads). There are also many resources
 available online that detail how to install Python on different platforms.
 
 Once Python is installed, you must download the PyYAML module using pip (<code>pip install PyYAML</code>). This can
-either be done on a global level, or utilizing a virtual environment (https://docs.python.org/3/library/venv.html).
+either be done on a global level, or utilizing a [virtual environment](https://docs.python.org/3/library/venv.html).
 
 ### Zowe
 
-You must have a valid installation of the Zowe CLI. The recommended approach is to use a supported environment, like CA
-Brightside (https://www.broadcom.com/products/mainframe/application-development/brightside). This takes much of the
+You must have a valid installation of the Zowe CLI. The recommended approach is to use a supported environment, like [CA
+Brightside](https://www.broadcom.com/products/mainframe/application-development/brightside). This takes much of the
 guesswork and trial-and-error that can sometimes accompany installing and configuring open source tools.
 
 However, the only requirements for the scripts to run correctly are to have a valid Zowe CLI with the CA Endevor SCM for
