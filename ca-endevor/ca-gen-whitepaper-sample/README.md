@@ -3,7 +3,7 @@
 ## Overview
 
 As part of our commitment to integration between CA Gen and standard DevOps tools, we are providing sample code
-alongside a white paper describing a streamlined CA Gen developer workflow. These scripts are intended to illustrate the
+alongside a [white paper](https://community.broadcom.com/mainframesoftware/communities/community-home/digestviewer/viewthread?GroupId=1513&MessageKey=7a3ba595-6432-48aa-93f4-f18206875d72&CommunityKey=4182c217-4789-4997-8f22-87de25983f6e&tab=digestviewer) describing a streamlined CA Gen developer workflow. These scripts are intended to illustrate the
 integration opportunities that are already present with your CA Gen installation. There are no requirements to install
 new CA Gen components to utilize functionality in these scripts.
 
