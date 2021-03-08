@@ -29,7 +29,7 @@ can be used to make the DBRMs unique.
 ISPS elements are templates used by the scripts to Link-Edit the Gen code.
 
 PARMS contain the Compiler and Link-Edit parms in member $$$$DFLT. It also contains elements with the SQL statements used 
-to BIND the DBRMS.
+to BIND the DBRMs.
 
 
 The PROCESSORs used are as provided by Endevor for regular processing with the following modifications:
