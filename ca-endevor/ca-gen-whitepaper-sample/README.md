@@ -7,8 +7,8 @@ alongside a white paper describing a streamlined CA Gen developer workflow. Thes
 integration opportunities that are already present with your CA Gen installation. There are no requirements to install
 new CA Gen components to utilize functionality in these scripts.
 
-You will need to have a CA Endevor SCM installation, and you must be able to access the installation through the CA
-Endevor SCM plugin for Zowe CLI. The details of setting this up will not be detailed here, and you should consult with
+You will need to have a CA Endevor SCM installation, and you must be able to access the installation through the [CA
+Endevor SCM plugin for Zowe CLI](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli). The details of setting this up will not be detailed here, and you should consult with
 your CA Endevor administrator, or the CA Endevor product documentation for details on what is required to install and
 configuration those components.
 
@@ -31,11 +31,11 @@ either be done on a global level, or utilizing a [virtual environment](https://d
 ### Zowe
 
 You must have a valid installation of the Zowe CLI. The recommended approach is to use a supported environment, like [CA
-Brightside](https://www.broadcom.com/products/mainframe/application-development/brightside). This takes much of the
+Brightside](https://www.broadcom.com/products/mainframe/application-development/brightside). This takes out much of the
 guesswork and trial-and-error that can sometimes accompany installing and configuring open source tools.
 
-However, the only requirements for the scripts to run correctly are to have a valid Zowe CLI with the CA Endevor SCM for
-Zowe CLI plugin installed and correctly configured.
+However, the only requirements for the scripts to run correctly are to have a valid [Zowe CLI](https://www.npmjs.com/package/@zowe/cli) with the [CA Endevor SCM for
+Zowe CLI plugin](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli) installed and correctly configured.
 
 ## Configuration
 
@@ -47,7 +47,7 @@ to remember the name because it is a required configuration parameter for the Py
 
 ### Python scripts
 
-The Python scripts currently require a configuration file in YaML format. There is a sample YaML configuration script
+The Python scripts currently require a configuration file in YAML format. There is a sample YAML configuration script
 provided in the <code>resources</code> directory. You should make a copy of the sample.yml file and tailor the values to
 match your environment and preferences. The config file has inline comments describing the function of the variables,
 but many of them are self-explanatory.
