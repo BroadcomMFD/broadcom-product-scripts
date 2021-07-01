@@ -25,7 +25,6 @@ The mechanism used to drive automated package shipments is the Shipment Rules ta
 
     The Typrun value may be ‘HOLD’, or 'SCAN' or blank. Use a Typrun value of 'HOLD' if you want to use a manual process or other automated proess to release the jobs at the appropriate times.
 
-
 The following are pre-requisites and assumptions:
     1) Endevor's package shipment process must be already configured. 
     2) IBM's FTP is found in the skl example, but any transmission method may be used.
