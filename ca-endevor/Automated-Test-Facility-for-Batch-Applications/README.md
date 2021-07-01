@@ -21,7 +21,7 @@ Setup steps for the Automated Test Facility for Batch Applications:
 2)  Copy `TEST#JOB` into a REXX library that will be accessed by your processors.
 
 3)	Prepare the JCL (or other element type) processor(s).  
-    a)	Install `GTESTING` as an Endevor processor. Optionally, you may copy `GTESTING` into an existing processor. Tailor the top of the processor to specify values applicable to your site. Be sure to name the library where you placed the `TEST#JOB` Rexx module. Also, consider the value given to the RESLTHLQ processor variable. This value names the High Level Qualifier for datasets where job outputs are captured. You can use the C1USERID processor, if you prefer. The Rexx driver, `TEST#JOB`, creates datasets prefixed with `RESLTHLQ` and with additional nodes for C1Stage, date and Job number.
+    a)	Install `GTESTING` as an Endevor processor. Optionally, you may copy `GTESTING` into an existing processor. Tailor the top of the processor to specify values applicable to your site. Be sure to name the library where you placed the `TEST#JOB` Rexx module. Also, consider the value given to the* **RESLTHLQ** processor variable. This value names the High Level Qualifier for datasets where job outputs are captured. You can use the C1USERID processor, if you prefer. The Rexx driver, `TEST#JOB`, creates datasets prefixed with **RESLTHLQ** and with additional nodes for C1Stage, date and Job number.
     b)  Define the use of your processor to the Endevor Environments, stages, systems, types and processor groups where you need to support Automated Testing.
     
 4)  Prepare the OPTIONS that drive Automated Testing. For example, if you have a batch COBOL program COBA that runs in a JCL element, JOBA, then you will need OPTIONS for both.
