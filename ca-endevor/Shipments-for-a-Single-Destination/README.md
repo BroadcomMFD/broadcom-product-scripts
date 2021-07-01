@@ -3,7 +3,7 @@ This procedure allows zowe commands to execute Endevor package shipments.
 
 For example: `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
     
-This procedure is a simpler version for cases when there is only one possible shipment destination. Typically the one shipment destination could be a prodcution destination that resides on a different mainframe than the Endevor life cycle that spawns the shipment.
+This procedure is a simpler version for cases when there is only one possible shipment destination. Typically the one shipment destination could be a production destination that resides on a different mainframe than the Endevor life cycle that spawns the shipment.
 
 Look for another procedure that supports shipments to multiple destinations, where 0 to many destinations will be automatically submitted based on the package content.
 
@@ -13,13 +13,13 @@ The following are pre-requisites and assumptions:
 1) There is only one destination always selected for the package shipment. The Destination is named in the `@site` member.
 2) It is assumed that Endevor's package shipment process is already configured. 
 3) The examples in this process assume that IBM's FTP is used for package shipments. However, any transmission method can be used.
-4) Some REXX modifcations may optionally be applied to the routines. For example, it may be preferred to limit the shipments to packages with a given prefix.
+4) Some REXX modifications may optionally be applied to the routines. For example, it may be preferred to limit the shipments to packages with a given prefix.
 
 
 Setup steps for the REXX-based objects for zowe package shipment automation:
-1)	Prepare the logon procedure for your zowe profile, if necessary. The default logon procedure name is IZUFPROC, which you can tailor or copy as another name. 
+1)	Prepare the logon procedure for your zowe profile, if necessary. The default logon procedure name is `IZUFPROC`, which you can tailor or copy as another name. 
     
-    a)	Your zowe logon procedure must include any STEPLIB and/or CONLIB content of your batch Endevor jobs. Both were inserted into our example IZUFNDVR.jcl. At some sites neither of these are necessary.
+    a)	Your zowe logon procedure must include any STEPLIB and/or CONLIB content of your batch Endevor jobs. Both were inserted into our example `IZUFNDVR.jcl`. At some sites neither of these are necessary.
         
     b)	Identify or create a REXX library for the REXX items of this solution. If not already there, include the REXX library name within the SYSEXEC library allocation of the logon procedure. (The library is also to be named as `MyCLS2Library` in the `@site.rex` member). Within the examples, the `PSP.ENDV.TEAM.REXX` library was named as the library for the REXX-based tools.
 
@@ -38,6 +38,6 @@ Setup steps for the REXX-based objects for zowe package shipment automation:
     -   Replace specific values for Package, Destination, Date and time as shown in the `SHIP#FTP` example.
     -   Save the tailored JCL as a member of a dataset, using whatever dataset and member names you like. 
     -   Enter the dataset name of the tailored JCL into the `Lpar-named-REXX` as the `MySEN2Library`. 
-    -   Enter the member name of the tailred JCL into the `Lpar-named-REXX` as the `ModelMember`.
+    -   Enter the member name of the tailored JCL into the `Lpar-named-REXX` as the `ModelMember`.
         
     f)  Execute your zowe command, for example: `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
