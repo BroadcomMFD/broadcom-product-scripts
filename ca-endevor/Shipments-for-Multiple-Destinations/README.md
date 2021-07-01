@@ -1,4 +1,4 @@
-#Readme Shipments for multiple destinations.md
+# Readme Shipments for multiple destinations.md
 This procedure allows zowe commands to execute Endevor package shipments. For example,
     zowe zos-tso issue command "PKGESHIP 'name-of-package'"
 The procedure is a more robust alternative to a simpler version, used when there is only one Endevor package shipment destination. 
@@ -35,36 +35,37 @@ The following are pre-requisites and assumptions:
 
 Setup steps for the REXX-based objects for zowe package shipment automation:
 1)	Prepare the logon procedure for your zowe profile, if necessary.
-    The default logon procedure name is IZUFPROC, which you can tailor or copy as another name. 
+    The default logon procedure name is `IZUFPROC`, which you can tailor or copy as another name. 
     a)	Your zowe logon procedure must include any STEPLIB and/or CONLIB content of your batch Endevor jobs.
-        Both were inserted into our example IZUFNDVR.jcl. At some sites neither of these are necessary. 
+        Both were inserted into our example `IZUFNDVR.jcl`. At some sites neither of these are necessary. 
     b)	Identify or create a REXX library for the REXX items of this solution. 
-        If not already there, include the REXX library name within the SYSEXEC library allocation of the logon procedure. (The library is also to be named as MyCLS2Library in the @siteMult.rex member)
+        If not already there, include the REXX library name within the SYSEXEC library allocation of the logon procedure. (The library is also to be named as MyCLS2Library in the `@siteMult.rex` member)
         Within the examples, the PSP.ENDV.TEAM.REXX library was named as the library for the REXX-based tools.
 
 2)	Install the remaining items for doing automated Package shipments. 
     All REXX members must be placed into the REXX library named on 1b.  
-    a)	WHEREAMI.rex – no changes are necessary. If you do not know the name of the Lpar, then  
+    a)	`WHEREAMI.rex` – no changes are necessary. If you do not know the name of the Lpar, then  
         execute this REXX once to determine the name. 
-        You can execute WHEREAMI by placing an "EX" to the left of its name when displayed as a member of the library for the REXX-based tools.
-    b)	@siteMult.rex – rename @siteMult to match the name displayed in step 2a. 
+        You can execute `WHEREAMI` by placing an "EX" to the left of its name when displayed as a member of the library for the REXX-based tools.
+    b)	`@siteMult.rex` – rename `@siteMult` to match the name displayed in step 2a. 
         For example, if you are running on an lpar named LP1, then step 2a will display "@LP1", and the member @site should be renamed to @LP1 .
         Then edit the renamed member to reflect values for the named Lpar. 
-    c)  SHIPRULE - Create a member named SHIPRULE from the SHIPRULE example. Tailor it to reflect your choices for
+    c)  `SHIPRULE` - Create a member named `SHIPRULE` from the example. 
+        Tailor it to reflect your choices for
         package shipments. Place the member into the library named in @siteMult as the MyDATALibrary.  
-    d)	WHERE@M1.rex – no changes are necessary. 
-    e)	PKGESHIP.rex – no changes are necessary. Although you may elect to turn off the Trace.
-    f)	SHIP#FTP.skl – needs to be a tailored version of your package shipping JCL.
+    d)	`WHERE@M1.rex` – no changes are necessary. 
+    e)	`PKGESHIP.rex` – no changes are necessary. Although you may elect to turn off the Trace.
+    f)	`SHIP#FTP.skl` – needs to be a tailored version of your package shipping JCL.
         -   In Endevor, manually Submit a package shipment, and capture the JCL that was submitted. 
         -   Replace specific values for Package, Destination, Date and time as shown in the SHIP#FTP example. 
         -   Save the tailored JCL as a member of a dataset, using whatever dataset and member names you like.   
-        -   Enter the dataset name of the tailored JCL into @siteMult.rex as the MySEN2Library. 
-        -   Enter the member name of the tailored JCL into @siteMult.rex as the ModelMember.
-    g)  BILDTGGR, PULLTGGR, TBLUNLOD and UPDTTGGR must be placed into the REXX library named on 1b.
+        -   Enter the dataset name of the tailored JCL into `@siteMult.rex` as the MySEN2Library. 
+        -   Enter the member name of the tailored JCL into `@siteMult.rex` as the ModelMember.
+    g)  `BILDTGGR`, `PULLTGGR`, `TBLUNLOD` and `UPDTTGGR` must be placed into the REXX library named on 1b.
     h)  Create a Trigger file as a sequential dataset (DSORG=PS) and record length 100 characters (LRECL=100).
-        Enter the Trigger file name into @siteMult.rex as the TriggerFileName. 
+        Enter the Trigger file name into `@siteMult.rex` as the TriggerFileName. 
     i)  Execute your zowe command, for example:
-        zowe zos-tso issue command "PKGESHIP 'name-of-package'"
+        `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
 
 Note.
-Shipments are submitted from entries placed automatically onto the "Trigger" file. You can manually update the "Trigger" file to request package shipments. If you create a SHIPRULE that designates a future shipment, then you can use the PULLTGGR program within a step of a typical sweep job to submit package shipments in a timely manner, similar to the way package execution jobs are submitted. 
+Shipments are submitted from entries placed automatically onto the "Trigger" file. You can manually update the "Trigger" file to request package shipments. If you create a `SHIPRULE` that designates a future shipment, then you can use the `PULLTGGR` program within a step of a typical sweep job to submit package shipments in a timely manner, similar to the way package execution jobs are submitted. 
