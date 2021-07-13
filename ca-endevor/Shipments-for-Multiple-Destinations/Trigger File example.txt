@@ -1,0 +1,2 @@
+*St Package--------- System-- Destination Date---- Time Jobname- Jobnumber Typrun
+ _  T#OCXL2603798307 CONCURNT TSO21       20140324 0000 TSO21TST JOB0232             
