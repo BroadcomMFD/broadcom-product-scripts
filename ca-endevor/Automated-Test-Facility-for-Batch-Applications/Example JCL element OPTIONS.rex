@@ -1,5 +1,6 @@
 *-----------------------------------------------------------------*
 * Specifications for the UTC stage
+*      (an asterisk in Column 1 designates a commment line)
 *-----------------------------------------------------------------*
 
 JCL.UNITTEST.FindTxt.1 = '//MISDXW#D JOB '
@@ -48,6 +49,12 @@ JCL.UNITTEST.Replace.14= 'DSN=BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
 
 JCL.UNITTEST.FindTxt.15= '//SYSOUT    DD DUMMY '
 JCL.UNITTEST.Replace.15= '//SYSOUT    DD SYSOUT=*'
+
+* Show the insert of a comment reflecting Endevor classification:
+JCL.UNITTEST.FindTxt.16 = '//  EXPORT SYMLIST='
+JCL.UNITTEST.where.16 = 'BEFORE'
+JCL.UNITTEST.Insertx.16 =,
+            '//* Testing Stg=&C1Stage Sys=&C1System Sbs=&C1Subsys '
 
 * Replace every STEPLIB
 JCL.UNITTEST.Replace.STEPLIB. =,

@@ -88,8 +88,8 @@
 //*--     Waits and WaitSecs can be overriden in the OPTIONS   -------*
 //*-------------------------------------------------------------------*
 //SUBMITST EXEC PGM=IKJEFT1B,   < execute the REXX driver for testing
-//  PARM='TEST#JOB &C1ELEMENT &C1STAGE &WAITS &WAITSECS &RESLTHLQ'
-//* PARM='TEST#JOB OPTdd WaitLoops LoopSeconds outputprefix'
+//  PARM=('TEST#JOB &C1ELEMENT &C1ENVMNT &C1STAGE &C1SY &C1SU ',       X
+//        '&WAITS &WAITSECS &RESLTHLQ')
 //* Can use OPTIONS to override WaitLoops and LoopSeconds
 //OLDJCL   DD DSN=&&ELMOUT,DISP=(OLD,DELETE)
 //NEWJCL   DD DSN=&OUTLIB(&C1ELEMENT),

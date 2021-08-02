@@ -73,7 +73,8 @@
      BPXWDYN("INFO FI(TEST#JOB) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then TraceRc = 'Y'
 
-   ARG C1Element C1Stage  WaitLoops LoopSeconds TestResultsHLQ ;
+   ARG C1Element C1Envmnt C1Stage C1System C1Subsys ,
+       WaitLoops LoopSeconds TestResultsHLQ ;
 
    If Length(TestResultsHLQ) > 21 then,
       Do
@@ -110,6 +111,7 @@
    Say 'Element ' C1Element 'at stage ' C1Stage
 
    /* Get   Options for tailoring and processing the JCL       */
+   /* If no Options are designated for C1stage, then exit      */
    Call ProcessInputOptions;
 
    /* If Baseline specified at Stage level use it.     */
@@ -210,13 +212,36 @@ ProcessInputOptions:
    x = IncludeQuotedOptions(OPTIONS)
    Say 'NumberReplaceStrings=' NumberReplaceStrings
 
+   If NumberReplaceStrings = 0 then,
+      Do
+      Say 'No Automated Test instructions are found for ',
+          C1Element 'in stage' C1Stage
+      Exit(0)
+      End
+
+   /* Additional Find and Replace cmds for Endevor variables */
+   NumberReplaceStrings = NumberReplaceStrings +1;
+   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Envmnt"
+   JCL.C1Stage.Replace.NumberReplaceStrings = C1Envmnt
+
+   NumberReplaceStrings = NumberReplaceStrings +1;
+   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Stage"
+   JCL.C1Stage.Replace.NumberReplaceStrings = C1Stage
+
+   NumberReplaceStrings = NumberReplaceStrings +1;
+   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1System"
+   JCL.C1Stage.Replace.NumberReplaceStrings = C1System
+
+   NumberReplaceStrings = NumberReplaceStrings +1;
+   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Subsys"
+   JCL.C1Stage.Replace.NumberReplaceStrings = C1Subsys
+
    Return;
 
 TailorNewJCLfromOld:
 
    /* Read the OLDJCL file           */
    "EXECIO * DISKR OLDJCL ( Stem jclrec. Finis"
-   If  TraceRc = 'Y'    then Trace r
    /* Scan each record of the JCL    */
    Do j# = 1 to jclrec.0
       jclline = jclrec.j#
@@ -240,7 +265,7 @@ TailorNewJCLfromOld:
             Do; Call ReplaceDDname; Iterate; end;
          End
       /* Execute the Search and replace string actions */
-      If TraceRc = 'Y' then Trace r
+      /*  If TraceRc = 'Y' then Trace r  */
       jclline = jclrec.j#
       Do rpl# = 1 to NumberReplaceStrings
          findString = JCL.C1Stage.FindTxt.rpl#
@@ -269,6 +294,7 @@ TailorNewJCLfromOld:
             End /* else ..  If replaceString /= ''  */
       End; /* Do rpl# = 1 to NumberReplaceStrings */
       /* Write line of JCL to output                   */
+      Trace off
       If thisJCLlineQueued /= 'Y' then,
          Queue jclline
    End; /* Do j# = 1 to jclrec.0  */
@@ -369,17 +395,16 @@ IncludeQuotedOptions:
 
 ReplaceDDname:
 
-   If  TraceRc = 'Y'    then Trace r
+/* If  TraceRc = 'Y'    then Trace r  */
    Say 'Replace the Step' thisStepName 'DDname' thisDDname 'with:'
    Label = thisDDname
    leadingSlashSlash = Pos('//',newDDnameJcl)
    If leadingSlashSlash =0 then, /* no // in replacement */
       Do w# = 1 to Words(newDDnameJcl)
       JCLtext = Word(newDDnameJcl,w#)
-      Say   '//'Label ' DD DSN='JCLtext || ','
-      Queue '//'Label ' DD DSN='JCLtext || ','
-      Say   '//         DISP=SHR'
-      Queue '//         DISP=SHR'
+      insertJclLines = '//'Label ' DD DSN='JCLtext || ','
+      Call InsertJclLines ;
+      Queue            '//         DISP=SHR'
       Label = '       '
       End /* Do w# = 1 to Words(newDDnameJcl) */
    Else,
@@ -389,8 +414,8 @@ ReplaceDDname:
       If whereNextSlashSlash = 0 then,
          whereNextSlashSlash = Length(newDDnameJcl) + 1
       JCLtext = Substr(newDDnameJcl,1,whereNextSlashSlash-1)
-      Say JCLtext
-      queue JCLtext
+      insertJclLines = JCLtext
+      Call InsertJclLines ;
       newDDnameJcl =,
             Strip(Substr(newDDnameJcl,whereNextSlashSlash))
       If length(newDDnameJcl) < 1 then Leave;
@@ -444,7 +469,21 @@ ReplaceText:
 
 InsertJclLines:
 
-   If  TraceRc = 'Y'    then Trace r
+   /* Apply Search and Replace actions to inserted lines */
+   Save_jclline = jclline;
+   jclline = insertJclLines
+   Do rpl# = 1 to NumberReplaceStrings
+      findString = JCL.C1Stage.FindTxt.rpl#
+      whereTxt = Pos(findString,jclline)
+      If whereTxt = 0 then iterate;
+      replaceString = JCL.C1Stage.Replace.rpl#
+      If replaceString /= '' then,
+         Call ReplaceText;
+   End ;  /*Do rpl# = 1 to NumberReplaceStrings */
+
+   insertJclLines = jclline   /* line(s) to be inserted         */
+   jclline = Save_jclline     /* The line that triggered insert */
+
    leadingSlashSlash = Pos('//',insertJclLines)
 
    If leadingSlashSlash = 1 then, /* Yes // in new jcl lines */
@@ -464,9 +503,6 @@ InsertJclLines:
       Say 'Unsupported DDName replacment text is found- '
       Exit(12)
       End /* Else */
-
-
-
 
    Return
 
@@ -746,7 +782,7 @@ Locate_Former_TestResults:
 
 CompareTestResults:
 
-   If TraceRc = 'Y' then trace r
+/* If TraceRc = 'Y' then trace r */
    /* Compare current Test result with former          */
    /* ... if it exists.                                */
 
@@ -795,7 +831,7 @@ NeutralizeString:
    /* Tailor content for a better SUPERC comparison  */
    /* Neutralize Date and time specific fields */
 
-   If TraceRc = 'Y' then trace r
+/* If TraceRc = 'Y' then trace r */
 
    nineString = Translate(String,'999999999','012345678')
    sa= nineString
