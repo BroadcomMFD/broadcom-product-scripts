@@ -82,21 +82,28 @@
       Say TestResultsHLQ 'is' Length(TestResultsHLQ) 'characters long'
       Exit(12)
       End
+
+   /* Set Default values....                                   */
+
    /* Set the value for Phase that indicates job is done       */
    FinalExpectedPhase = "AWAITING OUTPUT"
 
+   $numbers   = '0123456789'   /* chars for numeric values   */
    $OptionCommentChar = '*'
 
    /*   Select a Default for the SUPERC parameter.             */
    /* Set defaults                   */
    JCL.                = ''
+
+   Drop MaxReturnCode
+   JCL.C1Stage.MaxReturnCode = 4     /* Value for MaxReturncode */
    JCL.C1Stage.where.  = 'AFTER'     /* either BEFORE/AFTER */
+   JCL.C1Stage.FindTxt. = ''
    JCL.C1Stage.REPLACE. = ''
    JCL.C1Stage.Insertx. = ''
    SuperCRc = 0
-   MaxReturnCode = 0                 /* Maximum allowed RC  */
-   JCL.C1Stage.BASELINE = ''         /* Name of C1stage Baseline*/
-
+   Drop Baseline
+   JCL.C1Stage.BASELINE = ' '        /* Name of C1stage Baseline*/
 
    /* Default replacment strings to keep in the output results */
    NeutralizeMasks = 'JOB99999 D9999999 99.99.99 ',
@@ -115,13 +122,15 @@
    Call ProcessInputOptions;
 
    /* If Baseline specified at Stage level use it.     */
-   /* Otherwise use what is specified for Baseline     */
    If TraceRc = 'Y' then Trace r
-   SaveBaseline = Baseline
-   Drop BASELINE
-   StgBaseline = JCL.C1Stage.BASELINE
-   If StgBaseline /= '' then Baseline = StgBaseline
-   If StgBaseline  = '' then Baseline = SaveBaseline
+   Drop Baseline
+   thisBaseline = JCL.C1Stage.BASELINE
+
+   /* If MaxReturnCode given at Stage level use it.     */
+   Drop MaxReturncode
+   thisMaxReturncode = JCL.C1Stage.MaxReturnCode
+   If Verify(thisMaxReturncode,$numbers) > 0 then,
+      thisMaxReturncode = 4;
 
    NeutralizeMasks = NeutralizeMasks MoreMasks
    /* Using Options tailor the JCL so it can be Submitted      */
@@ -162,8 +171,6 @@
    TimeNode = 'T' || Substr(nowTime,1,2) || Substr(nowTime,4,2)
    /*             || Substr(nowTime,7,2)  */
    thisTestResult =   TestResultsHLQ'.' ||,
-                      DateNode'.'TimeNode'.'SelectJobNumber
-   thisTestResult =   TestResultsHLQ'.' ||,
                       C1Stage'.'DateNode'.'SelectJobNumber
 
    ADDRESS TSO,
@@ -182,32 +189,38 @@
    Push "RELATE OBJECT '"thisTestResult"'."
 
    /* If a Baseline for comparison is not named, search for former */
-   If Baseline = ' ' then,
+   If thisBaseline = ' ' then,
       Call Locate_Former_TestResults;
 
-   if Baseline /= ' ' Then,
+   /* If we have something to compare        */
+   /* and thisMaxReturncode < 999 then compare.. */
+   if thisMaxReturncode >= 999 then,
+      Say 'MaxReturnCode at Stage' C1Stage 'is' thisMaxReturncode'.',
+          ' The comparison of results is being skipped.'
+   Else,
+   if thisBaseline /= ' ' & thisMaxReturncode < 999 then,
       Do
       Say 'Comparing' thisTestResult
-      Say '       to' Baseline
+      Say '       to' thisBaseline
       Call CompareTestResults;
-      Push "RELATE OBJECT '"Baseline"'."
+      If thisBaseline /= ' ' then,
+         Push "RELATE OBJECT '"thisBaseline"'."
       End
 
    "EXECIO" QUEUED() "DISKW RELATE (Finis"
 
-   If SuperCRc > MaxReturnCode then,
+   If SuperCRc > thisMaxReturncode then,
       Do
       Say 'Comparison Fails. SUPERC rc='SuperCRc
       Exit(8)
       End
 
    Say 'Comparison is successful. SUPERC rc='SuperCRc
-   Exit(SuperCRc)
+   Exit(1); /* Submitted a Successful test */
 
 ProcessInputOptions:
 
    /* Read the OPTIONS (each value must be quoted) */
-   $numbers   = '0123456789.'   /* chars for numeric values   */
    NumberReplaceStrings = 0   ; /* Assume zero, unless we find some*/
    x = IncludeQuotedOptions(OPTIONS)
    Say 'NumberReplaceStrings=' NumberReplaceStrings
@@ -216,7 +229,7 @@ ProcessInputOptions:
       Do
       Say 'No Automated Test instructions are found for ',
           C1Element 'in stage' C1Stage
-      Exit(0)
+      Exit(0) ; /* No tests to submit      */
       End
 
    /* Additional Find and Replace cmds for Endevor variables */
@@ -235,6 +248,10 @@ ProcessInputOptions:
    NumberReplaceStrings = NumberReplaceStrings +1;
    JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Subsys"
    JCL.C1Stage.Replace.NumberReplaceStrings = C1Subsys
+
+   NumberReplaceStrings = NumberReplaceStrings +1;
+   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Element"
+   JCL.C1Stage.Replace.NumberReplaceStrings = C1Element
 
    Return;
 
@@ -269,6 +286,7 @@ TailorNewJCLfromOld:
       jclline = jclrec.j#
       Do rpl# = 1 to NumberReplaceStrings
          findString = JCL.C1Stage.FindTxt.rpl#
+         If findString = '' then iterate;
          whereTxt = Pos(findString,jclline)
          If whereTxt = 0 then iterate;
          replaceString = JCL.C1Stage.Replace.rpl#
@@ -307,7 +325,6 @@ IncludeQuotedOptions:
 /* Options built by others might not be trustworthy.                  */
 /* Use this routine in such conditions to interpret only those that   */
 /* have values contained in quotes, or values that are numeric.       */
-
    Arg $UserOptDDname;
 
    /*  Process only quoted Rexx assignment statements from User */
@@ -348,7 +365,8 @@ IncludeQuotedOptions:
              $UserOption = $UserOption $continueOption
       End /* Do 20 */
 
-      Sa= '$UserOption' $Uop# '=' $UserOption
+      If TraceRc = 'Y' then,
+         Say '$UserOption' $Uop# '=' $UserOption
       PARSE VAR $UserOption $keyword '=' $UserOptionValue ;
       $UserOptionValue = Strip($UserOptionValue)
       sa= '$keyword =' $keyword
@@ -754,26 +772,33 @@ Locate_Former_TestResults:
    "ALLOC FI(SYSIN) BLKSIZE(0) TRACKS LRECL(80) SPACE(5 5)",
        "RECFM(F B) NEW REUSE UNCATALOG" ;
 
-   Push  " LISTCAT LEVEL('"TestResultsHLQ"') NAME"
+   Push  " LISTCAT LEVEL('"TestResultsHLQ"."C1Stage"') NAME"
 
    "EXECIO 1 DISKW SYSIN (FINIS"
 
    ADDRESS LINK 'IDCAMS'
    MyRC =RC
 
-
    "EXECIO * DISKR SYSPRINT (Stem prt. FINIS"
 
- /*   temp = LISTDSI("'"Dataset"'" RECALL)  */
-   Do lin# = prt.0 by -1 to 1
-      print = Substr(prt.lin#,2)
-      if Substr(print,1,7) /= 'NONVSAM' then iterate;
-      sa= print
-      If pos(TestResultsHLQ,print) = 0 then iterate;
-      If pos(thisTestResult,print) > 0 then iterate;
-      Baseline = Word(print,3)
-      Leave
-   End;
+ /* Look through the former test result outputs */
+ /* .. to find the most recent one.             */
+   If prt.0 > 1 then,
+      Do lin# = prt.0 by -1 to 1
+         print = Substr(prt.lin#,2)
+         if Substr(print,1,7) /= 'NONVSAM' then iterate;
+         sa= print
+         If pos(TestResultsHLQ,print) = 0 then iterate;
+         If pos(thisTestResult,print) > 0 then iterate;
+         thisBaseline = Word(print,3)
+         Leave
+      End;
+
+ /*   If no recent output is found,      */
+ /*   then we have nothing to compare.   */
+ /*   Just exit as a successful test.    */
+   If thisBaseline = ' ' then,
+      Say 'There is no former output to compare'
 
    "FREE  F(SYSPRINT)"
    "FREE  FI(SYSIN)"
@@ -798,7 +823,7 @@ CompareTestResults:
    "EXECIO * DISKW NEWDD (Stem rcd. Finis"
 
    /* Neutralize for        a SUPERC call              */
-   "ALLOC F(OLDDD) DA('"Baseline"') SHR REUSE"
+   "ALLOC F(OLDDD) DA('"thisBaseline"') SHR REUSE"
    Drop rcd.
    "EXECIO * DISKR OLDDD (Stem rcd. Finis "
    Do rc# = 1 to rcd.0

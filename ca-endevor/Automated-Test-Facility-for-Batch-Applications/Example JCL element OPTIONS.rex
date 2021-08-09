@@ -79,6 +79,8 @@ JCL.UNITTEST.Replace.SYSLMOD.LKED =,
 JCL.UNITTEST.BASELINE=,
         'BST.ENDEVOR.CA32.UNITTEST.BASELINE(MISDXW#D)'
 
+JCL.UNITTEST.MaxReturnCode= 4 
+
 *-----------------------------------------------------------------*
 * Specifications for the UTC stage
 *-----------------------------------------------------------------*
@@ -146,14 +148,14 @@ JCL.UTC.Replace.SYSLIB.LKED =,
 JCL.UTC.Replace.SYSLMOD.LKED =,
         'BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
 
+JCL.UTC.MaxReturnCode= 1    
+
 *-----------------------------------------------------------------*
 * Specifications for all stages
 *-----------------------------------------------------------------*
 
 WaitLoops    = 4
 LoopSeconds  = 2
-
-MaxReturnCode= 4
 
 Superc_Parms = 'LONGL,LINECMP'
 Superc_Parms = 'LONGL,LINECMP,WIDE'

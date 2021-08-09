@@ -3,9 +3,10 @@
 //*- Determine whether this element has an expected        ------------
 //*- AutomatedTest@<C1stage> reference for testing         ------------
 //*-   RC=0 means no testing found. RC=1 means yes         ------------
-//*- Apply RELATE commands for element to testing JCL      ------------ 
+//*- Apply RELATE commands for element to testing JCL      ------------
 //*--------------------------------------------------------------------
-//AUTOTST1 EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'        AUTOTEST
+//AUTOTST1 EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST',       AUTOTEST
+//              MAXRC=4
 //TABLE    DD DSN=&&OPTIONE,DISP=(OLD,PASS) <- Required in processor
 //PARMLIST DD *         <- List of inputs/outputs/Options
 NOTHING  NOTHING  OPTIONS  0
@@ -34,7 +35,7 @@ MODELREL RELATES  OPTIONS2 A
 * AutoTest spawed for element &C1ELEMENT in:
 *   Env=&C1ENVMNT Sys=&C1SY Sub=&C1SU Typ= &C1TY
  SET FROM ENVIRONMENT '&C1ENVMNT' STAGE '&C1STGID'
-          SYSTEM '&C1SYSTEM' SUBSYSTEM '*'
+          SYSTEM '&C1SYSTEM' SUBSYSTEM '&C1SUBSYS'
           TYPE 'JCL'.
  SET OPTIONS COPYBACK SEARCH
           PROCESSOR GROUP = AUTOTEST
@@ -85,17 +86,17 @@ RELATE ELEMENT &RelateElement
 //             SPACE=(TRK,(1,5),RLSE),
 //             DISP=(NEW,PASS),
 //             DCB=(RECFM=FB,LRECL=80,DSORG=PS)
-//SYSTSPRT DD DUMMY
+//SYSTSPRT DD SYSOUT=&SYSOUT
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC1
 //         DD DISP=SHR,DSN=&SYSEXEC2
 //*-------------------------------------------------------------------
 //*--- Execute JCL element for Batch Testing --------------------------*
 //*--------------------------------------------------------------------*
-//AUTOTST2 EXEC PGM=C1BM3000,PARM='TESTDD1,TESTAUTO',      AUTOTEST
-//              COND=(1,NE,AUTOTST1)
+//AUTOTST2 EXEC PGM=C1BM3000,PARM='TESTDD1,C1MSGS1J',      AUTOTEST
+//              COND=(1,NE,AUTOTST1),
+//              MAXRC=4
 //TESTDD1  DD  DSN=&&GENERSCL,DISP=(OLD,DELETE)
-//TESTAUTO DD  SYSOUT=*
-//LISTFILE DD  SYSOUT=*
+//C1MSGS1J DD  SYSOUT=*
 //SYMDUMP  DD DUMMY
 //SYSUDUMP DD SYSOUT=*
 //*

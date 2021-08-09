@@ -16,7 +16,8 @@ Setup steps for the Automated Test Facility for Batch Applications:
 
 1)	Prepare your existing processors to recognize OPTIONS that request automated tests. This step addresses your existing Generate and/or Move processors:
     a)	A fetch for the element's options is necessary. If you do not already have one, then copy (or include) the content of `GET#OPTE` into your existing processor(s).  
-    b)	Copy or Include the content of `AUTOTEST` into your processor(s), placed after the fetch.  
+    b)	Copy or Include the content of `AUTOTEST` into your processor(s), placed after the fetch. 
+    (Be sure that no sequence numbers are included in its content)
 
 2)  Copy `TEST#JOB` into a REXX library that will be accessed by your processors.
 

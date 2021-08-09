@@ -10,8 +10,9 @@
 //*--------------------------------------------------------------------*
 //*  -- This processor must run in batch.                        ------*
 //*--------------------------------------------------------------------*
+//*--------------------------------------------------------------------*
 //GTESTING PROC AAAAAA=,
-//    HLQ='NDV.MOTM.ESCMSNDV.SHRD.D&C1STGNUM.',   Endevor Datasets HLQ
+//    HLQ='SYSDE32.NDVR.&C1ENVMNT..&C1SY..&C1SU.',                      00000700
 //    EXPINC=N,
 //    LISTLIB='&HLQ..LISTLIB',                    Listing lib
 //    MONITOR=COMPONENTS,
@@ -19,19 +20,18 @@
 //    OUTLIB='&HLQ..JCL',                         output JCL lib
 //    RESLTHLQ='PUBLIC.&C1ELEMENT',               perhaps C1userid...
 //    SHOWME='Y',       Show diagnostics & intermediate results Y/N
-//    SYSEXEC1=CATSNDVR.NDVR.EMER.CSIQCLS0,       1 of 2 Rexx libraries
-//    SYSEXEC2=CATSNDVR.NDVR.PROD.CSIQCLS0,       2 of 2 Rexx libraries
+//    SYSEXEC1=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
+//    SYSEXEC2=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM2.CLSTREXX,
 //    SYSOUT=*,
 //    WAITS=15,                                   Default # wait loops
 //    WAITSECS=3,                                 Default wait seconds
 //    WRKUNIT=3390,
 //    ZZZZZZZ=                              the end
 //*-------------------------------------------------------------------*
-//*-------------------------------------------------------------------*
 //*********************************************************************
 //*-- GET production JCL image.                                       *
 //*********************************************************************
-//CONWRITE EXEC PGM=CONWRITE,COND=(4,LT),MAXRC=0,
+//CONWRITE EXEC PGM=CONWRITE,COND=(4,LT),MAXRC=0,          GTESTING
 // PARM='EXPINCL(&EXPINC)'
 //ELMOUT   DD DSN=&&ELMOUT,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(100,100),RLSE),
@@ -40,7 +40,7 @@
 //**********************************************************************
 //*   ALLOCATE Temporary Datasets                                      *
 //**********************************************************************
-//INIT     EXEC PGM=BC1PDSIN,MAXRC=0
+//INIT     EXEC PGM=BC1PDSIN,MAXRC=0                       GTESTING
 //C1INIT01 DD DSN=&&OPTIONE,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
 //            DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)
@@ -50,7 +50,7 @@
 //*-------------------------------------------------------------------*
 //**  Get element specific OPTIONS ele for JCL     (If one EXISTS)   **
 //*-------------------------------------------------------------------*
-//GET#OPTE EXEC PGM=IEBUPDTE,COND=(4,LT),MAXRC=4
+//GET#OPTE EXEC PGM=IEBUPDTE,COND=(4,LT),MAXRC=4           GTESTING
 //SYSPRINT DD DUMMY
 //SYSIN    DD  *
 ./  REPRO NEW=PS,NAME=&C1ELEMENT
@@ -86,8 +86,11 @@
 //*--          is completed, and then used in comparison.      -------*
 //*-------------------------------------------------------------------*
 //*--     Waits and WaitSecs can be overriden in the OPTIONS   -------*
+//*--      (RC=0 means no tests to submit)                     -------*
+//*--      (RC=1 means   Successful test submitted)            -------*
+//*--      (RC=8 means UnSuccessful test submitted)            -------*
 //*-------------------------------------------------------------------*
-//SUBMITST EXEC PGM=IKJEFT1B,   < execute the REXX driver for testing
+//SUBMITST EXEC PGM=IKJEFT1B,   < execute the REXX driver  GTESTING
 //  PARM=('TEST#JOB &C1ELEMENT &C1ENVMNT &C1STAGE &C1SY &C1SU ',       X
 //        '&WAITS &WAITSECS &RESLTHLQ')
 //* Can use OPTIONS to override WaitLoops and LoopSeconds
@@ -97,7 +100,9 @@
 //OPTIONS  DD DSN=&&OPTIONE,DISP=(OLD,PASS)
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC1
 //         DD DISP=SHR,DSN=&SYSEXEC2
-//SYSTSPRT DD SYSOUT=*
+//SYSTSPRT DD DSN=&&SYSTSPRT,DISP=(,PASS),
+//            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
+//            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
 //SYSTSIN  DD DUMMY
 //RELATE   DD DSN=&&RELATE,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
@@ -108,30 +113,31 @@ CMPSECT START  TOP 'JESYSMSG-End'
 //*-------------------------------------------------------------------*
 //*---- Relate the job outputs to the JCL element  -------------------*
 //*-------------------------------------------------------------------*
-//RELATE   EXEC PGM=CONRELE,
-//         COND=(8,LT)
+//RELATE   EXEC PGM=CONRELE,                               GTESTING
+//         COND=(1,NE,SUBMITST)
 //NDVRIPT  DD DSN=&&RELATE,DISP=(OLD,DELETE)
 //*-------------------------------------------------------------------*
 //*******************************************************************
 //*     STORE THE LISTINGS IF:   LISTLIB=LISTING LIBRARY NAME       *
 //*******************************************************************
-//STORLIST EXEC PGM=CONLIST,MAXRC=0,PARM=STORE,COND=EVEN   GCOBOL
-//*          EXECIF=(&LISTLIB,NE,NO)
+//STORLIST EXEC PGM=CONLIST,MAXRC=0,PARM=STORE,COND=EVEN   GTESTING
 //C1LLIBO  DD DSN=&LISTLIB,DISP=SHR,
 //            MONITOR=&MONITOR
 //C1BANNER DD UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
 //            DCB=(RECFM=FBA,LRECL=121,BLKSIZE=0)
-//LIST01   DD DSN=&&SUPERC,DISP=(OLD,PASS)
+//LIST01   DD DSN=&&SYSTSPRT,DISP=(OLD,PASS)
+//LIST02   DD DSN=&&SUPERC,DISP=(OLD,PASS)
 //*******************************************************************
 //*     PRINT THE LISTINGS IF:   LISTLIB=NO                         *
 //*******************************************************************
-//PRNTLIST EXEC PGM=CONLIST,MAXRC=0,PARM=PRINT,COND=EVEN   GCOBOL
+//PRNTLIST EXEC PGM=CONLIST,MAXRC=0,PARM=PRINT,COND=EVEN   GTESTING
 //*          EXECIF=(&LISTLIB,EQ,NO)
 //C1BANNER DD UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
 //            DCB=(RECFM=FBA,LRECL=121,BLKSIZE=0,DSORG=PS)
-//C1PRINT  DD SYSOUT=&SYSOUT,
+//C1PRINT  DD SYSOUT=*,
 //            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
-//LIST01   DD DSN=&&SUPERC,DISP=(OLD,PASS)
+//LIST01   DD DSN=&&SYSTSPRT,DISP=(OLD,DELETE)
+//LIST02   DD DSN=&&SUPERC,DISP=(OLD,DELETE)
 //**
 //*******************************************************************
 //*     If Autotesting then this JCL might need others to follow:   *
