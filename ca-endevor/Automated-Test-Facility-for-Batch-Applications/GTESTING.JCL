@@ -10,9 +10,8 @@
 //*--------------------------------------------------------------------*
 //*  -- This processor must run in batch.                        ------*
 //*--------------------------------------------------------------------*
-//*--------------------------------------------------------------------*
 //GTESTING PROC AAAAAA=,
-//    HLQ='SYSDE32.NDVR.&C1ENVMNT..&C1SY..&C1SU.',                      00000700
+//    HLQ='NDV.MOTM.ESCMSNDV.SHRD.D&C1STGNUM.',   Endevor Datasets HLQ
 //    EXPINC=N,
 //    LISTLIB='&HLQ..LISTLIB',                    Listing lib
 //    MONITOR=COMPONENTS,
@@ -20,9 +19,9 @@
 //    OUTLIB='&HLQ..JCL',                         output JCL lib
 //    RESLTHLQ='PUBLIC.&C1ELEMENT',               perhaps C1userid...
 //    SHOWME='Y',       Show diagnostics & intermediate results Y/N
-//    SYSEXEC1=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
-//    SYSEXEC2=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM2.CLSTREXX,
-//    SYSOUT=*,
+//    SYSEXEC1=CATSNDVR.NDVR.EMER.CSIQCLS0,       1 of 2 Rexx libraries
+//    SYSEXEC2=CATSNDVR.NDVR.PROD.CSIQCLS0,       2 of 2 Rexx libraries
+//    SYSOUT=,
 //    WAITS=15,                                   Default # wait loops
 //    WAITSECS=3,                                 Default wait seconds
 //    WRKUNIT=3390,
@@ -91,13 +90,29 @@
 //*--      (RC=8 means UnSuccessful test submitted)            -------*
 //*-------------------------------------------------------------------*
 //SUBMITST EXEC PGM=IKJEFT1B,   < execute the REXX driver  GTESTING
-//  PARM=('TEST#JOB &C1ELEMENT &C1ENVMNT &C1STAGE &C1SY &C1SU ',       X
-//        '&WAITS &WAITSECS &RESLTHLQ')
+//  PARM='TEST#JOB &C1ELEMENT &C1STAGE &WAITS &WAITSECS &RESLTHLQ'
 //* Can use OPTIONS to override WaitLoops and LoopSeconds
 //OLDJCL   DD DSN=&&ELMOUT,DISP=(OLD,DELETE)
 //NEWJCL   DD DSN=&OUTLIB(&C1ELEMENT),
 //            DISP=SHR,MONITOR=COMPONENTS,FOOTPRNT=CREATE
 //OPTIONS  DD DSN=&&OPTIONE,DISP=(OLD,PASS)
+//VARIABLE DD *   <- Optionally provide more substitution variables
+* Endevor   variable examples
+  C1ELEMENT    = '&C1ELEMENT'
+  C1ENVMNT     = '&C1ENVMNT'
+  C1SYSTEM     = '&C1SYSTEM'
+  C1SUBSYS     = '&C1SUBSYS'
+  C1ELTYPE     = '&C1ELTYPE'
+  C1STAGE      = '&C1STAGE'
+* Processor variable examples
+  CSIQCLS0='CATSNDVR.NDVR.EMER.CSIQCLS0'
+  LOADBTCH='&HLQ..LOADLIB'
+  LOADCICS='&HLQ..LOADONL'
+  HLQ='NDV.MOTM.ESCMSNDV.SHRD.D&C1STGNUM.'
+* Site Symbol variable examples
+  #OCLIST###@1= 'CATSNDVR.NDVR.EMER.CSIQCLS0'
+  #OCLIST###@2= 'CATSNDVR.NDVR.PROD.CSIQCLS0'
+  #BASEPRFX=  'MOTM.&C1SY..&C1SU..&C1EN(1,1)&C1S#.'
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC1
 //         DD DISP=SHR,DSN=&SYSEXEC2
 //SYSTSPRT DD DSN=&&SYSTSPRT,DISP=(,PASS),

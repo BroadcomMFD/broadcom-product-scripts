@@ -73,7 +73,7 @@
      BPXWDYN("INFO FI(TEST#JOB) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then TraceRc = 'Y'
 
-   ARG C1Element C1Envmnt C1Stage C1System C1Subsys ,
+   ARG C1Element C1Stage ,
        WaitLoops LoopSeconds TestResultsHLQ ;
 
    If Length(TestResultsHLQ) > 21 then,
@@ -83,13 +83,15 @@
       Exit(12)
       End
 
-   /* Set Default values....                                   */
+   /* Set Default / initial values....                         */
 
    /* Set the value for Phase that indicates job is done       */
    FinalExpectedPhase = "AWAITING OUTPUT"
 
    $numbers   = '0123456789'   /* chars for numeric values   */
+   AlphaChars   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
    $OptionCommentChar = '*'
+   $EndevorVariables  = ''
 
    /*   Select a Default for the SUPERC parameter.             */
    /* Set defaults                   */
@@ -109,10 +111,12 @@
    NeutralizeMasks = 'JOB99999 D9999999 99.99.99 ',
                      'SYS99999 T999999 ',
                      '99:99 9999999.9999'
-   MoreMasks = ''
    Superc_Parms = 'DELTAL,LINECMP'
    Superc_Parms = 'LONGL,LINECMP'
    Superc_Parms = 'LONGL,LINECMP,WIDE'
+
+   NumberReplaceStrings = 0   ; /* Assume zero, unless we find some*/
+   NumberMaskStrings    = 0   ; /* Assume zero, unless we find some*/
 
    Say 'Automated Testing is examining details for '
    Say 'Element ' C1Element 'at stage ' C1Stage
@@ -132,7 +136,6 @@
    If Verify(thisMaxReturncode,$numbers) > 0 then,
       thisMaxReturncode = 4;
 
-   NeutralizeMasks = NeutralizeMasks MoreMasks
    /* Using Options tailor the JCL so it can be Submitted      */
    Call TailorNewJCLfromOld;
 
@@ -221,7 +224,6 @@
 ProcessInputOptions:
 
    /* Read the OPTIONS (each value must be quoted) */
-   NumberReplaceStrings = 0   ; /* Assume zero, unless we find some*/
    x = IncludeQuotedOptions(OPTIONS)
    Say 'NumberReplaceStrings=' NumberReplaceStrings
 
@@ -232,26 +234,13 @@ ProcessInputOptions:
       Exit(0) ; /* No tests to submit      */
       End
 
-   /* Additional Find and Replace cmds for Endevor variables */
-   NumberReplaceStrings = NumberReplaceStrings +1;
-   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Envmnt"
-   JCL.C1Stage.Replace.NumberReplaceStrings = C1Envmnt
+   Say 'NumberMaskStrings   =' NumberMaskStrings
 
-   NumberReplaceStrings = NumberReplaceStrings +1;
-   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Stage"
-   JCL.C1Stage.Replace.NumberReplaceStrings = C1Stage
-
-   NumberReplaceStrings = NumberReplaceStrings +1;
-   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1System"
-   JCL.C1Stage.Replace.NumberReplaceStrings = C1System
-
-   NumberReplaceStrings = NumberReplaceStrings +1;
-   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Subsys"
-   JCL.C1Stage.Replace.NumberReplaceStrings = C1Subsys
-
-   NumberReplaceStrings = NumberReplaceStrings +1;
-   JCL.C1Stage.FindTxt.NumberReplaceStrings = "&C1Element"
-   JCL.C1Stage.Replace.NumberReplaceStrings = C1Element
+   /* Read the VARIABLE data (variables provided by Endevor) */
+   /* Variables can be mixture of C1* variables  of Endevor, */
+   /* processor variables and Site Symbol variables.         */
+   x = IncludeQuotedOptions(VARIABLE)
+   Say 'Number Endevor Variables =' Words($EndevorVariables)
 
    Return;
 
@@ -281,9 +270,12 @@ TailorNewJCLfromOld:
          If newDDnameJcl /= '' then,
             Do; Call ReplaceDDname; Iterate; end;
          End
+
+      If TraceRc = 'Y' then Trace r
+      jclline = jclrec.j#
+
       /* Execute the Search and replace string actions */
       /*  If TraceRc = 'Y' then Trace r  */
-      jclline = jclrec.j#
       Do rpl# = 1 to NumberReplaceStrings
          findString = JCL.C1Stage.FindTxt.rpl#
          If findString = '' then iterate;
@@ -291,7 +283,10 @@ TailorNewJCLfromOld:
          If whereTxt = 0 then iterate;
          replaceString = JCL.C1Stage.Replace.rpl#
          If replaceString /= '' then,
+            Do
             Call ReplaceText;
+            Call ReplaceEndevorVariables;
+            End /* If replaceString /= '' */
          Else,
             Do
             insertJclLines = JCL.C1Stage.Insertx.rpl#
@@ -314,7 +309,10 @@ TailorNewJCLfromOld:
       /* Write line of JCL to output                   */
       Trace off
       If thisJCLlineQueued /= 'Y' then,
+         Do
+         Call ReplaceEndevorVariables;
          Queue jclline
+         End
    End; /* Do j# = 1 to jclrec.0  */
 
    "EXECIO" QUEUED() "DISKW NEWJCL ( Finis"
@@ -322,6 +320,7 @@ TailorNewJCLfromOld:
    Return;
 
 IncludeQuotedOptions:
+/* (this routine is tailored from a 2021 version of ENBPIU00)         */
 /* Options built by others might not be trustworthy.                  */
 /* Use this routine in such conditions to interpret only those that   */
 /* have values contained in quotes, or values that are numeric.       */
@@ -367,6 +366,7 @@ IncludeQuotedOptions:
 
       If TraceRc = 'Y' then,
          Say '$UserOption' $Uop# '=' $UserOption
+
       PARSE VAR $UserOption $keyword '=' $UserOptionValue ;
       $UserOptionValue = Strip($UserOptionValue)
       sa= '$keyword =' $keyword
@@ -392,13 +392,14 @@ IncludeQuotedOptions:
                 $UserOption ;
          Iterate ;
          End /* If Words.....   */
-      if wordpos($keyword,$OptionsVariables) = 0 then,
-         $OptionsVariables = $OptionsVariables $keyword ;
 
       If TraceRc = 'Y' then Say $UserOption
 
+      say       $UserOption
+
       Interpret $UserOption
-      If Pos('JCL.'C1Stage'.FindTxt.',$keyword) > 0 then,
+
+      If Pos('JCL.'C1Stage'.FindTxt.',$keyword)    > 0 then,
          Do
          $tmp = Translate($keyword,' ','.');
          $tmpNumber = Word($tmp,Words($tmp));
@@ -406,6 +407,19 @@ IncludeQuotedOptions:
          If $rslt = 0 & $tmpNumber > NumberReplaceStrings then,
             NumberReplaceStrings = $tmpNumber;
          End;
+      Else,
+      If Pos('JCL.'C1Stage'.MaskTarget.',$keyword) > 0 then,
+         Do
+         $tmp = Translate($keyword,' ','.');
+         $tmpNumber = Word($tmp,Words($tmp));
+         $rslt =  VERIFY($tmpNumber,$numbers)
+         If $rslt = 0 & $tmpNumber > NumberMaskStrings then,
+            NumberMaskStrings    = $tmpNumber;
+         End;
+      Else,
+      If Pos('.',$keyword) = 0 &,
+         wordpos($keyword,$EndevorVariables) = 0 then,
+         $EndevorVariables = $EndevorVariables $keyword ;
    End /* DO $Uop# = 1 TO $Opts.$options#.0 */
 
    RETURN $UserOptDDname
@@ -485,11 +499,27 @@ ReplaceText:
 
    Return
 
+ReplaceEndevorVariables:
+
+   /* Use Endevor variables for Search and replace actions */
+   Do ndvr# = 1 to Words($EndevorVariables)
+      ndvrVariable = Word($EndevorVariables,ndvr#)
+      findString = '&' || Word($EndevorVariables,ndvr#)
+      whereTxt = Pos(findString,jclline)
+      If whereTxt = 0 then iterate;
+      replaceString = Value(ndvrVariable)
+      If replaceString /= '' then,
+         Call ReplaceText;
+   End; /*  Do ndvr# = 1 to Words($EndevorVariables) */
+
+   Return
+
 InsertJclLines:
 
    /* Apply Search and Replace actions to inserted lines */
    Save_jclline = jclline;
    jclline = insertJclLines
+   Call ReplaceEndevorVariables;
    Do rpl# = 1 to NumberReplaceStrings
       findString = JCL.C1Stage.FindTxt.rpl#
       whereTxt = Pos(findString,jclline)
@@ -521,6 +551,7 @@ InsertJclLines:
       Say 'Unsupported DDName replacment text is found- '
       Exit(12)
       End /* Else */
+
 
    Return
 
@@ -893,6 +924,7 @@ NeutralizeString:
       string = Overlay('DayOfWeek-',String,whereMask)
    Sa= 'NeutralizeMasks =' NeutralizeMasks
 
+   /* Process built-in Numeric Masks         */
    Do msk# = 1 to Words(NeutralizeMasks)
       thisMask =  Word(NeutralizeMasks,msk#)
       whereMask =  Pos(thisMask, nineString)
@@ -903,6 +935,49 @@ NeutralizeString:
         If whereMask = 0 then Leave;
       End;  /* Do Forever  */
    End; /*  Do msk# = 1 to Words(NeutralizeMasks) */
+
+   If TraceRc = 'Y' then Trace r
+   /* Process User MaskTarget and MaskColumn pairs */
+   If NumberMaskStrings > 0 then,
+      Do
+       If rc# = 1 then,
+          Say 'Applying user MaskTarget and MaskColum pairs to',
+              ' test results'
+       Do msk# = 1 to NumberMaskStrings
+          thisMaskTarget = JCL.C1stage.MaskTarget.msk# ;
+          thisMaskColumn = JCL.C1stage.MaskColumn.msk# ;
+          if thisMaskTarget > '' &,
+             thisMaskColumn > 0 then,
+                Call MaskOutputString;
+       End /* Do msk# = 1 to NumberMaskStrings */
+      End /* If NumberMaskStrings > 0         */
+   Trace off
+
+   Return
+
+MaskOutputString:
+
+   If TraceRc = 'Y' then Trace r
+   /* Apply masking changes to the String, and if the result     */
+   /* matches the mask, then overlay the line.                   */
+   origString = ,
+      Substr(String,thisMaskColumn,Length(thisMaskTarget))
+   tempString = origString
+
+   /* Convert numeric characters to '9's            */
+   If Pos('99',thisMaskTarget) > 0 then,
+      tempString = Translate(tempString,,$numbers,'9')
+
+   /* Convert alpha   characters to 'Z's            */
+   If Pos('ZZ',thisMaskTarget) > 0 then,
+      tempString = Translate(tempString,,AlphaChars,'Z')
+
+   If tempString /= thisMaskTarget then Return;
+
+   Say "B4:" Substr(String,1,80)
+   String = Overlay(tempString,String,thisMaskColumn)
+   Say "AF:" Substr(String,1,80)
+   Trace off
 
    Return
 
