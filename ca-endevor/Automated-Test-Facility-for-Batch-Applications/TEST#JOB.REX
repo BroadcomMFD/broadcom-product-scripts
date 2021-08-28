@@ -36,7 +36,7 @@
    /*                                     \ (defaults to 'AFTER') */
    /*                                                             */
    /*  Optionally, a DDname can be used for identifying where     */
-   /*  to insert lines of JCL:                                    */
+   /*  to insert lines of JCL-                                    */
    /*                                                             */
    /*   JCL.C1Stage.REPLACE.<ddname>.     = '<jcl>'               */
    /*                                                             */
@@ -83,7 +83,7 @@
       Exit(12)
       End
 
-   /* Set Default / initial values....                         */
+   /* Set Defaults / initial values....                        */
 
    /* Set the value for Phase that indicates job is done       */
    FinalExpectedPhase = "AWAITING OUTPUT"
@@ -92,6 +92,7 @@
    AlphaChars   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
    $OptionCommentChar = '*'
    $EndevorVariables  = ''
+   ShowReplaceResults = 'Y'
 
    /*   Select a Default for the SUPERC parameter.             */
    /* Set defaults                   */
@@ -124,6 +125,11 @@
    /* Get   Options for tailoring and processing the JCL       */
    /* If no Options are designated for C1stage, then exit      */
    Call ProcessInputOptions;
+
+   /* If ShowReplaceResults not = 'Y' then notify msgs are off */
+   If ShowReplaceResults /= 'Y' then,
+      Say 'FindTxt-Replace messages are turned off via',
+          ' ShowReplaceResults'
 
    /* If Baseline specified at Stage level use it.     */
    If TraceRc = 'Y' then Trace r
@@ -225,7 +231,8 @@ ProcessInputOptions:
 
    /* Read the OPTIONS (each value must be quoted) */
    x = IncludeQuotedOptions(OPTIONS)
-   Say 'NumberReplaceStrings=' NumberReplaceStrings
+   If ShowReplaceResults = 'Y' then,
+      Say 'NumberReplaceStrings=' NumberReplaceStrings
 
    If NumberReplaceStrings = 0 then,
       Do
@@ -234,13 +241,15 @@ ProcessInputOptions:
       Exit(0) ; /* No tests to submit      */
       End
 
-   Say 'NumberMaskStrings   =' NumberMaskStrings
+   If ShowReplaceResults = 'Y' then,
+      Say 'NumberMaskStrings   =' NumberMaskStrings
 
    /* Read the VARIABLE data (variables provided by Endevor) */
    /* Variables can be mixture of C1* variables  of Endevor, */
    /* processor variables and Site Symbol variables.         */
    x = IncludeQuotedOptions(VARIABLE)
-   Say 'Number Endevor Variables =' Words($EndevorVariables)
+   If ShowReplaceResults = 'Y' then,
+      Say 'Number Endevor Variables =' Words($EndevorVariables)
 
    Return;
 
@@ -295,7 +304,8 @@ TailorNewJCLfromOld:
                insertWhere  = JCL.C1Stage.where.rpl#
                If insertWhere /= 'BEFORE' then,
                   insertWhere = 'AFTER'
-               Say 'Inserting JCL lines' insertWhere,
+               If ShowReplaceResults = 'Y' then,
+                  Say 'Inserting JCL lines' insertWhere,
                    findString
                If insertWhere = 'AFTER' then,
                   Do
@@ -395,8 +405,6 @@ IncludeQuotedOptions:
 
       If TraceRc = 'Y' then Say $UserOption
 
-      say       $UserOption
-
       Interpret $UserOption
 
       If Pos('JCL.'C1Stage'.FindTxt.',$keyword)    > 0 then,
@@ -428,7 +436,8 @@ IncludeQuotedOptions:
 ReplaceDDname:
 
 /* If  TraceRc = 'Y'    then Trace r  */
-   Say 'Replace the Step' thisStepName 'DDname' thisDDname 'with:'
+   If ShowReplaceResults = 'Y' then,
+      Say 'Replace the Step' thisStepName 'DDname' thisDDname 'with:'
    Label = thisDDname
    leadingSlashSlash = Pos('//',newDDnameJcl)
    If leadingSlashSlash =0 then, /* no // in replacement */
@@ -493,9 +502,12 @@ ReplaceText:
                 replaceString || ,
                 substr(jclline,whereTXT+Length(findString))
 
-   Say "JCL line Changed:"
-   Say " B4:"Saved_jclline
-   Say " AF:"jclline
+   If ShowReplaceResults = 'Y' then,
+      Do
+      Say "JCL line Changed:"
+      Say " B4:"Saved_jclline
+      Say " AF:"jclline
+      End
 
    Return
 
@@ -540,7 +552,8 @@ InsertJclLines:
       If whereNextSlashSlash = 0 then,
          whereNextSlashSlash = Length(insertJclLines) + 1
       JCLtext = Substr(insertJclLines,1,whereNextSlashSlash-1)
-      Say JCLtext
+      If ShowReplaceResults = 'Y' then,
+         Say JCLtext
       queue JCLtext
       insertJclLines =,
             Strip(Substr(insertJclLines,whereNextSlashSlash))

@@ -97,22 +97,25 @@
 //            DISP=SHR,MONITOR=COMPONENTS,FOOTPRNT=CREATE
 //OPTIONS  DD DSN=&&OPTIONE,DISP=(OLD,PASS)
 //VARIABLE DD *   <- Optionally provide more substitution variables
-* Endevor   variable examples
+* Format:        variable-name = 'value'
+* A variable-name can be existing Endevor/processor/Site Symbol
+*                 variable names, or or any valid (rexx) name
+*   variable-names preceded with an '&' can be included in the
+*                  Replace and Insertx text strings of your OPTIONS
+
+* values must be quoted by single or double quotes, and may
+*                 contain mixtures of other variables.
+
   C1ELEMENT    = '&C1ELEMENT'
   C1ENVMNT     = '&C1ENVMNT'
   C1SYSTEM     = '&C1SYSTEM'
   C1SUBSYS     = '&C1SUBSYS'
   C1ELTYPE     = '&C1ELTYPE'
   C1STAGE      = '&C1STAGE'
-* Processor variable examples
-  CSIQCLS0='CATSNDVR.NDVR.EMER.CSIQCLS0'
-  LOADBTCH='&HLQ..LOADLIB'
-  LOADCICS='&HLQ..LOADONL'
-  HLQ='NDV.MOTM.ESCMSNDV.SHRD.D&C1STGNUM.'
-* Site Symbol variable examples
-  #OCLIST###@1= 'CATSNDVR.NDVR.EMER.CSIQCLS0'
-  #OCLIST###@2= 'CATSNDVR.NDVR.PROD.CSIQCLS0'
-  #BASEPRFX=  'MOTM.&C1SY..&C1SU..&C1EN(1,1)&C1S#.'
+  CSIQCLS0='&#HLQ..EMER.CSIQCLS0'
+  #OCLIST###@1= '&#OREXX####@1'
+  #OCLIST###@2= '&#OREXX####@2'
+  MyDSNPrefix='MOTM.&C1SY..&C1SU..&C1EN(1,1)&C1S#.'
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC1
 //         DD DISP=SHR,DSN=&SYSEXEC2
 //SYSTSPRT DD DSN=&&SYSTSPRT,DISP=(,PASS),
