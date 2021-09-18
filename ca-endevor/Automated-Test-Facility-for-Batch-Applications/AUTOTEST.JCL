@@ -21,7 +21,7 @@ MODELREL RELATES  OPTIONS2 A
 //OPTIONS1 DD *         <- Parse each OPTION statement
 * Split the option statement using "=" character
   PARSE VAR Option keyword "=" myValue
-  say 'AutomatedTest@&C1STAGE..'
+  sa= 'AutomatedTest@&C1STAGE..'
   go = Abbrev(keyword,'AutomatedTest@&C1STAGE..')
   If go /= 1 then $SkipRow = 'Y'
   $index = $index + 1

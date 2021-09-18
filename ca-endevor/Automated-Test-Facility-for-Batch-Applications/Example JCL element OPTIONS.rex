@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 * An asterisk in Column 1 designates a commment line
 *
 * If you want to turn off FindTxt and Replace messages, include the statement below              
@@ -6,6 +7,11 @@
                                                      
 *-----------------------------------------------------------------*
 * Specifications for the UTC stage
+=======
+*-----------------------------------------------------------------*
+* Specifications for the UTC stage
+*      (an asterisk in Column 1 designates a commment line)
+>>>>>>> bd7e7dd6bf037ff027017f29a572cf2986aeb566
 *-----------------------------------------------------------------*
 
 JCL.UNITTEST.FindTxt.1 = '//MISDXW#D JOB '
