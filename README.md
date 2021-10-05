@@ -13,6 +13,7 @@ This repository houses Zowe CLI sample scripts for use cases involving the follo
 - [CA SYSVIEW Performance Management](https://www.npmjs.com/package/@broadcom/sysview-for-zowe-cli)
 - [CA View](https://www.npmjs.com/package/@broadcom/caview-for-zowe-cli)
 - [CA Workload Automation CA 7](https://www.npmjs.com/package/@broadcom/ca7-for-zowe-cli)
+- [Test4z](https://www.npmjs.com/package/@broadcom/test4z)
 
 **Note:** If you do not have access to the public registry, please obtain these plug-ins from [Broadcom's Free Zowe Download Site](https://validate.broadcom.com/key/ZoweDistributionLink).
 
