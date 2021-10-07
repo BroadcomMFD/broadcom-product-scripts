@@ -44,7 +44,7 @@
    /*                                                             */
    /*   JCL.C1Stage.REPLACE.<ddname>.<stepname>'  = '<jcl>'       */
    /*                                                             */
-   /*  If new or replacment JCL text begins with '//' then the    */
+   /*  If new or replacement JCL text begins with '//' then the   */
    /*  lines of JCL are inserted, using '//' to identifiy the     */
    /*  start of each line.                                        */
    /*  If '//' is not found, then it is assumed that dataset      */
@@ -78,8 +78,9 @@
 
    If Length(TestResultsHLQ) > 21 then,
       Do
-      Say 'The TestResultsHLQ length must be 21 characters or less'
-      Say TestResultsHLQ 'is' Length(TestResultsHLQ) 'characters long'
+      Push 'The TestResultsHLQ length must be 21 characters or less'
+      Push TestResultsHLQ 'is' Length(TestResultsHLQ) 'characters long'
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End
 
@@ -108,7 +109,7 @@
    Drop Baseline
    JCL.C1Stage.BASELINE = ' '        /* Name of C1stage Baseline*/
 
-   /* Default replacment strings to keep in the output results */
+   /* Default replacement strings to keep in the output results */
    NeutralizeMasks = 'JOB99999 D9999999 99.99.99 ',
                      'SYS99999 T999999 ',
                      '99:99 9999999.9999'
@@ -150,7 +151,8 @@
    If $rslt = 0 then SubmitJCL = sysdsname
    Else,
       Do
-      Say 'NEWJCL must be a cataloged dataset'
+      Push 'NEWJCL must be a cataloged dataset'
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(12)
       End
 
@@ -165,7 +167,9 @@
    Call Submit_n_save_jobInfo;
    If SelectJobName = myJobName then,
       Do
-      Say 'The job to be monitored is mine. Invalid request'
+      Push 'The job to be monitored is mine. Invalid request'
+      Push 'you must ensure the test job has a different name.'
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(8)
       End;
 
@@ -220,7 +224,8 @@
 
    If SuperCRc > thisMaxReturncode then,
       Do
-      Say 'Comparison Fails. SUPERC rc='SuperCRc
+      Push 'Comparison Fails. SUPERC rc='SuperCRc
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(8)
       End
 
@@ -229,8 +234,31 @@
 
 ProcessInputOptions:
 
-   /* Read the OPTIONS (each value must be quoted) */
-   x = IncludeQuotedOptions(OPTIONS)
+   If TraceRc = 'Y' then Trace r
+   /* Determine from 1st record if OPTIONS are in YAML format  */
+   "EXECIO 1 DISKR OPTIONS "
+   Pull FirstOption
+   If Substr(FirstOption,1,1) = '%' then,  /* We are using YAML */
+      Do
+      Push 'YAML support is coming soon '
+      "EXECIO 1 DISKW ERRORS (Finis"
+      EXIT(12)
+      x = YAML2REX(YIKES)
+      HowManyYamls = QUEUED();
+       Do y# = 1 to HowManyYamls
+          Parse pull newRexx
+          sa=        newRexx
+          interpret  newRexx
+       End ; /* Do y# = 1 to HowManyYamls */
+      Trace off
+      End ; /* If Substr(FirstOption,1,1) = '%' */
+   Else,
+      Do
+      Trace off
+      x = IncludeQuotedOptions(OPTIONS)
+      End ; /* If Substr(FirstOption,1,1) = '%' */
+
+   /* Read the OPTIONS (each value must be quoted)             */
    If ShowReplaceResults = 'Y' then,
       Say 'NumberReplaceStrings=' NumberReplaceStrings
 
@@ -280,11 +308,10 @@ TailorNewJCLfromOld:
             Do; Call ReplaceDDname; Iterate; end;
          End
 
-      If TraceRc = 'Y' then Trace r
+/*    If TraceRc = 'Y' then Trace r  */
       jclline = jclrec.j#
 
       /* Execute the Search and replace string actions */
-      /*  If TraceRc = 'Y' then Trace r  */
       Do rpl# = 1 to NumberReplaceStrings
          findString = JCL.C1Stage.FindTxt.rpl#
          If findString = '' then iterate;
@@ -317,7 +344,7 @@ TailorNewJCLfromOld:
             End /* else ..  If replaceString /= ''  */
       End; /* Do rpl# = 1 to NumberReplaceStrings */
       /* Write line of JCL to output                   */
-      Trace off
+
       If thisJCLlineQueued /= 'Y' then,
          Do
          Call ReplaceEndevorVariables;
@@ -348,7 +375,8 @@ IncludeQuotedOptions:
       "EXECIO * DISKR" $USROPTS "(Stem $Opts."$options#". Finis"
       IF RC > 8 THEN,
          DO
-         SAY 'Cannot find OPTIONS File ' $USROPTS
+         Push 'Cannot find OPTIONS File ' $USROPTS
+         "EXECIO 1 DISKW ERRORS (Finis"
          EXIT(12)
          END;
       End; /* if $options# = 0 then */
@@ -379,6 +407,16 @@ IncludeQuotedOptions:
 
       PARSE VAR $UserOption $keyword '=' $UserOptionValue ;
       $UserOptionValue = Strip($UserOptionValue)
+
+      If length($UserOptionValue) > 256 then,
+         Do
+         Push 'Finding this string -'
+         Push  Substr($UserOptionValue,1,70) '...'
+         Push 'Value cannot exceed 256 characters.'
+         "EXECIO 3 DISKW ERRORS (Finis"
+         Exit(12)
+         End
+
       sa= '$keyword =' $keyword
       Sa= '$UserOptionValue= ' $UserOptionValue
 
@@ -463,7 +501,10 @@ ReplaceDDname:
       End /* Do Forever */
    Else,
       Do
-      Say 'Unsupported DDName replacment text is found- '
+      Push 'Unsupported DDName replacement text is found- '
+      Push "Expected leading '//', but found- ",
+          "'"newDDnameJcl"'"
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End /* Else */
 
@@ -561,7 +602,10 @@ InsertJclLines:
       End /* Do Forever */
    Else,
       Do
-      Say 'Unsupported DDName replacment text is found- '
+      Push 'Unsupported DDName replacement text is found- '
+      Push "Expected leading '//', but found- ",
+          "'"insertJclLines"'"
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End /* Else */
 
@@ -576,7 +620,8 @@ Submit_n_save_jobInfo: /* submit SubmitJCL job and save job info */
    ADDRESS TSO "SUBMIT '"SubmitJCL"("C1Element")'" ;
    If RC > 4 then,
       Do
-      Say 'Cannot find Element member to submit.'
+      Push 'Cannot find Element member to submit.'
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(12)
       End
    CALL OUTTRAP "OFF"
@@ -595,7 +640,8 @@ Monitor_Job_Status:
    IsfRC = isfcalls( "ON" )
    if IsfRC <> 0 then,
       Do
-      Say "Failure with isfcalls"
+      Push "Failure with isfcalls"
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(8)
       End
 
@@ -626,7 +672,8 @@ Monitor_Job_Status:
 
       if RC <> 0 then,
         Do
-        say "RC" RC "returned from ISFEXEC ST" ;
+        Push "RC" RC "returned from ISFEXEC ST" ;
+        "EXECIO 1 DISKW ERRORS (Finis"
         Exit(12);
         end;
 
@@ -677,9 +724,10 @@ Monitor_Job_Status:
       End
    Else,
       Do
-      Say 'Job' SelectJobname SelectJobNumber,
+      Push 'Job' SelectJobname SelectJobNumber,
           ' not completed within Wait arguments',
           WaitLoops LoopSeconds
+      "EXECIO 1 DISKW ERRORS (Finis"
       exit(8)
       End
 
@@ -759,7 +807,8 @@ ProcessSYSOUTS:
          Sa= "Capturing " this_ddname;
          address SDSF "isfact st token('"j_token.jX"') parm(np sa)"
          if RC <> 0 then do
-           say "SYSOUT allocation failed for" JobName "with RC" ActRC
+           Push "SYSOUT allocation failed for" JobName "with RC" ActRC
+           "EXECIO 1 DISKW ERRORS (Finis"
            Exit(12)
            end
          /* Copy ot examine the SYSOUT        */
@@ -851,7 +900,6 @@ Locate_Former_TestResults:
 
 CompareTestResults:
 
-/* If TraceRc = 'Y' then trace r */
    /* Compare current Test result with former          */
    /* ... if it exists.                                */
 
@@ -899,8 +947,6 @@ NeutralizeString:
 
    /* Tailor content for a better SUPERC comparison  */
    /* Neutralize Date and time specific fields */
-
-/* If TraceRc = 'Y' then trace r */
 
    nineString = Translate(String,'999999999','012345678')
    sa= nineString

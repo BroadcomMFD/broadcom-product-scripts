@@ -112,6 +112,7 @@
   C1SUBSYS     = '&C1SUBSYS'
   C1ELTYPE     = '&C1ELTYPE'
   C1STAGE      = '&C1STAGE'
+  C1STGNUM     = '&C1STGNUM'
   CSIQCLS0='&#HLQ..EMER.CSIQCLS0'
   #OCLIST###@1= '&#OREXX####@1'
   #OCLIST###@2= '&#OREXX####@2'
@@ -121,6 +122,7 @@
 //SYSTSPRT DD DSN=&&SYSTSPRT,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
 //            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//ERRORS   DD SYSOUT=*   <- if any errors are found
 //SYSTSIN  DD DUMMY
 //RELATE   DD DSN=&&RELATE,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
