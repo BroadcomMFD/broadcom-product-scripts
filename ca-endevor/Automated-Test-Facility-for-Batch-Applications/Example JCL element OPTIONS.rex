@@ -1,5 +1,17 @@
+<<<<<<< HEAD
+* An asterisk in Column 1 designates a commment line
+*
+* If you want to turn off FindTxt and Replace messages, include the statement below              
+  ShowReplaceResults = 'N'  
+* Otherwise by omitting the statement, all messages will be written.                         
+                                                     
 *-----------------------------------------------------------------*
 * Specifications for the UTC stage
+=======
+*-----------------------------------------------------------------*
+* Specifications for the UTC stage
+*      (an asterisk in Column 1 designates a commment line)
+>>>>>>> bd7e7dd6bf037ff027017f29a572cf2986aeb566
 *-----------------------------------------------------------------*
 
 JCL.UNITTEST.FindTxt.1 = '//MISDXW#D JOB '
@@ -49,6 +61,12 @@ JCL.UNITTEST.Replace.14= 'DSN=BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
 JCL.UNITTEST.FindTxt.15= '//SYSOUT    DD DUMMY '
 JCL.UNITTEST.Replace.15= '//SYSOUT    DD SYSOUT=*'
 
+* Show the insert of a comment reflecting Endevor classification:
+JCL.UNITTEST.FindTxt.16 = '//  EXPORT SYMLIST='
+JCL.UNITTEST.where.16 = 'BEFORE'
+JCL.UNITTEST.Insertx.16 =,
+            '//* Testing Stg=&C1STAGE Sys=&C1SYSTEM Sbs=&C1SUBSYS '
+
 * Replace every STEPLIB
 JCL.UNITTEST.Replace.STEPLIB. =,
                          'NDV.MOTM.ESCMSNDV.SHRD.D1.LOADLIB ',
@@ -71,6 +89,8 @@ JCL.UNITTEST.Replace.SYSLMOD.LKED =,
 
 JCL.UNITTEST.BASELINE=,
         'BST.ENDEVOR.CA32.UNITTEST.BASELINE(MISDXW#D)'
+
+JCL.UNITTEST.MaxReturnCode= 4 
 
 *-----------------------------------------------------------------*
 * Specifications for the UTC stage
@@ -139,19 +159,31 @@ JCL.UTC.Replace.SYSLIB.LKED =,
 JCL.UTC.Replace.SYSLMOD.LKED =,
         'BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
 
+JCL.UTC.MaxReturnCode= 1    
+
 *-----------------------------------------------------------------*
 * Specifications for all stages
 *-----------------------------------------------------------------*
 
+* Indicate how many loops to make, and how long to wait for each loops 
 WaitLoops    = 4
 LoopSeconds  = 2
 
-MaxReturnCode= 4
+* Options for the Comparison of test results...
 
+* If no Baseline is specified, then the current test result 
+* is compared with the previous one.
+JCL.UNITTEST.BASELINE=,                               
+        'BST.ENDEVOR.CA32.UNITTEST.BASELINE(MISDXW#D)'
+
+* Only one of the 3 Superc_Parms is necessary. 
+* Each produces a report in a unique format.
 Superc_Parms = 'LONGL,LINECMP'
 Superc_Parms = 'LONGL,LINECMP,WIDE'
 Superc_Parms = 'DELTAL,LINECMP'
 
-NeutralizeMasks = NeutralizeMasks,
-                  ' Count=99999 99:99:99.99 '
-
+* If in column 1 of the output, numeric text is found similar to this,
+*    then replace the numbers with all '9's.                                                 
+JCL.UNITTEST.MaskTarget.1 = '99999999 99:99:99 ' 
+JCL.UNITTEST.MaskColumn.1 = 1                    
+                                                 

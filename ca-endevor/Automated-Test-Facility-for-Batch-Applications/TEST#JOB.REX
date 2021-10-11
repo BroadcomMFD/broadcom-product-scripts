@@ -36,7 +36,7 @@
    /*                                     \ (defaults to 'AFTER') */
    /*                                                             */
    /*  Optionally, a DDname can be used for identifying where     */
-   /*  to insert lines of JCL:                                    */
+   /*  to insert lines of JCL-                                    */
    /*                                                             */
    /*   JCL.C1Stage.REPLACE.<ddname>.     = '<jcl>'               */
    /*                                                             */
@@ -44,7 +44,7 @@
    /*                                                             */
    /*   JCL.C1Stage.REPLACE.<ddname>.<stepname>'  = '<jcl>'       */
    /*                                                             */
-   /*  If new or replacment JCL text begins with '//' then the    */
+   /*  If new or replacement JCL text begins with '//' then the   */
    /*  lines of JCL are inserted, using '//' to identifiy the     */
    /*  start of each line.                                        */
    /*  If '//' is not found, then it is assumed that dataset      */
@@ -73,55 +73,76 @@
      BPXWDYN("INFO FI(TEST#JOB) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then TraceRc = 'Y'
 
-   ARG C1Element C1Stage  WaitLoops LoopSeconds TestResultsHLQ ;
+   ARG C1Element C1Stage ,
+       WaitLoops LoopSeconds TestResultsHLQ ;
 
    If Length(TestResultsHLQ) > 21 then,
       Do
-      Say 'The TestResultsHLQ length must be 21 characters or less'
-      Say TestResultsHLQ 'is' Length(TestResultsHLQ) 'characters long'
+      Push 'The TestResultsHLQ length must be 21 characters or less'
+      Push TestResultsHLQ 'is' Length(TestResultsHLQ) 'characters long'
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End
+
+   /* Set Defaults / initial values....                        */
+
    /* Set the value for Phase that indicates job is done       */
    FinalExpectedPhase = "AWAITING OUTPUT"
 
+   $numbers   = '0123456789'   /* chars for numeric values   */
+   AlphaChars   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
    $OptionCommentChar = '*'
+   $EndevorVariables  = ''
+   ShowReplaceResults = 'Y'
 
    /*   Select a Default for the SUPERC parameter.             */
    /* Set defaults                   */
    JCL.                = ''
+
+   Drop MaxReturnCode
+   JCL.C1Stage.MaxReturnCode = 4     /* Value for MaxReturncode */
    JCL.C1Stage.where.  = 'AFTER'     /* either BEFORE/AFTER */
+   JCL.C1Stage.FindTxt. = ''
    JCL.C1Stage.REPLACE. = ''
    JCL.C1Stage.Insertx. = ''
    SuperCRc = 0
-   MaxReturnCode = 0                 /* Maximum allowed RC  */
-   JCL.C1Stage.BASELINE = ''         /* Name of C1stage Baseline*/
+   Drop Baseline
+   JCL.C1Stage.BASELINE = ' '        /* Name of C1stage Baseline*/
 
-
-   /* Default replacment strings to keep in the output results */
+   /* Default replacement strings to keep in the output results */
    NeutralizeMasks = 'JOB99999 D9999999 99.99.99 ',
                      'SYS99999 T999999 ',
                      '99:99 9999999.9999'
-   MoreMasks = ''
    Superc_Parms = 'DELTAL,LINECMP'
    Superc_Parms = 'LONGL,LINECMP'
    Superc_Parms = 'LONGL,LINECMP,WIDE'
+
+   NumberReplaceStrings = 0   ; /* Assume zero, unless we find some*/
+   NumberMaskStrings    = 0   ; /* Assume zero, unless we find some*/
 
    Say 'Automated Testing is examining details for '
    Say 'Element ' C1Element 'at stage ' C1Stage
 
    /* Get   Options for tailoring and processing the JCL       */
+   /* If no Options are designated for C1stage, then exit      */
    Call ProcessInputOptions;
 
-   /* If Baseline specified at Stage level use it.     */
-   /* Otherwise use what is specified for Baseline     */
-   If TraceRc = 'Y' then Trace r
-   SaveBaseline = Baseline
-   Drop BASELINE
-   StgBaseline = JCL.C1Stage.BASELINE
-   If StgBaseline /= '' then Baseline = StgBaseline
-   If StgBaseline  = '' then Baseline = SaveBaseline
+   /* If ShowReplaceResults not = 'Y' then notify msgs are off */
+   If ShowReplaceResults /= 'Y' then,
+      Say 'FindTxt-Replace messages are turned off via',
+          ' ShowReplaceResults'
 
-   NeutralizeMasks = NeutralizeMasks MoreMasks
+   /* If Baseline specified at Stage level use it.     */
+   If TraceRc = 'Y' then Trace r
+   Drop Baseline
+   thisBaseline = JCL.C1Stage.BASELINE
+
+   /* If MaxReturnCode given at Stage level use it.     */
+   Drop MaxReturncode
+   thisMaxReturncode = JCL.C1Stage.MaxReturnCode
+   If Verify(thisMaxReturncode,$numbers) > 0 then,
+      thisMaxReturncode = 4;
+
    /* Using Options tailor the JCL so it can be Submitted      */
    Call TailorNewJCLfromOld;
 
@@ -130,7 +151,8 @@
    If $rslt = 0 then SubmitJCL = sysdsname
    Else,
       Do
-      Say 'NEWJCL must be a cataloged dataset'
+      Push 'NEWJCL must be a cataloged dataset'
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(12)
       End
 
@@ -145,7 +167,9 @@
    Call Submit_n_save_jobInfo;
    If SelectJobName = myJobName then,
       Do
-      Say 'The job to be monitored is mine. Invalid request'
+      Push 'The job to be monitored is mine. Invalid request'
+      Push 'you must ensure the test job has a different name.'
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(8)
       End;
 
@@ -159,8 +183,6 @@
    nowTime= TIME()
    TimeNode = 'T' || Substr(nowTime,1,2) || Substr(nowTime,4,2)
    /*             || Substr(nowTime,7,2)  */
-   thisTestResult =   TestResultsHLQ'.' ||,
-                      DateNode'.'TimeNode'.'SelectJobNumber
    thisTestResult =   TestResultsHLQ'.' ||,
                       C1Stage'.'DateNode'.'SelectJobNumber
 
@@ -180,35 +202,82 @@
    Push "RELATE OBJECT '"thisTestResult"'."
 
    /* If a Baseline for comparison is not named, search for former */
-   If Baseline = ' ' then,
+   If thisBaseline = ' ' then,
       Call Locate_Former_TestResults;
 
-   if Baseline /= ' ' Then,
+   /* If we have something to compare        */
+   /* and thisMaxReturncode < 999 then compare.. */
+   if thisMaxReturncode >= 999 then,
+      Say 'MaxReturnCode at Stage' C1Stage 'is' thisMaxReturncode'.',
+          ' The comparison of results is being skipped.'
+   Else,
+   if thisBaseline /= ' ' & thisMaxReturncode < 999 then,
       Do
       Say 'Comparing' thisTestResult
-      Say '       to' Baseline
+      Say '       to' thisBaseline
       Call CompareTestResults;
-      Push "RELATE OBJECT '"Baseline"'."
+      If thisBaseline /= ' ' then,
+         Push "RELATE OBJECT '"thisBaseline"'."
       End
 
    "EXECIO" QUEUED() "DISKW RELATE (Finis"
 
-   If SuperCRc > MaxReturnCode then,
+   If SuperCRc > thisMaxReturncode then,
       Do
-      Say 'Comparison Fails. SUPERC rc='SuperCRc
+      Push 'Comparison Fails. SUPERC rc='SuperCRc
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(8)
       End
 
    Say 'Comparison is successful. SUPERC rc='SuperCRc
-   Exit(SuperCRc)
+   Exit(1); /* Submitted a Successful test */
 
 ProcessInputOptions:
 
-   /* Read the OPTIONS (each value must be quoted) */
-   $numbers   = '0123456789.'   /* chars for numeric values   */
-   NumberReplaceStrings = 0   ; /* Assume zero, unless we find some*/
-   x = IncludeQuotedOptions(OPTIONS)
-   Say 'NumberReplaceStrings=' NumberReplaceStrings
+   If TraceRc = 'Y' then Trace r
+   /* Determine from 1st record if OPTIONS are in YAML format  */
+   "EXECIO 1 DISKR OPTIONS "
+   Pull FirstOption
+   If Substr(FirstOption,1,1) = '%' then,  /* We are using YAML */
+      Do
+      Push 'YAML support is coming soon '
+      "EXECIO 1 DISKW ERRORS (Finis"
+      EXIT(12)
+      x = YAML2REX(YIKES)
+      HowManyYamls = QUEUED();
+       Do y# = 1 to HowManyYamls
+          Parse pull newRexx
+          sa=        newRexx
+          interpret  newRexx
+       End ; /* Do y# = 1 to HowManyYamls */
+      Trace off
+      End ; /* If Substr(FirstOption,1,1) = '%' */
+   Else,
+      Do
+      Trace off
+      x = IncludeQuotedOptions(OPTIONS)
+      End ; /* If Substr(FirstOption,1,1) = '%' */
+
+   /* Read the OPTIONS (each value must be quoted)             */
+   If ShowReplaceResults = 'Y' then,
+      Say 'NumberReplaceStrings=' NumberReplaceStrings
+
+   If NumberReplaceStrings = 0 then,
+      Do
+      Say 'No Automated Test instructions are found for ',
+          C1Element 'in stage' C1Stage
+      Exit(0) ; /* No tests to submit      */
+      End
+
+   If ShowReplaceResults = 'Y' then,
+      Say 'NumberMaskStrings   =' NumberMaskStrings
+
+   /* Read the VARIABLE data (variables provided by Endevor) */
+   /* Variables can be mixture of C1* variables  of Endevor, */
+   /* processor variables and Site Symbol variables.         */
+   x = IncludeQuotedOptions(VARIABLE)
+   If ShowReplaceResults = 'Y' then,
+      Say 'Number Endevor Variables =' Words($EndevorVariables)
 
    Return;
 
@@ -216,7 +285,6 @@ TailorNewJCLfromOld:
 
    /* Read the OLDJCL file           */
    "EXECIO * DISKR OLDJCL ( Stem jclrec. Finis"
-   If  TraceRc = 'Y'    then Trace r
    /* Scan each record of the JCL    */
    Do j# = 1 to jclrec.0
       jclline = jclrec.j#
@@ -239,16 +307,22 @@ TailorNewJCLfromOld:
          If newDDnameJcl /= '' then,
             Do; Call ReplaceDDname; Iterate; end;
          End
-      /* Execute the Search and replace string actions */
-      If TraceRc = 'Y' then Trace r
+
+/*    If TraceRc = 'Y' then Trace r  */
       jclline = jclrec.j#
+
+      /* Execute the Search and replace string actions */
       Do rpl# = 1 to NumberReplaceStrings
          findString = JCL.C1Stage.FindTxt.rpl#
+         If findString = '' then iterate;
          whereTxt = Pos(findString,jclline)
          If whereTxt = 0 then iterate;
          replaceString = JCL.C1Stage.Replace.rpl#
          If replaceString /= '' then,
+            Do
             Call ReplaceText;
+            Call ReplaceEndevorVariables;
+            End /* If replaceString /= '' */
          Else,
             Do
             insertJclLines = JCL.C1Stage.Insertx.rpl#
@@ -257,7 +331,8 @@ TailorNewJCLfromOld:
                insertWhere  = JCL.C1Stage.where.rpl#
                If insertWhere /= 'BEFORE' then,
                   insertWhere = 'AFTER'
-               Say 'Inserting JCL lines' insertWhere,
+               If ShowReplaceResults = 'Y' then,
+                  Say 'Inserting JCL lines' insertWhere,
                    findString
                If insertWhere = 'AFTER' then,
                   Do
@@ -269,8 +344,12 @@ TailorNewJCLfromOld:
             End /* else ..  If replaceString /= ''  */
       End; /* Do rpl# = 1 to NumberReplaceStrings */
       /* Write line of JCL to output                   */
+
       If thisJCLlineQueued /= 'Y' then,
+         Do
+         Call ReplaceEndevorVariables;
          Queue jclline
+         End
    End; /* Do j# = 1 to jclrec.0  */
 
    "EXECIO" QUEUED() "DISKW NEWJCL ( Finis"
@@ -278,10 +357,10 @@ TailorNewJCLfromOld:
    Return;
 
 IncludeQuotedOptions:
+/* (this routine is tailored from a 2021 version of ENBPIU00)         */
 /* Options built by others might not be trustworthy.                  */
 /* Use this routine in such conditions to interpret only those that   */
 /* have values contained in quotes, or values that are numeric.       */
-
    Arg $UserOptDDname;
 
    /*  Process only quoted Rexx assignment statements from User */
@@ -296,7 +375,8 @@ IncludeQuotedOptions:
       "EXECIO * DISKR" $USROPTS "(Stem $Opts."$options#". Finis"
       IF RC > 8 THEN,
          DO
-         SAY 'Cannot find OPTIONS File ' $USROPTS
+         Push 'Cannot find OPTIONS File ' $USROPTS
+         "EXECIO 1 DISKW ERRORS (Finis"
          EXIT(12)
          END;
       End; /* if $options# = 0 then */
@@ -322,9 +402,21 @@ IncludeQuotedOptions:
              $UserOption = $UserOption $continueOption
       End /* Do 20 */
 
-      Sa= '$UserOption' $Uop# '=' $UserOption
+      If TraceRc = 'Y' then,
+         Say '$UserOption' $Uop# '=' $UserOption
+
       PARSE VAR $UserOption $keyword '=' $UserOptionValue ;
       $UserOptionValue = Strip($UserOptionValue)
+
+      If length($UserOptionValue) > 256 then,
+         Do
+         Push 'Finding this string -'
+         Push  Substr($UserOptionValue,1,70) '...'
+         Push 'Value cannot exceed 256 characters.'
+         "EXECIO 3 DISKW ERRORS (Finis"
+         Exit(12)
+         End
+
       sa= '$keyword =' $keyword
       Sa= '$UserOptionValue= ' $UserOptionValue
 
@@ -348,13 +440,12 @@ IncludeQuotedOptions:
                 $UserOption ;
          Iterate ;
          End /* If Words.....   */
-      if wordpos($keyword,$OptionsVariables) = 0 then,
-         $OptionsVariables = $OptionsVariables $keyword ;
 
       If TraceRc = 'Y' then Say $UserOption
 
       Interpret $UserOption
-      If Pos('JCL.'C1Stage'.FindTxt.',$keyword) > 0 then,
+
+      If Pos('JCL.'C1Stage'.FindTxt.',$keyword)    > 0 then,
          Do
          $tmp = Translate($keyword,' ','.');
          $tmpNumber = Word($tmp,Words($tmp));
@@ -362,6 +453,19 @@ IncludeQuotedOptions:
          If $rslt = 0 & $tmpNumber > NumberReplaceStrings then,
             NumberReplaceStrings = $tmpNumber;
          End;
+      Else,
+      If Pos('JCL.'C1Stage'.MaskTarget.',$keyword) > 0 then,
+         Do
+         $tmp = Translate($keyword,' ','.');
+         $tmpNumber = Word($tmp,Words($tmp));
+         $rslt =  VERIFY($tmpNumber,$numbers)
+         If $rslt = 0 & $tmpNumber > NumberMaskStrings then,
+            NumberMaskStrings    = $tmpNumber;
+         End;
+      Else,
+      If Pos('.',$keyword) = 0 &,
+         wordpos($keyword,$EndevorVariables) = 0 then,
+         $EndevorVariables = $EndevorVariables $keyword ;
    End /* DO $Uop# = 1 TO $Opts.$options#.0 */
 
    RETURN $UserOptDDname
@@ -369,17 +473,17 @@ IncludeQuotedOptions:
 
 ReplaceDDname:
 
-   If  TraceRc = 'Y'    then Trace r
-   Say 'Replace the Step' thisStepName 'DDname' thisDDname 'with:'
+/* If  TraceRc = 'Y'    then Trace r  */
+   If ShowReplaceResults = 'Y' then,
+      Say 'Replace the Step' thisStepName 'DDname' thisDDname 'with:'
    Label = thisDDname
    leadingSlashSlash = Pos('//',newDDnameJcl)
    If leadingSlashSlash =0 then, /* no // in replacement */
       Do w# = 1 to Words(newDDnameJcl)
       JCLtext = Word(newDDnameJcl,w#)
-      Say   '//'Label ' DD DSN='JCLtext || ','
-      Queue '//'Label ' DD DSN='JCLtext || ','
-      Say   '//         DISP=SHR'
-      Queue '//         DISP=SHR'
+      insertJclLines = '//'Label ' DD DSN='JCLtext || ','
+      Call InsertJclLines ;
+      Queue            '//         DISP=SHR'
       Label = '       '
       End /* Do w# = 1 to Words(newDDnameJcl) */
    Else,
@@ -389,15 +493,18 @@ ReplaceDDname:
       If whereNextSlashSlash = 0 then,
          whereNextSlashSlash = Length(newDDnameJcl) + 1
       JCLtext = Substr(newDDnameJcl,1,whereNextSlashSlash-1)
-      Say JCLtext
-      queue JCLtext
+      insertJclLines = JCLtext
+      Call InsertJclLines ;
       newDDnameJcl =,
             Strip(Substr(newDDnameJcl,whereNextSlashSlash))
       If length(newDDnameJcl) < 1 then Leave;
       End /* Do Forever */
    Else,
       Do
-      Say 'Unsupported DDName replacment text is found- '
+      Push 'Unsupported DDName replacement text is found- '
+      Push "Expected leading '//', but found- ",
+          "'"newDDnameJcl"'"
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End /* Else */
 
@@ -436,15 +543,48 @@ ReplaceText:
                 replaceString || ,
                 substr(jclline,whereTXT+Length(findString))
 
-   Say "JCL line Changed:"
-   Say " B4:"Saved_jclline
-   Say " AF:"jclline
+   If ShowReplaceResults = 'Y' then,
+      Do
+      Say "JCL line Changed:"
+      Say " B4:"Saved_jclline
+      Say " AF:"jclline
+      End
+
+   Return
+
+ReplaceEndevorVariables:
+
+   /* Use Endevor variables for Search and replace actions */
+   Do ndvr# = 1 to Words($EndevorVariables)
+      ndvrVariable = Word($EndevorVariables,ndvr#)
+      findString = '&' || Word($EndevorVariables,ndvr#)
+      whereTxt = Pos(findString,jclline)
+      If whereTxt = 0 then iterate;
+      replaceString = Value(ndvrVariable)
+      If replaceString /= '' then,
+         Call ReplaceText;
+   End; /*  Do ndvr# = 1 to Words($EndevorVariables) */
 
    Return
 
 InsertJclLines:
 
-   If  TraceRc = 'Y'    then Trace r
+   /* Apply Search and Replace actions to inserted lines */
+   Save_jclline = jclline;
+   jclline = insertJclLines
+   Call ReplaceEndevorVariables;
+   Do rpl# = 1 to NumberReplaceStrings
+      findString = JCL.C1Stage.FindTxt.rpl#
+      whereTxt = Pos(findString,jclline)
+      If whereTxt = 0 then iterate;
+      replaceString = JCL.C1Stage.Replace.rpl#
+      If replaceString /= '' then,
+         Call ReplaceText;
+   End ;  /*Do rpl# = 1 to NumberReplaceStrings */
+
+   insertJclLines = jclline   /* line(s) to be inserted         */
+   jclline = Save_jclline     /* The line that triggered insert */
+
    leadingSlashSlash = Pos('//',insertJclLines)
 
    If leadingSlashSlash = 1 then, /* Yes // in new jcl lines */
@@ -453,7 +593,8 @@ InsertJclLines:
       If whereNextSlashSlash = 0 then,
          whereNextSlashSlash = Length(insertJclLines) + 1
       JCLtext = Substr(insertJclLines,1,whereNextSlashSlash-1)
-      Say JCLtext
+      If ShowReplaceResults = 'Y' then,
+         Say JCLtext
       queue JCLtext
       insertJclLines =,
             Strip(Substr(insertJclLines,whereNextSlashSlash))
@@ -461,11 +602,12 @@ InsertJclLines:
       End /* Do Forever */
    Else,
       Do
-      Say 'Unsupported DDName replacment text is found- '
+      Push 'Unsupported DDName replacement text is found- '
+      Push "Expected leading '//', but found- ",
+          "'"insertJclLines"'"
+      "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End /* Else */
-
-
 
 
    Return
@@ -478,7 +620,8 @@ Submit_n_save_jobInfo: /* submit SubmitJCL job and save job info */
    ADDRESS TSO "SUBMIT '"SubmitJCL"("C1Element")'" ;
    If RC > 4 then,
       Do
-      Say 'Cannot find Element member to submit.'
+      Push 'Cannot find Element member to submit.'
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(12)
       End
    CALL OUTTRAP "OFF"
@@ -497,7 +640,8 @@ Monitor_Job_Status:
    IsfRC = isfcalls( "ON" )
    if IsfRC <> 0 then,
       Do
-      Say "Failure with isfcalls"
+      Push "Failure with isfcalls"
+      "EXECIO 1 DISKW ERRORS (Finis"
       Exit(8)
       End
 
@@ -528,7 +672,8 @@ Monitor_Job_Status:
 
       if RC <> 0 then,
         Do
-        say "RC" RC "returned from ISFEXEC ST" ;
+        Push "RC" RC "returned from ISFEXEC ST" ;
+        "EXECIO 1 DISKW ERRORS (Finis"
         Exit(12);
         end;
 
@@ -579,9 +724,10 @@ Monitor_Job_Status:
       End
    Else,
       Do
-      Say 'Job' SelectJobname SelectJobNumber,
+      Push 'Job' SelectJobname SelectJobNumber,
           ' not completed within Wait arguments',
           WaitLoops LoopSeconds
+      "EXECIO 1 DISKW ERRORS (Finis"
       exit(8)
       End
 
@@ -661,7 +807,8 @@ ProcessSYSOUTS:
          Sa= "Capturing " this_ddname;
          address SDSF "isfact st token('"j_token.jX"') parm(np sa)"
          if RC <> 0 then do
-           say "SYSOUT allocation failed for" JobName "with RC" ActRC
+           Push "SYSOUT allocation failed for" JobName "with RC" ActRC
+           "EXECIO 1 DISKW ERRORS (Finis"
            Exit(12)
            end
          /* Copy ot examine the SYSOUT        */
@@ -718,26 +865,33 @@ Locate_Former_TestResults:
    "ALLOC FI(SYSIN) BLKSIZE(0) TRACKS LRECL(80) SPACE(5 5)",
        "RECFM(F B) NEW REUSE UNCATALOG" ;
 
-   Push  " LISTCAT LEVEL('"TestResultsHLQ"') NAME"
+   Push  " LISTCAT LEVEL('"TestResultsHLQ"."C1Stage"') NAME"
 
    "EXECIO 1 DISKW SYSIN (FINIS"
 
    ADDRESS LINK 'IDCAMS'
    MyRC =RC
 
-
    "EXECIO * DISKR SYSPRINT (Stem prt. FINIS"
 
- /*   temp = LISTDSI("'"Dataset"'" RECALL)  */
-   Do lin# = prt.0 by -1 to 1
-      print = Substr(prt.lin#,2)
-      if Substr(print,1,7) /= 'NONVSAM' then iterate;
-      sa= print
-      If pos(TestResultsHLQ,print) = 0 then iterate;
-      If pos(thisTestResult,print) > 0 then iterate;
-      Baseline = Word(print,3)
-      Leave
-   End;
+ /* Look through the former test result outputs */
+ /* .. to find the most recent one.             */
+   If prt.0 > 1 then,
+      Do lin# = prt.0 by -1 to 1
+         print = Substr(prt.lin#,2)
+         if Substr(print,1,7) /= 'NONVSAM' then iterate;
+         sa= print
+         If pos(TestResultsHLQ,print) = 0 then iterate;
+         If pos(thisTestResult,print) > 0 then iterate;
+         thisBaseline = Word(print,3)
+         Leave
+      End;
+
+ /*   If no recent output is found,      */
+ /*   then we have nothing to compare.   */
+ /*   Just exit as a successful test.    */
+   If thisBaseline = ' ' then,
+      Say 'There is no former output to compare'
 
    "FREE  F(SYSPRINT)"
    "FREE  FI(SYSIN)"
@@ -746,7 +900,6 @@ Locate_Former_TestResults:
 
 CompareTestResults:
 
-   If TraceRc = 'Y' then trace r
    /* Compare current Test result with former          */
    /* ... if it exists.                                */
 
@@ -762,7 +915,7 @@ CompareTestResults:
    "EXECIO * DISKW NEWDD (Stem rcd. Finis"
 
    /* Neutralize for        a SUPERC call              */
-   "ALLOC F(OLDDD) DA('"Baseline"') SHR REUSE"
+   "ALLOC F(OLDDD) DA('"thisBaseline"') SHR REUSE"
    Drop rcd.
    "EXECIO * DISKR OLDDD (Stem rcd. Finis "
    Do rc# = 1 to rcd.0
@@ -794,8 +947,6 @@ NeutralizeString:
 
    /* Tailor content for a better SUPERC comparison  */
    /* Neutralize Date and time specific fields */
-
-   If TraceRc = 'Y' then trace r
 
    nineString = Translate(String,'999999999','012345678')
    sa= nineString
@@ -832,6 +983,7 @@ NeutralizeString:
       string = Overlay('DayOfWeek-',String,whereMask)
    Sa= 'NeutralizeMasks =' NeutralizeMasks
 
+   /* Process built-in Numeric Masks         */
    Do msk# = 1 to Words(NeutralizeMasks)
       thisMask =  Word(NeutralizeMasks,msk#)
       whereMask =  Pos(thisMask, nineString)
@@ -842,6 +994,49 @@ NeutralizeString:
         If whereMask = 0 then Leave;
       End;  /* Do Forever  */
    End; /*  Do msk# = 1 to Words(NeutralizeMasks) */
+
+   If TraceRc = 'Y' then Trace r
+   /* Process User MaskTarget and MaskColumn pairs */
+   If NumberMaskStrings > 0 then,
+      Do
+       If rc# = 1 then,
+          Say 'Applying user MaskTarget and MaskColum pairs to',
+              ' test results'
+       Do msk# = 1 to NumberMaskStrings
+          thisMaskTarget = JCL.C1stage.MaskTarget.msk# ;
+          thisMaskColumn = JCL.C1stage.MaskColumn.msk# ;
+          if thisMaskTarget > '' &,
+             thisMaskColumn > 0 then,
+                Call MaskOutputString;
+       End /* Do msk# = 1 to NumberMaskStrings */
+      End /* If NumberMaskStrings > 0         */
+   Trace off
+
+   Return
+
+MaskOutputString:
+
+   If TraceRc = 'Y' then Trace r
+   /* Apply masking changes to the String, and if the result     */
+   /* matches the mask, then overlay the line.                   */
+   origString = ,
+      Substr(String,thisMaskColumn,Length(thisMaskTarget))
+   tempString = origString
+
+   /* Convert numeric characters to '9's            */
+   If Pos('99',thisMaskTarget) > 0 then,
+      tempString = Translate(tempString,,$numbers,'9')
+
+   /* Convert alpha   characters to 'Z's            */
+   If Pos('ZZ',thisMaskTarget) > 0 then,
+      tempString = Translate(tempString,,AlphaChars,'Z')
+
+   If tempString /= thisMaskTarget then Return;
+
+   Say "B4:" Substr(String,1,80)
+   String = Overlay(tempString,String,thisMaskColumn)
+   Say "AF:" Substr(String,1,80)
+   Trace off
 
    Return
 
