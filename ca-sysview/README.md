@@ -1,1 +1,0 @@
-# CA SYSVIEW Performance Management Plug-in for Zowe CLI - Sample Scripts

@@ -1,1 +1,0 @@
-# CA MAT Detect Plug-in for Zowe CLI - Sample Scripts
