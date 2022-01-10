@@ -1,5 +1,4 @@
-# Endevor Plug-in for Zowe CLI - Sample Scripts
-These use cases involve the [Endevor plug-in for Zowe CLI](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-brightside/3-0/zowe-cli/available-cli-plug-ins/ca-endevor-scm-plug-in-for-zowe-cli.html), available on [public npm](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli).
+# Endevor - Sample Scripts
 
 ## Automated Test Facility for Batch Applications
 This [sample repository](Automated-Test-Facility-for-Batch-Applications) contains artifacts described in the [How to Leverage Endevor Processors to Test Batch Applications](https://medium.com/modern-mainframe/how-to-leverage-endevor-processors-to-test-batch-applications-6247a9dfdafa) blog on Medium.  The objects are for using Endevor processors in Building an Automated Test Facility for Batch Applications in Endevor.

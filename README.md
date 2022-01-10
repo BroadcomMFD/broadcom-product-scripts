@@ -1,5 +1,5 @@
 # Broadcom Product Scripts
-This repository houses Zowe CLI sample scripts for use cases involving Broadcom Products.
+This repository houses sample scripts for use cases involving Broadcom Products.
 
 # Using
 Sample scripts for each product are located in the directory that shares its name. For example, Endevor samples are in the [endevor](endevor) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
