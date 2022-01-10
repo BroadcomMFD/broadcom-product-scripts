@@ -7,9 +7,8 @@ alongside a [white paper](https://community.broadcom.com/mainframesoftware/commu
 integration opportunities that are already present with your CA Gen installation. There are no requirements to install
 new CA Gen components to utilize functionality in these scripts.
 
-You will need to have a CA Endevor SCM installation, and you must be able to access the installation through the [CA
-Endevor SCM plugin for Zowe CLI](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli). The details of setting this up will not be detailed here, and you should consult with
-your CA Endevor administrator, or the CA Endevor product documentation for details on what is required to install and
+You will need to have an Endevor SCM installation, and you must be able to access the installation through the [Endevor SCM plugin for Zowe CLI](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli). The details of setting this up will not be detailed here, and you should consult with
+your Endevor administrator, or the Endevor product documentation for details on what is required to install and
 configuration those components.
 
 ## Looking for help?
@@ -34,14 +33,14 @@ You must have a valid installation of the Zowe CLI. The recommended approach is 
 Brightside](https://www.broadcom.com/products/mainframe/application-development/brightside). This takes out much of the
 guesswork and trial-and-error that can sometimes accompany installing and configuring open source tools.
 
-However, the only requirements for the scripts to run correctly are to have a valid [Zowe CLI](https://www.npmjs.com/package/@zowe/cli) with the [CA Endevor SCM for
+However, the only requirements for the scripts to run correctly are to have a valid [Zowe CLI](https://www.npmjs.com/package/@zowe/cli) with the [Endevor SCM for
 Zowe CLI plugin](https://www.npmjs.com/package/@broadcom/endevor-for-zowe-cli) installed and correctly configured.
 
 ## Configuration
 
 ### Zowe Profiles
 
-You must create a profile of type endevor-profile that points to the CA Endevor web service configured for your
+You must create a profile of type endevor-profile that points to the Endevor web service configured for your
 environment. The types of information required for an endevor-profile are things like host, port, protocol, etc. Be sure
 to remember the name because it is a required configuration parameter for the Python scripts.
 
