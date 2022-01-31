@@ -1,4 +1,0 @@
-# CA Gen
-
-## CA Gen DevOps Whitepaper sample code and SCL
-While there is no CA Gen Plug-in for Zowe CLI, the CA Endevor Plug-in for Zowe CLI can be leveraged to enable DevOps for CA Gen. This [sample repository](../ca-endevor/ca-gen-whitepaper-sample) contains the artifacts described in the [Building a z/OS CICS Blockmode Application with CA Endevor® and Zowe whitepaper](https://community.broadcom.com/mainframesoftware/communities/community-home/digestviewer/viewthread?GroupId=1513&MessageKey=7a3ba595-6432-48aa-93f4-f18206875d72&CommunityKey=4182c217-4789-4997-8f22-87de25983f6e&tab=digestviewer). There are Python scripts that you can use as-is or modify to better match your organization's DevOps practices. Also included are SCL templates (or skeletons) that show examples of processors you will need to have present in your organization's CA Endevor installation to successfully compile and link your CA Gen applications with CA Endevor.

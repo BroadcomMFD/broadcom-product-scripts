@@ -1,0 +1,131 @@
+zowe:
+  system_name: SAMPMDL
+  sandbox_input: sandbox.txt
+  profile: user1
+  env: DEV
+  subsystem: $UNDEF
+  # allows you to downlaod content from a subsystem other than the "main" one for the scripts
+  #view_sandbox: SNDBX1
+  # this is the subsystem to use when creating a sandbox
+  sandbox_subsystem: GA
+  # set the signout mode
+  signout_mode: override # possible values: ignore|override|nosign
+  # this will set the ccid and comment on each Endevor command that needs one
+  ccid: GENDEMO1
+  comment: testing things out
+  # this is the instance/region for the Endevor REST API (from the endevor-location-profile)
+  region: WEBSAAA
+  # the following are skeletons and processor group names that may be different at each site
+  sql_skeleton: SMPCBSQL
+  dynamic_isps: SMPCDYNC
+  bind_skeleton: SMPBNDP
+  cobol_pg: LEMBXC5
+  coboldb2_pg: LEMB2C5
+  linkPG: L2
+  noprocPG: "*NOPROC*"
+  # this is the directory where all zowe output will be written
+  output_dir: zowe-output
+  # Comment this out for non-Windows platforms because Windows needs to be told
+  # exactly where to find the executable. Also note the lack of drive letter or
+  # forward slashes
+  executable_path: /Program Files/nodejs/zowe.cmd
+  # this is another possible location for the command in Windows (you can use
+  # the where command to find this in your Command Prompt)
+  #executable_path: /Users/{oktaid}/AppData/Roaming/npm/zowe.cmd
+  # controls caching of downloaded files
+  download_cache:
+    enabled: yes
+    max_age: 86400 # 1 day in seconds (if a file is older than this, then it
+                   # will be re-downloaded)
+
+###################################################
+# CSD Definitions Related parms ** DONOT CHANGE **#
+###################################################
+csd:
+  lnkmod: |
+    DEFINE PROGRAM({filename}) GROUP(MENUGR) LANGUAGE(COBOL)
+    DESCRIPTION(GEN APPL PROGRAM) DATALOCATION(ANY)
+    EXECKEY(USER) CONCURRENCY(THREADSAFE)
+  pstep: |
+    DEFINE TRANSACTION({dlgtran}) GROUP(MENUGR) PROGRAM({member})
+    DESCRIPTION(GEN APPL TRANSACTION)
+    TASKDATALOC(ANY)    TASKDATAKEY(USER)
+  group: |
+    ADD GROUP(MENUGR) LIST(CGDCIC1)
+  deletegroup: |
+    DELETE GROUP(MENUGR)
+
+templates:
+  db2_bind:
+    vars:
+      db2_sys_name: DB2X
+      qualifier: #user
+      user: #user
+      # this is the Gen runtime collection ID likely found in your PARMLIB dataset
+      # it is an optional parameter...only necessary if using an SQL RPROF
+      # processing logic will append ", " to the beginning of this value before substituting it
+      # in the bind_plan string
+      gen_runtime_collection_id: #default is normally RTCOLLID
+    content:
+      dsn: DSN SYSTEM({db2_sys_name})
+      bind_member: |
+        BIND MEMBER({dbrm_member_name})+
+             PACKAGE({collection})+
+             LIBRARY('{dbrmlib}')+
+             ACTION(REPLACE)+
+             ISOLATION(RR)+
+             OWNER({user})+
+             ENCODING(EBCDIC)+
+             CURRENTDATA(NO)+
+             FLAG(I)+
+             VALIDATE(B)+
+             QUALIFIER({qualifier})
+      bind_plan: |
+        BIND PLAN({lnk_elem_name}) PKLIST({mbr_coll}{gen_runtime_collection_id}) ACTION(REPLACE)
+
+######################################################
+# Script LNKINC/LNK Related parms **DO NOT CHANGE ** #
+######################################################
+linkedit:
+  pad_each_with: " "
+  INC_CEHBSIDE: INCLUDE CEHBSIDE({filename})  TYPE=UTIN
+  INC_AEHBMOD0: INCLUDE AEHBMOD0({filename})
+  MODE_STR: MODE AMODE(31),RMODE(ANY)
+  SETOPT_NCAL: SETOPT  PARM(AMODE=31,RMODE=ANY,DYNAM=DLL,REUS(RENT),NCAL)
+  ENTRY: ENTRY {filename}
+  INC_INCLIB: INCLUDE INCLIB({filename})
+  NAME: NAME {filename}(R)
+  IMPORT_CODE: IMPORT CODE,'{member}','{member}'
+  SETOPT_CALL: SETOPT  PARM(AMODE=31,RMODE=ANY,CALL,LIST,XREF,DYNAM=DLL,REUS(RENT))
+
+# optional, but allow you to specify the remote file in the config rather than as a CLI arg
+inputfiles:
+    dialogrmtfile: MENU.rmt
+    cascadermtfile: CASCADE.rmt
+
+processing:
+  zowe_pool_size: 5
+  # this directory will be cleaned up when the script is run
+  # all files that we pull from the remote file or template in code
+  # will end up here
+  template:
+    output_dir: elem_output
+  # not used yet, but still required in config (for now)
+  diff:
+    output_dir: elem_output/diff
+  # this directory will not be cleaned up when the script is run
+  download:
+    output_dir: elem_output/download
+  db2_bind:
+    # true/false to toggle templating PARMS elements for Db2 binds
+    create: false
+    # Each stage will result in a new element being created, you'll want one of these
+    # for each stage that you want to create a PARMS element for.
+    # There will be an element per Load Module per stage defined below
+    stages:
+        # the DSN for the DBRMLIB for this Endevor stage
+      - dsn: HLQ.SBOXNAME.D1.DBRMLIB
+        # this suffix will be appended to the load module name
+        elem_suffix: D1
+      - dsn: HLQ.SBOXNAME.D2.DBRMLIB
+        elem_suffix: D2
