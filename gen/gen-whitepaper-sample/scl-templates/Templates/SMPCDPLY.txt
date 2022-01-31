@@ -1,0 +1,13 @@
+ LIST GROUP(<GENGRP#>) OBJECTS                                                  
+*ADD GROUP(<GENGRP#>) LIST(<CICS LIST>)                                         
+                                                                                
+ DEFINE  PROGRAM(<PROG1>) GROUP(<GENGRP#>)   LANGUAGE(LE370)                    
+         DESCRIPTION(GEN APPL PROGRAM)                                          
+         DATALOCATION(ANY)    EXECKEY(USER) CONCURRENCY(THREADSAFE)             
+                                                                                
+ DEFINE  TRANSACTION(<TRAN>) GROUP(<GENGRP#>)   PROGRAM(<PROG1>)                
+         DESCRIPTION(GEN APPL TRANSACTION)                                      
+         TASKDATALOC(ANY)    TASKDATAKEY(USER)                                  
+                                                                                
+ LIST GROUP(<GENGRP#>) OBJECTS                                                  
+                                                                                
