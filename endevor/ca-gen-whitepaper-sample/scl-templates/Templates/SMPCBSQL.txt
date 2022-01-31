@@ -1,2 +1,0 @@
-CBL SQL("APOSTSQL,STDSQL(NO),PERIOD")                                           
-CBL SQL("DATE(ISO),TIME(ISO),VERSION(<UNIQUE VERSION FOR DBRM>)")               
