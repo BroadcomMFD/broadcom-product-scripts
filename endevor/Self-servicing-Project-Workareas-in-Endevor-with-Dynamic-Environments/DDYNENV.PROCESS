@@ -1,0 +1,62 @@
+//*-------------------------------------------------------------------*         
+//* DDYNENV                                                                     
+//*         GENERATE DYNAMIC ENVIRONMENT                                        
+//*-------------------------------------------------------------------*         
+//DDYNENV PROC DEFINE=Y,                                                        
+//        HLQ='ALC.MOTM.ALCTEST.VSAMRLS',                                       
+//        ENV=&C1EN(1,1),                                                       
+//        PHL='ALC.MOTM.ALCTEST.GA',                                            
+//        DSNS='&PHL..&C1ELEMENT(1,1)*.**',                                     
+//        DSND='&PHL..&C1ELEMENT(1,1).**',                                      
+//        MCF1='&HLQ..&C1ELEMENT..S1',                                          
+//        MCF2='&HLQ..&C1ELEMENT..S2'                                           
+//*                                                                             
+//* DELETE THE ENVIRONMENT                                                      
+//*                                                                             
+//ADMIN    EXEC PGM=ENBE1000,ALTID=Y,                                           
+//         PARM='MSGS1(CUSTMSG1),MSGS2(CUSTMSG2),SCLIN(CUSTSCL)'                
+//CUSTMSG1 DD SYSOUT=*                                                          
+//CUSTMSG2 DD SYSOUT=*                                                          
+//CUSTSCL  DD *                                                                 
+   DELETE ENVIRONMENT '&C1ELEMENT'                                              
+   .                                                                            
+/*                                                                              
+//*                                                                             
+//* DELETE THE MCFS IF ENVIRONMENT WAS DELETED                                  
+//*                                                                             
+//DEALOC     EXEC PGM=IDCAMS,COND=(4,LE,ADMIN)                                  
+//SYSPRINT DD   SYSOUT=*                                                        
+//SYSPRINT DD   SYSOUT=*                                                        
+//SYSIN    DD   *                                                               
+ DELETE '&MCF1' -                                                               
+   PURGE -                                                                      
+   ERASE                                                                        
+                                                                                
+ DELETE '&MCF2' -                                                               
+   PURGE -                                                                      
+   ERASE                                                                        
+//*                                                                             
+//DELDFC     EXEC PGM=IDCAMS,COND=(4,LE,ADMIN),                                 
+//           EXECIF=((&ENV,NE,D),(&ENV,NE,Q),(&ENV,NE,P))                       
+//SYSPRINT DD   SYSOUT=*                                                        
+//SYSPRINT DD   SYSOUT=*                                                        
+//SYSIN    DD   *                                                               
+ DELETE '&DSNS' MASK -                                                          
+   PURGE                                                                        
+                                                                                
+ DELETE '&DSND' MASK -                                                          
+   PURGE                                                                        
+                                                                                
+//*                                                                             
+//* DELETE THE LISTING IF ENVIRONMENT WAS DELETED                               
+//*                                                                             
+//DELACMOP EXEC PGM=CONDELE,PARM='*COMPONENTS',COND=(4,LE,ADMIN)                
+//*                                                                             
+//* FAIL PROCESSOR IF ENV DELETE FAILED                                         
+//*                                                                             
+//SETMAXCC EXEC PGM=IDCAMS,MAXRC=4,COND=(4,GT,ADMIN)                            
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD   *                                                               
+SET MAXCC = 5                                                                   
+/*                                                                              
+                                                                                

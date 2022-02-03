@@ -1,0 +1,74 @@
+//*-------------------------------------------------------------------*       
+//* GSANDDFC                                                                  
+//*         GENERATE DYNAMIC ENVIRONMENT                                      
+//*-------------------------------------------------------------------*       
+//GSANDTST PROC DEFINE=Y,                                                     
+//        HLQ='BST.ENDTEST2',                                                 
+//        MCF1='&HLQ..&C1ELEMENT..S1',                                        
+//        MCF2='&HLQ..&C1ELEMENT..S2',                                        
+//        VIO=SYSDA
+//*                                                                          
+//*  ALLOCATE THE MCF VSAM DATABASE
+//*                                                                           
+//ALOC     EXEC PGM=IDCAMS
+//SYSPRINT DD   DSN=&&IDMSGS,DISP=(SHR,PASS)
+//SYSIN    DD   *
+ DEFINE CLUSTER (NAME('&MCF1') -               
+   IMBED -
+   SPEED -
+   UNIQUE -
+   FREESPACE(30 30)    -
+   RECORDS(1000 1000)  -
+   STORAGECLASS(TSO)   -
+ /*VOLUME(NDVS03)*/ -
+   RECORDSIZE(640 1200) KEYS(28 0) SHR(3 3)) -
+  DATA  (NAME('&MCF1..DATA') -              
+   CISZ(8192)) -
+  INDEX (NAME('&MCF1..INDEX') -              
+   CISZ(2048))
+ /* DEFINE MCF AT STG2
+ DEFINE CLUSTER (NAME('&MCF2') -               
+   IMBED -
+   SPEED -
+   UNIQUE -
+   FREESPACE(30 30)    -
+   RECORDS(1000 1000)  -
+   STORAGECLASS(TSO)   -
+ /*VOLUME(NDVS03)*/ -
+   RECORDSIZE(640 1200) KEYS(28 0) SHR(3 3)) -
+  DATA  (NAME('&MCF2..DATA') -              
+   CISZ(8192)) -
+  INDEX (NAME('&MCF2..INDEX') -              
+   CISZ(2048))
+//*
+//*                                                                          
+//*  DEFINE DYNAMIC ENV AND CLONE SYSTEMS
+//*                                                                           
+//ADMIN    EXEC PGM=ENBE1000,ALTID=Y,                                         
+//         PARM='MSGS1(CUSTMSG1),MSGS2(CUSTMSG2),SCLIN(CUSTSCL)'              
+//CUSTMSG1 DD DSN=&&BAMSG1,DISP=(SHR,PASS)                                    
+//CUSTMSG2 DD DSN=&&BAMSG2,DISP=(SHR,PASS)                                                         
+//CUSTSCL  DD *                                                               
+   DEFINE ENVIRONMENT '&C1ELEMENT'                                    
+   TITLE 'DYNAMIC DEVELOPMENT ENVIRONMENT &C1ELEMENT'
+   STAGE ONE MCF '&MCF1'
+   STAGE TWO MCF '&MCF2'
+   LIKE &C1ENVMNT                    
+     NEXT ENVIRONMENT &C1ENVMNT                                               
+   .                                                                          
+   CLONE SYSTEM *
+     FROM ENVIRONMENT &C1ENVMNT
+     TO ENVIRONMENT &C1ELEMENT
+     INCLUDE SUBSYSTEMS
+     INCLUDE TYPES
+   .                                                                          
+/*                                                                            
+//CONLIST  EXEC PGM=CONLIST,PARM=STORE,MAXRC=0,COND=EVEN        
+//C1LLIBO  DD   DSN=BST.ENDTEST2.ENVS.LISTLIB,               
+//         DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE                        
+//C1BANNER DD   UNIT=&VIO,SPACE=(TRK,(1,1)),                                  
+//         DCB=(RECFM=FBA,LRECL=121,BLKSIZE=6171,DSORG=PS)                    
+//LIST01   DD   DSN=&&IDMSGS,DISP=(OLD,DELETE)                                
+//LIST02   DD   DSN=&&BAMSG1,DISP=(OLD,DELETE)                                
+//LIST03   DD   DSN=&&BAMSG2,DISP=(OLD,DELETE)                                
+//LIST04   DD   DSN=&&ESITR,DISP=(OLD,DELETE)                                 
