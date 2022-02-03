@@ -1,6 +1,6 @@
 //*-------------------------------------------------------------------*         
 //* DDYNENV                                                                     
-//*         GENERATE DYNAMIC ENVIRONMENT                                        
+//*         DELETE DYNAMIC ENVIRONMENT                                        
 //*-------------------------------------------------------------------*         
 //DDYNENV PROC DEFINE=Y,                                                        
 //        HLQ='ALC.MOTM.ALCTEST.VSAMRLS',                                       
