@@ -9,6 +9,9 @@ Alternatively, you can select from the use cases below:
 ## Endevor - Automated Test Facility for Batch Applications
 This [sample repository](endevor/Automated-Test-Facility-for-Batch-Applications) contains artifacts described in the [How to Leverage Endevor Processors to Test Batch Applications](https://medium.com/modern-mainframe/how-to-leverage-endevor-processors-to-test-batch-applications-6247a9dfdafa) blog on Medium.  The objects are for using Endevor processors in Building an Automated Test Facility for Batch Applications in Endevor.
 
+## Endevor - Self-servicing Project Workareas in Endevor with Dynamic Environments
+This [sample repository](endevor/Self-servicing-Project-Workareas-in-Endevor-with-Dynamic-Environments) contains artifacts described in the [Self-servicing Project Workareas in Endevor with Dynamic Environments](https://medium.com/@vaughn.marshall/self-servicing-project-workareas-in-endevor-with-dynamic-environments-dd18516ab760) blog on Medium.  The objects are sample processors for enabling self service with Dynamic Environments backed by Deferred File Creation.
+
 ## Endevor - Shipments for a Single-Destination
 This [sample repository](endevor/Shipments-for-a-Single-Destination) contains artifacts described in the [Automate Endevor Package Shipments with Zowe CLI](https://medium.com/zowe/automate-ca-endevor-package-shipments-with-zowe-cli-e15feb61745a) blog on Medium.  The objects are used to initiate package shipments for an Endevor image that has only one Shipment destination.  The installation steps are fewer and simpler than those necessary for Shipments-for-Multiple-Destinations.
 
