@@ -1,0 +1,16 @@
+#pragma pack(packed)                                                            
+                                                                                
+struct emlxtrpl {                                                               
+  void          *emxtr___userid___len; /* ADDR INPUT USERID LENGTH        */    
+  void          *emxtr___userid;       /* ADDR INPUT USERID               */    
+  void          *emxtr___email___len;  /* ADDR RESPONSE EMAIL AREA LENGTH */    
+  void          *emxtr___email;        /* ADDR RESPONSE EMAIL             */    
+  void          *emxtr___safrc;        /* ADDR RESPONSE SAF RC            */    
+  void          *emxtr___racfrc;       /* ADDR RESPONSE RACF RC           */    
+  void          *emxtr___racfrsn;      /* ADDR RESPONSE RACF RSN          */    
+  };                                                                            
+                                                                                
+/* Values for field "emxtr___racfrsn" */                                        
+#define emlxtrpl___length 0x38                                                  
+                                                                                
+#pragma pack(reset)                                                             

@@ -1,0 +1,109 @@
+spring:
+    application:
+        name:  ${apiml.service.serviceId}
+    output:
+        ansi:
+            enabled: always
+logging:
+    level:
+        ROOT: INFO
+        org.springframework: INFO
+        org.apache: DEBUG
+server:
+    port: 8080
+    servlet:
+        context-path: /email-app
+    ssl:
+        #enabled: false
+        protocol: TLSv1.2
+        enabled-protocols: TLSv1.2
+        ciphers: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+        keyStoreType: PKCS12
+        trustStoreType: PKCS12
+        keyAlias: localhost
+        keyPassword: password
+        keyStore: C:/zowe/share/apiml-xe69/keystore/localhost/localhost.keystore.p12
+        keyStorePassword: password
+        trustStore: C:/zowe/share/apiml-xe69/keystore/localhost/localhost.truststore.p12
+        trustStorePassword: password
+
+apiml:
+    enabled: true                           # Decision if the service should automatically register with API ML discovery service
+    enableUrlEncodedCharacters: true        # Decision if the service requests the API ML GW to receive encoded characters in the URL
+    service:                                # The root of API ML onboarding configuration
+
+        serviceId: email-app      # The symbolic name of the service
+        title: Email Lookup Application 
+        description: This application provides the api for email lookup # API service description
+
+        scheme: https
+        hostname: localhost                           # hostname can be externalized by specifying -Dapiml.service.hostname command line parameter
+        port: 8080                                               # port can be externalized by specifying -Dapiml.service.port command line parameter
+
+        #baseUrl: https://localhost:1011
+        baseUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}
+        contextPath: /${apiml.service.serviceId}      # By default the contextPath is set to be the same as apiml.service.serviceId, but doesn't have to be the same
+
+        homePageRelativeUrl: ${apiml.service.contextPath}
+        statusPageRelativeUrl: ${apiml.service.contextPath}/application/info
+        healthCheckRelativeUrl: ${apiml.service.contextPath}/application/health
+
+        discoveryServiceUrls: https://localhost:10011/eureka # discoveryServiceUrlscan be externalized by specifying -Dapiml.service.discoveryServiceUrls command line parameter
+
+        routes:
+            -   gateway-url: "ui/v1"
+                service-url: ${apiml.service.contextPath}
+            -   gateway-url: "api/v1"
+                service-url: ${apiml.service.contextPath}/api/v1
+            -   gateway-url: "ws/v1"
+                service-url: ${apiml.service.contextPath}/ws
+
+        authentication:
+            scheme: httpBasicPassTicket
+            applid: ZOWEAPPL
+
+        apiInfo:
+            -   apiId: com.example.email
+                version: 1.0.0
+                gatewayUrl: api/v1
+                swaggerUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}${apiml.service.contextPath}/api-doc
+                documentationUrl: https://www.zowe.org
+            -   apiId: com.example.email.email-service
+                version: 2.0.0
+                gatewayUrl: api/v2
+                swaggerUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}${apiml.service.contextPath}/api-doc?group=apiv2
+                documentationUrl: https://www.zowe.org
+
+        catalog:
+            tile:
+                id: email-app                                     # Provide ID for your service Catalog tile
+                title: Email Lookup Application 
+                description: This application provide email lookup functionality.
+                version: 1.0.1
+
+        ssl:
+            ## This part configures the http client that connects to Discovery Service. You might reuse your server.ssl.xxx properties that configure your application's servlet.
+            #enabled: true
+            #verifySslCertificatesOfServices: true
+            protocol: TLSv1.2
+            enabled-protocols: TLSv1.2
+            keyStoreType: PKCS12
+            trustStoreType: PKCS12
+
+            ### DEFINE FOLLOWING PROPERTIES IN EXTERNAL CONFIGURATION
+            ciphers: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+            #keyStoreType: PKCS12
+            #StrustStoreType: PKCS12
+            keyAlias: localhost
+            keyPassword: password
+            keyStore: C:/zowe/share/apiml-xe69/keystore/localhost/localhost.keystore.p12
+            keyStorePassword: password
+            trustStore: C:/zowe/share/apiml-xe69/keystore/localhost/localhost.truststore.p12
+            trustStorePassword: password       
+        # Optional metadata section
+        customMetadata:
+            yourqualifier:
+                key1: value1
+                key2: value2
+
+       

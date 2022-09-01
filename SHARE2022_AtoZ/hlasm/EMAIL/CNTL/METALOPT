@@ -1,0 +1,16 @@
+METAL                                                                   00010000
+LIST                                                                    00011000
+SOURCE                                                                  00012000
+SHOWMACRO                                                               00013000
+SS                                                                      00014000
+NOSE                                                                    00015000
+OPTIMIZE(0)                                                             00016000
+INLINE                                                                  00017000
+INLR                                                                    00018000
+ARCH(5)                                                                 00019000
+LANGLVL(EXTENDED)                                                       00020000
+SKIPS(HIDE)                                                             00030000
+SE(/usr/include/metal/)                                                 00040000
+SE(DD:USERLIB)                                                          00050000
+GENASM                                                                  00060000
+strict                                                                  00070000

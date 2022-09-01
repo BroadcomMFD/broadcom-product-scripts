@@ -1,0 +1,19 @@
+//*===========
+//*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//*Broadcom Inc. corporate affiliate that distributes this software.
+//*===========
+//LINKA    JOB (000000000),'OS/MVS',MSGCLASS=X,MSGLEVEL=(1,1),          00010000
+//         NOTIFY=IBMUSER,TIME=1439,REGION=4096K                        00020000
+//LINK     EXEC PGM=IEWL,PARM='LIST,LET,XREF,RENT,NCAL'                 01580000
+//SYSLMOD  DD DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.LOADLIB                 01590000
+//SYSPRINT DD SYSOUT=*                                                  01600000
+//OBJMOD   DD DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.OBJ                     01610000
+//SYSUT1   DD UNIT=VIO,SPACE=(1700,(1200,300))                          01620000
+//SYSLIN   DD *                                                         01630000
+  ORDER   MTLCMAIL                                                      01640000
+  INCLUDE OBJMOD(GETEMAIL)                                              01650000
+  INCLUDE OBJMOD(MTLCMAIL)                                              01651000
+  MODE    RMODE(ANY),AMODE(64)                                          01660000
+  ENTRY   MTLCMAIL                                                      01670000
+  NAME    MTLCMAIL(R)                                                   01680000
+//                                                                      01690000

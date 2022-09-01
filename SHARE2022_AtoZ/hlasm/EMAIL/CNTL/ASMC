@@ -1,0 +1,19 @@
+//*===========
+//*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//*Broadcom Inc. corporate affiliate that distributes this software.
+//*===========
+//ASMC     JOB (000000000),'OS/MVS',MSGCLASS=X,MSGLEVEL=(1,1),          00001000
+//         NOTIFY=IBMUSER,TIME=1439,REGION=0M,CLASS=C                   00002000
+//*                                                                     00003000
+//  JCLLIB ORDER=(IBMUSER.PUBLIC.EMAIL.CNTL)                            00004000
+//*                                                                     00004100
+//STEP1    EXEC PGM=IEBCOPY,REGION=4096K                                00004200
+//SYSPRINT DD   SYSOUT=*                                                00004300
+//INPUT    DD   DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.C.GENASM              00004400
+//OUTPUT   DD   DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.C.GENASM              00004500
+//SYSIN    DD   *                                                       00004600
+  COPY OUTDD=OUTPUT,INDD=INPUT                                          00004700
+//*                                                                     00004800
+//ASM01    EXEC ASMMETC,MEMBER=MTLCMAIL,                                00004900
+//         AMODE=LP64                                                   00005000
+//*                                                                     00006000

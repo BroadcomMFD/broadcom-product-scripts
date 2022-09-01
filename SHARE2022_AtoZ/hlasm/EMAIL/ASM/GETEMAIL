@@ -1,0 +1,203 @@
+//*===========
+//*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//*Broadcom Inc. corporate affiliate that distributes this software.
+//*===========
+//GETEMIL  JOB (000000000),'OS/MVS',MSGCLASS=X,MSGLEVEL=(1,1),          00010000
+//         NOTIFY=IBMUSER,TIME=1439,REGION=4096K                        00020000
+//ASM      EXEC PGM=ASMA90,PARM='DECK,RENT'                             00030000
+//SYSLIB   DD  DISP=SHR,DSN=SYS1.MACLIB                                 00040000
+//         DD  DISP=SHR,DSN=SYS1.MODGEN                                 00050000
+//         DD  DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.MACS                   00070000
+//SYSUT1   DD  UNIT=VIO,SPACE=(1700,(1200,300))                         00080000
+//SYSUT2   DD  UNIT=VIO,SPACE=(1700,(1200,300))                         00090000
+//SYSUT3   DD  UNIT=VIO,SPACE=(1700,(1200,300))                         00100000
+//SYSPRINT DD  DSN=IBMUSER.PUBLIC.EMAIL.ASM.LIST(GETEMAIL),DISP=SHR     00110000
+//*YSPRINT DD  SYSOUT=*                                                 00120000
+//SYSLIN   DD  DUMMY                                                    00130000
+//SYSPUNCH DD  DSN=IBMUSER.PUBLIC.EMAIL.OBJ(GETEMAIL),DISP=SHR          00140000
+//SYSIN    DD  *                                                        00150000
+         TITLE ' - EMAIL LOOKUP USING CALLABLE SERVICE'                 00160000
+*PROCESS RENT                                                           00170000
+************************************************************            00180000
+*                                                                       00190000
+*  FUNCTION: GET EMAIL                                                  00200000
+*                                                                       00210000
+*  INVOKE THE IBM RACF IRRSIM00 SERVICE TO RETRIEVE THE                 00220000
+*  EMAIL OF AN USER FROM THE ESM                                        00230000
+*                                                                       00240000
+*  INPUT:                                                               00250000
+*                                                                       00260000
+*     R1  -> AD(EMLXTRPL)                                               00270000
+*                                                                       00280000
+*  OUTPUT:                                                              00290000
+*                                                                       00300000
+*     R15 -> IRRSIM00 RETURN CODE                                       00310000
+*                                                                       00320000
+************************************************************            00330000
+         EJECT                                                          00340000
+         YREGS                                                          00350000
+         EJECT                                                          00360000
+         EMLXTRPL                                                       00370000
+         EJECT                                                          00380000
+*                                                                       00390000
+* DEFINITIONS                                                           00400000
+*                                                                       00410000
+WORKAREA DSECT ,                                                        00420000
+SAVE     DS    18F                       OS LINKAGE SAVEAREA            00430000
+ALET     DS    F                         ALET                           00440000
+MODADDR  DS    A                         IRRSIM00 ADDRESS               00450000
+SAFRC    DS    F                         SAF  RETURN CODE               00460000
+RACFRC   DS    F                         RACF RETURN CODE               00470000
+RACFRSN  DS    F                         RACF REASON CODE               00480000
+ADMNFUNC DS    XL2                       FUNCTION CODE                  00490000
+USERID   DS    0XL9                      USERID PARM AREA               00500000
+USER_LEN DS    X                         ACTUAL LENGTH OF USERID        00510000
+USER_NM  DS    CL8                       USERID NAME                    00520000
+OPTWORD  DS    F                                                        00530000
+CERT     DS    CL4                                                      00540000
+EMAIL    DS    CL248                     AREA FOR RESPONSE EMAIL VALUE  00550000
+DN       DS    CL3                                                      00560000
+REGISTRY DS    CL3                                                      00570000
+         DS    0D                                                       00580000
+WTOWRK   DS    XL(WTOML)                 AREA FOR WTO                   00590000
+         DS    0D                                                       00600000
+IRRWRK   DS    XL1024                    IRRSIM00 WORKAREA              00610000
+PCOMP    DS    XL2048                    AREA FOR IRRSIM00 PCOMP PLIST  00620000
+         DS    0D                                                       00630000
+WORKLEN  EQU   *-WORKAREA                LENGTH OF WORKAREA             00640000
+         TITLE 'MAIN ROUTINE'                                           00650000
+         SYSSTATE ARCHLVL=2                                             00660000
+GETEMAIL RSECT                                                          00670000
+GETEMAIL RMODE ANY                                                      00680000
+GETEMAIL AMODE 64                                                       00690000
+         BSM   R14,0                     GET CALLER'S AMODE             00700000
+         BAKR  R14,0                     SAVE ENVIRONMENT               00710000
+*                                                                       00720000
+         SAM31                           SWITCH TO AMODE31              00730000
+         LARL  R12,GETEMAIL              GET ADDRESSABILITY             00740000
+         USING GETEMAIL,R12              ADDRESSABILITY                 00750000
+         LG    R10,0(,R1)                GET EMLXTRPL PLIST             00760000
+         USING EMLXTRPL,R10                                             00770000
+*                                                                       00780000
+         STORAGE OBTAIN,                                               +00790000
+               SP=0,                                                   +00800000
+               LENGTH=WORKLEN,                                         +00810000
+               CHECKZERO=YES                                            00820000
+*                                                                       00830000
+         LR    R13,R1                    SAVE WA ADDRESS                00840000
+         CHI   R15,20                    SYSTEM CLEARED STORAGE?        00850000
+         JE    SKIPCLR                   YES, SLIP CLEAR                00860000
+*                                                                       00870000
+         LR    R0,R1                     ADDRESS FOR CLEAR              00880000
+         LA    R1,WORKLEN                LENGTH TO CLEAR                00890000
+         SR    R15,R15                   PREPARE FOR CLEAR              00900000
+         MVCL  R0,R14                    CLEAR WORKAREA                 00910000
+*                                                                       00920000
+SKIPCLR  DS    0H                                                       00930000
+         USING WORKAREA,R13              ADDRESSABILITY                 00940000
+         EJECT                                                          00950000
+*                                                                       00960000
+         MVC   ADMNFUNC,=AL2(9)          SET FUNCTION = RETURN EMAIL    00970000
+         LG    R15,EMXTR_USERID_LEN      GET POINTER TO USERID LENGTH   00980000
+         LLGF  R15,0(,R15)               GET USERID LENGTH              00990000
+         STC   R15,USER_LEN              SET IN PLIST AREA              01000000
+         LG    R14,EMXTR_USERID          GET POINTER TO USERID          01010000
+         AHI   R15,-1                    PREPARE FOR EXECUTE            01020000
+         EX    R15,*+4                   COPY THE USERID                01030000
+         MVC   USER_NM(*-*),0(R14)                                      01040000
+         MVC   ALET,=A(0)                SET ALET TO HOME               01050000
+         MVC   EMAIL(2),=AL2(L'EMAIL-2)  AREA FOR EMAIL                 01060000
+         MVC   CERT(2),=AL2(0)           AREA FOR CERT                  01070000
+         MVC   DN(2),=AL2(0)             AREA FOR DN                    01080000
+         MVC   REGISTRY(2),=AL2(0)       AREA FOR REGISTRY              01090000
+*                                                                       01100000
+         LOAD  EP=IRRSIM00               LOAD R_USERMAP ROUTINE         01110000
+         ST    R0,MODADDR                GRAB RTN ADDRESS               01120000
+         L     R15,MODADDR               GET ROUTINE ADDR               01130000
+         EJECT                                                          01131000
+*                                                                       01140000
+         CALL  (15),                                                   X01150000
+               (IRRWRK,                  POINT TO R_ADMIN PARMS        X01160000
+               ALET,SAFRC,                                             X01170000
+               ALET,RACFRC,                                            X01180000
+               ALET,RACFRSN,                                           X01190000
+               ALET,ADMNFUNC,            FUNCTION                      X01200000
+               OPTWORD,                  FUNCTION PLIST                X01210000
+               USERID,                   USERID@                       X01220000
+               CERT,                     ACEEP@                        X01230000
+               EMAIL,                    EMAIL                         X01240000
+               DN,                       DN                            X01250000
+               REGISTRY),                REGISTRY                      X01260000
+               MF=(E,PCOMP),VL                                          01270000
+         EJECT                                                          01280000
+*                                                                       01290000
+         LR    R2,R15                    SAVE FUNCTION RC               01300000
+*                                                                       01320000
+         LG    R15,EMXTR_SAFRC           GET SAF RC ADDRESS             01330000
+         MVC   0(4,R15),SAFRC            COPY SAF RC                    01331000
+         LG    R15,EMXTR_RACFRC          GET RACF RC ADDRESS            01340000
+         MVC   0(4,R15),RACFRC           COPY RACF RC                   01350000
+         LG    R15,EMXTR_RACFRSN         GET RACF RSN ADDRESS           01360000
+         MVC   0(4,R15),RACFRSN          COPY RACF RSN                  01370000
+         LT    R15,SAFRC                 SUCCESS?                       01373000
+         JNZ   REQ_FAIL                  NO, SKIP COPYING EMAIL         01374000
+*                                                                       01380000
+         LH    R15,EMAIL                 GET LENGTH OF EMAIL            01390000
+         OILH  R15,X'4000'               SET PADDING TO BLANKS          01400000
+         LA    R14,EMAIL+2               POINT AT EMAIL VALUE           01410000
+         LG    R1,EMXTR_EMAIL_LEN        GET RESP EMAIL LENGTH ADDR     01420000
+         LLGF  R1,0(,R1)                 GET ACTUAL RESP AREA LENGTH    01430000
+         LG    R0,EMXTR_EMAIL            GET RESP EMAIL ADDRESS         01440000
+         MVCL  R0,R14                    COPY EMAIL VALUE               01450000
+*                                                                       01460000
+         LH    R14,EMAIL                 GET EMAIL LENGTH               01470000
+         LG    R15,EMXTR_EMAIL_LEN       GET RESP EMAIL LENGTH ADDR     01480000
+         ST    R14,0(,R15)               COPY EMAIL LENGTH              01490000
+         EJECT                                                          01500000
+*                                                                       01510000
+         WTO   'EMAIL ADDRESS',ROUTCDE=(11),DESC=(6)                    01520000
+*                                                                       01530000
+         MVC   WTOWRK(L'WTOWRK),WTOM     COPY MODEL                     01540000
+         LH    R15,WTOWRK                GET TEXT MSG AREA LENG         01550000
+         OILH  R15,X'4000'               SET PADDING TO BLANKS          01560000
+         LA    R14,EMAIL+2               SET SOURCE                     01570000
+         LH    R1,EMAIL                  GET TARGET LENGTH              01580000
+         LA    R0,WTOWRK+4               SET TARGET ADDRESS             01590000
+         MVCL  R0,R14                    COPY TEXT                      01600000
+*                                                                       01610000
+         WTO   MF=(E,WTOWRK)                                            01620000
+*                                                                       01630000
+         WTO   'BLANKZ',ROUTCDE=(11),DESC=(6)                           01640000
+         J     EXIT                                                             
+*                                                                       01650000
+REQ_FAIL DS    0H                                                               
+         WTO   'REQUEST FAILED'                                         01651000
+                                                                                
+*                                                                       01680000
+*--------------------------------------------------------------         01690000
+* RETURN TO THE CALLER                                                  01700000
+*--------------------------------------------------------------         01710000
+*                                                                       01720000
+EXIT     DS    0H                                                       01730000
+         DELETE EP=IRRSIM00              DELETE LOAD MODULE             01660000
+         EJECT                                                          01670000
+                                                                                
+         STORAGE RELEASE,                                              +01740000
+               ADDR=(R13),                                             +01750000
+               LENGTH=WORKLEN,                                         +01760000
+               SP=0                                                     01770000
+*                                                                       01780000
+         LR    R15,R2                    RESTORE RC                     01790000
+         PR                              RETURN TO CALLER               01800000
+         EJECT                                                          01810000
+         LTORG                                                          01820000
+*                                                                       01830000
+WTOM     WTO   '                                                     ',X01840000
+               ROUTCDE=(11),DESC=(6),MF=L                               01850000
+WTOML    EQU   *-WTOM                                                   01860000
+*                                                                       01870000
+BLANKZ   DC    AL2(L'TEST)                                              01880000
+TEST     DC    C'ABCDEFGHIJKL'                                          01890000
+LT_USER  DC    AL1(8)              <---                                 01900000
+         DC    C'IBMUSER '                                              01910000
+         END   GETEMAIL                                                 01920000

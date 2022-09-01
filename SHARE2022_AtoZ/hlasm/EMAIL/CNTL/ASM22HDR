@@ -1,0 +1,28 @@
+//*===========
+//*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//*Broadcom Inc. corporate affiliate that distributes this software.
+//*===========
+//ASM22HDR JOB (000000000),ASM2HDR,CLASS=B,MSGCLASS=X,NOTIFY=&SYSUID           
+//*                                                                             
+// SET DPARM='EQU(BIT,DEF),BITF0XL,LOC(EN_US.IBM-1047),LP64,UNIQUE'             
+//*                                                                             
+//ASSEMBLE EXEC PGM=ASMA90,                                                     
+//         PARM='ADATA,LIST(133),GOFF,TERM,NODECK,NOOBJECT'                     
+//SYSLIB   DD DISP=SHR,DSN=SYS1.MACLIB                                          
+//         DD DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.MACS                            
+//SYSADATA DD DSN=&&ADATA,DISP=(NEW,PASS),                                      
+//         SPACE=(32000,(30,30)),DCB=(RECFM=VB,LRECL=8144,BLKSIZE=8192)         
+//SYSPUNCH DD DUMMY                                                             
+//SYSLIN   DD DUMMY                                                             
+//SYSTERM  DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD *                                                                 
+         EMLXTRPL  ,                                                            
+         END   ,                                                                
+//*                                                                             
+//DSECTGEN EXEC PGM=CCNEDSCT,PARM='&DPARM'                                      
+//STEPLIB  DD DISP=SHR,DSN=CBC.SCCNCMP                                          
+//SYSADATA DD DSN=*.ASSEMBLE.SYSADATA,DISP=(OLD,PASS)                           
+//SYSOUT   DD SYSOUT=*                                                          
+//SYSP2INT DD SYSOUT=*                                                          
+//EDCDSECT DD DISP=SHR,DSN=IBMUSER.PUBLIC.EMAIL.C.CHDSECT(EMLXTRPL)             

@@ -1,0 +1,133 @@
+//*===========
+//*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//*Broadcom Inc. corporate affiliate that distributes this software.
+//*===========
+//GEMLCLG  JOB (000000000),'OS/MVS',MSGCLASS=X,MSGLEVEL=(1,1),                  
+//         NOTIFY=IBMUSER,TIME=1439,REGION=4096K                                
+//*********************************************************************         
+//STEP1   EXEC HLASMCLG,                                                        
+//             PARM.C='OBJECT,NODECK',                                          
+//             COND.L=(0,NE,C),                                                 
+//             COND.G=((0,NE,C),(0,NE,L))                                       
+//SYSLIB   DD  DISP=SHR,DSN=SYS1.MACLIB                                         
+//         DD  DISP=SHR,DSN=SYS1.MODGEN                                                      
+//G.SYSUDUMP DD SYSOUT=*                                                        
+//G.CAOESTOP DD DUMMY                                                           
+//G.SNAPDUMP DD SYSOUT=*                                                        
+//G.SYSPRINT DD SYSOUT=*                                                        
+//C.SYSIN    DD  *                                                              
+EMAILFIL TITLE ' - EMAIL LOOKUP USING CALLABLE SERVICE'                           
+GETEMAIL  CSECT                                                                 
+GETEMAIL  RMODE ANY                                                             
+GETEMAIL  AMODE 31                                                              
+         STM   R14,R12,12(R13)           SAVE CALLER'S REGS                     
+         LR    R12,R15                   GET ENTRY ADDRESS                      
+         LR    R10,R1                    SAVE PARMS                                                
+         USING GETEMAIL,R12              ADDRESSABILITY                         
+                                                                                
+         STORAGE OBTAIN,SP=0,LENGTH=WORKLEN                                     
+         LR    R2,R1                     SAVE WA address                        
+         LR    R0,R1                     Address for Clear                      
+         LA    R1,WORKLEN                Length to clear                        
+         SR    R15,R15                   Prepare for clear                      
+         MVCL  R0,R14                    Clear workarea                         
+         ST    R2,8(,R13)                Set forward link                       
+         ST    R13,4(,R2)                Set backwork link                      
+         LR    R13,R2                    Address of workarea                    
+         USING WORKAREA,R13              Addressability                         
+*        *-------------------------------------------------------------         
+*        * Main processing logic                                                
+*        *-------------------------------------------------------------         
+*        Load the module - IRRSIM00                                             
+         MVC   ADMNFUNC,=X'0009'                                                
+         MVC   RACFUSER,USERID                                                  
+         MVC   CERT(2),=AL2(0)                                                  
+         MVC   EMAIL(2),=AL2(L'EMAIL-2)  Area for EMAIL                         
+         MVC   DN(2),=AL2(0)             Area for DN                            
+         MVC   REGISTRY(2),=AL2(0)       Area for Registry                      
+*                                                                               
+*                                                                               
+         LOAD  EP=IRRSIM00                      Load R_usermap routine              
+         ST    R0,SEQMOD                        Grab rtn address from           
+         L     R15,SEQMOD     Get routine addr                                  
+*                                                                               
+*Call R_usermap                                                                     
+         CALL  (15),                                                   X        
+               (IRRWRK,                         R_usermap parms        X        
+               ALET,SAFRC,                                             X        
+               ALET,RACRC,                                             X        
+               ALET,RACRSN,                                            X        
+               ALET,ADMNFUNC,                   function               X        
+               OPTWORD,                         function plist         X        
+               RACFUSER,                        userid@                X        
+               CERT,                            aceep@                 X        
+               EMAIL,                           Email                  X        
+               DN,                              DN                     X        
+               REGISTRY),                       Registry               X        
+               MF=(E,PCOMP),VL                                                  
+*                                                                               
+         WTO   'EMAIL ADDRESS'                                                  
+         LA    5,EMAIL             Copy Email to register 5                     
+         WTO   TEXT=(5)            WTO the email address.                       
+         WTO   'BLANKZ'                                                         
+         LA    5,BLANKZ            Copy Email to register 5                     
+         WTO   TEXT=(5)            WTO BLANKZ                                   
+*                                                                               
+         LTR   15,15          CHECK RC FROM WTO                                 
+         BNZ   RADM_RC00      <>0 WTO RC RETURNED TO CALLER                     
+         B     RADM_RC00      <>0 WTO RC RETURNED TO CALLER                     
+*                                                                               
+*--------------------------------------------------------------                 
+* Good return                                                                   
+*--------------------------------------------------------------                 
+*                                                                               
+RADM_RC00  DC  0H                                                               
+         XR    R15,R15        Clear RC                                          
+         B     EXIT                                                             
+*                                                                               
+*--------------------------------------------------------------                 
+* Bad return                                                                    
+*--------------------------------------------------------------                 
+*                                                                               
+RADM_RC04  DS  0H                                                               
+         LA    R15,4          Set RC                                            
+         B     EXIT                                                             
+*                                                                               
+*--------------------------------------------------------------                 
+* Return to the caller                                                          
+*--------------------------------------------------------------                 
+*                                                                               
+***************OS TERMINATION                                                   
+EXIT     L     13,SAVE+4                                                        
+*                                                                               
+         STORAGE RELEASE,ADDR=(R2),LENGTH=WORKLEN,SP=0                          
+         DELETE EP=IRRSIM00              DELETE LOAD MODULE                     
+*                                                                               
+         RETURN (14,12),RC=0                                                    
+*                                                                               
+BLANKZ   DC AL2(L'TEST)                                                         
+TEST     DC C'ABCDEFGHIJKL'                                                     
+USERID   DC AL1(8)                                                              
+USER     DC C'IBMUSER '                                                         
+         YREGS                                                                  
+         LTORG                                                                  
+*                                                                               
+* Definitions                                                                   
+WORKAREA DSECT ,                                                                
+SAVE     DC    18F'0'                                                           
+ALET     DC    F'0'                                                             
+SEQMOD   DS    A                   IRRSIM00 address                             
+IRRWRK   DS    XL1024              work buffer                                  
+SAFRC    DS    F                   SAF  return code                             
+RACRC    DS    F                   RACF return code                             
+RACRSN   DS    F                   RACF reason code                             
+ADMNFUNC DS    X'0009'             Function code                                
+RACFUSER DS    CL9                                                              
+OPTWORD  DS    F                                                                
+CERT     DS    CL4                                                              
+EMAIL    DS    CL250                                                            
+DN       DS    CL3                                                              
+REGISTRY DS    CL3                                                              
+PCOMP    DS    XL2046                                                           
+WORKLEN  EQU   *-WORKAREA        Length of workarea                             
+         END   GETEMAIL                                                         
