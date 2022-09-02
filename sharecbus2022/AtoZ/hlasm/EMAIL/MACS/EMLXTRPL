@@ -1,3 +1,7 @@
+.*===========                                                        
+.*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+.*Broadcom Inc. corporate affiliate that distributes this software.
+.*===========
          MACRO                                                          00010000
          EMLXTRPL &DSECT=YES                                            00020000
 .*                                                                      00030000

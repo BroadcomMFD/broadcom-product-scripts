@@ -1,3 +1,7 @@
+//===========
+//Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//Broadcom Inc. corporate affiliate that distributes this software.
+//===========
 package org.zowe.apiml;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;

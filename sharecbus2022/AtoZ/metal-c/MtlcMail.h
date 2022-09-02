@@ -1,3 +1,7 @@
+//===========
+//Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+//Broadcom Inc. corporate affiliate that distributes this software.
+//===========
 #ifndef MTLCMAIL_H
 #define MTLCMAIL_H
 
