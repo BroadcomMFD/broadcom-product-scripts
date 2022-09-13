@@ -27,5 +27,8 @@ This [sample repository](gen/gen-whitepaper-sample) contains the artifacts descr
 ## Test4z
 The [Test4z sample project](https://github.com/BroadcomMFD/test4z) contains client-side installation of Test4z as well as a series of sample tests that use the Test4z API to run tests on data sets on your z/OS system. Test4z leverages z/OSMF and Zowe to facilitate batch application testing for flat files on the z/OS platform. Installing Test4z on your z/OS system lets you perform certain operations on your data sets from a client machine.
 
+## AtoZ
+The [AtoZ sample project](https://github.com/BroadcomMFD/sharecbus2022/AtoZ) contains the source code presented during the session titled "Mainframe Modernization All the Way from A(ssembler) to Z(owe)" by John Mathunny and John Jakacki on August 22, 2022 at SHARE Columbus 2022.
+
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
