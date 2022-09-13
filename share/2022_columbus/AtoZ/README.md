@@ -1,5 +1,5 @@
 # Share Columbus 2022 - Mainframe Modernization All the Way from A(ssembler) to Z(owe):-
-This repository contains the source code presented during the session 
+This repository contains the sample code presented during the session 
 "Mainframe Modernization All the Way from A(ssembler) to Z(owe)" 
 by John Mathunny and John Jakacki on August 22, 2022 
 at SHARE Columbus 2022.
