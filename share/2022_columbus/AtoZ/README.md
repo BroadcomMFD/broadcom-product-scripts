@@ -2,7 +2,7 @@
 This repository contains the sample code presented during the session 
 "Mainframe Modernization All the Way from A(ssembler) to Z(owe)" 
 by John Mathunny and John Jakacki on August 22, 2022 
-at SHARE Columbus 2022.
+at SHARE Columbus.
 
 ## High Level Assembler (HLASM) Sample
 This [hlasm](../hlasm) folder contains HLASM module that calls IBM R_Usermap service with metal c driver to search User's email address.
