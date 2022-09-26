@@ -1,0 +1,33 @@
+plugins {
+	id 'org.springframework.boot' version '2.7.2'
+	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+	id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+	maven { setUrl('https://zowe.jfrog.io/zowe/libs-release/') }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+	
+	implementation "org.zowe.apiml.sdk:onboarding-enabler-spring:2.3.3"
+	implementation "io.springfox:springfox-swagger2:2.7.0"
+	implementation 'io.swagger.core.v3:swagger-jaxrs2:2.0.0'
+	implementation "io.springfox:springfox-spring-web:2.7.0"
+
+	implementation "org.projectlombok:lombok:1.18.20"
+	annotationProcessor "org.projectlombok:lombok:1.18.20"
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+

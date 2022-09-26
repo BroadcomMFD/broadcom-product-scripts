@@ -1,0 +1,86 @@
+//*===========
+//*Copyright 2022 Broadcom.  The term “Broadcom” refers solely to the 
+//*Broadcom Inc. corporate affiliate that distributes this software.
+//*===========
+//********************************************************************          
+//                                                                              
+// Metal-C Email driver                                                         
+//                                                                              
+//********************************************************************          
+//                                                                              
+//********************************************************************          
+//                                                                              
+//                                                                              
+// Metal-C compile options: OPTIMIZE(0)                                         
+//                          ARCH(5)                                             
+//                          LP64                                                
+//                                                                              
+//********************************************************************          
+//                                                                              
+                                                                                
+#include <metal.h>                                                              
+#include <ctype.h>                                                              
+#include <math.h>                                                               
+#include <stdio.h>                                                              
+#include <stdlib.h>                                                             
+#include <stddef.h>                                                             
+#include <string.h>                                                             
+#include "emlxtrpl.h"                                                           
+                                                                                
+#pragma csect(CODE,   "MTLCMAIL")                                               
+                                                                                
+#pragma insert_asm(" YREGS ")                                                   
+                                                                                
+typedef struct                                                                  
+{                                                                               
+                                                                                
+  unsigned char   ident[8];                                                     
+  unsigned char   emlxtrpl[sizeof(struct emlxtrpl)];                            
+  unsigned char   userid[8];                                                    
+  unsigned int    userid_len;                                                   
+  unsigned char   email[246];                                                   
+  unsigned int    email_len;                                                    
+  unsigned int    saf_rc;                                                       
+  unsigned int    racf_rc;                                                      
+  unsigned int    racf_rsn;                                                     
+                                                                                
+} MW;                                                                           
+                                                                                
+int GETEMAIL(struct emlxtrpl * __ptr64) __attribute__((amode64));               
+                                                                                
+//********************************************************************          
+// Main routine                                                                 
+//********************************************************************          
+                                                                                
+int main( int argc, char **argv )                                               
+{                                                                               
+                                                                                
+  char SAF_USERID[8]   = "IBMUSER";                                             
+  char SAF_USERID_LEN  = 0x07;                                                  
+                                                                                
+  MW _mw;                                                                       
+                                                                                
+                                                                                
+  int req_rc = 0;                                                               
+  memcpy(_mw.ident, "mw_area ", 8);                                             
+                                                                                
+                                                                                
+                                                                                
+  struct emlxtrpl *_emlxtrpl = (struct emlxtrpl *) _mw.emlxtrpl;                
+  memcpy(_mw.userid, SAF_USERID, sizeof(SAF_USERID));                           
+  _emlxtrpl->emxtr___userid = (char *) &_mw.userid;                             
+  _mw.userid_len = SAF_USERID_LEN;                                              
+  _emlxtrpl->emxtr___userid___len = (char *) &_mw.userid_len;                   
+  _emlxtrpl->emxtr___email = (char *) &_mw.email;                               
+  _mw.email_len = sizeof(_mw.email);                                            
+  _emlxtrpl->emxtr___email___len = (char *) &_mw.email_len;                     
+  _emlxtrpl->emxtr___safrc = (char *) &_mw.saf_rc;                              
+  _emlxtrpl->emxtr___racfrc = (char *) &_mw.racf_rc;                            
+  _emlxtrpl->emxtr___racfrsn = (char *) &_mw.racf_rsn;                          
+                                                                                
+                                                                                
+  req_rc = GETEMAIL(_emlxtrpl);                                                 
+                                                                                
+  return req_rc;                                                                
+                                                                                
+}                                                                               

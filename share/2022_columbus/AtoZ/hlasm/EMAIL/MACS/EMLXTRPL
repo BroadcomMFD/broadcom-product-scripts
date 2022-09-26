@@ -1,0 +1,33 @@
+.*===========                                                        
+.*Copyright 2022 Broadcom.  The term "Broadcom" refers solely to the 
+.*Broadcom Inc. corporate affiliate that distributes this software.
+.*===========
+         MACRO                                                          00010000
+         EMLXTRPL &DSECT=YES                                            00020000
+.*                                                                      00030000
+.*-------------------------------------------------------------------*  00040000
+.*                                                                      00050000
+.*    EMAIL EXTRACT PLIST                                               00060000
+.*                                                                      00070000
+.*-------------------------------------------------------------------*  00080000
+.*                                                                      00090000
+         AIF   ('&DSECT' EQ 'YES').GENDS0                               00100000
+         AIF   ('&DSECT' EQ  'NO').GENID0                               00110000
+         MNOTE 8,'EMLXTRPL: ERROR, DSECT=&DSECT IS INVALID'             00120000
+         MEXIT                                                          00130000
+.GENDS0  ANOP                                                           00140000
+EMLXTRPL           DSECT                                                00150000
+         AGO   .GENOK0                                                  00160000
+.*                                                                      00170000
+.GENID0  ANOP                                                           00180000
+EMLXTRPL           DS    0D                                             00190000
+.GENOK0  ANOP                                                           00200000
+EMXTR_USERID_LEN   DS    AD            ADDR INPUT USERID LENGTH         00210000
+EMXTR_USERID       DS    AD            ADDR INPUT USERID                00220000
+EMXTR_EMAIL_LEN    DS    AD            ADDR RESPONSE EMAIL AREA LENGTH  00230000
+EMXTR_EMAIL        DS    AD            ADDR RESPONSE EMAIL              00240000
+EMXTR_SAFRC        DS    AD            ADDR RESPONSE SAF RC             00250000
+EMXTR_RACFRC       DS    AD            ADDR RESPONSE RACF RC            00260000
+EMXTR_RACFRSN      DS    AD            ADDR RESPONSE RACF RSN           00270000
+EMLXTRPL_LENGTH    EQU   *-EMLXTRPL                                     00280000
+                        MEND                                            00290000
