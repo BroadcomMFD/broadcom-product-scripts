@@ -1,4 +1,4 @@
-# Web Viewer - Basic API Operations Sample - Java
+# Web Viewer - Basic API Operations Sample
 
 ## Overview
 
