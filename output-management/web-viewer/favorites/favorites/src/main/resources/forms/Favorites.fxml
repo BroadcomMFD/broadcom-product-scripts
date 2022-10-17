@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane fx:id="root" minWidth="280" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.broadcom.msd.om.sample.favorites.controllers.Favorites">
+  <GridPane hgap="5.0" vgap="5.0">
+    <Label alignment="CENTER_RIGHT" text="Favorites:" textAlignment="RIGHT" GridPane.halignment="RIGHT" />
+    <ComboBox fx:id="listControl" disable="true" prefWidth="240.0" GridPane.columnIndex="1" />
+
+    <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+      <Button fx:id="executeControl" disable="true" onAction="#executeFavorite" text="E_xecute" />
+      <Button fx:id="editControl"    disable="true" onAction="#editFavorite" text="_Edit" />
+      <Button fx:id="deleteControl"  disable="true" onAction="#deleteFavorite" text="_Delete" />
+    </HBox>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+
+    <Button onAction="#createFavorite" text="Create _New Favorite" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
+    <Button onAction="#exit" cancelButton="true" mnemonicParsing="false" text="Exit" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+
+    <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" prefWidth="80.0" />
+      <ColumnConstraints hgrow="SOMETIMES" />
+    </columnConstraints>
+
+    <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+
+    <rowConstraints>
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+    </rowConstraints>
+  </GridPane>
+</StackPane>

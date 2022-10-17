@@ -1,0 +1,5 @@
+groupId: com.broadcom.msd.om.sample.favorites
+artifactId: sdk
+artifactVersion: 1.0.0
+snapshotVersion: false
+disallowAdditionalPropertiesIfNotPresent: false

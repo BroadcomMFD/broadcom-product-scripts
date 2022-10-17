@@ -1,0 +1,15 @@
+node_modules/
+
+.gradle
+gradle/wrapper
+build
+
+.idea
+
+sdk/
+openapitools.json
+
+build/
+
+*.txt
+*.pdf

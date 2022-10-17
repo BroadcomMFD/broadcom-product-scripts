@@ -1,0 +1,12 @@
+group = 'com.broadcom.msd.om.sample.favorites'
+version = '1.0.0'
+
+repositories {
+    mavenLocal()
+}
+
+task printVersion {
+    doLast {
+        print project.version
+    }
+}
