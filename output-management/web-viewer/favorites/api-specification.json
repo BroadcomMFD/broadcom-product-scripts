@@ -118,8 +118,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -138,8 +138,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -195,8 +195,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -215,8 +215,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -273,16 +273,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Export rule details are being sent.",
             "content": {
@@ -293,18 +283,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The request failed because the authenticated user did not have the required privileges.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -323,8 +303,28 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "403": {
+            "description": "The request failed because the authenticated user did not have the required privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -389,16 +389,6 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Export rule updated.",
             "content": {
@@ -409,18 +399,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The request failed because the authenticated user did not have the required privileges.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -439,8 +419,28 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "403": {
+            "description": "The request failed because the authenticated user did not have the required privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -505,28 +505,8 @@
               }
             }
           },
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The request failed because the authenticated user did not have the required privileges.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -545,8 +525,28 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "403": {
+            "description": "The request failed because the authenticated user did not have the required privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -650,18 +650,8 @@
               }
             }
           },
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -680,8 +670,18 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -725,18 +725,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The request failed because the authenticated user did not have the required privileges.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -755,8 +745,18 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "403": {
+            "description": "The request failed because the authenticated user did not have the required privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -803,16 +803,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Repository group successfully deleted.",
             "content": {
@@ -823,18 +813,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The request failed because the authenticated user did not have the required privileges.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -853,8 +833,28 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "403": {
+            "description": "The request failed because the authenticated user did not have the required privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1035,18 +1035,8 @@
               }
             }
           },
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1065,8 +1055,18 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1144,16 +1144,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Returns binary report data.",
             "headers": {
@@ -1287,8 +1277,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1307,8 +1297,18 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1393,12 +1393,6 @@
           }
         ],
         "responses": {
-          "401": {
-            "description": "The request was not authenticated."
-          },
-          "500": {
-            "description": "The request failed because of an internal application error."
-          },
           "200": {
             "description": "Report data exported successfully.",
             "content": {
@@ -1420,8 +1414,14 @@
           "400": {
             "description": "The request could not be fulfilled due to invalid or missing information."
           },
+          "401": {
+            "description": "The request was not authenticated."
+          },
           "403": {
             "description": "The request failed because the authenticated user did not have the required privileges."
+          },
+          "500": {
+            "description": "The request failed because of an internal application error."
           }
         },
         "security": [
@@ -1508,16 +1508,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "List of repositories retrieved.",
             "content": {
@@ -1528,8 +1518,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1548,8 +1538,18 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1583,8 +1583,28 @@
           "required": true
         },
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "200": {
+            "description": "Repository definition successfully created or updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepositoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request was not authenticated.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1603,28 +1623,8 @@
               }
             }
           },
-          "200": {
-            "description": "Repository definition successfully created or updated.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RepositoryResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "The request was not authenticated.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1671,28 +1671,18 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
+          "200": {
+            "description": "Repository definition successfully deleted.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RepositoryResponse"
                 }
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The request failed because the authenticated user did not have the required privileges.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1711,18 +1701,28 @@
               }
             }
           },
-          "200": {
-            "description": "Repository definition successfully deleted.",
+          "403": {
+            "description": "The request failed because the authenticated user did not have the required privileges.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RepositoryResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1748,11 +1748,11 @@
         "description": "Log out a user. Log out should be the last call to the API as the session token (guid) is no longer valid after the user is logged out.\n\n**Note**: If a log out call is not made, the session token will time out if no API calls are made within the expiration period.",
         "operationId": "logout",
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error."
-          },
           "200": {
             "description": "Log out completed successfully."
+          },
+          "500": {
+            "description": "The request failed because of an internal application error."
           }
         },
         "security": [
@@ -1799,26 +1799,6 @@
           }
         ],
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "The request was not authenticated.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Log in completed successfully.",
             "headers": {
@@ -1840,6 +1820,26 @@
           },
           "400": {
             "description": "The request could not be fulfilled due to invalid or missing information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request was not authenticated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1887,22 +1887,22 @@
           }
         ],
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Export rules list is being sent.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExportReportRulesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1917,8 +1917,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1973,16 +1973,6 @@
           "required": true
         },
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "201": {
             "description": "Export rule created (saved).",
             "headers": {
@@ -2002,6 +1992,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "The request was not authenticated.",
             "content": {
@@ -2012,8 +2012,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2061,8 +2061,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2081,8 +2081,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2199,16 +2199,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "The requested resource does not exist.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Returns a list of reports.",
             "content": {
@@ -2219,8 +2209,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2239,8 +2229,18 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2315,7 +2315,11 @@
             "schema": {
               "type": "string",
               "description": "Specifies the page orientation for a text report converted to PDF. If convertToPdf is false or the report is not a native text report, then this value is ignored.",
-              "default": "PORTRAIT"
+              "default": "PORTRAIT",
+              "enum": [
+                "PORTRAIT",
+                "LANDSCAPE"
+              ]
             }
           },
           {
@@ -2325,9 +2329,10 @@
             "required": false,
             "schema": {
               "minimum": 1,
-              "type": "string",
+              "type": "integer",
               "description": "Specifies the font size for a text report converted to PDF. If convertToPdf is false or the report is not a native text report, then this value is ignored.",
-              "default": "12"
+              "format": "int32",
+              "default": 12
             }
           },
           {
@@ -2495,8 +2500,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2515,8 +2520,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2598,8 +2603,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2618,8 +2623,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2709,8 +2714,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2729,8 +2734,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2828,8 +2833,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2848,8 +2853,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2875,9 +2880,6 @@
         "description": "Lists all locales supported by the product.",
         "operationId": "list-locales",
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error."
-          },
           "200": {
             "description": "Locales retrieved.",
             "content": {
@@ -2887,6 +2889,9 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error."
           }
         }
       }
@@ -3049,8 +3054,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3069,8 +3074,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3240,22 +3245,22 @@
           }
         ],
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Returns a list of cross-report index values.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CrossReportIndexValuesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -3270,8 +3275,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3439,8 +3444,8 @@
               }
             }
           },
-          "500": {
-            "description": "The request failed because of an internal application error.",
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3459,8 +3464,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3486,22 +3491,22 @@
         "description": "Returns a list of all available export rules for reports. This list includes every rule that authenticated users can access. For users, this list includes their private rules and all public rules. For administrators, this list includes the private rules of all users and all public rules.",
         "operationId": "list-all-export-rules",
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "Export rules list is being sent.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExportRulesAllResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request could not be fulfilled due to invalid or missing information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -3516,8 +3521,8 @@
               }
             }
           },
-          "400": {
-            "description": "The request could not be fulfilled due to invalid or missing information.",
+          "500": {
+            "description": "The request failed because of an internal application error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3543,9 +3548,6 @@
         "description": "Lists all character sets supported by the product.",
         "operationId": "list-character-sets",
         "responses": {
-          "500": {
-            "description": "The request failed because of an internal application error."
-          },
           "200": {
             "description": "Character sets retrieved.",
             "content": {
@@ -3555,6 +3557,9 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "The request failed because of an internal application error."
           }
         }
       }
@@ -3668,7 +3673,7 @@
           "status": {
             "type": "string",
             "description": "Request status.",
-            "example": "SUCCESS",
+            "example": "ERROR",
             "enum": [
               "SUCCESS",
               "ERROR"
