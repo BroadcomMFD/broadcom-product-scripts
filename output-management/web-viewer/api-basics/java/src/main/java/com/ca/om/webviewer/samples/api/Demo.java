@@ -137,10 +137,10 @@ public class Demo {
   }
 
   /**
-   * <p><ul>
+   * <ul>
    * <li>Log in with a username and password to obtain a session token.</li>
    * <li>Log out by invalidating the session token.</li>
-   * </ul></p>
+   * </ul>
    *
    * @param basePath Http address and port for the application server.
    * @param username User id to authenticate.
@@ -159,13 +159,13 @@ public class Demo {
 
   /**
    * Extract command-line arguments for a report list and follow these steps:
-   * <p><ul>
+   * <ul>
    * <li>Log in with a username and password to obtain a session token.</li>
    * <li>List a repository.</li>
    * <li>List the report for the first found repository id.</li>
    * <li>Print the content of first found text report.</li>
    * <li>Log out by invalidating the session token.</li>
-   * </ul></p>
+   * </ul>
    *
    * @param basePath Http address and port for the application server.
    * @param username User id to authenticate.
@@ -256,7 +256,7 @@ public class Demo {
 
   /**
    * Extract command line arguments for cross report index list and follow these steps:
-   * <p><ul>
+   * <ul>
    * <li>Login using the username and password and obtain a session token.</li>
    * <li>List the repository.</li>
    * <li>List the cross report index names for the first found repository id.</li>
@@ -265,7 +265,7 @@ public class Demo {
    * value.</li>
    * <li>Print the content of first found text cross report index value reports.</li>
    * <li>Log out by invalidating the session token.</li>
-   * </ul></p>
+   * </ul>
    *
    * @param basePath Application server HTTP address and port.
    * @param username User id to authenticate.
@@ -423,7 +423,6 @@ public class Demo {
     // Log out by invalidating the session token.
     logout(basePath, sessionToken);
   }
-
 
   /**
    * Authenticate with username and password and process any error occurred.
