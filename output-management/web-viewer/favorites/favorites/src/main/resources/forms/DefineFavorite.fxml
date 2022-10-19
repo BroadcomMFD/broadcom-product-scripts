@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane fx:id="root" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.broadcom.msd.om.sample.favorites.controllers.DefineFavorite">
+  <GridPane hgap="5.0" vgap="5.0">
+
+    <Label text="Name:" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+    <TextField fx:id="nameControl" GridPane.columnIndex="1" GridPane.rowIndex="0">
+      <tooltip>
+        <Tooltip text="Specify the name of this favorite." wrapText="true" />
+      </tooltip>
+    </TextField>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
+
+    <Label alignment="CENTER_RIGHT" text="Repository:" textAlignment="RIGHT" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+    <ComboBox fx:id="repositoryControl" disable="true" prefWidth="240.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <tooltip>
+        <Tooltip text="Select desired repository." />
+      </tooltip>
+    </ComboBox>
+
+    <Label text="Mode:" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+    <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+      <ChoiceBox fx:id="modeControl" prefWidth="70.0">
+        <tooltip>
+          <Tooltip text="Select Mode to use." />
+        </tooltip>
+      </ChoiceBox>
+
+      <TextField fx:id="distributionControl" prefWidth="90.0">
+        <tooltip>
+          <Tooltip text="Define Distribution ID to use." />
+        </tooltip>
+      </TextField>
+
+      <Button fx:id="applyControl" onAction="#apply" text="_Apply" >
+        <tooltip>
+          <Tooltip text="Apply selected mode and distribution id." />
+        </tooltip>
+      </Button>
+    </HBox>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+
+    <Label text="Reports:" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+    <TextField fx:id="filterControl" onKeyTyped="#filterChanged" promptText="Filter by name ..." GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+    <ListView fx:id="reportsControl" prefHeight="120.0" prefWidth="180.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+      <tooltip>
+        <Tooltip text="Select any number of reports to include. Hold Ctrl to select multiple reports." />
+      </tooltip>
+    </ListView>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="7" />
+
+    <Label text="Versions:" GridPane.halignment="RIGHT" GridPane.rowIndex="8" />
+    <Spinner fx:id="versionsControl" GridPane.columnIndex="1" GridPane.rowIndex="8">
+      <tooltip>
+        <Tooltip text="Specify the number of latest versions of each selected report to be included." />
+      </tooltip>
+    </Spinner>
+
+    <Label text="Options:" GridPane.halignment="RIGHT" GridPane.rowIndex="9" />
+    <CheckBox fx:id="combineControl" mnemonicParsing="false" onAction="#refreshCheckboxes" text="Save as single document" GridPane.columnIndex="1" GridPane.rowIndex="9">
+      <tooltip>
+        <Tooltip text="If checked, all the downloaded reports will be combined into a single document." />
+      </tooltip>
+    </CheckBox>
+    <CheckBox fx:id="pdfControl" mnemonicParsing="false" onAction="#refreshCheckboxes" text="Save as PDF" GridPane.columnIndex="1" GridPane.rowIndex="10">
+      <tooltip>
+        <Tooltip text="If checked, the downloaded reports will be saved as PDF documents." />
+      </tooltip>
+    </CheckBox>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="11" />
+
+    <Button fx:id="saveControl" defaultButton="true" onAction="#save" text="_Save" GridPane.columnSpan="2147483647" GridPane.valignment="TOP" GridPane.rowIndex="12" />
+    <Button cancelButton="true" mnemonicParsing="false" onAction="#cancel" text="Cancel" GridPane.columnIndex="1" GridPane.valignment="TOP" GridPane.halignment="RIGHT" GridPane.rowIndex="12" />
+
+    <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+
+    <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" prefWidth="80.0" />
+      <ColumnConstraints hgrow="SOMETIMES" />
+    </columnConstraints>
+
+    <rowConstraints>
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints minHeight="40" vgrow="SOMETIMES" />
+    </rowConstraints>
+  </GridPane>
+</StackPane>

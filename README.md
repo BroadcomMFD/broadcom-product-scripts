@@ -30,5 +30,9 @@ The [Test4z sample project](https://github.com/BroadcomMFD/test4z) contains clie
 ## AtoZ
 The [AtoZ sample project](https://github.com/BroadcomMFD/share/2022_columbus/AtoZ) contains the sample code presented during the session titled "Mainframe Modernization All the Way from A(ssembler) to Z(owe)" by John Mathunny and John Jakacki on August 22, 2022 at SHARE Columbus.
 
+## Output Management
+
+The [output-management](output-management) directory contains multiple samples related to Broadcom output management products.
+
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
