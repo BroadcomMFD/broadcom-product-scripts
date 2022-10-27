@@ -33,8 +33,13 @@ public class Endpoint extends Common implements Initializable {
       return;
     }
 
-    configuration.setUrl(getUrl());
-    api.getApiClient().setBasePath(getUrl());
+    final String appUrl = getUrl();
+    configuration.setUrl(appUrl);
+
+    api.getApiClient().setBasePath(
+        appUrl.endsWith("/api")
+            ? appUrl
+            : appUrl + "/api");
 
     closeStage();
     onConfigured.run();
