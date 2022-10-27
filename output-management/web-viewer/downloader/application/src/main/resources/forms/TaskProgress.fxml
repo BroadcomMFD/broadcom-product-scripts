@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane fx:id="root" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.broadcom.msd.om.sample.downloader.controllers.TaskProgress">
+  <GridPane hgap="5.0" vgap="5.0">
+
+    <Label fx:id="stepControl" alignment="CENTER_RIGHT" text="Step ..." wrapText="true" GridPane.halignment="LEFT" GridPane.rowIndex="0" />
+
+    <ProgressBar fx:id="progressControl" prefWidth="250.0" progress="0.0" GridPane.rowIndex="1" />
+
+    <Button fx:id="buttonControl" mnemonicParsing="false" text="OK" GridPane.rowIndex="2" />
+
+    <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+
+    <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" />
+    </columnConstraints>
+
+    <rowConstraints>
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+    </rowConstraints>
+  </GridPane>
+</StackPane>

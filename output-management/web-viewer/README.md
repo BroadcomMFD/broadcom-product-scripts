@@ -7,3 +7,6 @@ Currently available samples:
 
 - [Favorites Application](favorites) - A sample that shows how the REST API can be used to implement
   higher-level functionality supporting particular business use-cases when handling reports.
+
+- [Downloader Application](downloader) - A sample that shows how the REST API can be used to
+  implement a batch downloader for text reports into a merged local file.

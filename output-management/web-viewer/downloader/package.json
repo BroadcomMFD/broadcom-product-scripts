@@ -1,0 +1,14 @@
+{
+  "name": "sample-downloader",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.5.2"
+  },
+  "scripts": {
+    "generate-sdk": "openapi-generator-cli generate --generator-name java --config generator.yml --input-spec api-specification.json --output sdk",
+    "clean": "gradlew clean",
+    "build": "npm run generate-sdk && gradlew build",
+    "start": "npm run generate-sdk && gradlew run"
+  }
+}
