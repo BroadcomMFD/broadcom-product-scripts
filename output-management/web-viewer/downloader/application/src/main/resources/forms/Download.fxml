@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane fx:id="root" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.broadcom.msd.om.sample.downloader.controllers.Download">
+  <GridPane hgap="5.0" vgap="5.0">
+
+    <Label text="Repository:" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+    <ComboBox fx:id="repositoryControl" disable="true" prefWidth="240.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+      <tooltip>
+        <Tooltip text="Select desired repository." />
+      </tooltip>
+    </ComboBox>
+
+    <Label text="Mode:" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+    <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <ChoiceBox fx:id="modeControl" disable="true" prefWidth="70.0">
+        <tooltip>
+          <Tooltip text="Select Mode to use." />
+        </tooltip>
+      </ChoiceBox>
+
+      <TextField fx:id="distributionControl" prefWidth="90.0">
+        <tooltip>
+          <Tooltip text="Define Distribution ID to use." />
+        </tooltip>
+      </TextField>
+    </HBox>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+
+    <Label text="Report Name:" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+    <TextField fx:id="nameControl" prefWidth="90.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+      <tooltip>
+        <Tooltip text="Report Name (Id) filter. Supports asterisk (*) as a wildcard." />
+      </tooltip>
+    </TextField>
+
+    <Label text="Archival From:" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+    <DatePicker fx:id="archivalFromControl" GridPane.columnIndex="1" GridPane.rowIndex="4">
+      <tooltip>
+        <Tooltip text="Start of archival date range." />
+      </tooltip>
+    </DatePicker>
+
+    <Label text="Archival To:" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+    <DatePicker fx:id="archivalToControl" GridPane.columnIndex="1" GridPane.rowIndex="5">
+      <tooltip>
+        <Tooltip text="End of archival date range." />
+      </tooltip>
+    </DatePicker>
+
+    <Separator GridPane.columnSpan="2147483647" GridPane.rowIndex="6" />
+
+    <ButtonBar GridPane.rowIndex="7" GridPane.columnSpan="2147483647">
+      <buttons>
+        <Button fx:id="downloadControl" defaultButton="true" onAction="#onDownload" text="_Download" ButtonBar.buttonData="LEFT" />
+        <Button fx:id="previewControl" onAction="#onPreview" text="_Preview" />
+        <Button cancelButton="true" onAction="#onExit" text="E_xit" ButtonBar.buttonData="RIGHT"/>
+      </buttons>
+    </ButtonBar>
+
+    <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+
+    <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" />
+    </columnConstraints>
+
+    <rowConstraints>
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+    </rowConstraints>
+  </GridPane>
+
+  <padding>
+    <Insets bottom="10.0" top="10.0" />
+  </padding>
+</StackPane>

@@ -163,9 +163,6 @@ public class DefineFavorite extends Common implements Initializable {
     if (!suppressUiHandlers) {
       final boolean distributionSupported = Api.modeSupportsDistribution(getMode());
       distributionControl.setDisable(!distributionSupported);
-      if (!distributionSupported) {
-        setDistributionId(repositoryUser.getDist());
-      }
     }
 
     refreshButtons();
@@ -386,7 +383,8 @@ public class DefineFavorite extends Common implements Initializable {
     final Task<Void> task = new Task<>() {
       @Override
       protected Void call() throws Exception {
-        api.updateUserConfiguration(repositoryId, mode, distribution);
+        api.updateUserConfiguration(repositoryId, mode,
+            Api.modeSupportsDistribution(mode) ? distribution : null);
         return null;
       }
     };

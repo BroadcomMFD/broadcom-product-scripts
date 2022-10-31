@@ -1,4 +1,6 @@
-package com.broadcom.msd.om.sample.favorites.controllers;
+package com.broadcom.msd.om.sample.downloader.controllers;
+
+import static com.broadcom.msd.om.sample.downloader.configuration.ApplicationConfiguration.ENDPOINT;
 
 import com.google.inject.Singleton;
 import java.net.URL;
@@ -34,8 +36,9 @@ public class Endpoint extends Common implements Initializable {
     }
 
     final String appUrl = getUrl();
-    configuration.setUrl(appUrl);
+    ENDPOINT.set(appUrl);
 
+    // The generated API SDK does not contain the api prefix in operation path values.
     api.getApiClient().setBasePath(
         appUrl.endsWith("/api")
             ? appUrl
@@ -64,7 +67,7 @@ public class Endpoint extends Common implements Initializable {
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
-    setUrl(configuration.getUrl());
+    setUrl(ENDPOINT.get());
 
     refreshButtons();
   }

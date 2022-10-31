@@ -1,0 +1,5 @@
+groupId: com.broadcom.msd.om.sample.downloader
+artifactId: sdk
+artifactVersion: 1.0.0
+snapshotVersion: false
+disallowAdditionalPropertiesIfNotPresent: false
