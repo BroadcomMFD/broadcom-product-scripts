@@ -2,28 +2,49 @@
 These procedures provide solutions for the reporting of Endevor package information. The first example offers a package report that can be used to determine input component omissions, and package relationships for multiple Endevor packages that need to be considered together.
 
 ## Multi-Package Reporting and Component Validation
-With this procedure a user can submit a job for a list of Endevor packages which are to be evaluated together. The job performs an examination of the combined package SCL and conducts an analysis similar to the Component Validation feature of Endevor. Input components for the combined package content are identified and if any are missing, they are reported. Unlike the component validation Endevor performs on a single package, this procedure looks for input components across the multiple packages listed, and shows the dependencies between packages.
+With this procedure a job can be submitted for a list of Endevor packages which are to be evaluated together. The job performs an analysis similar to the Component Validation feature of Endevor, and looks for input components which might be missing, and also shows dependency relationships between the packages. Input components for the combined package content found missing are reported, and a high return code is given. If no input components are missing a simple message is printed and a return code of 0 is given.
 
-If no input components are missing then a simple message is printed, and a return code of 0 is given. If at least one input component is found missing then the job ends with a return code of 12. Each input component that is found missing is printed along with the packaged element that depends on the missing input component.
-
-
-Here is an example report showing a missing input component:
+Here is an example report showing package relationships and a missing input component:
 ```
-For package ID 2#WJQJ4003906276:                                        
-CLUELESS_COPYBOOK_DEV_FINANCE_ACTP0001_D is non-packaged input used by: 
-   PG000044     COBOL      DEV        FINANCE    ACTP0001    D          
-package ID 2#WKHK1207983231:                                            
- depends on 2#WJQJ4003906276                                            
-                                                                        
- 2#WJQJ4003906276                                                       
- 2#WJSK1700940165                                                       
- D#WKRP5940791179                                                       
-    2#WKHK1207983231                                                    
-                                                                        
-   *** Return Code= 12                                                  
+For package ID D#WKYL5451187354:                                       
+FINAPC01_COPYBOOK_DEV_FINANCE_ACTP0004_D is non-packaged input used by:
+   PGMDAVE1     COBOL      DEV        FINANCE    ACTP0005    D         
+package ID D#WKYL5451187354:                                           
+ depends on D#WKYL5657683637                                           
+FINAPC01_COPYBOOK_DEV_FINANCE_ACTP0004_D is non-packaged input used by:
+   PGMJJ1       COBOL      DEV        FINANCE    ACTP0005    D         
+FINAPC01_COPYBOOK_DEV_FINANCE_ACTP0004_D is non-packaged input used by:
+   PGMNS        COBOL      DEV        FINANCE    ACTP0005    D         
+FINAPC01_COPYBOOK_DEV_FINANCE_ACTP0004_D is non-packaged input used by:
+   PG000003     COBOL      DEV        FINANCE    ACTP0005    D         
+FINAPC01_COPYBOOK_DEV_FINANCE_ACTP0004_D is non-packaged input used by:
+   PG000023     COBOL      DEV        FINANCE    ACTP0005    D         
+FINAPC01_COPYBOOK_DEV_FINANCE_ACTP0004_D is non-packaged input used by:
+   PMGBOBBY     COBOL      DEV        FINANCE    ACTP0005    D         
+
+package ID D#WKYO0226831512:                     
+ depends on D#WKYL5451187354                     
+ depends on D#WKYL5657683637                     
+package ID D#WKYO2326944798:                     
+ depends on D#WKYO0226831512                     
+ depends on D#WKYL5657683637                     
+Packages with level 3 prerequisites              
+       D#WKYO2326944798                          
+Packages with level 2 prerequisites              
+     D#WKYO0226831512                            
+Packages with level 1 prerequisites              
+   D#WKYL5451187354                              
+   D#WKYM0405508812                              
+Packages with no prerequisites                   
+ D#WKYL5657683637                                
+ D#WKYL5919699963                                
+ D#WKYM0242257206                                
+ D#WKYM2606593342                                
+                                                 
+   *** Return Code= 12                           
 ```
 
-This next example shows that all input components are packaged. It also lists multiple package relationships and a valid chronological order of package executions.
+This next example shows that all input components are packaged and multiple package relationships. 
 
 ```
 package ID 2#Componentpkg#2:                        
@@ -38,19 +59,26 @@ package ID 4#Package:
  depends on 1#COMPONENT4MANY
 package ID 5#DEPENDSON#4:                        
  depends on 4#Package
-            
-1#COMPONENT4MANY           
-    2#Componentpkg#2        
-    2aPackage               
-       3#Package            
-          4#Package         
-             5#DEPENDSON#4  
-
-
+  
  *** All input components are found packaged ***    
                                                      
    *** Return Code= 0    
 ```
+An optional report can show a potential chronological order for the packages
+
+
+```
+*** Potential Chronological order of packages: *** 
+ D#WKYL5657683637                                  
+ D#WKYL5919699963                                  
+ D#WKYM2606593342                                  
+   D#WKYL5451187354                                
+   D#WKYM0242257206                                
+   D#WKYM0405508812                                
+     D#WKYO0226831512                              
+       D#WKYO2326944798                            
+```
+
 
 ### Setup Steps for Multi-Package Reporting and Component Validation
 
