@@ -31,7 +31,6 @@
      Queue Result
      End;
 
-
   /* Establish Defaults  */
   Count = 0
   DfltC1Envmnt   = ' '
@@ -73,7 +72,7 @@ ProcessStatement:
                     ' DEL DELETE '
 
   thisCommand = Word(Statement,1)
-  If Words(thisCommand) < 1 then Return;
+  If Words(Statement) < 1 Then Return;
 
   C1Envmnt = DfltC1Envmnt
   C1Stgid  = DfltC1Stgid
@@ -83,56 +82,55 @@ ProcessStatement:
   C1ElType = DfltC1ElType
 
   If Words(Statement) > 1 Then,
-     Do w# = 2 to Words(Statement)
-        thisWord = Word(Statement,w#)
-        If w# < Words(Statement) then,
-           nextWord = Word(Statement,w#+1)
-        Else,
-           nextWord = '  '
-        If (thisWord = 'CCID' |,
-            thisWord = 'COMMENT' ) &,
-           Substr(nextWord,1,1) = "'" then,
-           Do
-           w# = w# + 1
-           whereAmI   = Wordindex(Statement,w#)
-           whereQuote = Pos("'",Statement,whereAmi+1)
-           if whereQuote <= whereAmI then Iterate;
-           Do forever;
-              If WordIndex(Statement,w#+1) > whereQuote then Leave;
-              w# = w# + 1;
-              sa= WordIndex(Statement,w#+1)   whereQuote
-           End; /* Do forever */
-           Iterate;
-           End
+   Do w# = 2 to Words(Statement)
+/* MG added Translate */
+     thisWord = Translate(Word(Statement,w#))
+     If w# < Words(Statement) then,
+        nextWord = Word(Statement,w#+1)
+     Else,
+        nextWord = '  '
+     If (thisWord = 'CCID' |,
+         thisWord = 'COMMENT' ) &,
+        Substr(nextWord,1,1) = "'" then,
+        Do
+        w# = w# + 1
+        whereAmI   = Wordindex(Statement,w#)
+        whereQuote = Pos("'",Statement,whereAmi+1)
+        if whereQuote <= whereAmI then Iterate;
+        Do forever;
+           If WordIndex(Statement,w#+1) > whereQuote then Leave;
+           w# = w# + 1;
+           sa= WordIndex(Statement,w#+1)   whereQuote
+        End; /* Do forever */
+        Iterate;
+     End
 
-        nextWord = Strip(nextWord,'B',"'");
-        nextWord = Strip(nextWord,'B','"');
+     nextWord = Strip(nextWord,'B',"'");
+     nextWord = Strip(nextWord,'B','"');
 
-        If thisWord = 'OPTIONS'          then Leave  ;
-        If WordPos(thisWord,Classifications) = 0 then iterate;
+     If thisWord = 'OPTIONS'          then Leave  ;
+     If WordPos(thisWord,Classifications) = 0 then iterate;
 
-        If thisCommand = 'SET' then,
-           Do
-           If Substr(thisWord,1,3) = 'ENV' then DfltC1Envmnt = nextWord
-           If Substr(thisWord,1,3) = 'STA' then DfltC1Stgid = nextWord
-           If Substr(thisWord,1,3) = 'SYS' then DfltC1System = nextWord
-           If Substr(thisWord,1,3) = 'SUB' then DfltC1Subsys = nextWord
-           If Substr(thisWord,1,3) = 'ELE' then DfltC1Element= nextWord
-           If Substr(thisWord,1,3) = 'TYP' then DfltC1ElType = nextWord
-           w# = w# + 1
-           End
-        Else,
-           Do
-           If Substr(thisWord,1,3) = 'ENV' then C1Envmnt = nextWord
-           If Substr(thisWord,1,3) = 'STA' then C1Stgid  = nextWord
-           If Substr(thisWord,1,3) = 'SYS' then C1System = nextWord
-           If Substr(thisWord,1,3) = 'SUB' then C1Subsys = nextWord
-           If Substr(thisWord,1,3) = 'ELE' then C1Element= nextWord
-           If Substr(thisWord,1,3) = 'TYP' then C1ElType = nextWord
-           w# = w# + 1
-           End
-
-     End;   /* Do w# = 2 to Words(Statement) */
+     If thisCommand = 'SET' then,
+        Do
+        If Substr(thisWord,1,3) = 'ENV' then DfltC1Envmnt = nextWord
+        If Substr(thisWord,1,3) = 'STA' then DfltC1Stgid = nextWord
+        If Substr(thisWord,1,3) = 'SYS' then DfltC1System = nextWord
+        If Substr(thisWord,1,3) = 'SUB' then DfltC1Subsys = nextWord
+        If Substr(thisWord,1,3) = 'ELE' then DfltC1Element= nextWord
+        If Substr(thisWord,1,3) = 'TYP' then DfltC1ElType = nextWord
+        End
+     Else,
+        Do
+        If Substr(thisWord,1,3) = 'ENV' then C1Envmnt = nextWord
+        If Substr(thisWord,1,3) = 'STA' then C1Stgid  = nextWord
+        If Substr(thisWord,1,3) = 'SYS' then C1System = nextWord
+        If Substr(thisWord,1,3) = 'SUB' then C1Subsys = nextWord
+        If Substr(thisWord,1,3) = 'ELE' then C1Element= nextWord
+        If Substr(thisWord,1,3) = 'TYP' then C1ElType = nextWord
+        End
+     w# = w# + 1
+  End;   /* Do w# = 2 to Words(Statement) */
 
   If thisCommand = 'SET' then Return ;
   If Length(C1Element) > 10 then Return;
@@ -147,7 +145,8 @@ ProcessStatement:
       Left(C1Subsys,8),
       Left(C1ElType,8),
       C1Element || "'"
+/* MG added Translate */
+  Result = Translate(Result)
   Queue Result
 
   Return;
-

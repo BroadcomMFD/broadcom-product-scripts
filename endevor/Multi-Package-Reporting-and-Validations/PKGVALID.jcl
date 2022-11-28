@@ -10,19 +10,28 @@
 // JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL.CSV)
 //*==================================================================*
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available
-//*---
+//*------           / where are INCLUDES: STEPLIB,CSIQCLS0,SYSEXEC
 //   SET EXPORTDS='SYSDE32.NDVR.TEAM.EXPORTS'
-//   SET ENVIRON=DEV
+//   SET ENVIRON=DEV                 <-From Env
+//   SET STAGE#=2                    <-From Stage number
+//   SET CIRCLRC=5                   <-RC when finding circulars
+//   SET PATHINIT='DEV.2'
 //*-------------------------------------------------------------------
 //*   STEP 1 -- For each Package prefix, build EXPORT SCL
 //*-------------------------------------------------------------------
 //STEP1     EXEC PGM=IRXJCL,           <- Build EXPORT statements
-//         PARM='ENBPIU00 A'
+//          PARM='ENBPIU00 A'
 //TABLE    DD * <- List selected Packages/Package-Prefixes
 * Package---------    -----Comment-------------------------------
-  2#WJQJ4003906276    (Sandbox  ACTP0001) contains CLUELESS/GLUELESS
-  2#WJSK1700940165    (Sandbox  ACTP0003)
-  2#WKHK1207983231    (Sandbox  ACTP0005)
+  D#WKYL5451187354    (Sandbox  ACTP0005)
+  D#WKYL5657683637    (Sandbox  ACTP0004) -> FINAPC01/JUNKCOPY/PG000054
+  D#WKYL5919699963    (Sandbox  ACTP0002) contains COB TEST*
+  D#WKYM0242257206    (Sandbox  ACTP0003)
+  D#WKYM0405508812    (Sandbox  ACTP0006)
+  D#WKYM2606593342    (Sandbox  ACTP0001)
+  D#WKYO0226831512    (Sandbox  ACTP0007)   depends on ACTP0004
+  D#WKYO2326944798    (Sandbox  ACTP0007)   depends on previous
+**D#WKYO5924996838    (Sandbox  ACTP0007)   causes a circular
 //MODEL1   DD *,SYMBOLS=JCLONLY
   EXPORT PACKAGE '&Package'
     TO DSNAME '&EXPORTDS'
@@ -33,10 +42,9 @@
 //MODEL3   DD *
   Row4Package.&Package   = &RowNumber
   Package4Row.&RowNumber = '&Package'
-//*--
-//   INCLUDE MEMBER=SYSEXEC
-//*--
+//   INCLUDE MEMBER=CSIQCLS0           <- where is ENBPIU00
 //OPTIONS  DD *
+   $QuietMessages = 'Y'         /* Bypass messages Y/N        */
    $NumberModelsAndTblouts= 3 ; /* Number of MODEL inputs */
    RowNumber = Right($row#,4,'0')
    SCLmbr = 'SCL#' || RowNumber
@@ -58,11 +66,20 @@
 //*---------------------------------------------------------------------
 //*  PRINT RESULTS
 //*---------------------------------------------------------------------
-//SHOWME1   EXEC PGM=IEBGENER,COND=(0,LE)
+//SHOWME1   EXEC PGM=IEBGENER,COND=(5,LE)
 //SYSPRINT DD DUMMY
 //SYSIN    DD DUMMY
-//SYSUT1   DD DSN=&&EXPORTS,DISP=(OLD,PASS)
+//SYSUT1   DD *
+****  Content from DSN=&&EXPORTS ****
+//         DD DSN=&&EXPORTS,DISP=(OLD,PASS)
+//         DD *
+****  Content from DSN=&&SCAN#SCL****
+//         DD DSN=&&SCAN#SCL,DISP=(OLD,PASS)
+//         DD *
+****  Content from DSN=&&PKGIDS  ****
+//         DD DSN=&&PKGIDS,DISP=(OLD,PASS)
 //SYSUT2   DD SYSOUT=*
+//*
 //*==================================================================*
 //*   STGID#1 - EXECUTE CSV UTILITY
 //*---  Collect Rexx stem array data for conversion of ----------------
@@ -70,11 +87,7 @@
 //*-------------------------------------------------------------------
 //STGID#1   EXEC PGM=NDVRC1,REGION=4M, <- Endevor Stg# -> Stgid 1/2
 //         PARM='BC1PCSV0'
-//STEPLIB  DD  DISP=SHR,DSN=SYSDE32.NDVR.R1801.CSIQAUTU    SCMM@LIB
-//         DD  DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQAUTH   SCMM@LIB
-//         DD  DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQAUTU   SCMM@LIB
-//         DD  DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQLOAD   SCMM@LIB
-//CONLIB   DD  DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQLOAD   SCMM@LIB
+//   INCLUDE MEMBER=STEPLIB            <- Endevor STEPLIB+CONLIB
 //BSTIPT01 DD *
 LIST STAGE '*' FROM ENVIRONMENT '*'
    TO DDNAME 'EXTRACTS'
@@ -90,7 +103,7 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //*--------------------------------------------------------------------
 //STGID#2   EXEC PGM=IRXJCL,           <- Endevor Stg# -> Stgid 2/2
 //          PARM='ENBPIU00 A',COND=(4,LT)
-//   INCLUDE MEMBER=CSIQCLS0
+//   INCLUDE MEMBER=CSIQCLS0           <- where is ENBPIU00
 //TABLE    DD  DSN=&&EXTRACTS,DISP=(OLD,DELETE)
 //MODEL    DD *  <- All kinds of Stage info
   Location.&$row#   = '&ENV_NAME &STG_#'
@@ -100,6 +113,7 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //OPTIONS  DD *
 * ENV_NAME STG_NAME STG_ID STG_# ENTRY_STG NEXT_ENV NEXT_STG_#
   $Table_Type = "CSV"
+  $QuietMessages = 'Y'         /* Bypass messages Y/N        */
 //SYSTSPRT DD SYSOUT=*
 //SYSPRINT DD SYSOUT=*
 //DISPLAYS DD SYSOUT=*
@@ -142,7 +156,7 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //         PARM=ENBP1000,
 //         DYNAMNBR=1500
 //*---------  your Steplib ....
-//   INCLUDE MEMBER=STEPLIB
+//   INCLUDE MEMBER=STEPLIB            <- Endevor STEPLIB+CONLIB
 //*---------
 //ENPSCLIN DD DSN=&&EXPORTS,DISP=(OLD,DELETE)
 //C1MSGS1  DD SYSOUT=*
@@ -154,10 +168,10 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //*   STEP 3 -- SCAN Package SCLs - reformat into a Table   format.
 //*---------------------------------------------------------------------
 //SCAN#SCL  EXEC PGM=IKJEFT1B          <- Scan+Format Exported SCL
-//SYSEXEC   DD DISP=SHR,DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
+//   INCLUDE MEMBER=SYSEXEC            <- my Rexx library
 //SYSTSPRT  DD SYSOUT=*
 //SYSTSIN   DD DSN=&&SCAN#SCL,DISP=(OLD,DELETE)
-//SCAN#SCL  DD DUMMY
+//*SCAN#SCL  DD DUMMY    <- Turn Trace on/off
 //RESULTS  DD DSN=&&SCLRSLTS,
 //         DCB=(DSORG=PS,RECFM=FB,LRECL=100,BLKSIZE=32000),
 //         DISP=(MOD,PASS),
@@ -174,8 +188,11 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //*   STEP 4 -- Build ACM Queries
 //*---------------------------------------------------------------------
 //STEP4     EXEC PGM=IRXJCL,           <- Build ACM Queries SCL
-//         PARM='ENBPIU00 A'
+//         PARM='ENBPIU00 PARMLIST'
 //TABLE    DD DSN=&SCLRSLTS,DISP=(OLD,PASS)
+//PARMLIST  DD *   <- Order of processing
+  NOTHING   NOTHING  STAGEIDS  0
+  MODEL     TBLOUT   OPTIONS   A
 //POSITION  DD *   <- Positions of Package SCL actions
    Count       5 10
    C1Action    9 21
@@ -190,32 +207,44 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
         ELEMENT  &C1Element
         ENVIRONMENT &C1Envmnt
         SYSTEM   &C1System  SUBSYSTEM  &C1Subsys
-        TYPE     &C1ElType  STAGE NUMBER  2
+        TYPE     &C1ElType  STAGE NUMBER &C1Stgnum
      OPTIONS
   .
-//OPTIONS   DD *
+//STAGEIDS DD DSN=&&STAGEIDS,DISP=(OLD,PASS)
+//OPTIONS  DD *  <-ACM uses stage numbers. Convert from Stageids.
   $QuietMessages = 'Y'         /* Bypass messages Y/N        */
   If Count = '000000' then $SkipRow = 'Y'
   C1Element = Strip(C1Element)
   C1Element = Strip(C1Element,'T',"'")
-//   INCLUDE MEMBER=SYSEXEC
+  Env = Strip(C1Envmnt)
+  C1Stgnum = Stage_#.Env.C1Stage
+* Say 'Converted' Env C1Stage 'to' Env C1Stgnum
+//   INCLUDE MEMBER=CSIQCLS0           <- where is ENBPIU00
 //SYSTSPRT  DD SYSOUT=*
 //TBLOUT   DD DSN=&&ACMQRYS,
 //         DCB=(DSORG=PS,RECFM=FB,LRECL=80),
 //         DISP=(NEW,PASS),UNIT=3390,
 //         SPACE=(TRK,(5,15),RLSE)
+//*-------------------------------------------------------------------
+//*  PRINT RESULTS
+//*-------------------------------------------------------------------
+//SHOWME3   EXEC PGM=IEBGENER,COND=(5,LE)
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&ACMQRYS,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//*
 //*-------------------------------------------------------------------*
 //*     ACMQuery in Batch                                             *
 //*-------------------------------------------------------------------*
 //STEP5     EXEC PGM=NDVRC1,           <- Run   ACM Queries
 //          PARM='BC1PACMQ',REGION=4096K
-//   INCLUDE MEMBER=STEPLIB
+//   INCLUDE MEMBER=STEPLIB            <- Endevor STEPLIB+CONLIB
 //ACMSCLIN DD DSN=&&ACMQRYS,DISP=(OLD,DELETE)
 //ACMMSGS1 DD SYSOUT=*
 //ACMMSGS2 DD SYSOUT=*
 //SYMDUMP  DD DUMMY
 //SYSUDUMP DD SYSOUT=*
-//*ACMOUT   DD SYSOUT=*
 //ACMOUT   DD DSN=&&ACMOUT,
 //         DCB=(DSORG=PS,RECFM=FB,LRECL=100),
 //         DISP=(NEW,PASS),UNIT=3390,
@@ -223,7 +252,7 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //*-------------------------------------------------------------------
 //*  PRINT ACMQuery results
 //*-------------------------------------------------------------------
-//SHOWME3   EXEC PGM=IEBGENER,COND=(5,LE)
+//SHOWME4   EXEC PGM=IEBGENER,COND=(5,LE)
 //SYSPRINT DD DUMMY
 //SYSIN    DD DUMMY
 //SYSUT1   DD DSN=&&ACMOUT,DISP=(OLD,PASS)
@@ -233,16 +262,16 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //*--   Indicate in RC if any elements are missing from package(s)----
 //*-------------------------------------------------------------------
 //VALIDATE  EXEC PGM=IKJEFT1B,         <- Build Report
-//          PARM='PKGVAL#2 &ENVIRON'
+//    PARM='PKGVAL#2 &ENVIRON &STAGE# &CIRCLRC &PATHINIT'
 //PKGIDS    DD DSN=&&PKGIDS,DISP=(OLD,DELETE)   <- package ID info
 //STAGEIDS  DD DSN=&&STAGEIDS,DISP=(OLD,DELETE) <- STG# to STGID
 //SCL       DD DSN=&&SCLRSLTS,DISP=(OLD,PASS) <- Packaged SCL
 //ACMQ      DD DSN=&&ACMOUT,DISP=(OLD,DELETE) <- ACMQuery results
-//SYSEXEC   DD DISP=SHR,DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
+//   INCLUDE MEMBER=SYSEXEC            <- my Rexx library
 //SYSTSPRT  DD SYSOUT=*
 //SYSTSIN   DD DUMMY
 //*PKGVAL#2  DD DUMMY           <- Turn Trace on/off
-//PKGVAL#2  DD DUMMY           <- Turn Trace on/off
-//RESULTS   DD SYSOUT=*
+//RESULTS   DD SYSOUT=*         <- Final Report output
+//PKGORDER  DD SYSOUT=*         <- Delete this line if unwanted
 //*-------------------------------------------------------------------
 //*-------------------------------------------------------------------
