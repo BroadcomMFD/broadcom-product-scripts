@@ -270,11 +270,15 @@ ScanACMandCompare:
 ShowChronologicalOrder:
 
    If Trace_Opt == 'Y' then Trace r
-
-   /* Interpret Rexx Stem info on Packages      */
+  /* Interpret Rexx Stem info on Packages      */
    Package4Row.     = ''
    Row4Package.     = ''
+   PackageRow.     = 0
+   maxrow = 0
    Do p# = 1 to pkg.0
+      PackageRow.p# = Right(Strip(pkg.p#),4)
+      If maxrow < PackageRow.p# Then maxrow = PackageRow.p#
+      p# = p# + 1
       packageInfo = pkg.p#
       Interpret packageInfo
    End
@@ -293,7 +297,7 @@ ShowChronologicalOrder:
          row# = row# + 1
          rowindx = Right(row#,4,'0')
          thisPkg =  Package4Row.rowindx
-         If thisPkg == '' & row# < pkg.0 Then Iterate
+         If thisPkg == '' & row# < maxrow Then Iterate
          Else if thisPkg == '' Then ContinueLooping = 'E'
          If ContinueLooping == 'E' then,
             Do
