@@ -223,7 +223,7 @@ ScanACMandCompare:
      If curstage <> ENVIRON||'.'||STG# Then Do
        x = WordPos(ENVIRON||'.'||STG#,priorstgs)
        If x > 0 Then Do
-         ENIVIRON = thisEnv
+         ENVIRON = thisEnv
          STG# = thisStg#
          STG = thisStg
        End
