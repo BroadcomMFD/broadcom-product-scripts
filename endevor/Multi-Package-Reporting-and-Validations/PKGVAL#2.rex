@@ -12,7 +12,7 @@
   my_rc = 0
   PkgDependencies. = ''
 
-  Arg thisEnv thisStg# CircleRc thisPath
+  Arg thisEnv thisStg# CircleRc PromStgs thisPath
   If Trace_Opt == 'Y' Then Say 'thisEnv='||thisEnv
   If Trace_Opt == 'Y' Then Say 'thisStg#='||thisStg#
   If Trace_Opt == 'Y' Then Say 'thisPath='||thisPath
@@ -172,6 +172,18 @@ ConvertSCL2StemArray:
      Subsys    = Word(SCLdetail,05)
      Type      = Word(SCLdetail,06)
      Element   = Word(SCLdetail,07)
+     If thisEnv||'.'||thisStg <> Envmnt||'.'||Stg Then Do
+        x = WordPos(Envmnt||'.'||Stg,PromStgs)
+        If x > 0 Then Do
+          Envmnt = thisEnv
+          Stg = thisStg
+        End
+        Else If Element <> 'Element' Then Do
+          Say 'SCL below does not match from stage 'thisEnv'.'thisStg
+          Say Element'_'Type'_'Envmnt'_'System'_'Subsys'_'Stg
+        End
+     End
+
      If Trace_Opt == 'Y' Then Trace r
      entry = Element'_'Type'_'Envmnt'_'System'_'Subsys'_'Stg
      SCLdet.entry = Command

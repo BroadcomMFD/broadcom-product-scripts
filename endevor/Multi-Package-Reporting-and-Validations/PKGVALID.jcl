@@ -32,6 +32,7 @@
   D#WKYO0226831512    (Sandbox  ACTP0007)   depends on ACTP0004
   D#WKYO2326944798    (Sandbox  ACTP0007)   depends on previous
 **D#WKYO5924996838    (Sandbox  ACTP0007)   causes a circular
+  FINA#WLFP1016782     Promotion package
 //MODEL1   DD *,SYMBOLS=JCLONLY
   EXPORT PACKAGE '&Package'
     TO DSNAME '&EXPORTDS'
@@ -42,29 +43,37 @@
 //MODEL3   DD *
   Row4Package.&Package   = &RowNumber
   Package4Row.&RowNumber = '&Package'
+//MODEL4   DD *
+  LIST PACKAGE ACTION FROM PACKAGE '&Package'
+       TO FILE PKGHIST
+       OPTIONS PROMOTION HISTORY .
+//SYSPRINT DD SYSOUT=*
 //   INCLUDE MEMBER=CSIQCLS0           <- where is ENBPIU00
 //OPTIONS  DD *
    $QuietMessages = 'Y'         /* Bypass messages Y/N        */
-   $NumberModelsAndTblouts= 3 ; /* Number of MODEL inputs */
+   $NumberModelsAndTblouts= 4 ; /* Number of MODEL inputs */
    RowNumber = Right($row#,4,'0')
    SCLmbr = 'SCL#' || RowNumber
-//SYSPRINT DD SYSOUT=*
 //SYSTSPRT DD SYSOUT=*
-//TBLOUT1  DD DSN=&&EXPORTS,
+//TBLOUT1  DD DSN=&&EXPORTS,    <- Export SCL
 //         DCB=(DSORG=PS,RECFM=FB,LRECL=80),
 //         DISP=(NEW,PASS),UNIT=3390,
 //         SPACE=(TRK,(1,5),RLSE)
-//TBLOUT2  DD DSN=&&SCAN#SCL,
+//TBLOUT2  DD DSN=&&SCAN#SCL,   <- SCAN#SCL command for each Pkg
 //         DCB=(DSORG=PS,RECFM=FB,LRECL=80),
 //         DISP=(NEW,PASS),UNIT=3390,
 //         SPACE=(TRK,(1,5),RLSE)
-//TBLOUT3  DD DSN=&&PKGIDS,
+//TBLOUT3  DD DSN=&&PKGIDS,     <- Package<->Row# info
+//         DCB=(DSORG=PS,RECFM=FB,LRECL=80),
+//         DISP=(NEW,PASS),UNIT=3390,
+//         SPACE=(TRK,(1,5),RLSE)
+//TBLOUT4  DD DSN=&&CSVALPKG,   <- LIST PACKAGE ... for CSV Calls
 //         DCB=(DSORG=PS,RECFM=FB,LRECL=80),
 //         DISP=(NEW,PASS),UNIT=3390,
 //         SPACE=(TRK,(1,5),RLSE)
 //**
 //*---------------------------------------------------------------------
-//*  PRINT RESULTS
+//*  PRINT RESULTS - downstream commands etc
 //*---------------------------------------------------------------------
 //SHOWME1   EXEC PGM=IEBGENER,COND=(5,LE)
 //SYSPRINT DD DUMMY
@@ -78,6 +87,9 @@
 //         DD *
 ****  Content from DSN=&&PKGIDS  ****
 //         DD DSN=&&PKGIDS,DISP=(OLD,PASS)
+//         DD *
+****  Content from DSN=&&CSVALPKG****
+//         DD DSN=&&CSVALPKG,DISP=(OLD,PASS)
 //SYSUT2   DD SYSOUT=*
 //*
 //*==================================================================*
@@ -92,14 +104,21 @@
 LIST STAGE '*' FROM ENVIRONMENT '*'
    TO DDNAME 'EXTRACTS'
    OPTIONS   RETURN ALL.
-//EXTRACTS DD DSN=&&EXTRACTS,
+//         DD DSN=&&CSVALPKG,DISP=(OLD,PASS)
+//EXTRACTS DD DSN=&&EXTRACTS,   <- CSV Stage information
 //      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),
 //      DISP=(NEW,PASS),UNIT=VIO,
 //      SPACE=(TRK,(5,1),RLSE)
+//PKGHIST  DD DSN=&&PKGHIST,    <- CSV package action + history
+//      DCB=(RECFM=FB,LRECL=2000,BLKSIZE=24000,DSORG=PS),
+//      DISP=(NEW,PASS),UNIT=3390,
+//      SPACE=(CYL,(5,1),RLSE)
 //C1MSGS1  DD SYSOUT=*
 //BSTERR   DD SYSOUT=*
 //*--------------------------------------------------------------------
-//*--- Reformat CSV data ----------------------------------------------
+//*--- Reformat CSV data for Stage info -------------------------------
+//*---  Keep Rexx stem array data for conversion of    ----------------
+//*---  Endevor Stage# to StageId                      ----------------
 //*--------------------------------------------------------------------
 //STGID#2   EXEC PGM=IRXJCL,           <- Endevor Stg# -> Stgid 2/2
 //          PARM='ENBPIU00 A',COND=(4,LT)
@@ -150,11 +169,11 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //         DISP=(NEW,CATLG,KEEP),DSNTYPE=LIBRARY,VOL=SER=TSOB32,
 //         UNIT=3390,SPACE=(CYL,(10,10,10))
 //*---------------------------------------------------------------------
-//*   STEP 2 -- EXPORT package SCL into PDS members
+//*   STEP 2A-- EXPORT package SCL into PDS members
 //*---------------------------------------------------------------------
-//STEP2     EXEC PGM=NDVRC1,           <- Export Package SCLs
+//STEP2A    EXEC PGM=NDVRC1,           <- Export Package SCLs
 //         PARM=ENBP1000,
-//         DYNAMNBR=1500
+//         DYNAMNBR=1500               COND=(0,LE)
 //*---------  your Steplib ....
 //   INCLUDE MEMBER=STEPLIB            <- Endevor STEPLIB+CONLIB
 //*---------
@@ -164,6 +183,75 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //SYSUDUMP DD SYSOUT=*
 //SYMDUMP  DD DUMMY
 //JCLOUT   DD DUMMY
+//*---------------------------------------------------------------------
+//*   STEP 2B-- Capture historical SCL for Promotion Packages
+//*---------------------------------------------------------------------
+//STEP2B    EXEC PGM=IRXJCL,           <- Promotion PKG scl
+//          PARM='ENBPIU00 PARMLIST',COND=(4,LT)
+//   INCLUDE MEMBER=CSIQCLS0           <- where is ENBPIU00
+//TABLE    DD DSN=&&PKGHIST,           <- CSV package action + history
+//            DISP=(OLD,DELETE)
+//PARMLIST DD *               <- Default Model
+  NOTHING  NOTHING  CHKEMPTY  0
+  NOTHING  NOTHING  STAGEIDS  0
+  NOTHING  NOTHING  PKGIDS    0
+  MODELDF  TBLOUT   OPTIONS   A
+//CHKEMPTY DD *               <- Default Model
+  Say 'CHKEMPTY'
+  "EXECIO 3 DISKR TABLE (Stem csv. Finis"
+  say 'csv.0=' csv.0
+  If csv.0 < 2 then Exit
+//STAGEIDS DD DSN=&&STAGEIDS,DISP=(OLD,PASS)
+//PKGIDS   DD DSN=&&PKGIDS,DISP=(OLD,PASS)
+//MODELMBR DD *               <- Default Model
+./   ADD  NAME=&SCLmbr
+* &PKG_ID SCL created in STEP2B of the PKGVALID job
+//MODELDF  DD *               <- Default Model
+  &ELM_ACT ELEMENT &ELM_@S@
+    FROM ENVIRONMENT &ENV_NAME_@S@ STAGE &STG_ID_@S@
+         SYSTEM  &SYS_NAME_@S@ SUBSYSTEM &SBS_NAME_@S@
+         TYPE &TYPE_NAME_@S@ .
+//MODELTR  DD *               <- Transfer Model
+  TRANSFER ELEMENT &ELM_@S@
+    FROM ENVIRONMENT &ENV_NAME_@S@ STAGE &STG_ID_@S@
+         SYSTEM  &SYS_NAME_@S@ SUBSYSTEM &SBS_NAME_@S@
+         TYPE &TYPE_NAME_@S@
+    TO   ENVIRONMENT &ENV_NAME_@T@ STAGE &STG_ID_@T@
+         SYSTEM  &SYS_NAME_@T@ SUBSYSTEM &SBS_NAME_@T@
+         TYPE &TYPE_NAME_@T@ .
+//OPTIONS  DD *,SYMBOLS=JCLONLY
+* ENV_NAME STG_NAME STG_ID STG_# ENTRY_STG NEXT_ENV NEXT_STG_#
+  $Table_Type = "CSV"
+  $QuietMessages = 'Y'         /* Bypass messages Y/N        */
+  STG_num_@S@ = Stage_#.ENV_NAME_@S@.STG_ID_@S@
+  Say ENV_NAME_@S@ STG_ID_@S@ STG_num_@S@
+  If ENV_NAME_@S@ /= '&ENVIRON' then $SkipRow = 'Y'
+  If STG_num_@S@  /= '&STAGE#'  then $SkipRow = 'Y'
+  Member = Row4Package.PKG_ID
+  RowNumber = Right(Member,4,'0')
+  SCLmbr = 'SCL#' || RowNumber
+  If PKG_ID /= lastPKG_ID then x = BuildFromMODEL(MODELMBR)
+  lastPKG_ID = PKG_ID
+  MODEL = 'MODELDF'
+  If Substr(ELM_ACT,1,4) = 'TRAN' then MODEL = 'MODELTR'
+  $my_rc = 2
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//DISPLAYS DD SYSOUT=*
+//SYSTSIN  DD DUMMY
+//TBLOUT   DD DSN=&&IEBUPDT,    <- IEBUPD cmds for Pkg SCL
+//         DCB=(DSORG=PS,RECFM=FB,LRECL=80),
+//         DISP=(NEW,PASS),UNIT=3390,
+//         SPACE=(TRK,(1,5),RLSE)
+//*---------------------------------------------------------------------
+//*   IEBUPDT - Save Appropriate version of SCL for Promotion pkgs.
+//*---------------------------------------------------------------------
+//IEBUPDT EXEC PGM=IEBUPDTE,PARM=NEW,
+//        COND=(2,NE,STEP2B)
+//SYSIN    DD DSN=&&IEBUPDT,DISP=(OLD,DELETE) <-IEBUPD cmds for Pkg SCL
+//SYSUT1   DD DUMMY
+//SYSUT2   DD DSN=SYSDE32.NDVR.TEAM.EXPORTS,DISP=SHR
+//SYSPRINT DD SYSOUT=*
 //*---------------------------------------------------------------------
 //*   STEP 3 -- SCAN Package SCLs - reformat into a Table   format.
 //*---------------------------------------------------------------------
