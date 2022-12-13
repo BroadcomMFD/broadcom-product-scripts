@@ -12,10 +12,16 @@
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available
 //*------           / where are INCLUDES: STEPLIB,CSIQCLS0,SYSEXEC
 //   SET EXPORTDS='SYSDE32.NDVR.TEAM.EXPORTS'
-//   SET ENVIRON=DEV                 <-From Env
-//   SET STAGE#=2                    <-From Stage number
-//   SET CIRCLRC=5                   <-RC when finding circulars
-//   SET PATHINIT='DEV.2'
+//   SET ENVIRON=DEV        <-From Env
+//   SET STAGE#=2           <-From Stage number
+//*------                     ENVIRON.STAGE# represent a common
+//*------                     starting point for listed packages.
+//   SET CIRCLRC=5          <-RC when finding circular references
+//   SET PROMSTGS='NONE'    <-'NONE' / One or more Env.Stg values
+//*------                     separated by commas to substitute with
+//*------                     ENVIRON.STAGE# when found
+//   SET PATHINIT='DEV.2'   <-Env.Stg values mapping to ENVIRON.STAGE#
+//*------                     can be space or comma delimited.
 //*-------------------------------------------------------------------
 //*   STEP 1 -- For each Package prefix, build EXPORT SCL
 //*-------------------------------------------------------------------
@@ -250,7 +256,7 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //        COND=(2,NE,STEP2B)
 //SYSIN    DD DSN=&&IEBUPDT,DISP=(OLD,DELETE) <-IEBUPD cmds for Pkg SCL
 //SYSUT1   DD DUMMY
-//SYSUT2   DD DSN=SYSDE32.NDVR.TEAM.EXPORTS,DISP=SHR
+//SYSUT2   DD DSN=&EXPORTDS,DISP=SHR
 //SYSPRINT DD SYSOUT=*
 //*---------------------------------------------------------------------
 //*   STEP 3 -- SCAN Package SCLs - reformat into a Table   format.
@@ -350,7 +356,7 @@ LIST STAGE '*' FROM ENVIRONMENT '*'
 //*--   Indicate in RC if any elements are missing from package(s)----
 //*-------------------------------------------------------------------
 //VALIDATE  EXEC PGM=IKJEFT1B,         <- Build Report
-//    PARM='PKGVAL#2 &ENVIRON &STAGE# &CIRCLRC &PATHINIT'
+//    PARM='PKGVAL#2 &ENVIRON &STAGE# &CIRCLRC &PROMSTGS &PATHINIT'
 //PKGIDS    DD DSN=&&PKGIDS,DISP=(OLD,DELETE)   <- package ID info
 //STAGEIDS  DD DSN=&&STAGEIDS,DISP=(OLD,DELETE) <- STG# to STGID
 //SCL       DD DSN=&&SCLRSLTS,DISP=(OLD,PASS) <- Packaged SCL

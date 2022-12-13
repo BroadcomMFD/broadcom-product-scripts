@@ -15,6 +15,9 @@
   Arg thisEnv thisStg# CircleRc PromStgs thisPath
   If Trace_Opt == 'Y' Then Say 'thisEnv='||thisEnv
   If Trace_Opt == 'Y' Then Say 'thisStg#='||thisStg#
+  PromStgs = Translate(PromStgs,' ',',')
+  If Trace_Opt == 'Y' Then Say 'PromStgs='||PromStgs
+  thisPath = Translate(thisPath,' ',',')
   If Trace_Opt == 'Y' Then Say 'thisPath='||thisPath
 
   /* Get package ID info                */
