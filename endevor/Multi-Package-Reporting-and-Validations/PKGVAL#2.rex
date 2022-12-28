@@ -175,18 +175,26 @@ ConvertSCL2StemArray:
      Subsys    = Word(SCLdetail,05)
      Type      = Word(SCLdetail,06)
      Element   = Word(SCLdetail,07)
-     If thisEnv||'.'||thisStg <> Envmnt||'.'||Stg Then Do
-        x = WordPos(Envmnt||'.'||Stg,PromStgs)
-        If x > 0 Then Do
-          Envmnt = thisEnv
-          Stg = thisStg
-        End
-        Else If Element <> 'Element' Then Do
-          Say 'SCL below does not match from stage 'thisEnv'.'thisStg
-          Say Element'_'Type'_'Envmnt'_'System'_'Subsys'_'Stg
-        End
+     If Command == 'Command' Then Do
+       p# = p# + 2
+       Sa= pkg.p#
+       Iterate
      End
-
+     If thisEnv||'.'||thisStg <> Envmnt||'.'||Stg Then Do
+       x = WordPos(Envmnt||'.'||Stg,PromStgs)
+       If x > 0 Then Do
+         Say 'Replacing 'Envmnt'.'Stg||' with '||thisEnv'.'thisStg,
+          ' for package '||pkg.p#
+         Envmnt = thisEnv
+         Stg = thisStg
+       End
+       Else Do
+         Say 'SCL below does not match from stage 'thisEnv'.'thisStg
+         Say Element'_'Type'_'Envmnt'_'System'_'Subsys'_'Stg
+         Say 'action='||Command||' for package '||pkg.p#
+         Iterate
+       End
+     End
      If Trace_Opt == 'Y' Then Trace r
      entry = Element'_'Type'_'Envmnt'_'System'_'Subsys'_'Stg
      SCLdet.entry = Command
@@ -229,10 +237,15 @@ ScanACMandCompare:
      SUBSYS    = Word(Substr(ACMDetail,58),1)
      STG#      = Word(Substr(ACMDetail,70),1)
      STG       = StageID.Environ.STG#
+
      If LVL == '1' then Do
-        entry1 = ELEMENT'_'TYPE'_'ENVIRON'_'SYSTEM'_'SUBSYS'_'STG
-        Dependency = Strip(Substr(ACMDetail,12,58)||STG)
-        Iterate
+       If curstage == ENVIRON||'.'||STG# Then Do
+         entry1 = ELEMENT'_'TYPE'_'ENVIRON'_'SYSTEM'_'SUBSYS'_'STG
+         Dependency = Strip(Substr(ACMDetail,12,58)||STG)
+       End
+       Else,
+        Say 'dropping 'ELEMENT'_'TYPE'_'ENVIRON'_'SYSTEM'_'SUBSYS'_'STG
+     Iterate
      End
      If LVL <> '2' then Iterate;
      If curstage <> ENVIRON||'.'||STG# Then Do
@@ -244,6 +257,7 @@ ScanACMandCompare:
        End
        Else Iterate;
      End
+
 /*   If ENVIRON /= thisEnv then Iterate; */
      entry = ELEMENT'_'TYPE'_'ENVIRON'_'SYSTEM'_'SUBSYS'_'STG
      If entry == Last_entry then iterate;
@@ -284,7 +298,6 @@ ScanACMandCompare:
 
 ShowChronologicalOrder:
 
-   If Trace_Opt == 'Y' then Trace r
   /* Interpret Rexx Stem info on Packages      */
    Package4Row.     = ''
    Row4Package.     = ''
@@ -394,7 +407,7 @@ ShowPKGORDER_Report:
       Do row# = 2 to lastrow#
          rowindx = Right(row#,4,'0')
          thisPkg =  Package4Row.rowindx
-         if thisPkg = ' ' then leave;
+         if thisPkg = ' ' then Iterate;
          orderThisPkg = Chronological.thisPkg
          if orderThisPkg /= thisOrder then Iterate ;
          Queue Copies(' ',(thisOrder-1)*2) thisPkg
