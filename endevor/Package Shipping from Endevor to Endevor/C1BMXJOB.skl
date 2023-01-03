@@ -1,0 +1,210 @@
+)REXX VNBCPARM VNBLSDST OVERIDSN
+ /* REXX CODE */
+  TRACE  off
+  WHERE = 'C1BMXJOB'
+  tmparm = Translate(VNBCPARM,' ',',')
+  Date6 = Substr(Word(tmparm,2),3)
+  Time6 = Substr(Word(tmparm,3),1,6)
+  OVERIDSN='PUBLIC.HOST.D'Date6'.T'Time6'.OVERRIDE'
+)ENDREXX
+)CM
+)CM
+)CM  PACKAGE SHIPMENT BATCH JCL - STAGING STEP - ISPSLIB(C1BMXJOB)
+)CM
+)CM  THIS SKELETON IS USED TO GENERATE "PACKAGE SHIPMENT" JCL.  IT IS THE
+)CM  FIRST STEP OF A JOBSTREAM WHICH POPULATES STAGING DATASETS IN PREPARATION
+)CM  FOR TRANSMISSION VIA FILE TRANSMISSION SOFTWARE.
+)CM
+)CM  ISPSLIB(SCMM@SYM) - SETS STANDARD VARIABLES,
+)CM                      TAILORED BY THE HOST SITE.
+)CM  ISPSLIB(C1BMXHJC) - JOBCARD FOR THE HOST SITE.  THIS SKELETON IS IMBEDDED
+)CM                      IN C1BMXJOB AND XRCN.
+)CM  ISPSLIB(C1BMXJOB) - ** YOU ARE HERE **
+)CM  ISPSLIB(C1BMXLIB) - STEPLIB : CONLIB : SYSUDUMP : MESSAGE LOG
+)CM                      THIS SKELETON IS IMBEDDED IN XJOB, XHCN, AND XRCN
+)CM  ISPSLIB(C1BMXRCN) - REMOTE CONFIRMATION EXECUTION JCL
+)CM  ISPSLIB(C1BMXIN)  - SYSIN ( SHIP PKG <PKG-ID> TO DEST <DEST-ID> ETC. )
+)CM
+)CM  ISPSLIB(C1BMXCOM) - STEP TO TRANSFER VIA  XCOM FOR MVS
+)CM  ISPSLIB(C1BMXLOC) - STEP TO TRANSFER LOCALLY USING IEBCOPY
+)CM  ISPSLIB(C1BMXBD1) - STEP TO TRANSMIT VIA BULK DATA TRANSFER (JES)
+)CM  ISPSLIB(C1BMXBDT) - STEP TO TRANSMIT VIA BULK DATA TRANSFER (VER 2)
+)CM  ISPSLIB(C1BMXFTP) - STEP TO TRANSMIT VIA NETVIEW FTP
+)CM  ISPSLIB(C1BMXNDM) - STEP TO TRANSMIT VIA NETWORK DATA MOVER
+)CM
+)CM  ISPSLIB(C1BMXHCN) - JCL TO CONFIRM TRANSMISSION VIA ABOVE 4 METHODS
+)CM
+)CM  ISPSLIB(C1BMXEOJ) - EPILOG STEP(S) - CLEANUP
+)CM
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  THE FOLLOWING IS A GUIDE TO THE SKELETAL IMBEDDING:
+)CM
+)CM  C1BMXJOB
+)CM       C1BMXHJC
+)CM       C1BMXLIB
+)CM       C1BMXHJC        DATA FOR DD=C1BMXHJC
+)CM       C1BMXHCN        DATA FOR DD=C1BMXHCN
+)CM            C1BMXHJC
+)CM       C1BMXRCN        DATA FOR DD=C1BMXRCN
+)CM            C1BMXHJC
+)CM            C1BMXLIB
+)CM       C1BMXIN
+)CM  C1BMXLOC
+)CM  C1BMXCOM
+)CM  C1BMXHCN
+)CM       C1BMXLIB
+)CM  C1BMXBD1
+)CM  C1BMXBDT
+)CM  C1BMXHCN
+)CM       C1BMXLIB
+)CM  C1BMXHCN
+)CM       C1BMXLIB
+)CM  C1BMXFTP
+)CM  C1BMXNDM
+)CM  C1BMXHCN
+)CM       C1BMXLIB
+)CM  C1BMXEOJ
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  TAILORING INSTRUCTIONS:
+)CM
+)CM  1.  REMOVE THE TRANSMISSION PACKAGE DD STATEMENTS THAT DO NOT
+)CM      APPLY (E.G., IF BDT IS NOT USED, REMOVE C1BMXBDC AND C1BMXBDM).
+)CM
+)CM  2.  MODIFY THE MODEL CONTROL CARD DATASET NAME(S) USING SITE
+)CM      SPECIFIC PREFIXES.
+)CM
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)IM C1BMXHJC
+//*    PACKAGE=&PACKAGE
+//*    DESTID =&DESTID
+)IM SCMM@SYM
+//* *============================================* ISPSLIB(C1BMXJOB) *
+//* *==============================================================* *
+//* *==============================================================* *
+//* *==============================================================* *
+//* *==============================================================* *
+//NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,REGION=4096K,     C1BMXJOB
+//         PARM='&VNBCPARM SHIP &ZUSER '
+//*
+)IM C1BMXLIB
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXDET DD SYSOUT=*     ** SHIPMENT DETAIL REPORT  ****************
+//C1BMXSUM DD SYSOUT=*     ** SHIPMENT SUMMARY REPORT ****************
+//C1BMXSYN DD SYSOUT=*     ** INPUT LISTING AND SYNTAX ERROR REPORT **
+//C1BMXTRC DD SYSOUT=*,LRECL=133,RECFM=FBA   ** Shipment trace             **
+//*
+//* ******************************************************************
+//* *  LOCAL TRANSFER COPY/RUN COMMAND DATASETS
+//* *  LOCAL MODEL CONTROL CARD DATASET
+//* ******************************************************************
+//*
+//C1BMXLCC DD DSN=&&&&XLCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+//C1BMXLCM DD DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS,DISP=SHR
+//         DD DSN=SYSSHR.NDVR.R1801.CSIQOPTN,DISP=SHR
+//*
+//* ******************************************************************
+//* * NETVIEW FTP "ADD TO TRANSMISSION QUEUE" DATASET AND INTERNAL RDR
+//* * NETVIEW FTP MODEL CONTROL CARD DATASET //*
+******************************************************************
+//*
+//C1BMXFTC DD DSN=&&&&XFTC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+// DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+// UNIT=SYSALLDA
+//C1BMXFTM DD DISP=SHR,DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS
+//         DD DSN=SYSSHR.NDVR.R1801.CSIQOPTN,DISP=SHR
+//* * NETWORK DATA MOVER COPY/RUN COMMAND DATASETS
+//* * NETWORK DATA MOVER MODEL CONTROL CARD DATASET
+//* ******************************************************************
+//C1BMXNWC DD DSN=&&&&XNWC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+// DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+// UNIT=SYSALLDA
+//*
+)SEL PIGSFLY = Y
+//* ******************************************************************
+//* *  NETWORK DATA MOVER COPY/RUN COMMAND DATASETS
+//* *  NETWORK DATA MOVER MODEL CONTROL CARD DATASET
+//* ******************************************************************
+//*
+//C1BMXNWC DD DSN=&&&&XNWC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+)ENDSEL PIGSFLY = Y
+//C1BMXNWM DD DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS,DISP=SHR
+//         DD DSN=SYSSHR.NDVR.R1801.CSIQOPTN,DISP=SHR
+//C1BMXRJC DD DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS,DISP=SHR
+//         DD DSN=SYSSHR.NDVR.R1801.CSIQSENU,DISP=SHR
+//*
+//* ******************************************************************
+//* *  SHIPMENT DATE/TIME READ BY INLINE HOST CONFIRMATION STEP
+//* ******************************************************************
+//*
+//C1BMXDTM DD DSN=&&&&XDTM,DISP=(NEW,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+//* ******************************************************************
+//* *  HOST STAGING DATASET DELETION STATEMENTS (IDCAMS)
+//* ******************************************************************
+//*
+//C1BMXDEL DD DSN=&&&&HDEL,DISP=(NEW,PASS),SPACE=(TRK,(10,10)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+//* ******************************************************************
+//* *  REMOTE JCL MODEL MEMBERS
+//* ******************************************************************
+//*
+//C1BMXMDL DD DSN=&OVERIDSN,
+//            VOL=SER=TSOC32,UNIT=3390,
+//            DISP=SHR   (OLD,DELETE)
+//         DD DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS,DISP=SHR
+//         DD DSN=SYSSHR.NDVR.R1801.CSIQOPTN,DISP=SHR
+//*
+//* ******************************************************************
+//* *  JCL SEGMENTS TO CREATE GROUP SYMBOLICS FOR MODELLING
+//* ******************************************************************
+//*
+//C1BMXHJC DD DATA,DLM=##
+)IM C1BMXHJC OPT
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXHCN DD DATA,DLM=##
+)IM C1BMXHCN OPT
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXRCN DD DATA,DLM=##
+)IM C1BMXRCN OPT
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXLIB DD DATA,DLM=##
+)IM C1BMXLIB OPT
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//* ******************************************************************
+//* *  SHIP PACKAGE PKG-ID TO DESTINATION DEST-ID ( OPTION BACKOUT ) .
+//* ******************************************************************
+//*
+//* THE FOLLOWING DD STATEMENT MUST BE THE *LAST* CARD IN THIS MEMBER.
+//* ISPSLIB MEMBER C1BMXIN IS INCLUDED AFTER IT AS THE INSTREAM DATA.
+//*
+//C1BMXIN  DD *  *-------------------------------* ISPSLIB(C1BMXIN)  *

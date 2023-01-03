@@ -1,0 +1,67 @@
+)REXX VNBCPARM VNBSQDSP VPHPKGID OVERIDSN
+ /* REXX CODE */
+  TRACE off
+  WHERE = 'C1BMXIN    '
+  tmparm = Translate(VNBCPARM,' ',',')
+  PkgInfo  = GETSYRSB(VPHPKGID) ; /* get sys/sub from pkg name*/
+  If Words(PkgInfo) = 2 then,
+     C1SUBSYS = Word(PkgInfo,1);  /* get sys/sub from pkg name*/
+  Else,
+     C1SUBSYS = 'NA'
+  tmpShip= Strip(VNBSQDSP)
+  tmpShip= Strip(tmpShip,'T','.')
+  whereOut = Wordpos('OPT',tmpShip)
+  SHIPOUT = Word(tmpShip,whereOut+1)
+  SENTFROM = SYSVAR(SYSNODE)
+
+  Sa= 'C1BMXIN is preparing' OVERIDSN
+
+  "ALLOC F(OVERRIDE)  DA('"OVERIDSN"') ",
+         "LRECL(80)   BLKSIZE(24000) SPACE(1,1)",
+         "RECFM(F B) TRACKS DIR(5) ",
+         "UNIT(3390) VOLUME(TSOC32) ",
+         "NEW CATALOG KEEP  "     ;
+  "FREE  F(OVERRIDE) "
+
+  "ALLOC F(OVERRIDE)  DA('"OVERIDSN"(OVERRIDE)') ",
+         "UNIT(3390) VOLUME(TSOC32) SHR REUSE "
+  PUSH "//* Package Shipment Details    (C1BMXIN) **"
+  PUSH "//  SET SENTFROM='"SENTFROM"'"
+  PUSH "//  SET REQUEST='"SHIPOUT"'"
+  PUSH "//  SET DESTIN='"Strip(VNBLSDST)"'"
+  PUSH "//  SET PACKAGE='"VPHPKGID"'"
+  PUSH "//  SET C1SUBSYS='"C1SUBSYS"'"
+  PUSH "//* Package Shipment Details    (C1BMXIN) **"
+  "EXECIO 8 DISKW OVERRIDE (FINIS"
+  "FREE  F(OVERRIDE) "
+
+  TRACE Off
+  If SHIPOUT = 'BAC' then,
+     Do
+     "ALLOC F(OVERRIDE)  DA('"OVERIDSN"(BACKOUT1)') ",
+            "UNIT(3390) VOLUME(TSOC32) SHR REUSE "
+     PUSH "//IGNORE   DD   DATA,DLM=@@"
+     PUSH "//COPIES   EXEC PGM=IEFBR14  *PKG BACKOUT*"
+     "EXECIO 2 DISKW OVERRIDE (FINIS"
+     "FREE  F(OVERRIDE) "
+
+     "ALLOC F(OVERRIDE)  DA('"OVERIDSN"(BACKOUT2)') ",
+            "UNIT(3390) VOLUME(TSOC32) SHR REUSE "
+     PUSH "@@"
+     "EXECIO 1 DISKW OVERRIDE (FINIS"
+     "FREE  F(OVERRIDE) "
+     End
+
+)ENDREXX
+)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
+)CM
+)CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT
+)CM  TO C1BMX000.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+&VNBSQDSP
