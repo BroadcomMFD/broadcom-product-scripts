@@ -1,7 +1,7 @@
 # Package Shipping from Endevor to Endevor
-These procedures provide examples of package shipping scripts supporting shipments of elements from one Endevor to another. The Shipments can be to remote or local Destinations. The overall effect is the extension of an application's life cycle across multiple Endevor images.
+These procedures provide examples of package shipping scripts supporting the shipment of elements from one Endevor to another. Shipment can be to a remote or local Destination where another Endevor is running. The overall effect is the extension of an application's life cycle across multiple Endevor images.
 
-For many sites, the simple examples in this collection may be sufficient for theri needs. For other sites that have a wide range of changing values for System, Subsystem or Type names as elements ship from one Endevor to another, the dditional examples in this collection may be helpful.
+For many sites, the first few examples in this collection may be sufficient for your needs. If your site has a wide range of changing values for System, Subsystem  or Type as elements ship from one Endevor to another, then the additional examples in this collection may be helpful.
 
 ## Content Summary
 This procedure leverages the How to Enable Post-Ship Script Execution feature of Endevor. 
@@ -13,6 +13,6 @@ Your target Destination mapping rules must contain a rule, such as:
      HOST DATASET NAME:  SYSDE32.NDVR.ADMIN.ENDEVOR.*.ALTERS   
        maps to                                                  
      REMOTE DATASET NAME:(SCRIPT-FILE)                         
-- #RJICPY1 - the REMOTE JOBSTREAM skeleton. This version shows some additional commenting that you may elect to include
 - C1BMXIN and C1BMXJOB are the most complicated of the items in this collection, and are the most likely to be excluded. These show a more complicated method for mapping to the Destination system or subsystem name, using the package name prefix as the determining factor. 
-
+- GETSYRSB example REXX routine that determines the Destination System or Subsystem name based on the package prefix.
+- #RJICPY1 - provided only to demonstrate additional commenting that you may elect to use. This item contains the "@INCLUDE=(B)" statement that copies in a CA66AB or CA32AB member, or member named for a Destination at your site.
