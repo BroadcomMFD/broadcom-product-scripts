@@ -16,7 +16,6 @@ PARSE ARG Package
    PackageInfo.PACK= 'PACKAGE  SBS'
    PackageInfo.PDA#= 'PDA      SBS'
    PackageInfo.PKGM= 'PKGMAINT SBS'
-   PackageInfo.PNC#= 'PNC      SBS'
    PackageInfo.SHIP= 'SHIPPING SBS'
    PackageInfo.UTIL= 'UTILITY  SBS'
    PackageInfo.ZUNI= 'ZUNIT    SBS'
