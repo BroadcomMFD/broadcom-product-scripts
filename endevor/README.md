@@ -20,3 +20,6 @@ This [sample repository](Shipments-for-Multiple-Destinations) contains artifacts
 
 ## Storing zUnit Artifacts in Endevor
 This [sample repository](zunit) contains the artifacts described in the [Modern Mainframe](https://medium.com/modern-mainframe) blog on Medium.  The REXX scripts and corresponding JCL are used to serialize and deserialize zUnit test cases.  Also included is a JenkinsFile that shows how these scripts can be invoked via Zowe CLI in a Jenkins pipeline.
+
+## ISPF tools for Quick-Edit and Endevor
+This [ISPF sample project](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/ISPF-tools-for-Quick-Edit-and-Endevor) contains a collection of Field Developed Procedures, dependent upon on IBM's ISPF services and available to Quick-Edit and Endevor users on the mainframe. These tools can increase the productivity level of users on the mainframe, and in some cases render the Endevor experience to be closer to that of VS Code and zowe users. 
