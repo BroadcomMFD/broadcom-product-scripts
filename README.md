@@ -37,5 +37,8 @@ The [AtoZ sample project](https://github.com/BroadcomMFD/share/2022_columbus/Ato
 
 The [output-management](output-management) directory contains multiple samples related to Broadcom output management products.
 
+## ISPF tools for Quick-Edit and Endevor
+This [ISPF sample project](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/ISPF-tools-for-Quick-Edit-and-Endevor) contains a collection of Field Developed Procedures, dependent upon on IBM's ISPF services and available to Quick-Edit and Endevor users on the mainframe. These tools can increase the productivity level of users on the mainframe, and in some cases render the Endevor experience to be closer to that of VS Code and zowe users. 
+
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
