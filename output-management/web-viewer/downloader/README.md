@@ -39,7 +39,7 @@ once.
 
 Windows:
 
-    gradle/bootstrap/bootstrap-gradlew.bat
+    gradle\bootstrap\bootstrap-gradlew.bat
     npm ci
 
 Other OS:
@@ -59,6 +59,9 @@ Other OS:
 
     npm run generate-sdk
     ./gradlew build
+
+Note that the first time your run the `npm run generate-sdk` command the tool will need to download
+the OpenAPI Generator Java JAR file from the internet using hosts under the maven.org domain.
 
 The built distributable packages are saved in the `application/build/distributions` directory.
 
