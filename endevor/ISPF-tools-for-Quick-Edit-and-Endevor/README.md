@@ -1,10 +1,10 @@
 # ISPF tools for Quick-Edit and Endevor
-This collection of mainframe tools is dependent upon IBM's ISPF, and can only be used on the mainframe by users of Quick-Edit and Endevor. Although these tools are not availalbe to others, such as users on VS Code or zowe, in some cases they provide a similiar experience to those from other tools.
+This collection of mainframe tools is dependent upon IBM's ISPF, and can only be used on the mainframe by users of Quick-Edit and Endevor. Although these tools are not availalbe to others, such as users on VS Code or Zowe, in some cases they provide a similiar experience to those from other tools.
 Use the extension on each item to determine where the item needs to reside.
 - rex items must reside in a Rexx library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library
 - pnl items must reside in an ISPF panel library, typically a ISPPLIB or a CSIQPENU library
 - skl items must reside in an ISPF skeleton library, typically a ISPSLIB or a CSIQSENU library
-- msg items must reside in an ISPF message library, typically a ISPMLIB or a CSIQSENU library
+- msg items must reside in an ISPF message library, typically a ISPMLIB or a CSIQMENU library
 
 ## Content Summary
 This list is presented in an order of percieved value and popularity. Items listed together run together. 
