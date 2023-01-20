@@ -544,13 +544,24 @@ BUILD_PDMWIP:
 
    BUILD_PDMWIP_RC = RC ;
 /*                                                                   */
-   If BUILD_PDMWIP_RC > 8 then,
+   If BUILD_PDMWIP_RC > 7 then,
       Do
       Say "Showing results....."
       ADDRESS ISPEXEC "LMINIT DATAID(DDID) DDNAME(C1MSGS1)"
       ADDRESS ISPEXEC "VIEW DATAID(&DDID)"
       ADDRESS ISPEXEC "LMFREE DATAID(&DDID)"
+      want = 'N'
+      MSG1 = "Want to continue  ? (Enter 'Y')       "
+      MSG2 = "Want to exit      ? (Enter 'N')       "
+      MSG3 = " "
+      MSG4 = " "
+      MSG5 = "(Y/N)            "
+      ADDRESS ISPEXEC " ADDPOP  ROW(3)  COLUMN(12)"
+      ADDRESS ISPEXEC " DISPLAY PANEL(RETROPOP) "
+      ADDRESS ISPEXEC "REMPOP " ;
+      IF want = 'N' then Exit
       End
+
 
    "FREE FI(BATCHIN)" ;
 /*
