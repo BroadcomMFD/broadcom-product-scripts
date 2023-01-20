@@ -9,6 +9,9 @@ Alternatively, you can select from the use cases below:
 ## Endevor - Automated Test Facility for Batch Applications
 This [sample repository](endevor/Automated-Test-Facility-for-Batch-Applications) contains artifacts described in the [How to Leverage Endevor Processors to Test Batch Applications](https://medium.com/modern-mainframe/how-to-leverage-endevor-processors-to-test-batch-applications-6247a9dfdafa) blog on Medium.  The objects are for using Endevor processors in Building an Automated Test Facility for Batch Applications in Endevor.
 
+## Endevor - ISPF tools for Quick-Edit and Endevor
+This [ISPF sample project](endevor/ISPF-tools-for-Quick-Edit-and-Endevor) contains a collection of Field Developed Procedures, dependent upon on IBM's ISPF services and available to Quick-Edit and Endevor users on the mainframe. These tools can increase the productivity level of users on the mainframe, and in some cases render the Endevor experience to be closer to that of VS Code and Zowe users. 
+
 ## Endevor - Package Reporting
 This [sample repository](endevor/Multi-Package-Reporting-and-Validations) provides solutions for the reporting of Endevor package information. The first example offers a package report that can be used to determine input component omissions, and package relationships for multiple Endevor packages that need to be considered together.
 
@@ -36,9 +39,6 @@ The [AtoZ sample project](https://github.com/BroadcomMFD/share/2022_columbus/Ato
 ## Output Management
 
 The [output-management](output-management) directory contains multiple samples related to Broadcom output management products.
-
-## ISPF tools for Quick-Edit and Endevor
-This [ISPF sample project](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/ISPF-tools-for-Quick-Edit-and-Endevor) contains a collection of Field Developed Procedures, dependent upon on IBM's ISPF services and available to Quick-Edit and Endevor users on the mainframe. These tools can increase the productivity level of users on the mainframe, and in some cases render the Endevor experience to be closer to that of VS Code and zowe users. 
 
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
