@@ -1,0 +1,23 @@
+/* REXX */
+   ADDRESS ISREDIT
+   "ISREDIT MACRO (ONOROFF) "
+  trace O
+  Upper ONOROFF ;
+  ADDRESS ISPEXEC  'VGET (NOTIFYME) PROFILE '
+  IF ONOROFF = '?' THEN,
+     Do
+     SAY "Notify option is '"NOTIFYME"'" ;
+     Exit
+     End
+
+  IF ONOROFF = 'Y' | ONOROFF = 'ON' THEN,
+     NOTIFYME = 'Y' ;
+  ELSE,
+  IF ONOROFF = '' & NOTIFYME = 'N' THEN,
+     NOTIFYME = 'Y' ;
+  ELSE,
+     NOTIFYME = 'N' ;
+  ADDRESS ISPEXEC  'VPUT (NOTIFYME) PROFILE '
+  PDAOPT = NOTIFYME
+  ADDRESS ISPEXEC  'VPUT (PDAOPT) PROFILE '
+  EXIT

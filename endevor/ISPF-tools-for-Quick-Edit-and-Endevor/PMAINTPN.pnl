@@ -1,0 +1,33 @@
+)ATTR DEFAULT(%+_)
+/*----------------------------------------------------------------------
+/* (C) 2002 Computer Associates International, Inc.
+/*----------------------------------------------------------------------
+ › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)
+ | TYPE(OUTPUT) INTENS(LOW)
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)
+ ¬ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)
+)BODY
+%------------------------ ENDEVOR Package(s) Maintenance ----------------------
+%Command ===>_VARWKCMD
++
++    Action    :_ACTION  +   <- COMMIT,RESET,DELETE  for ›ROWNUM+Packages
++
++ Complete the JCL JOB card and press%ENTER+to submit the jobstream.
++ Enter the%END+command to terminate the submit.
++
++
++  _C1BJC1                                                                +
++  _C1BJC2                                                                +
++  _C1BJC3                                                                +
++  _C1BJC4                                                                +
++
+%
++     (PRESS%ENTER+ or%PF3+TO CANCEL OR END)
++
+)INIT
+  &ACTION   = 'COMMIT'
+)PROC
+ VER (&ACTION,LIST,COMMIT,RESET,DELETE)
+)END
