@@ -132,16 +132,15 @@
    /* In case some are for MASK or SuperC, this step needs   */
    /* to interpret those too, and place others back on Stack.*/
 
+   If TraceRc = 'Y' then Say 'TEST#JOB: Preparing OPTIONS:'
    /* re-Stack  the ones beginning with TXT.         */
    /* Interpret the others.                          */
    Do QueuedTotal
       Parse Pull thisVopt
       thisVopt = Strip(thisVopt)
       If TraceRc = 'Y' then Say 'TEST#JOB:' thisVopt
-      if Substr(thisVopt,1,4) = 'TXT.' then,
-         Queue thisVopt    ;  /* opt is for TXTRPLCE */
-      Else,
-         interpret thisVopt;  /* opt is for TEST#JOB */
+      Queue thisVopt    ;  /* opt is for TXTRPLCE */
+      interpret thisVopt;  /* opt is for TEST#JOB */
    End;   /* Do v# = 1 to vopts.0 */
 
    QueuedTotal = QUEUED()
