@@ -69,7 +69,7 @@ FirstLookAtIndentation:
 
    /* Bypass blank lines and comment lines */
    if Words(yamlrec) = 0 then Return 0 ; /* Blank line */
-   whereComment = Pos('#',yamlrec);
+   whereComment = FindCommentPosition()
    if whereComment = 1 then Return 0 ;   /* Comment line */
    else
    if whereComment = 0 then NOP
@@ -94,6 +94,29 @@ FirstLookAtIndentation:
       End
 
    Return 1
+
+FindCommentPosition:
+
+   Start =1
+   Do forever
+      If Start >= length(yamlrec) then Return 0
+      foundComment = Pos('#',yamlrec,Start);
+      if foundComment = 0 then Return 0
+      OpenSingleQt = Pos("'",yamlrec,Start);
+      ClosSingleQt = Pos("'",yamlrec,OpenSingleQt+1)
+      OpenDoubleQt = Pos('"',yamlrec,Start);
+      ClosDoubleQt = Pos('"',yamlrec,OpenDoubleQt+1)
+      If foundComment > OpenSingleQt &,
+         foundComment < ClosSingleQt then,
+         Start = ClosSingleQt + 1
+      Else,
+      If foundComment > OpenDoubleQt &,
+         foundComment < ClosDoubleQt then,
+         Start = ClosDoubleQt + 1
+      Else Return foundComment
+   End /* Do forever */
+
+   Return foundComment
 
 CloserLookAtYamlrecall:
 
