@@ -2,34 +2,57 @@
 //        MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A
 //*-------------------------------------------------------------------
 //* Create an new Dynamic Environment from an existing Environment
+//* The name of the new   Environment comes from the Table
 //* Use SET variables to name new and old Environment data
-//*   JCL: PSP.ENDV.TEAM.JCL(DEFINEN4)
+//*   JCL: PSP.ENDV.TEAM.MODELS(DEFINENS)
 //*-------------------------------------------------------------------
 // JCLLIB  ORDER=(PSP.ENDV.TEAM.JCL)     <-DSN containing INCLUDE mbrs
 //*--
 // EXPORT SYMLIST=(*)
-//*--
+//*--                 / Table Tool variables
 //    SET LIKENV=&LikeEnvir
 //    SET NEWENV=&NewEnvir
 //    SET NEWSTG1=&NewStage1
 //    SET NEWSTG2=&NewStage2
 //*--
 //    SET DEFINES=&DefinesDSN
-//*-------------------------------------------------------------------*
-//*   STEP 1 -- Batch Admin for Like Environement already done.
-//*-------------------------------------------------------------------*
-//STEP01   EXEC PGM=IEFBR14     'ENBE1000'  <-Batch Admin BUILD LikeEnv
 //*--------------------------------------------------------------------
 //*   STEP 2 -- Apply search and replace values for new Build SCL
 //*   TXTRPLCE- https://github.com/BroadcomMFD/broadcom-product-scripts
+//*   OPTIONS - Find and Replace pairs in either REXX or YAML
 //*--------------------------------------------------------------------
 //STEP02   EXEC PGM=IRXJCL,                 <-Search and Replace
 //         PARM='TXTRPLCE Ndvr',
 //         COND=(4,LT)
-//OLDTXT   DD  DISP=SHR,DSN=&DEFINES(&LikeEnvir)
-//NEWTXT   DD  DISP=SHR,DSN=&DEFINES(&NewEnvir)
+//OLDTXT   DD  DISP=SHR,DSN=&DEFINES(&LikeEnvir)   <- input
+//NEWTXT   DD  DISP=SHR,DSN=&DEFINES(&NewEnvir)    <- output
 //*TXTRPLCE DD  DUMMY          <- Turn on Trace for TXTRPLCE
-//OPTIONS  DD  *,SYMBOLS=JCLONLY
+//OPTIONS  DD  *,SYMBOLS=JCLONLY  <- YAML format
+# YALM Search+Replace pairs for creating Dynamic Environments
+#   code as many FindTxt and Replace pairs as needed
+TXT:
+  Ndvr:
+    Change:
+       - FindTxt   : "ENVIRONMENT '&LikeEnvir'"
+       - Replace   : "ENVIRONMENT '&NewEnvir'"
+#
+       - FindTxt   : "SHARE.ENDV.PRCS.ADMPROD.PRCSMY.LOAD"
+       - Replace   : "SHARE.ENDV.PRCS.ADMTEST.PRCSMY.LOAD"
+#
+#*    ----  Need to make Base and Deltas unique ---      **
+       - FindTxt   : "&#ZHLQELIB..&#ZHLQINV..."
+       - Replace   : "&#ZHLQELIB..&C1SY..&C1SU..D&C1ST(5,2).."
+#
+       - FindTxt   : "SHARE.NDVR.&#ZHLQINV..."
+       - Replace   : "SHARE.NDVR.&C1SY..&C1SU..&C1ST.."
+#
+       - FindTxt   : "SHARE.NDVR.TSLIK.SLICK.D2"
+       - Replace   : "SHARE.NDVR.TSLIK.SLICK.&C1ST."
+#
+       - FindTxt   : "&C1SY..&C1SU..D&C1ST(5,2).."
+       - Replace   : "&C1SY..&C1SU..D&C1ST(5,2)."
+#
+//OPTIONSR DD  *,SYMBOLS=JCLONLY  <- REXX format
 *   code as many FindTxt and Replace pairs as needed
 TXT.Ndvr.FindTxt.1 = "ENVIRONMENT '&LikeEnvir'"
 TXT.Ndvr.Replace.1 = "ENVIRONMENT '&NewEnvir'"
@@ -50,14 +73,13 @@ TXT.Ndvr.Replace.5 = "SHARE.NDVR.TSLIK.SLICK.&C1ST."
 TXT.Ndvr.FindTxt.6 = "&C1SY..&C1SU..D&C1ST(5,2).."
 TXT.Ndvr.Replace.6 = "&C1SY..&C1SU..D&C1ST(5,2)."
 *
-//*INPUTS  DD  DUMMY
-//   INCLUDE MEMBER=SYSEXEC       <- where is TXTRPLCE
 //SYSPRINT DD  SYSOUT=*
+//   INCLUDE MEMBER=SYSEXEC       <- where is TXTRPLCE
 //SYSTSIN  DD  DUMMY
 //SYSTSPRT DD  SYSOUT=*
 //*
 //*-------------------------------------------------------------------*
-//*   STEP 3 -- EXECUTE CSV UTILITY
+//*   STEP 3 -- Allocate new MCF files for new Env
 //*-------------------------------------------------------------------*
 //STEP03   EXEC PGM=IDCAMS,                 <-Define new MCFs
 //         COND=(4,LT)
@@ -71,7 +93,6 @@ TXT.Ndvr.Replace.6 = "&C1SY..&C1SU..D&C1ST(5,2)."
 //SYSPRINT   DD SYSOUT=*
 //AMSDUMP    DD SYSOUT=*
 //*
-//*-------------------------------------------------------------------*
 //*-------------------------------------------------------------------*
 //*   STEP 4 -- EXECUTE Endevor Batch Administration to Define Environ
 //*-------------------------------------------------------------------*

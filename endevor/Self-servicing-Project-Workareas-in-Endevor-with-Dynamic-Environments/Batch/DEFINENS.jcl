@@ -14,22 +14,22 @@
 //    SET LIKENV=DEV                     <-Old Env to model for NEw
 //    SET DEFINES=PSP.ENDV.TEAM.DEFINES  <-DSN for ADMIN SCL
 //*-------------------------------------------------------------------*
-//*   STEP 1 -- EXECUTE CSV UTILITY to Build SCL for LIKE enironement
+//*   STEP 1 -- Collect info from the Table
 //*-------------------------------------------------------------------*
-//SUBMITS  EXEC PGM=IRXJCL,PARM='ENBPIU00 A' <-Process Table
-//TABLE    DD *
+//DYNENVS  EXEC PGM=IRXJCL,PARM='ENBPIU00 A' <-Process Table
+//TABLE    DD *  <- List details for new Dynamic Environments
 *NewEnvir NewStage1 NewStage2 Description-----------------------------
  VIN01    VIN0VA    VIN0VB    Environment for Vin
  DEV01    DEV01A    DEV01B
  DEV02    DEV02A    DEV02B
  DEV03    DEV03A    DEV03B
-**EV04    DEV04A    DEV04B
-*DEV05    DEV05A    DEV05B
-*DEV06    DEV06A    DEV06B
-*DEV07    DEV07A    DEV07B
-*DEV08    DEV08A    DEV08B
-*DEV09    DEV09A    DEV09B
-*DEV10    DEV10A    DEV10B
+ DEV04    DEV04A    DEV04B
+ DEV05    DEV05A    DEV05B
+ DEV06    DEV06A    DEV06B
+ DEV07    DEV07A    DEV07B
+ DEV08    DEV08A    DEV08B
+ DEV09    DEV09A    DEV09B
+ DEV10    DEV10A    DEV10B
 //OPTIONS  DD *,SYMBOLS=JCLONLY
   Jobchar = Substr(NewEnvir,5,1)
   LikeEnvir       = '&LIKENV'
@@ -37,7 +37,7 @@
   If Description=' ' then Description='DEVELOPMENT Dynamic' NewEnvir
   Userid = USERID()
   $delimiter = '|'
-//MODEL    DD DISP=SHR,DSN=PSP.ENDV.TEAM.MODELS(DEFINEN4)
+//MODEL    DD DISP=SHR,DSN=PSP.ENDV.TEAM.MODELS(DEFINENS)
 //   INCLUDE MEMBER=CSIQCLS0      <- where is ENBPIU00
 //SYSTSPRT  DD SYSOUT=*
 //TBLOUT   DD DSN=&&SUBMITS,
@@ -61,7 +61,7 @@ BUILD SCL FOR SYSTEM "*"
 //SYSTERM   DD  SYSOUT=*
 //SYSABEND  DD  SYSOUT=*
 //*-------------------------------------------------------------------*
-//*----- Submit a job for each new Environment------------------------*
+//*----- Submit (or print) the job for each new Environment-----------*
 //*--------------------------------------------------------------------
 //SUBMIT   EXEC PGM=IEBGENER,REGION=1024K    <-Submit or print
 //SYSPRINT  DD SYSOUT=*                           MESSAGES
@@ -69,5 +69,5 @@ BUILD SCL FOR SYSTEM "*"
 //SYSIN    DD DUMMY                               CONTROL STATEMENTS
 //SYSUDUMP DD SYSOUT=*
 //SYSUT2X   DD SYSOUT=*                     / Print or Submit
-//SYSUT2    DD SYSOUT=(A,INTRDR),LRECL=80   \       "
+//SYSUT2    DD SYSOUT=(A,INTRDR),LRECL=80
 //*--------------------------------------------------------------------
