@@ -1,7 +1,15 @@
 //*****************************************************************  
 //* Fetch the element's Options from Endevor libraries up the map * 
-//*  (Options also contain IGYCRCTL= and IEWL= statements         *
-//*    for CONPARMX steps  )                                      *
+//*  Evaluate the Element OPTIONS within a Generate processor     *
+//*  Options also contain IGYCRCTL= and IEWL= statements          *
+//*    for CONPARMX steps, For example:                           *
+//*  IGYCRCTL ='OBJECT,APOST,AWO,DATA(31),FASTSRT,FLAG(W),'+   
+//*            'OPT(1),LIST,RENT,TRUNC(BIN),'          
+//*  IEWL='XREF,LIST,LET,AMODE(31),RMODE(ANY),RENT,REUS'   
+//*  New_COBOL = 'Y'
+//*  MQSeries  = 'Y' 
+//*****************************************************************
+//*   Use IEBUPDTE to fetch Element OPTIONS                       *
 //*****************************************************************  
 //GETOPTN  EXEC PGM=IEBUPDTE,MAXRC=4                                 
 //SYSPRINT DD DUMMY                                                  
@@ -19,7 +27,7 @@
 //*     New_Cobol = 'Y'                                           *
 //*  Give RC=1   if found. Otherwise  RC=0                        *
 //*****************************************************************  
-//COMPILER EXEC PGM=VALUECHK,PARM='NEW_COBOL Y'                    
+//COMPILER EXEC PGM=VALUECHK,PARM='New_COBOL Y'                    
 //STEPLIB  DD DSN=<Load library where VALUECHK is found>,DISP=SHR    
 //SYSPRINT DD SYSOUT=*                                                
 //OPTIONS  DD DSN=&&OPTIONS,DISP=(OLD,PASS)                         
@@ -34,4 +42,5 @@
 //STEPLIB  DD DSN=<Load library where VALUECHK is found>,DISP=SHR    
 //SYSPRINT DD SYSOUT=*                                                
 //OPTIONS  DD DSN=&&OPTIONS,DISP=(OLD,DELETE)                         
-//*                                   
+//*            
+//*   (downstream processor steps respond to Return codes )    
