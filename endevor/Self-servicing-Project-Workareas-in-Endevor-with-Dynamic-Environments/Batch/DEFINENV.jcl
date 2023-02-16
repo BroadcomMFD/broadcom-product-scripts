@@ -1,6 +1,6 @@
-//&Userid|&Jobchar JOB (0000),'&NewEnvir ENV',                          JOB00133
-//        MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A
-//*--                 / Table Tool variables
+//WALJO11E JOB (0000),                                                  JOB00133
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
+//      NOTIFY=&SYSUID
 //*-------------------------------------------------------------------
 // JCLLIB  ORDER=(PSP.ENDV.TEAM.JCL)
 // EXPORT SYMLIST=(*)
@@ -9,11 +9,11 @@
 //* Use SET variables to name new and old Environment data
 //*   JCL: PSP.ENDV.TEAM.JCL(DEFINENV)
 //*-------------------------------------------------------------------
-//    SET NEWENV=&NewEnvir
-//    SET NEWSTG1=&NewStage1
-//    SET NEWSTG2=&NewStage2
+//    SET NEWENV=DEV02
+//    SET NEWSTG1=DEV02A
+//    SET NEWSTG2=DEV02B
 //*--
-//    SET LIKENV=&LikeEnvir
+//    SET LIKENV=DEV01      <- Built from DEV and adjusted
 //*-------------------------------------------------------------------*
 //*   STEP 1 -- EXECUTE CSV UTILITY to Build SCL for LIKE enironement
 //*-------------------------------------------------------------------*
