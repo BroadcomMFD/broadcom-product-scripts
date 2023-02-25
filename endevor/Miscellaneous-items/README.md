@@ -2,9 +2,9 @@
 
 These are other miscellaneous Endevor tools
 
-## ANL#* and BTCHEDIT
+## ANL#DRIV, ANL#VIEW and BTCHEDIT
 
-These items offer a Rexx Edit macro alternative to using the Endevor Inventory Analyzer. Advantages this Rexx version has:
+These items engage a Rexx Edit macro method as an alternative to the Endevor Inventory Analyzer. Advantages for this Rexx version:
 
 - The Edit macro ANL#VIEW can be tested on individual members of source. While viewing a member, enter ANL#VIEW on the command line.
 - Some conditions can be easier handled. For example, the analysis might produce Emdevor SCL and OPTIONS content
