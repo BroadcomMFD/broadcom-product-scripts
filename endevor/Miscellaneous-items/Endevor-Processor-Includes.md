@@ -8,7 +8,7 @@ Modify the LIBENV value on your Defaults table
 >
                LIBENV=PV,               LIBRARIAN (LB), PANVALET (PV)  X 
                
-You can choose a value of 'LB' or 'PV' for Librarian or Panvalet. Neither choice requires that you have the product installed, but simply designates whether include referecnes will be made with Librarian syntax ( -INC) or Panvalet syntax ( ++INCLUDE ).           
+You can choose a value of 'LB' or 'PV' for Librarian or Panvalet respectively. Neither choice requires that you have the product installed, but simply designates whether include references will be made with Librarian syntax ( -INC) or Panvalet syntax ( ++INCLUDE ).           
 
 ## Name an INCLUDE library on your processor Definitions
 
@@ -53,8 +53,7 @@ If you are using the Panvalet method, then use this example.
 //GCOBOL   PROC AAAX='',                                              
 //             CPARMA='LIB,LIST',                                     
 //             CPARMZ='NOSSR',                                        
-//*            CSIQCLS0=CARSMINI.NDVR.R1801.CSIQCLS0,                 
-//             @CICSLOD='SYSSHR.CTS540.GA.CICS.RSU1912.SDFHLOAD',     
+//             @CICSLOD='SYS3.GA.CICS.SDFHLOAD',     
        ++INCLUDE SETSTMTS    Standard processor includes              
 //            ZZZZZZ=                                                 
 ~~~
@@ -67,8 +66,7 @@ If you are using the Librarian method, then use this example.
 //GCOBOL   PROC AAAX='',                                              
 //             CPARMA='LIB,LIST',                                     
 //             CPARMZ='NOSSR',                                        
-//*            CSIQCLS0=CARSMINI.NDVR.R1801.CSIQCLS0,                 
-//             @CICSLOD='SYSSHR.CTS540.GA.CICS.RSU1912.SDFHLOAD',     
+//             @CICSLOD='SYS3.GA.CICS.SDFHLOAD',     
 -INC SETSTMTS    Standard processor includes              
 //            ZZZZZZ=                                                 
 ~~~
