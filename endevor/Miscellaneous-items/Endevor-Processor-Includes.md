@@ -1,6 +1,6 @@
 # Endevor-Processor-Includes
 
-COBOL programmers use Copybooks and Assembler programmers use macros. IBM's Job Control Language is supported by PROCs, and the C++ language is supported by Headers. All the supporting items represent places where frequently used lines of code can be coded once, and then referenced as needed by the others. This document presents how to provide the same feature for Endevor processors. Any Endevor site can incorporate the use of processor "Includes" by following these simple steps.
+COBOL programmers use Copybooks and Assembler programmers use macros. IBM's Job Control Language is supported by PROCs, and the C++ language is supported by Headers. All the supporting items represent places where frequently used lines of code can be coded once, and then referenced as needed by the others. This document presents how to provide the same feature for Endevor processors, using processor "Includes". Any Endevor site can incorporate the method by following these simple steps.
 
 ## Update the Defaults table
 
@@ -10,7 +10,7 @@ Modify the LIBENV value on your Defaults table
 
 You can choose a value of 'LB' or 'PV' for Librarian or Panvalet respectively. Neither choice requires that you have the product installed, but simply designates whether include references will be made with Librarian syntax ( -INC) or Panvalet syntax ( ++INCLUDE ).
 
-## Name an INCLUDE library on your processor Definitions
+## Name an INCLUDE library for process Type Definitions
 
 Here is an example processor type definition where an INCLUDE LIBRARY is defined. 
 
@@ -39,11 +39,11 @@ Here is an example processor type definition where an INCLUDE LIBRARY is defined
    SOURCE O/P LIBRARY===>NDVR.ADMIN.ENDEVOR.SHIP1.PROCESS             
      EXPAND INCLUDES(Y/N) ===>Y                                              
  ~~~
-In the Environment(s) where you have type PROCESS defined, add an Include library at each stage of the Environment.
+In the Environment(s) where you have type PROCESS defined, add an Include library at both stages of the Environment.
 
-## Define a type for INCLUDE
+## Define an INCLUDE Type
 
-In the Environment(s) where you have type PROCESS defined, also define the type INCLUDE (or your type name of choice). Ensure that the type is is defined so that  elements created for this type also cause the libraries named in the previous step to be populated.
+In the Environment(s) where you have type PROCESS defined, also define the type INCLUDE (or your type name of choice). Ensure that the type is defined so that  elements created for this type also cause the libraries named in the previous step to be populated.
 
 ## Create your INCLUDE references
 
@@ -73,4 +73,4 @@ If you are using the Librarian method, then use this example.
 ~~~
 The -"INC" text must begin in column 1.
 
-With either method, the Automated Configuration Manager (ACM) picks up relationships and Include elements automatically.
+With either method, the Automated Configuration Manager (ACM) picks up relationships between processor and Include elements automatically.
