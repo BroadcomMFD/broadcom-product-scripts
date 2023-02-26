@@ -1,5 +1,3 @@
-//IEBPTPCH JOB   123,CLASS=S,MSGCLASS=X,MSGLEVEL=(1,1),                         
-//         NOTIFY=TLSJPB,REGION=8M                                              
 //*-------------------------------------------------------------------          
 //GETPKGS  EXEC PGM=IEBPTPCH                                                    
 //SYSUT1   DD DISP=SHR,DSN=SACC.PROD.VPLSLPC.FFD.BINDDESA                       
