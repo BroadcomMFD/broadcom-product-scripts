@@ -19,13 +19,3 @@ A VALUECHK step in a processor reflects in its return code whether a statement c
 
 These items show "Extended Rexx" abilities of Table Tool to execute statements within a processor step, without having to create separate members for REXX code.
 
-## Dynamic-SYSLIB
-
-Items in this folder provide for a "Dyanamic SYSLIB" feature. Developement efforts conducted in parallel might need to share inputs, and these items provide for that kind of sharing. 
-
-For example, a January release being developed in one sandbox (or environment) might be underway at the same time as a March release in another sandbox (or envieonment). This feature allows the March release to include libraries for the January release in its own SYSLIB concatenations. The result is that testing of the March release simulates the January release being in production - before the January release is Moved to production.
-
-
-
-
-
