@@ -5,4 +5,4 @@ ENDIEIM1 is Quick-Edit's Edit Session Startup Command. In this folder a snippet 
 Similar constructs for ENDIEIM1 can render a support within Quick-Edit for other element types where an edit session is undesirable. For example:
 
  - Telon elements where a Quick-Edit session opens the Telon Design facility
- - SDSF elements where a Quick-Edit session opens the Screen Design Facility
+ - SDF II elements where a Quick-Edit session opens IBM's Screen Definition Facility II
