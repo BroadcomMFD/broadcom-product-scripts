@@ -1,6 +1,7 @@
 # Processor-Tools-and-Processor-Snippets
 
 Endevor processor utilities and example (snippets) of Endevor processor code are found at this location. 
+For the sake of highlighting and syntax checking, processors and processor snippets are given the .jcl extension.
 
 ## VALUECHK
 
