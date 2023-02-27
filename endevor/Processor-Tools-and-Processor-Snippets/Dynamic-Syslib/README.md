@@ -9,3 +9,5 @@ Endevor elements create library aliases are used to support this feature, which 
   - Endevor processors are impacted only for a 1-time setup of this feature. As alias names change, processors are not impacted
   - Endevor keeps a history (as deltas) of library concatenation changes
   - responsibility for library concatenations can be given to application teams
+
+The YAML2REXX routine is used by more than one solution, and can be found in the Processor-Tools-and-Processor-Snippets folder.
