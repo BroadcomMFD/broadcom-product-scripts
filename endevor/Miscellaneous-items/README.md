@@ -30,4 +30,6 @@ While editing a processor (or JCL) where a dataset name is found, enter the name
 
 ## ENDIEIM1
 
-Provided are an example feature-rich version and a snippet to invoke JCLCHeck executions. ENDIEIM1 is the Quick-Edit "Session Startup" command.  See the techdocs documentation for details.
+Provided are an example feature-rich version and a snippet to invoke JCLCHeck executions. ENDIEIM1 is the Quick-Edit "Session Startup" command.  
+Find other examples of ENDIEIM1 in the ISPF-tools-for-Quick-Edit-and-Endevor folder.
+See also techdocs documentation for details.
