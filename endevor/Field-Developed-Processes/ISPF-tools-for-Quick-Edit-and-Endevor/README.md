@@ -9,7 +9,8 @@ Use the extension on each item to determine where the item needs to reside.
 - msg items must reside in an ISPF message library, typically a ISPMLIB or a CSIQMENU library
 
 ## Content Summary
-This list is presented in an order of perceived value and popularity. Items listed together run together. 
+
+This list is presented in an order of perceived value and popularity. Items listed together run together.
 
 - Package PACKAGEP PKGESELS and PKGESEL2. These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package on one screen from a list of elements. While viewing an element list, enter "TSO PACKAGE" on the command line, and in one screen the items listed will be placed into a new package. Upon exiting the screen, a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
 APIALPKG is an optional API program that can be used with the Package tool. It allows a user to create a new package by copying the content of another package. In this case, from any Quick-Edit or Endevor screen that shows a package name, enter "TSO PACKAGE" on the command line and move the cursor to the input package name before pressing 'Enter'. 
@@ -23,4 +24,4 @@ APIALPKG is an optional API program that can be used with the Package tool. It a
 - RETRO RETROPOP RETRSHOW. These items can be used only from Quick-Edit where the PDA is active. The user can examine a PDA message, enter "TSO RETRO" on the command line, and use the cursor to point to a Note line that reflects another element to invoke an assisted PDM execution.
 - PKGMAINT and PMAINTPN. These items offer Quick-Edit and Endevor users a fast method for managing package actions. While displaying a list of packages, enter "TSO PKGMAINT" on the command line to enable a batch COMMIT/RESET/DELETE action for all the listed packages. 
 - QEXPAND and QEXPANDW. These two items can be used in Quick-Edit during an edit session as an "expand includes" utility. By entering "QEXPAND" on the command line, and moving the cursor to a COPY, ++INCLUDE, or -INC statement, the user invokes the tool to copy the content of the member referenced on the line into the edit session as NOTE lines.
-- Itens in the ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro folder empower Quick-Edit to bypass its normal edit session, and to initiate other processing
+- Items in the ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro folder empower Quick-Edit to bypass its normal edit session, and to initiate other processing

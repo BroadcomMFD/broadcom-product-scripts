@@ -11,7 +11,7 @@ This processor utility complements the use of CONPARMX within your processors. T
 
 where keyword can be any word or variable name, and _value_ is its assigned value. For example:
 
->Compiler = 'NewVersion'    
+>Compiler = 'NewVersion'
 >MQSeries = 'Y'
 
 A VALUECHK step in a processor reflects in its return code whether a statement can be found in the OPTIONS indicating that a keyword is assigned to a _value_. Processors can use the return codes from VALUECHK steps to determine whether an element requires certain processing choices, such as Compiler and MQseries.
@@ -20,4 +20,14 @@ A VALUECHK step in a processor reflects in its return code whether a statement c
 
 These items show "Extended Rexx" abilities of Table Tool to execute statements within a processor step, without having to create separate members for REXX code.
 
-## D
+## DB2MASK#
+
+A processor Rexx program that simulates the DB2 Masking method for doing DB2 Binds.
+
+## GOPTIONS and ROPTIONS
+
+A processor and its Rexx parser that can perform syntax checking on OPTIONS elements.
+
+## Dynamic-Syslib
+
+Items in this folder support the sharing of input components across developer efforts that are being conducted in parallel.
