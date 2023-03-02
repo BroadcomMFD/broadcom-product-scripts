@@ -1,10 +1,15 @@
 ## ACM-Build-Without-Generates
 
-For new Endevor implementations, the first choice for building Automated Configuration Manager (ACM) information is by performing Generate actions on the program inventory. However, some Endevor sites have never had all their program inventory Generated, and are running Endevor without the full benefit of the ACM. It may be considered too risky or unacceptable to make processor or processor group and approver relate changes in the production environment. Or, it may that there is too much program inventory to Generate over a weekend – even with the Concurrent Action Processing.  As an alternative, this collection provides a way for building ACM data which offers these benefits: 
+For new Endevor implementations, the first choice for building Automated Configuration Manager (ACM) information is by performing Generate actions on the program inventory. However, some Endevor sites have never had all their program inventory Generated, and are running Endevor without the full benefit of the ACM. It may be considered too risky or unacceptable to make processor or processor group and approver relate changes in the production environment. Or, it may that there is too much program inventory to Generate over a period of available time – even with the Concurrent Action Processing.  As an alternative, this collection provides a way for building ACM data with the following benefits:
 
-- Low risk – no processor changes are required. No Generate actions are required. Building of ACM information can be limited to elements that have never been Generated. 
+- Low risk:
+    
+   -  No processor changes are required
+   -  No Generate actions are required
+   -  No temporary removal of approvals is necessary. 
+   -  Building of ACM information can be limited to elements that have never been Generated. 
 - Fast – Builds ACM relationship information by scanning inventory. Runs in a fraction of the time that it takes to Generate inventory.
-- Enables the Endevor ACM Queries, and AutoGen functions.
+- Enables the use of Endevor ACM Queries, and AutoGen functions.
 
 ## Steps for Execution 
 
