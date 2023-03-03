@@ -4,7 +4,7 @@ These items were constructed by the Broadcom Services team and have been impleme
 
 ## ACM-build-without-Generates
 
-Since 2005 this FDP has been used at sites that had not built their Automated Configuration Manager data. Generating elements at the time of conversion remains the best approach, but if the opportunity was missed this FTP can catch things up quickly and without risk.
+Since 2005 this FDP has been used at sites that had not built their Automated Configuration Manager data. Generating elements at the time of conversion remains the best approach, but if the opportunity was missed this FDP can catch things up quickly and without risk.
 
 ## API-Assembler-Examples
 
@@ -17,7 +17,7 @@ The Stub is virtually static, and the REXX is able to operate on variables as de
 
 ## ISPF tools for Quick-Edit and Endevor
 
-This repository contains a collection of tools that are dependent upon on IBM's ISPF, and available only to Quick-Edit and Endevor users on the mainframe. Since 2004, these tools have increased the productivity level of users on the mainframe. Some of these tools make the Quick-Edit/Endevor experience to be closer to that of VS Code and Zowe users. 
+This repository contains a collection of tools that are dependent upon on IBM's ISPF, and available only to Quick-Edit and Endevor mainframe users. Since 2004, these tools increase the users productivity level, and in some cases deliver an experience closer to that given by the use of VS Code.
 
 ## Miscellaneous-items
 
@@ -29,7 +29,7 @@ This sample repository provides solutions for the reporting of input component o
 
 ## Package-Shipment-Automation-Using-Endevor-Exits
 
-Since the year 2006 a number of Endevor sites have automated package shipments, using this FTP.
+Since the year 2006 a number of Endevor sites have automated package shipments, using this FDP.
 
 ## Post-Ship-Scripts-for-Shipping-Endevor-to-Endevor
 
@@ -41,6 +41,6 @@ This collection contains widely-used objects and examples  for Endevor processor
 
 ## Table-Tool-Examples
 
-A collection of JCL members that demonstrate the use of Table Tool for reporting. Many of these were produced as a result of requests from the [Endevor Community website](https://community.broadcom.com/home).
+A collection of JCL and processor members that demonstrate the use of Table Tool. Many of these were produced as a result of requests from the [Endevor Community website](https://community.broadcom.com/home).
 
 

@@ -8,7 +8,7 @@ These items support the use of a Rexx Edit macro  as an alternative to the Endev
 
 - The REXX Edit macro can be easily tested on individual members of source. While viewing a member, enter ANL#VIEW on the command line.
 - Some conditions can be more conveniently discovered in REXX. For example, using the Built-in SYSDSN command to test whether a member exists within a dataset, which might determine detailed attributes about the member name.
-- OPTIONS Output more can easily be produced from REXX.
+- OPTIONS output can be more easily produced from REXX.
 - A user who is familiar with the REXX language does not need to learn the methods of the Inventory Analyzer.
 
 
@@ -22,6 +22,8 @@ X ALL
 f all "GENERATE PROCESSOR NAME IS '*NOPROC*'"
 FINDLOOP
 ~~~
+
+When done, you can Delete all excluded lines (ie DEL ALL X), change and save the results as a member for further Batch Admin processing.
 FINDWRD1 is a subroutine to FINDLOOP.
 
 ## JCLCOMMT
