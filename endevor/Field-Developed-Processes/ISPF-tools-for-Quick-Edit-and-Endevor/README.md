@@ -1,6 +1,7 @@
 # ISPF tools for Quick-Edit and Endevor
 
-This collection of mainframe tools is dependent upon IBM's ISPF, and can only be used on the mainframe by users of Quick-Edit and Endevor. Although these tools are not available to others, such as users on VS Code or Zowe, in some cases they provide a similar experience to those from other tools.
+This collection of mainframe tools is dependent upon IBM's ISPF. The items can only be used on the mainframe by users of Quick-Edit and Endevor. Although these tools are not available to  VS Code or Zowe users, some provide a user  experience similar to one from a modern tools.
+
 Use the extension on each item to determine where the item needs to reside.
 
 - rex items must reside in a Rexx library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library

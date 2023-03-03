@@ -6,10 +6,10 @@ For many sites, the first few examples in this collection may be sufficient for 
 
 ## Content Summary
 
-This procedure leverages the How to Enable Post-Ship Script Execution feature of Endevor.
+This procedure leverages the **How to Enable Post-Ship Script Execution** feature of Endevor.
 
-- CA66AB and CA32AB example shipment 'models' for destinations named CA66A and CA32A respectively. Use names that match the Destinations at your site where you want an Endevor image to be targeted. The single-letter suffix, 'B', is used to place these models "Before" the copy step in the remote JCL. The "ALTER" steps in these examples are optional, and if eliminated then the processor changes reflected in the RMALTERS, GWRITE and DESTCNFG members can also be eliminated. If a Destination has just one value for each of the entry Environment, System and Subsystem, then these examples should be sufficient. Otherwise see the C1BMXIN and C1BMXJOB entries for more complicated mapping.
-- DESTCNFG a sample Destination Cfg Mbr content, showing a method for mapping SYSTEM, SUBSYSTEM and TYPE values from the sending Endevor to those needed by the Destination Endevor. DESTCNFG is applicabe only for the ALTER steps.
+- CA66AB and CA32AB are example shipment 'models' for destinations named CA66A and CA32A respectively. Use names that match the Destinations at your site where you want an Endevor image to be targeted. The single-letter suffix, 'B', is used to place these models "Before" the copy step in the remote JCL. The "ALTER" steps in these examples are optional, and if eliminated then the processor changes reflected in the RMALTERS, GWRITE and DESTCNFG members can also be eliminated. If a Destination has just one value for each of the entry Environment, System and Subsystem, then these examples should be sufficient. Otherwise see the C1BMXIN and C1BMXJOB entries for more complicated mapping.
+- DESTCNFG a sample Destination Cfg Mbr content, showing a method for mapping SYSTEM, SUBSYSTEM and TYPE values from the sending Endevor to those needed by the Destination Endevor. DESTCNFG is applicable only for the ALTER steps.
 - GWRITE and RMALTERS contain processor code that builds ALTER output members that are shipped as Post-Ship Scripts. RMALTERS is provided as an example processor "include", which can be coded once and copied into each processor that needs the code, using the example found in GWRITE. The use of an "include" is purely optional. You may elect to copy the entire content of RMALTERS into each required processor. 
 Your target Destination mapping rules must contain a rule, such as: 
 
