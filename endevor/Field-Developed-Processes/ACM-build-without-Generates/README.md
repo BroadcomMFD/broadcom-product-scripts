@@ -1,6 +1,6 @@
 ## ACM-Build-Without-Generates
 
-For new Endevor implementations, the first choice for building Automated Configuration Manager (ACM) information is by performing Generate actions on the program inventory. However, some Endevor sites have never had all their program inventory Generated, and are running Endevor without the full benefit of the ACM. It may be considered too risky or unacceptable to make processor or processor group and approver relate changes in the production environment. Or, it may that there is too much program inventory to Generate over a period of available time – even with the Concurrent Action Processing.  As an alternative, this collection provides a way for building ACM data with the following benefits:
+For new Endevor implementations, the first choice for building Automated Configuration Manager (ACM) information is by performing Generate actions on the program inventory. However, some Endevor sites have never had all their program inventory Generated, and are running Endevor without the full benefit of the ACM. It may be considered too risky or unacceptable to make processor,  processor group, or approver relate changes in the production environment. Or, it may that there is too much program inventory to Generate over a period of available time – even with the Concurrent Action Processing.  As an alternative, this collection provides a way for building ACM data with the following benefits:
 
 - Low risk:
     

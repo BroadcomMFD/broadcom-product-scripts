@@ -1,6 +1,7 @@
    /*  REXX  */           
    /*  This snippet contains an example of a strongly recommended REXX        */
-   /*  practice. That is to enable any REXX program to identify and respond   */
+   /*  practice especially for large or complicated REXX programs.            */
+   /*  That is to enable any REXX program to identify and respond             */
    /*  to a request to turn on its REXX trace.                                */
    /*  If the name of the REXX program is 'REXXPGM' for example, here is how  */                                            
    Trace OFf                               

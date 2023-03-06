@@ -1,5 +1,5 @@
 /*    REXX  - Convert YAML to REXX.                                  */
-
+/*     in some cases Stem arrays, to support Mainframe processing    */
    isItThere = ,
      BPXWDYN("INFO FI(YAML2REX) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then TraceRc = 1
@@ -134,11 +134,17 @@ CloserLookAtYamlrecall:
    /* Replace spaces in YamlObect with underscore chars '_'     */
    YamlObject    = Translate(Strip(YamlObject),'_',' ')
 
-   /* Replace double quotes in value with single quotes "'"     */
+   /* Special handling of quote characters here.....            */
    YamlValue = Strip(YamlValue)
-   YamlValue = Strip(YamlValue,'B',"'")
-   YamlValue = Strip(YamlValue,'B','"')
-   YamlValue = Translate(YamlValue,"'",'"')
+   $firstchar = Substr(YamlValue,1,1)
+   $nextQuote = 0
+   If ($firstchar = "'" | $firstchar = '"') then,
+      $nextQuote = Pos($firstchar,YamlValue,2)
+   /* A quote character at beginning and end ?  */
+   If ($nextQuote  = Length(YamlValue)) then,
+      YamlValue = Strip(YamlValue,'B',$firstchar)
+   Else,
+      YamlValue = Translate(YamlValue,"'",'"')
 
    /* You can selectively turn on the trace here.......         */
    If YamlObject = 'Insert??t'   then Trace ?r
@@ -269,11 +275,14 @@ ConvertListedText:
       if indent# < multindent# then leave;
       if validrec = 0 then Iterate
       yamlrec     = Substr(yamlrec,multindent#)
-      yamlrec     = Translate(yamlrec,"'",'"')
-      yamlrec     = Strip(yamlrec,'B',"'")
       RexxCounter = RexxCounter + 1
-      newRexx.RexxCounter =,
-         RexxVarb'.'TextCounter '="'yamlrec'"'
+      $firstchar = Substr(yamlrec,1,1)
+      If $firstchar = '"' then,
+         newRexx.RexxCounter =,
+            RexxVarb'.'TextCounter '='yamlrec
+      Else,
+         newRexx.RexxCounter =,
+            RexxVarb'.'TextCounter '="'yamlrec'"'
       TextCounter = TextCounter + 1
    End /* Do Forever */
 
