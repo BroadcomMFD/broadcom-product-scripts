@@ -1,4 +1,6 @@
-//*-------------------------------------------------------------------          
+//*-------------------------------------------------------------------
+//*   Copies/Concatenates all members into a single ouput          
+//*-------------------------------------------------------------------
 //GETPKGS  EXEC PGM=IEBPTPCH                                                    
 //SYSUT1   DD DISP=SHR,DSN=SACC.PROD.VPLSLPC.FFD.BINDDESA                       
 //SYSPRINT DD  SYSOUT=*                                                         

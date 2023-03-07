@@ -2,7 +2,7 @@
 
 Items in this folder provide for a "Dynamic SYSLIB" feature. Development efforts conducted in parallel might need to share inputs, and items in this folder provide for that kind of sharing.
 
-For example, a January release being developed in one sandbox (or environment) might be underway at the same time as a March release in another sandbox (or environment). This feature allows the March release to include libraries from the January release within its own SYSLIB concatenations. The result is that testing of the March release includes items from the January release - before the January release is Moved to production.
+For example, development for a January release might be underway in one sandbox (or environment) at the same time as development for a March release in another sandbox (or environment). This feature allows the March release to include libraries from the January release within its own SYSLIB concatenations, before the January release is Moved to production.
 
 A processor for a new type (Examples: SYSLIB or ALIAS) creates library aliases to support this feature. Benefits include:
 

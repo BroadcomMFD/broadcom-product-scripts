@@ -1,6 +1,6 @@
 # Processor-Tools-and-Processor-Snippets
 
-At this location are found Endevor processor utilities and snippets of example Endevor processor code. For the sake of highlighting and syntax checking, processors and processor snippets are given the .jcl extension.
+At this location are found Endevor processor utilities and snippets of example processor code. For the sake of highlighting and syntax checking, processors and processor snippets are given the .jcl extension.
 
 ## VALUECHK
 
@@ -35,8 +35,16 @@ A processor REXX program that simulates the DB2 Masking method for Binds, used b
 
 A processor and its Rexx parser that can perform syntax checking on OPTIONS elements.
 
+
 ## Dynamic-Syslib
 
 Items in this folder support the sharing of input components across developer efforts/projects that are underway in parallel.
 
-For example, a January release being developed in one sandbox (or environment) might be underway at the same time as a March release in another sandbox (or environment). This feature allows the March release to include libraries from the January release within its own SYSLIB concatenations. The result is that testing of the March release includes items from the January release - before the January release is Moved to production.
+For example, development for a January release might be underway in one sandbox (or environment) at the same time as development for a March release in another sandbox (or environment). This feature allows the March release to include libraries from the January release within its own SYSLIB concatenations, before the January release is Moved to production.
+
+## OPTVALDT, TXTRPLCE and YAML2REX
+
+These are REXX subroutines which are used by other FDP solutions:
+ - OPTVALDT processes OPTIONS statements to ensure values are numeric or properly quoted
+ - TXTRPLCE is a generic Search and Replace utility
+ - YAML2REX is routine that can convert some YAML constructs into REXX

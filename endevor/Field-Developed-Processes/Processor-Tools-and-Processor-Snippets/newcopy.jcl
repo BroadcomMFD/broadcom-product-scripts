@@ -13,7 +13,7 @@
 QQ                                                                      
 //SYSTSPRT DD SYSOUT=*                                                  
 //OPTIONS  DD *                                                         
-//TBLOUT   DD SYSOUT=*                                                  
+//TBLOUT   DD SYSOUT=(A,INTRDR)                                                
 //*-------------------------------------------------------------------- 
 
 

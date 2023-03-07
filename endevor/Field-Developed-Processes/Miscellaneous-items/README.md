@@ -11,32 +11,15 @@ These items support the use of a Rexx Edit macro  as an alternative to the Endev
 - OPTIONS output can be more easily produced from REXX.
 - A user who is familiar with the REXX language does not need to learn the methods of the Inventory Analyzer.
 
+## SCHEDULE, WAITTIL and WAITSECS
 
-## FINDLOOP and FINDWRD1
-
-Together these can be used with Batch Administration SCL for creating new definitions or updating existing definitions. While in View or Edit and excluding some or all lines, FINDLOOP can be used to expose complete statements. Every line from the 'DEFINE' to the statement-closing period is exposed.
-
-For example, while editing a batch administration SCL member, try these commands:
+If you have a maintenance or test job for example, that you want to run after hours, you can use these - without having to wait around. Tailor the SCHEDULE job to specify when you want your job to run, and where to find the JCL. To schedule a job for the next day, you can increase the hour portion of the parameter. For example:
 ~~~
-X ALL
-f all "GENERATE PROCESSOR NAME IS '*NOPROC*'"
-FINDLOOP
+//   SET START='35:02:00'      <- HH:MM:SS
 ~~~
+Then just submit the SCHEDULE job before you leave.
 
-When done, you can Delete all excluded lines (ie DEL ALL X), change and save the results as a member for further Batch Admin processing.
-FINDWRD1 is a subroutine to FINDLOOP.
 
-## JCLCOMMT
+## Endevor-Processor-Includes.md
 
-This edit macro can be executed on Endevor processors, JCL, PROCs and Skeletons in a JCL format. While editing in Quick-Edit, enter JCLCOMMT on the command line. Lines containing an EXEC statement are then commented.
-
-## PTBROWSE and PTEDIT
-
-While editing a processor (or JCL) where a dataset name is found, enter the name of either of these on the command line, move the cursor to the first character of the dataset name, and press Enter. You will then be Browsing or Editing the dataset.
-
-## ENDIEIM1
-
-Within these two examples are features initiated by the Quick-Edit Startup command. ENDIEIM1 acts as an "Initial Edit Macro" for Quick-Edit sessions.
-
-Find other ENDIEIM1 examples in the ISPF-tools-for-Quick-Edit-and-Endevor folder.
-See also techdocs documentation for details.
+This document offers steps to be taken to allow processors to reference "Include" members/elements.
