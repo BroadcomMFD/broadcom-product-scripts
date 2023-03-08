@@ -4,7 +4,7 @@ This collection of mainframe tools is dependent upon IBM's ISPF. The items can o
 
 Use the extension on each item to determine where the item needs to reside.
 
-- rex items must reside in a Rexx library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library
+- rex items must reside in a REXX library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library
 - pnl items must reside in an ISPF panel library, typically an ISPPLIB or a CSIQPENU library
 - skl items must reside in an ISPF skeleton library, typically an ISPSLIB or a CSIQSENU library
 - msg items must reside in an ISPF message library, typically an ISPMLIB or a CSIQMENU library
@@ -13,28 +13,30 @@ Items listed together run together.
 
 ## Package PACKAGEP PKGESELS and PKGESEL2
 
-These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package on one screen from a list of elements. While viewing an element list, enter "TSO PACKAGE" on the command line, and in one screen the items listed will be placed into a new package. Upon exiting the screen, a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
-APIALPKG is an optional API program that can be used with the Package tool. It allows a user to create a new package by copying the content of another package. In this case, from any Quick-Edit or Endevor screen that shows a package name, enter "TSO PACKAGE" on the command line and move the cursor to the input package name before pressing 'Enter'. 
+These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package using only one screen while viewing a list of elements. Just  enter "TSO PACKAGE" on the command line, and the elements listed will be placed into a new package. Upon exiting the screen, a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
+APIALPKG is an optional API program that can be used with the Package tool. It allows a user to create a new package by copying the content of an existing package. In this case, from any Quick-Edit or Endevor screen that shows a package name, enter "TSO PACKAGE" on the command line, move the cursor to the first character of the package name, and press 'Enter'. 
 
 ## PDA NOTIFY @SITE and WhereIam
 
-These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that their edited element is encountering parallel development. Notifications appear as note lines within the edit session, reflecting the locations, userids and CCIDs for each element found outside of production. NOTIFY can be used by individual users to turn on or off the feature. The @SITE member is necessary only if you have multiple Endevor images and different life cycles. Each Endevor image will need its own version of @SITE, renamed to match the SYSNAME where Endevor is running. If you have only one Endevor image, or multiple Endevors with matching Environments and stages, then the @SITE and WhereIam members are not required for you. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:
+These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that the element being edited is found in parallel development. Notifications appear as note lines within the edit session, reflecting the locations, userids and CCIDs for each element found outside of production. NOTIFY can be used by individual users to turn on or off the feature. The @SITE member is necessary only if you have multiple Endevor images and different life cycles. Each Endevor image will need its own version of @SITE, renamed to match the SYSNAME where Endevor is running. If you have only one Endevor image, or multiple Endevors with matching Environments and stages, then the @SITE and WhereIam members are not required for you. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:
 
            PDAMaplist = ,        /* required only for PDA  */
               " SMPLTEST/T-SMPLTEST/Q ",
               " SMPLPROD/E-SMPLPROD/E "         
 
+Two detail lines are shown in the example above. Each detail line shows an environment-stage starting location and an environment-stage ending locations. The locations indicate where the PDA will search for elements in parallel development. As many detail lines as necessary can be coded.
+
 ## RETRO RETROPOP RETRSHOW
 
-These items can be used only from Quick-Edit where the PDA is active. The user can examine a PDA message, enter "TSO RETRO" on the command line, and use the cursor to point to a Note line that reflects another element to invoke an assisted PDM execution.
+These items can be used only from Quick-Edit where the PDA is active. The user can enter "TSO RETRO" on the command line, and use the cursor to point to a PDA Note line that shows another element. Then, an assisted PDM execution will be invoked.
 
-## PKGMAINT and PMAINTPN 
+## PKGMAINT and PMAINTPN
 
-These items offer Quick-Edit and Endevor users a fast method for managing package actions. While displaying a list of packages, enter "TSO PKGMAINT" on the command line to enable a batch COMMIT/RESET/DELETE action for all the listed packages. 
+These items offer Quick-Edit and Endevor users a fast method for managing packages. While displaying a list of packages, enter "TSO PKGMAINT" on the command line. The panel displayed prepares and submits a job to COMMIT/RESET/DELETE the packages listed.
 
 ## ENDIEIM1 and ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro
 
-ENDIEIM1 acts as an "Initial Edit Macro" for Quick-Edit sessions. Items whose names begin with "ENDIEIM1", including content in the **ISPF-tools-for-Quick-Edit-and-Endevor** folder, empower Quick-Edit to bypass its normal edit session, and to initiate exception processing.
+ENDIEIM1 acts as an "Initial Edit Macro" for Quick-Edit sessions. Items whose names begin with "ENDIEIM1", including the **ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro** folder content, empower Quick-Edit to bypass its normal edit session, and to initiate exception processing.
 
 ## FINDLOOP and FINDWRD1
 
@@ -47,12 +49,12 @@ f all "GENERATE PROCESSOR NAME IS '*NOPROC*'"
 FINDLOOP
 ~~~
 
-When done, you can Delete all excluded lines (ie DEL ALL X), change and save the results as a member for further Batch Admin processing.
+When done, complete SCL statements that contain your searched value will be displayed. You can Delete all excluded lines (ie DEL ALL X), change and save the results as a member for further Batch Admin processing.
 FINDWRD1 is a subroutine to FINDLOOP.
 
 ## JCLCOMMT
 
-This edit macro can be executed on Endevor processors, JCL, PROCs and Skeletons in a JCL format. While editing in Quick-Edit, enter JCLCOMMT on the command line. Lines containing an EXEC statement are then commented.
+This edit macro can be executed from Quick-Edit on Endevor processors, JCL, PROCs and Skeletons in a JCL format. Enter JCLCOMMT on the command line, and lines containing an EXEC statement are then commented with the element name.
 
 ## PTBROWSE and PTEDIT
 
@@ -60,9 +62,9 @@ While editing a processor (or JCL) where a dataset name is found, enter the name
 
 ## QEXPAND and QEXPANDW
 
-These two items can be used in Quick-Edit during an edit session as an "expand includes" utility. By entering "QEXPAND" on the command line, and moving the cursor to a COPY, ++INCLUDE, or -INC statement, the user invokes the tool to copy the content of the member referenced on the line into the edit session as NOTE lines.
+These two items can be used in Quick-Edit as an "expand includes" utility. After you enter "QEXPAND" on the command line, and move the cursor to a "COPY", "++INCLUDE", or "-INC" statement, and press Enter, the content of the referenced member is copied into the edit session as NOTE lines.
 
-The image below for example, shows an include member named **SETSTMTS** expanded within a processor that references it.
+The image below for example, shows an include member named **SETSTMTS** expanded from a "++INCLUDE" statement within a processor.
 
 ~~~
 GCOBOL     + TO: ADMIN/1/CATSNDVR/ENDEVOR/PROCESS       COLUMNS0000100072
@@ -87,3 +89,5 @@ Command ===>                                                Scroll ===>CSR
 =NOTE=//             CSYSLIB='&HLQ..COPYBOOK',                                
 =NOTE=//             EXPINC=N,                                                
 ~~~
+
+Some simple tailoring of QEXPANDW is likely required. See references to INCLUDE_LIBRARY_LIST within the REXX member.

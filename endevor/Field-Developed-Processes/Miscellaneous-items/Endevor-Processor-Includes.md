@@ -74,3 +74,5 @@ If you are using the Librarian method, then use this example.
 The -"INC" text must begin in column 1.
 
 With either method, the Automated Configuration Manager (ACM) picks up relationships between processor and Include elements automatically.
+
+To view an expansion of an include member within a processor, see all the **QEXPAND and QEXPANDW** reference of the **ISPF-tools-for-Quick-Edit-and-Endevor** folder. 
