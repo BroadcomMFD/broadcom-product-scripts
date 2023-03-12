@@ -1,6 +1,7 @@
-# Field-Developed-Processes
+# Field-Developed-Program
 
-These items were constructed by the Broadcom Services team and have been implemented at various Endevor customer sites.
+"Field Developed Program" (FDP) is a term used to refer to programs that were created to address specific needs or requirements of customers. These were constructed by your trusted Broadcom Services team and have been implemented at multiple Endevor customer sites.
+They are tested, secure and available for your use.
 
 ## ACM-build-without-Generates
 
