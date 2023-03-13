@@ -1,6 +1,6 @@
 //*--------------------------------------------------------------- 
 //* Check if a DDNAME is found Allocated. In Endevor, 
-//* Files allocated as "Additional JCL" are checked to.     
+//* Files allocated as "Additional JCL" are checked too.     
 //* This example is checking for the TESTING ddname
 //*---------------------------------------------------------------      
 //ISITHERE EXEC PGM=IRXJCL,PARM='ENBPIU00 1'                            
