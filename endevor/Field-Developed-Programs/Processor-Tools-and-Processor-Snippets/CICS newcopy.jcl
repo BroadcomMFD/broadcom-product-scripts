@@ -2,6 +2,8 @@
 //    'ENDEVOR BATCH',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,     
 //    NOTIFY=&SYSUID TYPRUN=SCAN                                       
 //*********************************************************************
+//* This is a JCL to simulate steps of an Endevor processor        ****
+//*********************************************************************
 //  SET C1ENV=TEST                                                     
 //  SET C1ENV=PROD                                                     
 //******                                                               
