@@ -19,6 +19,15 @@ If you have a maintenance or test job for example, that you want to run after ho
 ~~~
 Then just submit the SCHEDULE job before you leave.
 
+## INFO
+
+This member reflects a standard adopted by Broadcom Services for large or complex REXX programs. With just 3 lines of code a REXX program can detect if its name is allocated, and dynamically turn on the Trace as it runs. Then each time you want to see the Trace, there is no reason to change the code and no risk that the trace is turned on for others. 
+
+For example, if the name of a REXX program is MYREXXPG and it runs in batch, then include in the jobstep a statement like this one.
+
+~~~
+//MYREXXPG  DD DUMMY
+~~~
 
 ## Endevor-Processor-Includes.md
 

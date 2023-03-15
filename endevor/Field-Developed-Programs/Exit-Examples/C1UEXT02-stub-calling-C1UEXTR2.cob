@@ -8,9 +8,23 @@
        SOURCE-COMPUTER. IBM-370.
        OBJECT-COMPUTER. IBM-370.
       *****************************************************************
-      * DESCRIPTION: THIS PGM IS CALLED before Element processing*
+      * DESCRIPTION: THIS PGM IS CALLED before Element processing     *
       *              It gathers Endevor info from the exit blocks     *
       *              then calls REXX program C1UEXTR2.                *
+      *                                                               *
+      * SETUP:       The REXX C1UEXTR2 gets called from DD REXFILE.   *
+      *              Change the DSN to a secure dataset.(2 places)    *
+      *                                                               *
+      *    STRING 'ALLOC DD(REXFILE) ', <--look for REXFILE/SYSEXEC   *
+      *          'DA(ESS.ENDEVOR.EXIT.REXX)'  <----- here             *
+      *               DELIMITED BY SIZE                               *
+      *                 ' SHR REUSE'                                  *
+      *               DELIMITED BY SIZE                               *
+      *          INTO ALLOC-TEXT                                      *
+      *    END-STRING.                                                *
+      *                                                               *
+      *                                                               *
+      *                                                               *
       *****************************************************************
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
@@ -24,7 +38,7 @@
 
        77  FLAGS                             PIC S9(8) BINARY.
        77  REXX-RETURN-CODE                  PIC S9(8) BINARY.
-       77  DUMMY-ZERO                        PIC S9(8) BINARY.
+       77  DUMMY-ZERO                        PIC S9(8) BINARY VALUE 0.
        77  ARGUMENT-PTR                      POINTER.
        77  EXECBLK-PTR                       POINTER.
        77  ARGTABLE-PTR                      POINTER.
@@ -34,17 +48,17 @@
        01  IRXEXEC-PGM                       PIC X(08) VALUE 'IRXEXEC'.
 
        01 WS-VARIABLES.
-          03  WS-POINTER                   PIC 9(9)  COMP.
-          03  WS-WORK-ADDRESS-ADR          PIC S9(9) COMP SYNC .
+          03  WS-POINTER                   PIC 9(8)  COMP.
+          03  WS-WORK-ADDRESS-ADR          PIC S9(8) COMP SYNC .
           03  WS-WORK-ADDRESS-PTR          REDEFINES WS-WORK-ADDRESS-ADR
                                            USAGE IS POINTER .
-          03  ADDRESS-ECB-RETURN-CODE      PIC 9(09) .
-          03  ADDRESS-ECB-MESSAGE-CODE     PIC 9(09) .
-          03  ADDRESS-ECB-MESSAGE-LENGTH   PIC 9(09) .
-          03  ADDRESS-ECB-MESSAGE-TEXT     PIC 9(09) .
-          03  ADDRESS-REQ-SISO-INDICATOR   PIC 9(09) .
-          03  ADDRESS-REQ-CCID             PIC 9(09) .
-          03  ADDRESS-REQ-COMMENT          PIC 9(09) .
+          03  ADDRESS-ECB-RETURN-CODE      PIC 9(10) .
+          03  ADDRESS-ECB-MESSAGE-CODE     PIC 9(10) .
+          03  ADDRESS-ECB-MESSAGE-LENGTH   PIC 9(10) .
+          03  ADDRESS-ECB-MESSAGE-TEXT     PIC 9(10) .
+          03  ADDRESS-REQ-SISO-INDICATOR   PIC 9(10) .
+          03  ADDRESS-REQ-CCID             PIC 9(10) .
+          03  ADDRESS-REQ-COMMENT          PIC 9(10) .
 
 
        01 BPXWDYN PIC X(8) VALUE 'BPXWDYN'.
@@ -61,7 +75,7 @@
            03 REXX-NAME             PIC X(08) VALUE 'C1UEXTR2'.
            03 FILLER                PIC X(01) VALUE SPACE .
          02  ELM-EXECUTE-PARMS-IRXEXEC.                                 00004800
-           03 WS-REXX-STATEMENTS    PIC X(2000).
+           03 WS-REXX-STATEMENTS    PIC X(1800).
 
        01  EXECBLK.
            05 EXECBLK-ACRYN                  PIC X(08) VALUE 'IRXEXECB'.
@@ -112,14 +126,6 @@
                           TGT-ELEMENT-MASTER-INFO-BLOCK
                           TGT-FILE-CONTROL-BLOCK.
 
-
-********** IF ECB-USER-ID(1:7) NOT = 'WALJO11' AND
-**********    ECB-USER-ID(1:7) NOT = 'PL05958'
-**********     GOBACK
-********** END-IF.
-
-
-
            MOVE SPACES TO WS-REXX-STATEMENTS .
 
            SET  WS-WORK-ADDRESS-PTR TO
@@ -158,10 +164,8 @@
       *****
            MOVE 1 TO WS-POINTER.
 
-*******  Replace any double quote characters in data to be passed
            INSPECT REQ-CCID               REPLACING ALL '"' BY X'7D'.
            INSPECT REQ-COMMENT            REPLACING ALL '"' BY X'7D'.
-
 
            STRING
                   'ECB_TSO_BATCH_MODE = "'
@@ -260,6 +264,30 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
+                  'TGT_ELM_LAST_PROC_PACKAGE = "'
+                     DELIMITED BY SIZE
+                   TGT-ELM-LAST-PROC-PACKAGE
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
+                  'TGT_ELM_PROCESSOR_GROUP = "'
+                     DELIMITED BY SIZE
+                   TGT-ELM-PROCESSOR-GROUP
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
+                  'SRC_ELM_LAST_PROC_PACKAGE = "'
+                     DELIMITED BY SIZE
+                   SRC-ELM-LAST-PROC-PACKAGE
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
+                  'SRC_ELM_PROCESSOR_GROUP = "'
+                     DELIMITED BY SIZE
+                   SRC-ELM-PROCESSOR-GROUP
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
                   'Address_ECB_RETURN_CODE = ' ADDRESS-ECB-RETURN-CODE
                      DELIMITED BY SIZE
                   '; '
@@ -279,14 +307,27 @@
                   '; '
                      DELIMITED BY SIZE
               INTO   WS-REXX-STATEMENTS
+              WITH POINTER WS-POINTER .
+           IF SRC-ENV-IO-TYPE = 'I'
+              INSPECT SRC-ELM-ACTION-CCID   REPLACING ALL '"' BY X'7D'
+              INSPECT SRC-ELM-LEVEL-COMMENT REPLACING ALL '"' BY X'7D'
+              STRING
+                 'SRC_ELM_ACTION_CCID = "'
+                    DELIMITED BY SIZE
+                  SRC-ELM-ACTION-CCID
+                    DELIMITED BY SIZE
+                 '";'
+                    DELIMITED BY SIZE
+                 'SRC_ELM_LEVEL_COMMENT= "'
+                    DELIMITED BY SIZE
+                  SRC-ELM-LEVEL-COMMENT
+                    DELIMITED BY SIZE
+                 '";'
+                    DELIMITED BY SIZE
+              INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
-           END-STRING     .
-
-
-           IF SRC-ENV-TYPE-OF-BLOCK     = 'C'
-             INSPECT SRC-ELM-CURRENT-CCID  REPLACING ALL '"' BY X'7D'
-             INSPECT SRC-ELM-LEVEL-COMMENT REPLACING ALL '"' BY X'7D'
-             STRING
+              END-STRING .
+              STRING
                   'SRC_ENV_ENVIRONMENT_NAME = "'
                      DELIMITED BY SIZE
                    SRC-ENV-ENVIRONMENT-NAME
@@ -323,56 +364,28 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-                  'SRC_ELM_LAST_PROC_PACKAGE = "'
+                  'SRC_ENV_TYPE_OF_BLOCK = "'
                      DELIMITED BY SIZE
-                   SRC-ELM-LAST-PROC-PACKAGE
-                     DELIMITED BY SIZE
-                  '";'
-                     DELIMITED BY SIZE
-                  'SRC_ELM_PROCESSOR_GROUP = "'
-                     DELIMITED BY SIZE
-                   SRC-ELM-PROCESSOR-GROUP
+                   SRC-ENV-TYPE-OF-BLOCK
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-                 'SRC_ELM_CURRENT_CCID = "'
-                    DELIMITED BY SIZE
-                  SRC-ELM-CURRENT-CCID
-                    DELIMITED BY SIZE
-                 '";'
-                    DELIMITED BY SIZE
-                 'SRC_ELM_ACTION_CCID = "'
-                    DELIMITED BY SIZE
-                  SRC-ELM-ACTION-CCID
-                    DELIMITED BY SIZE
-                 '";'
-                    DELIMITED BY SIZE
-                 'SRC_ELM_LEVEL_COMMENT= "'
-                    DELIMITED BY SIZE
-                  SRC-ELM-LEVEL-COMMENT
-                    DELIMITED BY SIZE
-                 '";'
-                    DELIMITED BY SIZE
+                  'SRC_ENV_IO_TYPE = "'
+                     DELIMITED BY SIZE
+                   SRC-ENV-IO-TYPE
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
-             END-STRING
-           END-IF .
-
-
-           IF TGT-ENV-TYPE-OF-BLOCK     = 'C' AND
-             TGT-ENV-IO-TYPE GREATER THAN OR EQUAL 'I'
-             STRING
+              END-STRING .
+              STRING
                   'TGT_ENV_ENVIRONMENT_NAME = "'
                      DELIMITED BY SIZE
                    TGT-ENV-ENVIRONMENT-NAME
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-              INTO   WS-REXX-STATEMENTS
-              WITH POINTER WS-POINTER
-              ON OVERFLOW DISPLAY 'WS-POINTER=' WS-POINTER
-             END-STRING
-             STRING
                   'TGT_ENV_STAGE_NAME = "'
                      DELIMITED BY SIZE
                    TGT-ENV-STAGE-NAME
@@ -385,12 +398,6 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-              INTO   WS-REXX-STATEMENTS
-              WITH POINTER WS-POINTER
-              ON OVERFLOW DISPLAY 'WS-POINTER=' WS-POINTER
-             END-STRING
-
-             STRING
                   'TGT_ENV_SUBSYSTEM_NAME = "'
                      DELIMITED BY SIZE
                    TGT-ENV-SUBSYSTEM-NAME
@@ -403,41 +410,47 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-              INTO   WS-REXX-STATEMENTS
-              WITH POINTER WS-POINTER
-              ON OVERFLOW DISPLAY 'WS-POINTER=' WS-POINTER
-             END-STRING
-
-             STRING
                   'TGT_ENV_ELEMENT_NAME = "'
                      DELIMITED BY SIZE
                    TGT-ENV-ELEMENT-NAME
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-                  'TGT_ELM_LAST_PROC_PACKAGE = "'
+                  'TGT_ENV_TYPE_OF_BLOCK = "'
                      DELIMITED BY SIZE
-                   TGT-ELM-LAST-PROC-PACKAGE
+                   TGT-ENV-TYPE-OF-BLOCK
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
+                  'TGT_ENV_IO_TYPE = "'
+                     DELIMITED BY SIZE
+                   TGT-ENV-IO-TYPE
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
-              ON OVERFLOW DISPLAY 'WS-POINTER=' WS-POINTER
-             END-STRING
-
-             STRING
-                  'TGT_ELM_PROCESSOR_GROUP = "'
-                     DELIMITED BY SIZE
-                   TGT-ELM-PROCESSOR-GROUP
-                     DELIMITED BY SIZE
-                  '";'
-                     DELIMITED BY SIZE
+              END-STRING .
+           IF SRC-ENV-IO-TYPE NOT = 'I' AND
+              TGT-ENV-IO-TYPE = 'O'
+              INSPECT TGT-ELM-ACTION-CCID   REPLACING ALL '"' BY X'7D'
+              INSPECT TGT-ELM-LEVEL-COMMENT REPLACING ALL '"' BY X'7D'
+              STRING
+                 'TGT_ELM_ACTION_CCID = "'
+                    DELIMITED BY SIZE
+                  TGT-ELM-ACTION-CCID
+                    DELIMITED BY SIZE
+                 '";'
+                    DELIMITED BY SIZE
+                 'TGT_ELM_LEVEL_COMMENT= "'
+                    DELIMITED BY SIZE
+                  TGT-ELM-LEVEL-COMMENT
+                    DELIMITED BY SIZE
+                 '";'
+                    DELIMITED BY SIZE
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
-              ON OVERFLOW DISPLAY 'WS-POINTER=' WS-POINTER
-             END-STRING
-           END-IF.
+              END-STRING  .
       ***** \ Convert COBOL exit block Datanames into Rexx /
       *****
 
@@ -465,11 +478,6 @@
            GOBACK.
 
        1800-REXX-CALL-VIA-IRXEXEC.
-      *--- GET THE ADDRESS OF THE ARGUMENT(S) TO BE PASSED TO IXREXEC
-      *--- AND LOAD INTO THE ARGUMENT TABLES
-      **** IF ECB-USER-ID(1:7) = 'EGENG14'
-      ****     DISPLAY 'C1UEXT02: SETTING UP REXX EXECUTION'
-      **** END-IF .
            SET ARGSTRING-PTR (1)           TO ARGUMENT-PTR .
            CALL 'SET-ARGUMENT-POINTER'  USING ARGTABLE-PTR
                                               ARGUMENT .
@@ -477,14 +485,9 @@
                                               EXECBLK .
            CALL 'SET-EVALBLK-POINTER'   USING EVALBLK-PTR
                                               EVALBLK .
-      *--- SET FLAGS TO HEX 20000000
-      *    I.E. EXEC INVOKED AS SUBROUTINE
            MOVE 536870912         TO FLAGS
            MOVE 0                 TO REXX-RETURN-CODE .
 
-      **** IF ECB-USER-ID(1:7) = 'EGENG14'
-      ****     DISPLAY 'C1UEXT02: CALLING IRXEXC  '
-      **** END-IF .
       *--- CALL THE REXX EXEC ---
            CALL IRXEXEC-PGM USING EXECBLK-PTR
                                   ARGTABLE-PTR
@@ -494,7 +497,8 @@
                                   EVALBLK-PTR
                                   DUMMY-ZERO
                                   DUMMY-ZERO
-                                  DUMMY-ZERO .
+                                  DUMMY-ZERO
+                                  REXX-RETURN-CODE.
 
            IF REXX-RETURN-CODE NOT = 0
                DISPLAY 'C1UEXT02: IRXEXEC RETURN CODE = '
@@ -504,9 +508,11 @@
            CANCEL IRXEXEC-PGM
            .
 
+      *****************************************************************
+      **  Allocate DD REXFILE for TSO processing
+      *****************************************************************
        2100-ALLOCATE-REXFILE.
 
-********** DISPLAY 'C1UEXT02:  2100-ALLOCATE-REXFILE '.
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(REXFILE) ',
                  'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
@@ -518,7 +524,7 @@
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
 
       *****************************************************************
-      **  DYNAMICALLY DE-ALLOCATE UNNEEDED REXX FILES
+      **  Allocate DD SYSEXEC for batch processing
       *****************************************************************
        2101-ALLOCATE-SYSEXEC.
 
@@ -540,8 +546,6 @@
            MOVE 'FREE  DD(REXFILE)' TO ALLOC-TEXT
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
 
-********** MOVE 'FREE  DD(REXFILE2)' TO ALLOC-TEXT
-********** PERFORM 9000-DYNAMIC-ALLOC-DEALLOC
       *****************************************************************
       **  CALL BPXWDYN TO PREFORM REQUIRED REXX FUNCTIONS
        2201-FREE-SYSEXEC.
@@ -549,8 +553,6 @@
            MOVE 'FREE  DD(SYSEXEC)' TO ALLOC-TEXT
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
 
-********** MOVE 'FREE  DD(REXFILE2)' TO ALLOC-TEXT
-********** PERFORM 9000-DYNAMIC-ALLOC-DEALLOC
       *****************************************************************
       **  CALL BPXWDYN TO PREFORM REQUIRED REXX FUNCTIONS
        9000-DYNAMIC-ALLOC-DEALLOC.

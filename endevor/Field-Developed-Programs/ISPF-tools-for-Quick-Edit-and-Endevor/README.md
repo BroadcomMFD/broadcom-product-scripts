@@ -11,20 +11,20 @@ Use the extension on each item to determine where the item needs to reside.
 
 Items listed together run together.
 
-## Package PACKAGEP PKGESELS and PKGESEL2
+## PACKAGE PACKAGEP PKGESELS and PKGESEL2
 
-These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package using only one screen while viewing a list of elements. Just  enter "TSO PACKAGE" on the command line, and the elements listed will be placed into a new package. Upon exiting the screen, a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
+These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package using only one screen while viewing a list of elements. Just  enter "TSO PACKAGE" on the command line, and the elements listed will be placed into a new package. You can choose whether MOVE, GENERATE or DELETE actions are to be performed on all listed elements. Then a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
 APIALPKG is an optional API program that can be used with the Package tool. It allows a user to create a new package by copying the content of an existing package. In this case, from any Quick-Edit or Endevor screen that shows a package name, enter "TSO PACKAGE" on the command line, move the cursor to the first character of the package name, and press 'Enter'. 
 
-## PDA NOTIFY @SITE and WhereIam
+## PDA NOTIFY @SITE and WHEREIAM
 
-These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that the element being edited is found in parallel development. Notifications appear as note lines within the edit session, reflecting the locations, userids and CCIDs for each element found outside of production. NOTIFY can be used by individual users to turn on or off the feature. The @SITE member is necessary only if you have multiple Endevor images and different life cycles. Each Endevor image will need its own version of @SITE, renamed to match the SYSNAME where Endevor is running. If you have only one Endevor image, or multiple Endevors with matching Environments and stages, then the @SITE and WhereIam members are not required for you. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:
+These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that the edited element is in parallel development. Notifications appear as note lines and indicate the locations, userids and CCIDs for each element found.  NOTIFY can be used to turn on or off the notifications for a single user. The @SITE member is necessary only if you have multiple Endevor images and different life cycles. Each Endevor image will need its own version of @SITE, renamed to match the SYSNAME where Endevor is running. If you have only one Endevor image, or multiple Endevors with matching Environments and stages, then the @SITE and WhereIam members are not required for you. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:
 
            PDAMaplist = ,        /* required only for PDA  */
               " SMPLTEST/T-SMPLTEST/Q ",
               " SMPLPROD/E-SMPLPROD/E "         
 
-Two detail lines are shown in the example above. Each detail line shows an environment-stage starting location and an environment-stage ending locations. The locations indicate where the PDA will search for elements in parallel development. As many detail lines as necessary can be coded.
+Two detail lines are shown in the example above. Each detail line shows an environment-stage starting location and an environment-stage ending location. The locations indicate where the PDA will search for elements in parallel development. As many detail lines as necessary can be coded.
 
 ## RETRO RETROPOP RETRSHOW
 
@@ -32,7 +32,7 @@ These items can be used only from Quick-Edit where the PDA is active. The user c
 
 ## PKGMAINT and PMAINTPN
 
-These items offer Quick-Edit and Endevor users a fast method for managing packages. While displaying a list of packages, enter "TSO PKGMAINT" on the command line. The panel displayed prepares and submits a job to COMMIT/RESET/DELETE the packages listed.
+These items offer Quick-Edit and Endevor users a fast method for managing packages. While displaying a list of packages, enter "TSO PKGMAINT" on the command line. From the panel displayed is prepared and submitted a job to COMMIT/RESET/DELETE the packages listed.
 
 ## ENDIEIM1 and ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro
 

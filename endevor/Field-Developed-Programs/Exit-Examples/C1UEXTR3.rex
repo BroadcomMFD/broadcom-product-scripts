@@ -1,4 +1,6 @@
 /*           rexx         */
+/*      This rexx is just an example.                              */
+/*      It is not recommended you run it as is.                    */
 
    If USERID() /= 'XALJO11' then Exit
 
