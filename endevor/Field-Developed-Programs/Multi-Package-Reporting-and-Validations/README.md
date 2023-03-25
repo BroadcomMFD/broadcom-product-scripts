@@ -81,7 +81,8 @@ An optional report can show a potential chronological order for the packages
 ## Setup Steps for Multi-Package Reporting and Component Validation
 
 1. Tailor the JCL jobcard
-2. Optionally set the Order statement in the JCL to your JCL “INCLUDE” libraries. Alternatively just insert or modify the STEPLIB and SYSEXEC library designations in the JCL. The SYSEXEC library is the one you choose for the two REXX items.
+2. Optionally set the Order statement in the JCL to your JCL “INCLUDE” libraries. Alternatively just insert or modify the STEPLIB and SYSEXEC library designations in the JCL. The SYSEXEC library is the one you choose for the REXX items.
+Find the SCAN#SCL REXX member in the **Tools-and-Snippets** directory.
 3. Enter a list of Endevor packages:
    - Find the “//TABLE” reference in the first step, and list packages that will move from a given Environment and Stage number. Designate the Environment and Stage number as values for the SET statements ENVIRON and STAGE# respectively. Comments are optional for each package, and do not impact the processing in any way.
    - If the selected ENVIRON and STAGE# represent a merge point on your Endevor life cycle then within the value for PATHINIT specify each Environment and stage numbers that merge. Use a period between each Environment and stage number, and a space between each pair. For example, if DEV1.1 and DEV2.1 merge on the life cycle, then enter:
