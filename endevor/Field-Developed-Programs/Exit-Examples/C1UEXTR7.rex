@@ -1,6 +1,6 @@
 /*   rexx    */
    /* Values to be set for your site......                     */
-   CastPackageModel = 'WALJO11.BOFA.CASE(CASTPKGE)'
+   CastPackageModel = 'WALJO11.TEST.CASE(CASTPKGE)'
    CastPackageJCL   = USERID()".C1UEXTR7.SUBMIT"
 
    /* If wanting to limit the use of this exit, uncomment...   */
@@ -21,7 +21,7 @@
 
    Arg Parms
    sa= 'Parms len=' Length(Parms)
-   SA= 'BOFA VERSION'
+   
 
    /* Parms from C1UEXT07 is a string of REXX statements   */
    Interpret Parms
