@@ -163,28 +163,38 @@ Does_Package_Already_Have_SBOM:
 
    /* Examine package SCL for consistency....           */
    /* Set my_RC to reflect what needs to be done:       */
-   /*   my_RC=0 - do nothing                            */
+   /*-- Already found within package ------             */
+   /*   my_RC=0 - do nothing (promotion package)        */
    /*   my_RC=1 - Update_SBOM_Source only               */
-   /*   my_RC=2 - Update_SBOM_Source + update package   */
+   /*   my_RC=2 - Update_SBOM_Source only / ADD+MOVE    */
+   /*-- Not yet found within package -----              */
+   /*   my_RC=3 - Update_SBOM_Source + update package   */
+   /*   my_RC=4 - Update_SBOM_Source + MOVE + package   */
    /*   my_RC=8 - Not at an Entry stage. Needs help     */
-   my_RC = 2;
+   my_RC = -1 ;
    Do pk# = 2 to pkg.0
       packagedItem = Strip(Translate(Substr(pkg.pk#,14),' ',"'"));
       thisEnv     = Word(Substr(packagedItem,whereEnv),1)
       thisStg     = Word(Substr(packagedItem,whereStg),1)
       thisType    = Word(Substr(packagedItem,whereTyp),1)
       thisElement = Word(Substr(packagedItem,whereEle),1)
-      If thisType = 'MANIFEST' & thisElement = Package then,
+      If thisType = 'MANIFEST' & thisElement=Package then,
          Do
-         If AutoCast = 'Y' then my_RC = 0
+         If AutoCast='Y' then my_RC = 0
          Else,
-         If AutoCast/= 'Y' & FromEntryStage = thisStg then,
-              my_RC = 1
-         Else my_RC = 8
+         If FromEntryStage=thisStg then my_RC = 1
+         Else                           my_RC = 2
          Leave;
-         End;  /* If thisType = 'MANIFEST' */
+         End;  /* If thisType = 'MANIFEST' & thisElement=Package */
    End; /* Do pk# = 1 to pkg.0 */
 
+   If my_RC = -1 then,
+      Do
+      If FromEntryStage = thisStg then my_RC = 3
+      Else                             my_RC = 4
+      End  /* If my_RC = -1 */
+
+   Sa = 'For Package' Package 'my_RC = ' my_RC
    Trace off
 
    RETURN;
@@ -193,16 +203,25 @@ Update_SBOM_Source:
 
    If TraceRc = 1 then Say 'Update_SBOM_Source:  '
    MY_PARMS = COPIES(' ',720) ;      /*     80 * 9(LINES OF SCL) */
-   TEMP1 = " ADD ELEMENT '"Package"'"
-   TEMP2 = "  TO   ENVIRONMENT "firstEnv " SYSTEM "MSYSTEM
-   TEMP3 = "    SUBSYSTEM "MSUBSYS " TYPE "MELTYPE
-   TEMP4 = "  FROM DDNAME 'SBOMSRCE'"
-   TEMP4 = "  FROM DDNAME 'RESULTS'"
-   TEMP5 = "  OPTIONS UPDATE OVERRIDE SIGNOUT "
-   TEMP6 = "          COMMENT 'Automated SBOM' CCID 'MANIFEST'."
-   TEMP7 = "  EOF.  "
-   TEMP8 = "  "
-   TEMP9 = "  "
+   TEMP1 = " SET OPTIONS UPDATE OVERRIDE SIGNOUT "
+   TEMP2 = "        COMMENT 'Automated SBOM' CCID 'MANIFEST'."
+   TEMP3 = " ADD ELEMENT '"Package"'"
+   TEMP4 = "  TO   ENVIRONMENT "firstEnv " SYSTEM "MSYSTEM
+   TEMP5 = "    SUBSYSTEM "MSUBSYS " TYPE "MELTYPE
+   TEMP6 = "  FROM DDNAME 'RESULTS' ."
+   If my_RC = 2 | my_RC = 4 then,
+      Do
+      TEMP7 = " MOVE  ELEMENT '"Package"'"
+      TEMP8 = "  FROM  ENVIRONMENT "firstEnv " SYSTEM "MSYSTEM
+      TEMP9 = "    SUBSYSTEM "MSUBSYS " TYPE "MELTYPE,
+                 " STAGE NUM 1."
+      End /* If my_RC = 2 | my_RC = 4 */
+   Else,
+      Do
+      TEMP7 = "  EOF.  "
+      TEMP8 = "  "
+      TEMP9 = "  "
+      End /*  Else... If my_RC = 2 | my_RC = 4 */
 
    MY_PARMS = OVERLAY(TEMP1,MY_PARMS,001) ;
    MY_PARMS = OVERLAY(TEMP2,MY_PARMS,081) ;
