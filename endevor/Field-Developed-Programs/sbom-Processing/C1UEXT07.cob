@@ -8,7 +8,9 @@
       * 2) PERFORM Automated Package Execution when APPROVED     *
       * 3) SUPPORT Automated Package Shipping based on 'Rules'.  *
       ************************************************************
-
+      ** see also EAGGXCOB for Calling IRXEXEC - the IBM example
+      ** for calling IRXEXEC from a Cobol program
+      ************************************************************  
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
