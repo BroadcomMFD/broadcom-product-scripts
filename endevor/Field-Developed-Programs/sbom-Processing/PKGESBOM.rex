@@ -7,7 +7,7 @@
 
 /*                                                                    */
 /* If uncommented, the exit Runs only 4 one user    */
-/* If USERID() /= 'XALJO99' then Exit  */
+/* If USERID() /= 'WALJO11' then Exit  */
 
 /* Here are the Endevor values for where the manifest typ is defined  */
 /* Env and Stg are determined from SCL in package.                    */
@@ -16,6 +16,8 @@
    MSYSTEM = 'MANIFEST'
    MSUBSYS = 'SBOM'
    MELTYPE = 'MANIFEST'
+   ExemptSystems = 'CATSNDVR' MSYSTEM
+   ExemptEnviron = 'ADMIN'
 
    STRING = "ALLOC DD(SYSTSIN) DUMMY      "
    CALL BPXWDYN STRING;
@@ -36,6 +38,8 @@
     Environ = Substr(PARMS,18,08) ;
     Stage   = Substr(PARMS,27,01) ;
     TSOmode = Substr(PARMS,28,01) ;
+    create_User = Strip(Substr(PARMS,29,08))
+    If create_User /= 'WALJO11' then exit
 
    my_RC = 0
    Link_RC = 0
@@ -47,22 +51,26 @@
    Call Capture_Endevor_Stages
 
    Call Allocate_Files;
-   If TraceRc = 1 then Trace ?R
+/* If TraceRc = 1 then Trace ?R */
 
    Call ExportPackageSCL;
 
    Call SCAN#SCL;
 
    Call Does_Package_Already_Have_SBOM;
-   /*   my_RC=0 - sbom already in package + autocasting */
-   /*   my_RC=1 - Update_SBOM_Source only               */
-   /*   my_RC=2 - Update_SBOM_Source + update package   */
-   /*   my_RC=8 - Not at an Entry stage. Needs help     */
+   /* Set my_RC to reflect what needs to be done:       */
+   /*   my_RC=0 - do nothing (promotion package)               */
+   /*   my_RC=1 - Update_SBOM_Source with ADD                  */
+   /*   my_RC=2 - Update_SBOM_Source with ADD+MOVE             */
+   /*-- Not yet found within package -----                     */
+   /*   my_RC=3 - Update_SBOM_Source with ADD       + package  */
+   /*   my_RC=4 - Update_SBOM_Source with ADD+MOVE  + package  */
+   /*   my_RC=8 - Not at an Entry stage. Needs help            */
 
    If my_RC > 0 & my_RC < 8 then
       Call Update_SBOM_Source;
 
-   If my_RC > 1 & my_RC < 8 then
+   If my_RC > 2 & my_RC < 8 then
       Call AppendSBOMSCL;
 
    Call Free_Files;
@@ -99,7 +107,12 @@ Allocate_Files:
           " NEW UNCATALOG REUSE ";
    CALL BPXWDYN STRING;
 
-   CALL BPXWDYN "ALLOC DD(APIMSGS) SYSOUT(A) "
+   STRING = "ALLOC DD(APIMSGS) LRECL(133)",
+          " BLKSIZE(26600) SPACE(15,15) ",
+          " RECFM(F,B) TRACKS ",
+          " NEW UNCATALOG REUSE ";
+   CALL BPXWDYN STRING;
+/* CALL BPXWDYN "ALLOC DD(APIMSGS) SYSOUT(A) " */
    CALL BPXWDYN "ALLOC DD(APILIST) SYSOUT(A) "
    CALL BPXWDYN "ALLOC DD(SYSOUT)  SYSOUT(A) "
 
@@ -135,7 +148,6 @@ ExportPackageSCL:
 Does_Package_Already_Have_SBOM:
 
    If TraceRc = 1 then Say 'Does_Package_Already_Have_SBOM:'
-   If TraceRc = 1 then Trace r
    /* SCL is reformatted into fixed values here */
    "EXECIO * DISKR RESULTS  ( Stem pkg. FINIS"
    /* 1st record is a Heading                   */
@@ -149,6 +161,7 @@ Does_Package_Already_Have_SBOM:
    wordpStg = wordpEnv +  1;
    whereStg = WordIndex($heading,wordpStg);
 
+   whereSys = Pos('System',$heading)
    whereTyp = Pos('Type',$heading)
    whereEle = Pos('Element',$heading)
    /* Look for the 1st Environment reference    */
@@ -156,21 +169,29 @@ Does_Package_Already_Have_SBOM:
    packagedItem = Strip(Translate(Substr(pkg.2,14),' ',"'"));
    firstEnv    = Word(Substr(packagedItem,whereEnv),1)
    firstStg    = Word(Substr(packagedItem,whereStg),1)
+   firstSys    = Word(Substr(packagedItem,whereSys),1)
    firstType   = Word(Substr(packagedItem,whereTyp),1)
    firstElement = Word(Substr(packagedItem,whereEle),1)
 
+   If Wordpos(firstSys,ExemptSystems) > 0 |,
+      Wordpos(firstEnv,ExemptEnviron) > 0 |,
+      Substr(firstElement,1,1) = ' '      then,
+      Do
+      Call FREE_Files;
+      exit
+      End
    FromEntryStage = EntryStage.firstEnv.Entry
 
    /* Examine package SCL for consistency....           */
    /* Set my_RC to reflect what needs to be done:       */
    /*-- Already found within package ------             */
-   /*   my_RC=0 - do nothing (promotion package)        */
-   /*   my_RC=1 - Update_SBOM_Source only               */
-   /*   my_RC=2 - Update_SBOM_Source only / ADD+MOVE    */
-   /*-- Not yet found within package -----              */
-   /*   my_RC=3 - Update_SBOM_Source + update package   */
-   /*   my_RC=4 - Update_SBOM_Source + MOVE + package   */
-   /*   my_RC=8 - Not at an Entry stage. Needs help     */
+   /*   my_RC=0 - do nothing (promotion package)               */
+   /*   my_RC=1 - Update_SBOM_Source with ADD                  */
+   /*   my_RC=2 - Update_SBOM_Source with ADD+MOVE             */
+   /*-- Not yet found within package -----                     */
+   /*   my_RC=3 - Update_SBOM_Source with ADD       + package  */
+   /*   my_RC=4 - Update_SBOM_Source with ADD+MOVE  + package  */
+   /*   my_RC=8 - Not at an Entry stage. Needs help            */
    my_RC = -1 ;
    Do pk# = 2 to pkg.0
       packagedItem = Strip(Translate(Substr(pkg.pk#,14),' ',"'"));
@@ -180,10 +201,13 @@ Does_Package_Already_Have_SBOM:
       thisElement = Word(Substr(packagedItem,whereEle),1)
       If thisType = 'MANIFEST' & thisElement=Package then,
          Do
+         If TraceRc = 1 then Trace ?R
          If AutoCast='Y' then my_RC = 0
          Else,
          If FromEntryStage=thisStg then my_RC = 1
          Else                           my_RC = 2
+         nop
+         Trace off
          Leave;
          End;  /* If thisType = 'MANIFEST' & thisElement=Package */
    End; /* Do pk# = 1 to pkg.0 */
@@ -234,8 +258,20 @@ Update_SBOM_Source:
    MY_PARMS = OVERLAY(TEMP9,MY_PARMS,641) ;
    SA= my_parms ;
 
+   /* Swap to Alternate id (temporarily) */
+   Call SWAP2ALT
+
    ADDRESS LINKMVS 'APIAESCL MY_PARMS'
    if RC > 0 then Link_RC = RC
+
+   if Link_RC > 4 then,
+      Do
+      ADDRESS LINKMVS 'APIAESCL' 'MY_PARMS'
+      Link_RC = RC
+      End
+
+   /* Swap back to users id              */
+   Call SWAP2USR
 
    If Link_RC > 4 Then my_RC = 8
 
