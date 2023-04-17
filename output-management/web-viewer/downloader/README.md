@@ -19,6 +19,8 @@ All selected reports are downloaded into a single combined file.
 The tool also contains a preview function that shows summary information
 about reports matching the specified criteria, before starting the download.
 
+The built sample requires a Java 11 or higher runtime environment.
+
 ## Development Environment
 
 ### Prerequisites
@@ -26,7 +28,7 @@ about reports matching the specified criteria, before starting the download.
 The following software must be installed on the machine in order to build the application:
 
 - [Node.js](https://nodejs.org/en/)
-- [Java SDK 17+](https://adoptium.net/)
+- [Java SDK 17+](https://adoptium.net/) (Java 17 is only required during build time.)
 
 The system `PATH` must include the `node` and `npm` executables.
 
