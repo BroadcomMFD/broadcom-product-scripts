@@ -257,7 +257,7 @@
    Exit(1); /* Submitted a Successful test */
 
 ProcessInputOptions:
- trace r
+
    /* Determine from 1st record if OPTIONS are in YAML format  */
    If  TraceRc = 'Y'  then Trace r
    "EXECIO 1 DISKR OPTIONS "    /* may be in Rexx or Yaml format*/
