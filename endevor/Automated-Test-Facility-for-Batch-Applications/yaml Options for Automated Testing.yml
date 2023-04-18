@@ -1,0 +1,58 @@
+# YALM controls for testing JOBNUM44 on DE32                        
+#    Testing Options for the DEV2 stage                             
+JCL:                                                                
+  DEV2:                                                             
+    Change:                                                         
+         _FindTxt:   '//JOBNUM44 '                                  
+         _Replace:   '//TOBNUM44 '                                  
+                                                                    
+         _FindTxt:   'CLASS=P'                                      
+         _Replace:   'CLASS=A'                                      
+                                                                    
+         _FindTxt:   '//*     TEST PG000044 '                       
+         _where  :   'AFTER'                                        
+         _Insertx:   |                                              
+           '//*__________________________________________________*' 
+           '//* Testing Element: &C1ELEMENT                      *' 
+           '//*  Stg &C1STAGE Sys &C1SYSTEM Sbs &C1SUBSYS        *' 
+           '//*__________________________________________________*' 
+                    _Insertx:   |                                                
+           '//*__________________________________________________*'   
+           '//* Testing Element: &C1ELEMENT                      *'   
+           '//*  Stg &C1STAGE Sys &C1SYSTEM Sbs &C1SUBSYS        *'   
+           '//*__________________________________________________*'   
+                                                                      
+         _FindTxt :   ',NOTIFY=&SYSUID'                               
+         _Replace :   ',NOTIFY=WALJO11'                               
+                                                                      
+    DDName :                                                          
+           STEPLIB : |                                                
+              'SYSDE32.NDVR.DEV.&C1SYSTEM.&C1SUBSYS.LOADLIB'          
+              'SYSDE32.NDVR.PRD.FINANCE.ACCTPAY.LOADLIB'              
+                                                                      
+    MaxReturnCode : 4                                                 
+ 
+  QAS2:                                                                
+    Change:                                                            
+         _FindTxt :   '//JOBNUM44 '                                    
+         _Replace :   '//QOBNUM44 '                                    
+                                                                       
+         _FindTxt :   'CLASS=P'                                        
+         _Replace :   'CLASS=A'                                        
+                                                                       
+         _FindTxt :  '//*     TEST PG000044 '                          
+         _where   :  'AFTER'                                           
+         _Insertx :  |                                                 
+           '//*__________________________________________________*'    
+           '//* Testing Element: &C1ELEMENT '                          
+           '//*  Stg &C1STAGE Sys &C1SYSTEM Sbs &C1SUBSYS'             
+           '//*__________________________________________________*'    
+                                                                       
+    DDName :                                                           
+           STEPLIB : |                                                 
+              'SYSDE32.NDVR.QAS.&C1SYSTEM.&C1SUBSYS.LOADLIB'           
+     MaxReturnCode : 2                  
+                                      
+                                      
+ WaitLoops    : 12                    
+ LoopSeconds  : 1                     
