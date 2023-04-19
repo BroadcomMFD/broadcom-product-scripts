@@ -95,6 +95,7 @@
    TXT.Reference.DDName. = ''           /* Yaml transed to Rexx */
    TXT.Reference.REPLACE. = ''
    TXT.Reference.Insertx. = ''
+   TXT.Reference.InsertAtEnd. = ''
 
    NumberInstructions = 0     ; /* Assume zero, unless we find some*/
 
@@ -246,6 +247,12 @@ TailorNEWTXTfromOldViaYaml:
          Call ReplaceVariablesOnly;
          Queue textline
          End
+   End; /* Do j# = 1 to txtrec.0  */
+
+   /* If anything is to be inserted at End, do it here */
+   Do j# = 1 to txtrec.0
+      If TXT.Reference.InsertAtEnd.j# = '' then leave;
+      Queue TXT.Reference.InsertAtEnd.j#
    End; /* Do j# = 1 to txtrec.0  */
 
    "EXECIO" QUEUED() "DISKW NEWTXT ( Finis"
