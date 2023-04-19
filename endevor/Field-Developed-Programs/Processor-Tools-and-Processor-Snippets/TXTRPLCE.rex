@@ -167,6 +167,15 @@ TailorNEWTXTfromOldViaYaml:
    /* Read the OLDTXT file           */
    "EXECIO * DISKR OLDTXT ( Stem txtrec. Finis"
 
+   /* If anything is to be inserted at End, do it here */
+   Do j# = 1 to txtrec.0
+      If TXT.Reference.InsertAtEnd.j# = '' then leave;
+      txtrec#  = txtrec.0 + 1;
+      txtrec.txtrec# = TXT.Reference.InsertAtEnd.j#
+      txtrec.0 = txtrec#
+   End; /* Do j# = 1 to txtrec.0  */
+
+
    /* Scan each record of the text file */
    Do j# = 1 to txtrec.0
       textline = txtrec.j#
@@ -247,12 +256,6 @@ TailorNEWTXTfromOldViaYaml:
          Call ReplaceVariablesOnly;
          Queue textline
          End
-   End; /* Do j# = 1 to txtrec.0  */
-
-   /* If anything is to be inserted at End, do it here */
-   Do j# = 1 to txtrec.0
-      If TXT.Reference.InsertAtEnd.j# = '' then leave;
-      Queue TXT.Reference.InsertAtEnd.j#
    End; /* Do j# = 1 to txtrec.0  */
 
    "EXECIO" QUEUED() "DISKW NEWTXT ( Finis"
