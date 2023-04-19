@@ -5,6 +5,7 @@
    /*  This Rexx:                                              */
    /*      o Tailors the JCL for the testing location (C1STAGE)*/
    /*        using OPTIONS statements or a YAML input          */
+   /*      - then optionally:                                  */
    /*      o submits the JCL                                   */
    /*      o watches and waits for it to complete its execution*/
    /*      o then captures all the output from JES and copies  */
@@ -159,6 +160,11 @@
       Exit(12)
       End
 
+   /* If not expecting job submission, then exit       */
+   If WaitLoops = 0 then Exit(my_rc)
+
+
+   /************ --------------------------------***** */
    /* If Baseline specified at Stage level use it.     */
    If TraceRc = 'Y' then Trace r
    Drop Baseline

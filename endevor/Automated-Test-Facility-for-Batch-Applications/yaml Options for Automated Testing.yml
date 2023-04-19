@@ -24,7 +24,12 @@ JCL:
                                                                       
          _FindTxt :   ',NOTIFY=&SYSUID'                               
          _Replace :   ',NOTIFY=WALJO11'                               
-                                                                      
+                                                             
+    InsertAtEnd: |                               
+        "//*------- the end 1*****"             
+        "//*------- the end 2*****"             
+        "//*------- the end 3*****"             
+                                                                                                         
     DDName :                                                          
            STEPLIB : |                                                
               'SYSDE32.NDVR.DEV.&C1SYSTEM.&C1SUBSYS.LOADLIB'          
