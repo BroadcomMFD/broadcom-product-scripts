@@ -42,3 +42,5 @@ The [output-management](output-management) directory contains multiple samples r
 
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
+
+It is the responsibility of the original contributor to resolve vulnerabilities identified by Dependabot within their contributions.
