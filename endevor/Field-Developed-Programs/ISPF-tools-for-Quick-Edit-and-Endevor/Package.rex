@@ -151,8 +151,8 @@
      Call Build_NOTES_Fields   ;
 /*
   If ShipSchedulingMethod = 'Rules' then nop
-*/
   VPHNOTE8 = SchedulingOption'>' BTSTDATE '00:00' ;
+*/
   ACTION = 'MOVE'
   Call SHOW_PANEL;
   Call Build_Package ;
@@ -197,6 +197,7 @@ Build_Entries_QuickEdit:
         Environment = EEVETKEN ;
         Stage       = EEVETKSI ;
         PKGPRFIX    = EEVETKSY ;
+        UseCCID     = Strip(EEVETCCI)
         If Environment = 'ADMIN' then,
            PKGPRFIX    = EEVETKSB ;
         Else,
@@ -331,8 +332,9 @@ SHOW_PANEL:
   PACKAGE = STAGE   ||"#" || PKGUNIQ ;
   PACKAGE = PKGSTAGE ||"#" || PKGUNIQ ;
 */
-  PACKAGE = Substr(PKGPRFIX,1,4)|| '#' || PKGUNIQ
   PACKAGE = UseCCID || PKGUNIQ
+  PACKAGE = Substr(PKGPRFIX,1,4)|| '#' || PKGUNIQ
+
   PACKAGE = Left(PACKAGE,16,'#')
 
   COMMENT = Left(UseCCID||':' COMMENT,50)
