@@ -9,7 +9,7 @@
 /* Is PACKAGE is allocated? If yes, then turn on Trace  */
    isItThere = ,
      BPXWDYN("INFO FI(PACKAGE) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
-   If isItThere = 0 then Trace r
+   If isItThere = 0 then Trace ?r
 /*                                                                   */
 /* Variable settings for each site --->           */
    VCAPRN= '0'
@@ -63,6 +63,7 @@
   ADDRESS ISPEXEC,
      "VGET (C1BJC1 C1BJC2 C1BJC3 C1BJC4) PROFILE "
   ADDRESS ISPEXEC  "VGET (EEVCCID) PROFILE"
+  UseCCID     = Strip(EEVCCID);
   ADDRESS ISPEXEC  "VGET (EEVCOMM) PROFILE"
 
   VARWKCMD =  "" ;
@@ -148,7 +149,9 @@
   System_List = Strip(System_List) ;
   If ShipSchedulingMethod = 'Notes' then,
      Call Build_NOTES_Fields   ;
+/*
   If ShipSchedulingMethod = 'Rules' then nop
+*/
   VPHNOTE8 = SchedulingOption'>' BTSTDATE '00:00' ;
   ACTION = 'MOVE'
   Call SHOW_PANEL;
@@ -329,7 +332,10 @@ SHOW_PANEL:
   PACKAGE = PKGSTAGE ||"#" || PKGUNIQ ;
 */
   PACKAGE = Substr(PKGPRFIX,1,4)|| '#' || PKGUNIQ
+  PACKAGE = UseCCID || PKGUNIQ
   PACKAGE = Left(PACKAGE,16,'#')
+
+  COMMENT = Left(UseCCID||':' COMMENT,50)
 
   ADDRESS ISPEXEC,
      "DISPLAY  PANEL(PACKAGEP) "
