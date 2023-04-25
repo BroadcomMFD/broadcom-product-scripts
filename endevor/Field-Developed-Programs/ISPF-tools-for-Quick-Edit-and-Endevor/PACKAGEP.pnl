@@ -2,17 +2,17 @@
 /*----------------------------------------------------------------------
 /* (C) 2002 Computer Associates International, Inc.
 /*----------------------------------------------------------------------
- › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)
+ ^ TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)
  | TYPE(OUTPUT) INTENS(LOW)
  _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)
- ¬ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)
+ { TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)
  ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)
  ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)
 )BODY
 %------------------------ ENDEVOR Package(s) Builds ---------------------------
 %Command ===>_VARWKCMD
 +
-+    Action    :_ACTION  +   <- MOVE/GENERATE/DELETE for ›COUNT+Elements
++    Action    :_ACTION  +   <- MOVE/GENERATE/DELETE for ^COUNT+Elements
 +    CCID      :_CCID       +<- CCID                     _Z+<Use Pick-list
 +    Comment   :_COMMENT                                          +
 +
@@ -36,7 +36,7 @@
   &APPEND   = 'N'
   &CASTPKGE = 'Y'
   &VALIDATE = 'Y'
-  &EXECUTE  = 'Y'
+  &EXECUTE  = 'N'
   &ACTION   = 'MOVE'
   &DESCRIPT = &COMMENT
   &PICKLIST = 'N'

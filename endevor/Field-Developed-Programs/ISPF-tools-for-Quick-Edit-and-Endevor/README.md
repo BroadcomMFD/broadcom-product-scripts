@@ -7,18 +7,25 @@ Use the extension on each item to determine where the item needs to reside.
 - rex items must reside in a REXX library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library
 - pnl items must reside in an ISPF panel library, typically an ISPPLIB or a CSIQPENU library
 - skl items must reside in an ISPF skeleton library, typically an ISPSLIB or a CSIQSENU library
-- msg items must reside in an ISPF message library, typically an ISPMLIB or a CSIQMENU library
+- ispfmsg items must reside in an ISPF message library, typically an ISPMLIB or a CSIQMENU library
 
 Items listed together run together.
+## WHEREIAM and @SITE (shared by multiples) ## 
 
-## PACKAGE PACKAGEP PKGESELS and PKGESEL2
+Several of these solutions are prepared to run on multiple Lpars, and allow dataset names and other variables to differ between Lpars. These **WHEREAMI** and **@SITE** items provide for the differences between Lpars so that the remainint items can remain static. 
+
+You can do a stand-alone execution of WHEREIAM to receive a name that you should use to give to the @SITE member. Fixed code will look for that name to find the site-specific values for that site. 
+
+If you have only one Endevor image, or multiples with matching variable information, then the **WHEREAMI** and **@SITE**  members are not necessary for you. You may elect to assign values within the other members.
+
+## PACKAGE PACKAGEP PKGESELS PKGESEL2 and CIUU02
 
 These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package using only one screen while viewing a list of elements. Just  enter "TSO PACKAGE" on the command line, and the elements listed will be placed into a new package. You can choose whether MOVE, GENERATE or DELETE actions are to be performed on all listed elements. Then a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
 APIALPKG is an optional API program that can be used with the Package tool. It allows a user to create a new package by copying the content of an existing package. In this case, from any Quick-Edit or Endevor screen that shows a package name, enter "TSO PACKAGE" on the command line, move the cursor to the first character of the package name, and press 'Enter'. 
 
-## PDA NOTIFY @SITE and WHEREIAM
+## PDA and NOTIFY
 
-These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that the edited element is in parallel development. Notifications appear as note lines and indicate the locations, userids and CCIDs for each element found.  NOTIFY can be used to turn on or off the notifications for a single user. The @SITE member is necessary only if you have multiple Endevor images and different life cycles. Each Endevor image will need its own version of @SITE, renamed to match the SYSNAME where Endevor is running. If you have only one Endevor image, or multiple Endevors with matching Environments and stages, then the @SITE and WhereIam members are not required for you. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:
+These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that the edited element is in parallel development. Notifications appear as note lines and indicate the locations, userids and CCIDs for each element found.  NOTIFY can be used to turn on or off the notifications for a single user. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:
 
            PDAMaplist = ,        /* required only for PDA  */
               " SMPLTEST/T-SMPLTEST/Q ",

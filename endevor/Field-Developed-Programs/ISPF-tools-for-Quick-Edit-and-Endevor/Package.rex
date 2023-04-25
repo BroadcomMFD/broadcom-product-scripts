@@ -15,7 +15,7 @@
    VCAPRN= '0'
    VCAPYN = 'N'
 
-   WhereIam =  WHERE@M1()
+   WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
 
    interpret 'Call' WhereIam "'SchedulingPackageShipBundle'"
    SchedulingPackageShipBundle = Result
