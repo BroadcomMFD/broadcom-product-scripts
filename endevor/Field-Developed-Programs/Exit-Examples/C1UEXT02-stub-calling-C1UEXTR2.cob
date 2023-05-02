@@ -431,7 +431,7 @@
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
               END-STRING .
-           IF SRC-ENV-IO-TYPE NOT = 'I' AND
+           IF TGT-ENV-TYPE-OF-BLOCK = "C" AND
               TGT-ENV-IO-TYPE = 'O'
               INSPECT TGT-ELM-ACTION-CCID   REPLACING ALL '"' BY X'7D'
               INSPECT TGT-ELM-LEVEL-COMMENT REPLACING ALL '"' BY X'7D'
