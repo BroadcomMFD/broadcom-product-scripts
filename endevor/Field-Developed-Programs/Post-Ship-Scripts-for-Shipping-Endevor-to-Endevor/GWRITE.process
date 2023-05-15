@@ -1,0 +1,18 @@
+//********************************************************************
+//GWRITE   PROC AAA=,
+//         OUTPUT='SYSDE32.NDVR.&C1EN..&C1SY..&C1SU..&C1TY',
+//         EXPAND=N,
+//         FOOTPINT=&C1FOOTPRT(39,25),                                  00001500
+//         ZZZ=
+//*********************************************************************
+//*********************************************************************
+//* READ SOURCE AND EXPAND INCLUDES
+//*********************************************************************
+//CONWRITE EXEC PGM=CONWRITE,MAXRC=0,
+// PARM='RXPINCL(&EXPAND)'
+//ELMOUT   DD DSN=&OUTPUT,                   (&C1ELEMENT)
+//            MONITOR=COMPONENTS,DISP=SHR,
+//            FOOTPRNT=CREATE
+//*******************************************************************
+       ++INCLUDE RMALTERS    IF PACKAGING, PROVIDE DETAILS FOR ALTER
+//*******************************************************************

@@ -1,0 +1,51 @@
+)ATTR DEFAULT(%+_)
+/*----------------------------------------------------------------------
+/* (C) 2002 Computer Associates International, Inc.
+/*----------------------------------------------------------------------
+ ^ TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)
+ | TYPE(OUTPUT) INTENS(LOW)
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)
+ { TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)
+)BODY
+%------------------------ ENDEVOR Package(s) Builds ---------------------------
+%Command ===>_VARWKCMD
++
++    Action    :_ACTION  +   <- MOVE/GENERATE/DELETE for ^COUNT+Elements
++    CCID      :_CCID       +<- CCID                     _Z+<Use Pick-list
++    Comment   :_COMMENT                                          +
++
++       %Package ID ======>_PACKAGE         +            _Z+<-Append Y/N
++        %Concur Act =====>_Z+
++   Promote:_Z+ <- Y/N  Cast:_Z+ <- Y/N  Validate:_Z+ <- Y/N  Execute:_Z+ <- Y/N
++   Description:_DESCRIPT                                         +
++          EXECUTION WINDOW FROM%===>_Z      _Z    + TO%===>_Z      _Z    +
++       ----------------------%Package Note Text+-------------------------------
++        .........1.........2.........3.........4.........5.........6
++    1. `VPHNOTE1                                                    +
++    2. `VPHNOTE2                                                    +
++    3. `VPHNOTE3                                                    +
++    4. `VPHNOTE4                                                    +
++    5. `VPHNOTE5                                                    +
++    6. `VPHNOTE6                                                    +
++    7. `VPHNOTE7                                                    +
++    8. `VPHNOTE8                                                    +
+)INIT
+  VGET (VCAPRN) ASIS
+  &APPEND   = 'N'
+  &CASTPKGE = 'Y'
+  &VALIDATE = 'Y'
+  &EXECUTE  = 'N'
+  &ACTION   = 'MOVE'
+  &DESCRIPT = &COMMENT
+  &PICKLIST = 'N'
+  .ZVARS = '( PICKLIST APPEND VCAPRN PROMOTE CASTPKGE VALIDATE +
+              EXECUTE BTSTDATE BTSTTIME BTENDATE BTENTIME)'
+)PROC
+ VER (&ACTION,LIST,MOVE,GENERATE,DELETE)
+ VER (&VCAPRN,NUM)
+ &VARSPPKG = &PACKAGE
+ VPUT (VCAPRN) ASIS
+ VPUT (VARSPPKG) SHARED
+)END

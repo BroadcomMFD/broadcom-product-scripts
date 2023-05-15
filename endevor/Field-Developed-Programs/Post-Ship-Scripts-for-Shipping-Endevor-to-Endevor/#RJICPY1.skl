@@ -1,0 +1,115 @@
+@REM ****************************************************** #RJFCPY1 ***
+@REM *    CONTENTS: ENDEVOR/MVS - START PROCESSING A NEW DESTINATION
+@REM *              REMOTE JOBSTREAM TO COPY/DELETE SHIPMENT MEMBERS
+@REM *     PURPOSE: GENERATE A REMOTE JOBSTREAM TO CREATE/DELETE
+@REM *              SHIPMENT MEMBERS USING PDSMAN AND IDCAMS. CONFIRM
+@REM *              THE EXECUTION OF THIS JOBSTREAM AT THE HOST
+@REM *******************************************************************
+@REM *
+@REM *
+@REM *
+@SECTION=01   <=======================================================
+&RJOBCARDS
+//*-------------------------------------------------------------------
+//*--------------- include ORDER statement if found
+@INCLUDE=(O)
+//*-------------------------------------------------------------------
+//*----Package Shipment ---------------------------------  #RJICPY1
+//*------------------------------------------------------  #RJICPY1
+//* Host Staging DSN prefix        &HSTGPFX
+//* Remote Staging DSN prefix      &RSTGPFX
+//* Transmission Method (4 chars)  &XMIT4
+//* Transmission Method (1 char )  &XMIT1
+//* Ship Date                      &SHIPDATE
+//* Ship time                      &SHIPTIME
+//  EXPORT SYMLIST=(*)
+@INCLUDE=(OVERRIDE)
+//*-------------------------------------------------------------------
+@REM * //*-------------------------------------------------------------------
+@REM * //*- Let Each Destination use this JES include to insert
+@REM * //*-   Destination-specific variables etc
+@REM * // INCLUDE MEMBER=#&DESTID
+//*INCLUDE MEMBER=#&DESTID       JES include
+//*-------------------------------------------------------------------
+@INCLUDE=(BACKOUT1)
+@INCLUDE=(B)
+@INCLUDE=(BACKOUT2)
+@IF &ANY2PROCESS
+//JS01     EXEC PGM=IEBCOPY
+//SYSPRINT DD   SYSOUT=*
+//SYSUT3   DD   UNIT=&RUNIT,SPACE=(TRK,(5,5))
+//SYSUT4   DD   UNIT=&RUNIT,SPACE=(TRK,(5,5))
+@ENDIF
+@REM *
+@REM *----------------------------------------------------------------
+@REM #RJFCPY2 @SECTION=01 GENS AN INDD CARD AND AN OUTDD CARD PER PDS
+@REM *----------------------------------------------------------------
+@REM *
+@REM *
+@REM *
+@SECTION=02   <=======================================================
+@IF &ANY2PROCESS
+//SYSIN    DD   *
+@ENDIF
+@REM *----------------------------------------------------------------
+@REM #RJFCPY2 @SECTION=02 GENS A FASTCOPY "COPY" STATEMENT FOR EACH
+@REM                      PDS CONTAINING MEMBERS TO BE COPIED
+@REM *----------------------------------------------------------------
+@REM *
+@REM *
+@REM *
+@SECTION=03   <=======================================================
+@REM *----------------------------------------------------------------
+@REM #RJFCPY2 @SECTION=03 GENS A FASTCOPY "EDITDIR" STATEMENT FOR
+@REM                      EACH PDS CONTAINING MEMBERS TO BE DELETED
+@REM #RJFCPY4 @SECTION=03 GENS A FASTCOPY DELETE FOR EACH MEMBER
+@REM                      TO BE DELETED
+@REM *----------------------------------------------------------------
+@REM *
+@REM *
+@REM *
+@SECTION=04   <=======================================================
+@IF &RUCD
+//*
+//***********************************************************
+//* (OPTIONAL) MODIFY ARUCD COMMAND FILE          #RJFCPY1
+//*
+//* IF REQUIRED, YOU CAN EDIT THIS MODEL JCL HERE TO INSERT
+//* A STEP TO MODIFY THE ARUCD BPXBATCH COMMAND FILE BEFORE
+//* IT IS PROCESSED BY BPXBATCH.
+//* THE SYMBOL RUCD CAN BE USED FOR THE INPUT TO THE
+//* TAILORING STEP.
+//* THE STDPARM DD STATEMENT IN THE BPXBATCH STEP THAT
+//* FOLLOWS CAN BE USED AS A MODEL FOR INPUT TO THE
+//* INSERTED STEP.
+//*
+//***********************************************************
+//*
+//COPIES   EXEC PGM=BPXBATCH           FCPY
+//STDOUT   DD   SYSOUT=*
+//STDERR   DD   SYSOUT=*
+//STDPARM  DD   DISP=SHR,
+//         DSN=&RUCD
+@ENDIF
+@SECTION=05   <=======================================================
+@INCLUDE=(BACKOUT1)
+@INCLUDE=(A)
+@INCLUDE=(BACKOUT2)
+@IF RDISP=DELETE
+//JS02     EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+@ENDIF
+@REM *----------------------------------------------------------------
+@REM #RJFCPY2 @SECTION=05 GENS AN IDCAMS "DELETE" STATEMENT FOR REMOTE
+@REM                      STAGING DATA SETS IF REMOTE DISP=DELETE
+@REM #RJFCPY6 @SECTION=05 GENS AN IDCAMS "DELETE" STATEMENT FOR REMOTE
+@REM                      JOB DATA SET AND DSN CROSS REFERENCE DATASET
+@REM                      IF REMOTE DISP=DELETE
+@REM *----------------------------------------------------------------
+@REM *
+@REM *
+@REM *
+@SECTION=06   <=======================================================
+&RCONFJCL
+//* **** END OF JOBSTREAM **** *

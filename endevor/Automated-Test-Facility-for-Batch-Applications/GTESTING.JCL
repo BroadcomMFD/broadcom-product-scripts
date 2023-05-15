@@ -11,7 +11,9 @@
 //*  -- This processor must run in batch.                        ------*
 //*--------------------------------------------------------------------*
 //GTESTING PROC AAAAAA=,
-//    HLQ='NDV.MOTM.ESCMSNDV.SHRD.D&C1STGNUM.',   Endevor Datasets HLQ
+//    HLQ='SYSDE32.NDVR.&C1ENVMNT..&C1SY..&C1SU.',
+//*   INCLUDE='-INC &C1ELEMENT',
+//    INCLUDE='       ++INCLUDE &C1ELEMENT',
 //    EXPINC=N,
 //    LISTLIB='&HLQ..LISTLIB',                    Listing lib
 //    MONITOR=COMPONENTS,
@@ -19,9 +21,9 @@
 //    OUTLIB='&HLQ..JCL',                         output JCL lib
 //    RESLTHLQ='PUBLIC.&C1ELEMENT',               perhaps C1userid...
 //    SHOWME='Y',       Show diagnostics & intermediate results Y/N
-//    SYSEXEC1=CATSNDVR.NDVR.EMER.CSIQCLS0,       1 of 2 Rexx libraries
-//    SYSEXEC2=CATSNDVR.NDVR.PROD.CSIQCLS0,       2 of 2 Rexx libraries
-//    SYSOUT=,
+//    SYSEXEC1=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
+//    SYSEXEC2=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM2.CLSTREXX,
+//    SYSOUT=*,
 //    WAITS=15,                                   Default # wait loops
 //    WAITSECS=3,                                 Default wait seconds
 //    WRKUNIT=3390,
@@ -41,36 +43,40 @@
 //**********************************************************************
 //INIT     EXEC PGM=BC1PDSIN,MAXRC=0                       GTESTING
 //C1INIT01 DD DSN=&&OPTIONE,DISP=(,PASS),
-//            UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
-//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)
+//            UNIT=&WRKUNIT,SPACE=(TRK,(10,15)),
+//            DCB=(RECFM=FB,LRECL=120,BLKSIZE=24000)
 //C1INIT02 DD DSN=&&SUPERC,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
 //            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
 //*-------------------------------------------------------------------*
 //**  Get element specific OPTIONS ele for JCL     (If one EXISTS)   **
+//*------                                                            **
+//**  (You can use IEBUPDTE for this step if LRECL=80 for OPTIONS    **
+//**    Otherwise, on the Defaults table use                         **
+//**                  LIBENV=PV or LIBENV=LB
+//**               on the ENCOPTBL table use                         **
+//**                  ENHOPT MSGSEVERITY_ENBX043=W                   **
+//**     then use ENBX1000 on this step                           )  **
 //*-------------------------------------------------------------------*
-//GET#OPTE EXEC PGM=IEBUPDTE,COND=(4,LT),MAXRC=4           GTESTING
-//SYSPRINT DD DUMMY
-//SYSIN    DD  *
-./  REPRO NEW=PS,NAME=&C1ELEMENT
-//SYSUT1   DD DISP=SHR,DSN=&OPTIONS,
+//GET#OPTE EXEC PGM=CONAPI,PARM='ENBX1000',
+//              COND=(4,LT),MAXRC=4
+//ENXIN    DD *  / Fetch the OPTIONs for the Element
+&INCLUDE         <- Panv or Libr Include
+//*-INC &C1ELEMENT                   <- Libr version (-INC in col 1)
+//*      ++INCLUDE &C1ELEMENT        <- Panv version (++   in col 8)
+//ENXINC00 DD DISP=SHR,DSN=&OPTIONS,
 //            MONITOR=COMPONENTS,ALLOC=LMAP
-//SYSUT2   DD DSN=&&OPTIONE,DISP=(OLD,PASS)
-//EXAMPLES DD * <- These are examples OPTIONS to be fetched
-  JCL.FindTxt.1 = 'WALJO11.'
-  JCL.Replace.1 = 'PUBLIC.'
-
-  JCL.FindTxt.2 = 'CLASS=B'
-  JCL.Replace.2 = 'CLASS=A'
-
-  JCL.FindTxt.3 = 'CAIPRODD.NDVR'
-  JCL.Replace.3 = 'SYSDE32.NDVR.TEAM'
-
-  JCL.FindTxt.4 = 'SECONDS=12'
-  JCL.Replace.4 = 'SECONDS=04'
-  JCL.REPLACE.<ddname>.<stepname> = 'Jcl-statements>'
-  JCL.REPLACE.STEPLIB.      = 'WALJO11.LOADLIB' <-Replace all STEPLIBS
-  JCL.REPLACE.STEPLIB.STEP1 = 'WALJO11.LOADLIB' <-Replace   1 STEPLIB
+//ENXMSGS1 DD SYSOUT=*               EXECUTION REPORT
+//ENXMSGS2 DD SYSOUT=*               SUMMARY REPORT
+//C1TPDD01 DD UNIT=&WRKUNIT,SPACE=(CYL,3),
+//            DCB=(RECFM=VB,LRECL=260)
+//C1TPDD02 DD UNIT=&WRKUNIT,SPACE=(CYL,5),
+//            DCB=(RECFM=VB,LRECL=260)
+//C1TPLSIN DD UNIT=&WRKUNIT,SPACE=(CYL,3),
+//            DCB=(RECFM=FB,LRECL=80)
+//C1TPLSOU DD SYSOUT=*
+//C1PLMSGS DD SYSOUT=*
+//ENXOUT   DD DSN=&&OPTIONE,DISP=(OLD,PASS)
 //*-------------------------------------------------------------------*
 //*-- In the parameter string, enter:                          -------*
 //*--  o TEST#JOB - the name of the REXX driver                -------*
@@ -90,10 +96,16 @@
 //*--      (RC=8 means UnSuccessful test submitted)            -------*
 //*-------------------------------------------------------------------*
 //SUBMITST EXEC PGM=IKJEFT1B,   < execute the REXX driver  GTESTING
-//  PARM='TEST#JOB &C1ELEMENT &C1STAGE &WAITS &WAITSECS &RESLTHLQ'
+//  PARM='TEST#JOB &C1ELEMENT &C1STAGE &WAITS &WAITSECS &RESLTHLQ',
+//              COND=(4,LT),MAXRC=4
 //* Can use OPTIONS to override WaitLoops and LoopSeconds
-//OLDJCL   DD DSN=&&ELMOUT,DISP=(OLD,DELETE)
-//NEWJCL   DD DSN=&OUTLIB(&C1ELEMENT),
+//* Writes NEWTXT even if no OPTIONS are found
+//*EST#JOB DD DUMMY    < turn TEST#JOB Trace on/off
+//*XTRPLCE DD DUMMY    < turn TXTRPLCE Trace on/off
+//*PTVALDT DD DUMMY    < turn OPTVALDT Trace on/off
+//*AML2REX DD DUMMY    < turn YAML2REX Trace on/off
+//OLDTXT   DD DSN=&&ELMOUT,DISP=(OLD,DELETE)
+//NEWTXT   DD DSN=&OUTLIB(&C1ELEMENT),
 //            DISP=SHR,MONITOR=COMPONENTS,FOOTPRNT=CREATE
 //OPTIONS  DD DSN=&&OPTIONE,DISP=(OLD,PASS)
 //VARIABLE DD *   <- Optionally provide more substitution variables
@@ -119,7 +131,8 @@
   MyDSNPrefix='MOTM.&C1SY..&C1SU..&C1EN(1,1)&C1S#.'
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC1
 //         DD DISP=SHR,DSN=&SYSEXEC2
-//SYSTSPRT DD DSN=&&SYSTSPRT,DISP=(,PASS),
+//SYSTSPRT DD SYSOUT=*
+//SYSTSPRX DD DSN=&&SYSTSPRT,DISP=(,PASS),
 //            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
 //            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
 //ERRORS   DD SYSOUT=*   <- if any errors are found
@@ -164,6 +177,6 @@ CMPSECT START  TOP 'JESYSMSG-End'
 //*******************************************************************
 //*---------------------
 //  IF (RC < 4) AND (GET#OPTE.RC = 0) THEN
--INC AUTOTEST    Submit AutomatedTest if specified
+       ++INCLUDE AUTOTEST    Submit AutomatedTest if specified
 //  ENDIF
 //*---------------------

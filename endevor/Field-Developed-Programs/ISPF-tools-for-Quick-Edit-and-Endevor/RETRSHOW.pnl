@@ -1,0 +1,35 @@
+)ATTR DEFAULT(%+_)
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */
+   # TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)
+   _ TYPE(OUTPUT) INTENS(LOW)
+   | TYPE(OUTPUT) INTENS(HIGH) CAPS(OFF)
+)BODY EXPAND(\\)
+%\-\ RETROFIT PDM EXECUTION FOR|ELEMENT %/|MELTYPE +%\-\
++OPTION%===>#ZCMD
+%
+%       Please review inputs determined for PDM execution:
+%
++ ROOT:     Environment ===>|RENVMNT +   Version=>|BASEVV+
++                 Stage ===>|Z+           Level =>|BASELL+
++                System ===>|RSYSTEM +
++             Subsystem ===>|RSUBSYS +
++
++ DV1:      Environment ===>_MENVMNT +   Userid ===>|MUSERID+
++                 Stage ===>_Z+         %(your edited version)
++                System ===>_MSYSTEM +
++             Subsystem ===>_MSUBSYS +
++
++ DV2:      Environment ===>_TENVMNT +   Userid ===>|TUSERID+
++                 Stage ===>_Z+          Version=>|DV2VER+
++                System ===>_TSYSTEM +    Level =>|DV2LVL+
++             Subsystem ===>_TSUBSYS +
+%
++     (PRESS%ENTER+ or%PF3+TO CANCEL OR END)
+)INIT
+ &USERID = &ZUSER
+ .ZVARS = '(RSTGID MSTGID TSTGID)'
+)PROC
+)END

@@ -1,7 +1,5 @@
-# Package Reporting
-These procedures provide solutions for the reporting of Endevor package information. The first example offers a package report that can be used to determine input component omissions, and package relationships for multiple Endevor packages that need to be considered together.
+# Multi-Package Reporting and Component Validation
 
-## Multi-Package Reporting and Component Validation
 With this procedure a job can be submitted for a list of Endevor packages which are to be evaluated together. The job performs an analysis similar to the Component Validation feature of Endevor, and looks for input components which might be missing, and also shows dependency relationships between the packages. Input components for the combined package content found missing are reported, and a high return code is given. If no input components are missing a simple message is printed and a return code of 0 is given.
 
 Here is an example report showing package relationships and a missing input component:
@@ -80,7 +78,7 @@ An optional report can show a potential chronological order for the packages
 ```
 
 
-### Setup Steps for Multi-Package Reporting and Component Validation
+## Setup Steps for Multi-Package Reporting and Component Validation
 
 1. Tailor the JCL jobcard
 2. Optionally set the Order statement in the JCL to your JCL “INCLUDE” libraries. Alternatively just insert or modify the STEPLIB and SYSEXEC library designations in the JCL. The SYSEXEC library is the one you choose for the two REXX items.
@@ -91,7 +89,7 @@ An optional report can show a potential chronological order for the packages
    `//   SET PATHINIT=’DEV1.1 DEV2.1’`
 4. Set the value of EXPORTDS to an existing dataset. The job will create members in this dataset for each package EXPORT.
 
-### How It Works
+## How It Works
 - An EXPORT is executed for each package listed at the top of the job. The status value for the package can be anything, including IN-EDIT.
 - The SCL produced from the EXPORTed packages is reformatted. An ACM “Components Used” Query is constructed and executed for each packaged element.
 - The reformatted SCL and the output from the ACM queries are examined together. The findings are reported within the job’s RESULTS output.

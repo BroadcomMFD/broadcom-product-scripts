@@ -1,0 +1,7 @@
+*Environment Stage System-- Subsys-- Destination St Jobname-  Date Time  Typrun  Notify----- 
+ DEV         *     FINANCE  REMOTEST TST32       _  RMTEDE32  +0   0000                      
+*QAS         9     FINANCE  *        TSO21       _  SENDTS21  +0   0000  HOLD                
+ PRD         2     *        *        TSO32       _  PRODDE32  +0   0000                      
+ PRD         2     *        *        DE57#       _  PRODDE57  +0   0000                      
+ ADMIN       1     CATSNDVR *        CA66A       _  D32#CA66  +0   0000                      
+ ADMIN       1     CATSNDVR *        CA32A       _  D32#CA32  +0   0000                      

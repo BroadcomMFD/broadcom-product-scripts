@@ -1,0 +1,308 @@
+//WALJO11&JobChar JOB (0000),
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
+//      NOTIFY=&SYSUID
+//*-------------------------------------------------------------------*
+//* Submit ACM collection for one 'Group' of Inventory range ---------*
+//*-      Modify the SET statements ----------------------------------*
+//*-      Submitted by ACM#LOD2     ----------------------------------*
+//*-------------------------------------------------------------------*
+// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)      <-Where is STEPLIB incl
+//*==================================================================*
+//  EXPORT SYMLIST=(*)
+//*-------------------------------------------------------------------*
+//  SET HLQ=&SYSUID..ACM#BILD          Intermediate files HLQ
+//  SET MODELLIB=&SYSUID..ACM#BILD.WORK       <-Where are ACM#*
+//  SET CSIQCLS0=CARSMINI.NDVR.R1801.CSIQCLS0 <-Where is ENBPIU00
+//*-----------
+//  SET ACMROOT=SYSDE32.NDVR.ACMROOT         <-Name of ACMROOT
+//  SET ACMXREF=SYSDE32.NDVR.ACMXREF         <-Name of ACMXREF
+//  SET GROUP=&Group.
+//*-------------------------------------------------------------------*
+//*-------------------------------------------------------------------*
+//* SET START=&Start
+//* SET STOP=&Stop
+//*-------------------------------------------------------------------*
+//*  COLLECT ACMQ RELATIONSHIPS FOR NON-GENERATED ELEMENTS IN PROD
+//*-------------------------------------------------------------------*
+//STEP0    EXEC PGM=IEFBR14                                ACM#LOD3
+//ACMQLIST DD  DISP=(MOD,DELETE,DELETE),
+//             DSN=&HLQ..&GROUP.ACMQLIST,
+//         UNIT=SYSALLDA,SPACE=(CYL,(05,05),RLSE),
+//         DCB=(RECFM=FB,LRECL=90,BLKSIZE=0,DSORG=PS)
+//ACMQOUT  DD  DISP=(MOD,DELETE,DELETE),
+//             DSN=&HLQ..&GROUP.ACMQOUT,
+//         UNIT=SYSALLDA,SPACE=(CYL,(05,05),RLSE),
+//         DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//MERGED   DD  DISP=(MOD,DELETE,DELETE),
+//             DSN=&HLQ..&GROUP.MERGED,
+//         UNIT=SYSALLDA,SPACE=(CYL,(05,05),RLSE),
+//         DCB=(RECFM=FB,LRECL=120,BLKSIZE=0,DSORG=PS)
+//SAVEPDS  DD  DISP=(MOD,DELETE,DELETE),
+//             DSN=&HLQ..&GROUP.SAVEPDS,
+//         UNIT=SYSALLDA,SPACE=(CYL,(30,30,900),RLSE),
+//         DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PO)
+//*-------------------------------------------------------------------*
+//*********************************************************************
+//*  IDENTIFY WHICH ELEMENTS HAVE NO GENERATE DATE                    *
+//*********************************************************************
+//*-------------------------------------------------------------------*
+//STEP1    EXEC PGM=NDVRC1,PARM='ENTBJAPI',REGION=4096K    ACM#LOD3
+//   INCLUDE MEMBER=STEPLIB      <-Endevor STEPLIB,CONLIB etc
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//SYMDUMP  DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//MSGFILE  DD SYSOUT=*
+//ELEMLIST DD  DSN=&&EXTRACT,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(CYL,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//SYSIN    DD  *
+*---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
+***** ALELM = LIST ELEMENT STRUCTURE INFORMATION
+*    V - COLUMN 6 = PATH SETTING
+*     V - COLUMN 7 = RETURN SETTING
+*      V - COLUMN 8 = SEARCH SETTING
+*       = ' ' FOR FIRST
+*       = 'A' FOR ALL
+*       = 'B' FOR BETWEEN
+*       = 'E' FOR NEXT
+*       = 'N' FOR NO
+*       = 'R' FOR RANGE
+*       V - COLUMN 9 = UNUSED
+*        VVVVVVVV - COLUMN 10-17 ENVIRONMENT NAME
+*                V - COLUMN 18 = STAGE ID
+*                 VVVVVVVV - COLUMN 19-26 SYSTEM NAME
+*                         VVVVVVVV - COLUMN 27-34 SUBSYSTEM NAME
+*    COLUMN 35-44 = ELEMENT NAME  VVVVVVVVVV
+*    COLUMN 45-52 = TYPE NAME               VVVVVVVV
+*    COLUMN 53-60 = TO-ENV NAME                     VVVVVVVV
+*    COLUMN 61    = TO-STAGE ID                             V
+*    COLUMN 62-71 = THRU-ELEMENT NAME                        VVVVVVVVVV
+* NOTE: IF BETWEEN/RANGE SETTINGS ARE USED, YOU NEED TO SPECIFY
+*       TO-ENV AND TO-STAGE, OTHERWISE LEAVE BLANK.
+*---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
+AACTL MSGFILE ELEMLIST
+ALELM AR &ENVMNT\**       *       &Start010 *       &ENVMNT\&STAGE\&Stop
+RUN
+AACTLY
+RUN
+QUIT
+//*
+//*  PRINT EXTRACTED ELEMENT
+//SHOW2    EXEC PGM=IEBGENER,COND=(0,LE)                   ACM#LOD3
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&EXTRACT,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//*
+//******************************************************************
+//NOTGEND  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'        ACM#LOD3
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//PARMLIST DD  *
+  NOTHING SKIPPING USERTYPS 0
+  MODEL   TBLOUT   OPTIONS  A
+//USERTYPS DD DSN=&HLQ..ACM#LOAD.USERTYPS,DISP=SHR
+//OPTIONS  DD  *
+  IF $row# = 0 then $my_rc = 5 ;
+  $nomessages = 'Y'
+  MODEL = "SHOWME"
+  TBLOUT= "NOTHING"
+  IF UserType.TYPE = 'Y' THEN TBLOUT= "COMPUSER"
+  IF UserType.TYPE = 'Y' THEN MODEL = "MODELU"
+  IF ELEMENT < "&Start" THEN MODEL = "SKIPPING"
+  IF ELEMENT > "&Stop"  THEN MODEL = "SKIPPING"
+  COMPLINE = COPIES(" ",80)
+  COMPLINE = OVERLAY(ELEMENT,COMPLINE,01);
+  COMPLINE = OVERLAY(SYSTEM,COMPLINE,12);
+  COMPLINE = OVERLAY(SUBSYS,COMPLINE,22);
+  COMPLINE = OVERLAY(TYPE,COMPLINE,32);
+  COMPLINE = OVERLAY(EDLT_DATE,COMPLINE,42);
+  COMPLINE = OVERLAY(GEN_DATE,COMPLINE,52);
+  COMPLINE = OVERLAY(GEN_TIME,COMPLINE,62);
+  COMPLINE = OVERLAY(ENV,COMPLINE,73);
+  COMPLINE = OVERLAY(STG_NUM,COMPLINE,83);
+  IF MODEL="MODELU" & GEN_DATE>'00000000' then $SkipRow='Y'
+  IF MODEL  = "MODELU"  THEN $my_rc = 1 ;
+//MODELU   DD  *
+  PRINT ELEMENT &ELEMENT
+     FROM ENVIRONMENT &ENV STAGE NUMBER &STG_NUM
+          SYSTEM &SYSTEM SUBSYSTEM &SUBSYS TYPE &TYPE
+     TO FILE ACMCOMP
+**** WHERE CCID = '&ALELM_RS_EDLT_CCID' &GEN_DATE
+     OPTIONS NOCC BROWSE .
+//SHOWME   DD  *
+  PRINT ELEMENT &ELEMENT
+     FROM ENVIRONMENT &ENV STAGE NUMBER &STG_NUM
+          SYSTEM &SYSTEM SUBSYSTEM &SUBSYS TYPE &TYPE .
+//POSITION DD  *
+    ALELM_RS_EDLT_CCID            333 344
+    ALELM_RS_LACT_CCID            156 167
+    ELEMENT                        39  48
+    ENV                            15  22
+    STG_NUM                        66  66
+    SYSTEM                         23  30
+    SUBSYS                         31  38
+    TYPE                           49  56
+    EDLT_DATE                     301 308
+    GEN_DATE                      578 585
+    GEN_TIME                      586 593
+//SYSTSIN  DD  DUMMY
+//TABLE    DD DSN=&&EXTRACT,DISP=(OLD,DELETE)
+//NOTHING  DD DUMMY
+//SKIPPING DD DUMMY
+//SYSEXEC  DD DISP=SHR,DSN=&MODELLIB
+//*
+//COMPUSER DD  DSN=&&COMPUSER,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=24000)
+//SYSTSPRT DD  SYSOUT=*
+//*
+//*********************************************************************
+//*  PRINT SCL
+//SHOWSCL  EXEC PGM=IEBGENER,COND=(4,LT)                   ACM#LOD3
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&COMPUSER,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//*
+//*********************************************************************
+//**  EXTRACT ACM COMPONENT INFORMATION FROM ENDEVOR                 **
+//*********************************************************************
+//NDVRACMQ EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000',  ACM#LOD3
+//         COND=(4,LT),
+//            REGION=4096K
+//   INCLUDE MEMBER=STEPLIB      <-Endevor STEPLIB,CONLIB etc
+//*
+//C1MSGS1  DD SYSOUT=*                              MESSAGE OUTPUT
+//C1PRINT  DD SYSOUT=*                              PRINT ACTION FILE
+//SYSOUT   DD SYSOUT=*
+//ACMCOMPX DD SYSOUT=*
+//ACMCOMP  DD DSN=&&ACMCOMP,
+//             DISP=(NEW,PASS),
+//         UNIT=SYSALLDA,SPACE=(CYL,(100,50),RLSE),
+//         DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//BSTIPT01 DD *
+SET TO FILE ACMCOMP .
+SET OPTIONS NOCC BROWSE            .
+SET FROM ENVIRONMENT PROD STAGE P .
+//         DD DSN=&&COMPUSER,DISP=(OLD,DELETE)
+//*
+//*********************************************************************
+//*********************************************************************
+//SAVEPDS  EXEC PGM=IEFBR14,                               ACM#LOD3
+//         COND=(4,LT)
+//PDS      DD DSN=&HLQ..&GROUP.SAVEPDS,
+//             DISP=(MOD,CATLG,KEEP),
+//         UNIT=SYSALLDA,SPACE=(CYL,(30,30,900),RLSE),
+//         DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PO)
+//*********************************************************************
+//*  PRINT ENDEVOR OUTPUT
+//SHOW1    EXEC PGM=IEBGENER,COND=(0,LE)                   ACM#LOD3
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&ACMCOMP,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//*
+//*********************************************************************
+//ACM#PREP EXEC PGM=IKJEFT1B,COND=(4,LT),REGION=40M,       ACM#LOD3
+//       PARM='ACM#REX1 &HLQ..&GROUP.SAVEPDS'
+//*   WALJO11.REXX(ACM#REX1)
+//SYSPRINT DD  SYSOUT=*
+//SYSTSIN  DD  DUMMY
+//SYSTSPRT DD  SYSOUT=*
+//SYSEXEC  DD DISP=SHR,DSN=&MODELLIB
+//ACMCOMP  DD DSN=&&ACMCOMP,DISP=(OLD,DELETE)
+//ACMCOMP2 DD  SYSOUT=*
+//ACMQLIST DD DSN=&HLQ..&GROUP.ACMQLIST,
+//             DISP=(MOD,CATLG,KEEP),
+//         UNIT=SYSALLDA,SPACE=(CYL,(05,05),RLSE),
+//         DCB=(RECFM=FB,LRECL=90,BLKSIZE=0,DSORG=PS)
+//*-------------------------------------------------------------------
+//*    SORT ACMQLIST  LIST                                            *
+//*********************************************************************
+//*
+//SORTACMQ EXEC PGM=SORT,COND=(4,LT)                       ACM#LOD3
+//SYSPRT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SORTIN   DD DISP=SHR,DSN=&HLQ..&GROUP.ACMQLIST
+//SORTOUT  DD DISP=SHR,DSN=&HLQ..&GROUP.ACMQLIST
+//SYSIN    DD *
+ SORT FIELDS=(015,10,CH,A,30,9,CH,A)
+//*
+//*********************************************************************
+//*  PRINT ACMQLIST
+//SHOW1    EXEC PGM=IEBGENER,COND=(4,LT)                   ACM#LOD3
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DISP=SHR,DSN=&HLQ..&GROUP.ACMQLIST
+//SYSUT2   DD SYSOUT=*
+//*
+//*********************************************************************
+//*  MERGE ACMQLIST WITH COMPONTS (FROM A PREVIOUS STEP)
+//*********************************************************************
+//****  WALJO11.REXX(ACM#MERG)
+//MERGE   EXEC PGM=IRXJCL,PARM='ACM#MERG',COND=(4,LT)      ACM#LOD3
+//ACMQLIST DD DSN=&HLQ..&GROUP.ACMQLIST,DISP=SHR
+//COMPONTS DD DSN=&HLQ..ACM#LOAD.COMPONTS,DISP=SHR
+//SYSEXEC  DD DISP=SHR,DSN=&MODELLIB
+//SYSTSPRT DD  SYSOUT=*
+//MERGED   DD DSN=&HLQ..&GROUP.MERGED,
+//             DISP=(MOD,CATLG,KEEP),
+//         UNIT=SYSALLDA,SPACE=(CYL,(05,05),RLSE),
+//         DCB=(RECFM=FB,LRECL=120,BLKSIZE=0,DSORG=PS)
+//*-------------------------------------------------------------------
+//*    SORT MERGED    LIST                                            *
+//*********************************************************************
+//SORTACMQ EXEC PGM=SORT,COND=(4,LT)                       ACM#LOD3
+//SYSPRT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SORTIN   DD DISP=SHR,DSN=&HLQ..&GROUP.MERGED
+//SORTOUT  DD DISP=SHR,DSN=&HLQ..&GROUP.MERGED
+//SYSIN    DD *
+ SORT FIELDS=(085,10,CH,A,01,10,CH,A)
+//*********************************************************************
+//*  Show relationships found
+//SHOWRSLT EXEC PGM=IEBGENER,COND=(0,LE)                   ACM#LOD3
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DISP=SHR,DSN=&HLQ..&GROUP.MERGED
+//SYSUT2   DD SYSOUT=*
+//*********************************************************************
+//ACM#OUT  EXEC PGM=IKJEFT1B,COND=(4,LT),                  ACM#LOD3
+//       PARM='ACM#REX2 &HLQ..&GROUP.SAVEPDS'
+//****  WALJO11.REXX(ACM#REX2)
+//SYSPRINT DD  SYSOUT=*
+//SYSTSIN  DD  DUMMY
+//SYSTSPRT DD  SYSOUT=*
+//SYSEXEC  DD DISP=SHR,DSN=&MODELLIB
+//*ERGED   DD DSN=&&MERGED,DISP=(OLD,DELETE)
+//MERGED   DD DSN=&HLQ..&GROUP.MERGED,DISP=SHR
+//ACMQOUT  DD DSN=&HLQ..&GROUP.ACMQOUT,
+//             DISP=(MOD,CATLG,KEEP),
+//         UNIT=SYSALLDA,SPACE=(CYL,(05,05),RLSE),
+//         DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//*********************************************************************
+//**  POPULATE THE ACM EXTENDED QUERY ROOT AND INDEX DATA SETS       **
+//*********************************************************************
+//LOAD    EXEC PGM=NDVRC1,PARM='BC1PACMOMODE=OPT',         ACM#LOD3
+//             COND=(4,LT)
+//   INCLUDE MEMBER=STEPLIB      <-Endevor STEPLIB,CONLIB etc
+//*
+//SYSPRINT DD SYSOUT=*
+//ACMMSGS1 DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//ACMCOMP  DD DSN=&HLQ..&GROUP.ACMQOUT,DISP=SHR
+//ROOT     DD DISP=SHR,DSN=&ACMROOT
+//XREF     DD DISP=SHR,DSN=&ACMXREF
+//*********************************************************************
+//*--and remove work files                                           -*
+//*********************************************************************
+//DELETE  EXEC PGM=IEFBR14,COND=(0,LE)     / COND=(5,LT)   ACM#LOD3
+//ACMQLIST  DD DSN=&HLQ..&GROUP.ACMQLIST,DISP=(OLD,DELETE)
+//ACMQOUT   DD DSN=&HLQ..&GROUP.ACMQOUT,DISP=(OLD,DELETE)
+//*MERGED   DD DSN=&HLQ..&GROUP.MERGED,DISP=(OLD,DELETE)
+//SAVEPDS   DD DSN=&HLQ..&GROUP.SAVEPDS,DISP=(OLD,DELETE)
+//*********************************************************************
