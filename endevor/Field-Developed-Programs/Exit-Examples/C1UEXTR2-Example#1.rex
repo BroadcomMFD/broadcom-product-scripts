@@ -5,15 +5,13 @@
    STRING = "ALLOC DD(SYSTSIN) DUMMY"
    CALL BPXWDYN STRING;
 
-   Sa= 'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX(C1UEXTR2)'
-
    /* If C1UEXTR2 is allocated to anything, turn on Trace  */
    WhatDDName = 'C1UEXTR2'
    CALL BPXWDYN "INFO FI("WhatDDName")",
               "INRTDSN(DSNVAR) INRDSNT(myDSNT)"
    if Substr(DSNVAR,1,1) /= = ' ' then Trace ?r
 
-   Sa= 'You called SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX(C1UEXTR2) '
+   Sa= 'You called ....CLSTREXX(C1UEXTR2) '
 
    Arg Parms
    Parms = Strip(Parms)
@@ -31,6 +29,8 @@
    /* If COMMENT is left blank, then apply last used COMMENT */
    If REQ_COMMENT = COPIES(' ',40) then Call Update_COMMENT;
 
+   sa= 'MyRc =' MyRc
+
    If REQ_SISO_INDICATOR = 'Y' then
       Do
       Message = 'Remember that you have set OVERRIDE SIGNOUT'
@@ -39,7 +39,7 @@
 
    If ECB_USER_ID = '???JO11' then,
       Do
-      Message = 'Hello Dan.  You have a msg'
+      Message = 'Hello There.  You have a msg'
       MessageCode = '0920'
       MyRc        = 4
       End
@@ -76,7 +76,7 @@ Update_CCID:
    Else,
       Replace_CCID = TGT_ELM_ACTION_CCID
 
-   If Replace_CCID = Copies(' ',12) then Return;
+   If Substr(Replace_CCID,1,1) < 'A' then Return;
 
    hexAddress = D2X(Address_REQ_CCID)
    storrep = STORAGE(hexAddress,,Replace_CCID)
@@ -91,11 +91,10 @@ Update_COMMENT:
    Else,
       Replace_COMMENT = TGT_ELM_LEVEL_COMMENT
 
-   If Replace_COMMENT = Copies(' ',40) then Return;
+   If Substr(Replace_COMMENT,1,1) < 'A' then Return;
 
    hexAddress = D2X(Address_REQ_COMMENT)
    storrep = STORAGE(hexAddress,,Replace_COMMENT)
    MyRc = 4
 
    Return;
-

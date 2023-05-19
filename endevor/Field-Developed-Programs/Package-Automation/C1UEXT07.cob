@@ -130,7 +130,7 @@
            05 EXECBLK-RESERVED               PIC S9(8) BINARY
                                                        VALUE 0.
            05 EXECBLK-MEMBER                 PIC X(08) VALUE 'PKGEXECT'.
-           05 EXECBLK-DDNAME                 PIC X(08) VALUE 'REXFILE '.
+           05 EXECBLK-DDNAME                 PIC X(08) VALUE 'REXFILE7'.
            05 EXECBLK-SUBCOM                 PIC X(08) VALUE SPACES.
            05 EXECBLK-DSNPTR                 POINTER   VALUE NULL.
            05 EXECBLK-DSNLEN                 PIC 9(04) COMP
@@ -517,7 +517,7 @@
 
            MOVE SPACES TO ALLOC-TEXT.
 
-           STRING 'ALLOC DD(REXFILE) ',
+           STRING 'ALLOC DD(REXFILE7) ',
              'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'
                   DELIMITED BY SIZE
              INTO ALLOC-TEXT
@@ -530,7 +530,7 @@
            END-STRING.
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
 
-********** MOVE 'CONCAT DDLIST(REXFILE,REXFILE2)'
+********** MOVE 'CONCAT DDLIST(REXFILE7,REXFILE2)'
 **********   TO ALLOC-TEXT .
 **********
 ********** PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
@@ -540,7 +540,7 @@
       *****************************************************************
        2200-FREE-REXFILES.
 
-           MOVE 'FREE  DD(REXFILE)' TO ALLOC-TEXT
+           MOVE 'FREE  DD(REXFILE7)' TO ALLOC-TEXT
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC
 
            MOVE 'FREE  DD(SYSEXEC)' TO ALLOC-TEXT
