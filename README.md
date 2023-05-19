@@ -41,6 +41,6 @@ The [AtoZ sample project](https://github.com/BroadcomMFD/share/2022_columbus/Ato
 The [output-management](output-management) directory contains multiple samples related to Broadcom output management products.
 
 # Contributing
-**We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Michael.Bauer2@broadcom.com to discuss.**
+**We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Rose.Sakach@broadcom.com & Adam.Wolfe@broadcom.com to discuss.**
 
 It is the responsibility of the original contributor to resolve vulnerabilities identified by Dependabot within their contributions.
