@@ -1,0 +1,727 @@
+//&Jobname JOB (1),'ENDEVOR TEAM',REGION=0M,                            JOB06547
+//         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID&Typrun
+//*
+/*JOBPARM S=&SENDNODE
+//***=====Local Package Shipment ==================================* *
+// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+//* ISPSLIB(SHIPLOCL)
+//*--------------------------------------------------------SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*--------------------------------------------------------SHIPLOCL
+//*-----------------------------------------------------
+//* *==============================================================* *
+//NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,REGION=4096K,     SHIPLOCL
+//         PARM='C1BMX000,&Date8,&Time8 SHIP N625723 '
+//   INCLUDE MEMBER=STEPLIB
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXDET DD SYSOUT=*     ** SHIPMENT DETAIL REPORT  ****************
+//C1BMXSUM DD SYSOUT=*     ** SHIPMENT SUMMARY REPORT ****************
+//C1BMXSYN DD SYSOUT=*     ** INPUT LISTING AND SYNTAX ERROR REPORT **
+//*
+//* ******************************************************************
+//* *  LOCAL TRANSFER COPY/RUN COMMAND DATASETS
+//* *  LOCAL MODEL CONTROL CARD DATASET
+//* ******************************************************************
+//*
+//C1BMXLCC DD DSN=&&XLCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+//C1BMXLCM DD DISP=SHR,DSN=&MyOPT2Library
+//         DD DISP=SHR,DSN=&MyOPTNLibrary
+//*
+//* ******************************************************************
+//* * NETVIEW FTP "ADD TO TRANSMISSION QUEUE" DATASET AND INTERNAL RDR
+//* * NETVIEW FTP MODEL CONTROL CARD DATASET //*
+******************************************************************
+//*
+//C1BMXFTC DD DSN=&&XFTC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+// DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+// UNIT=SYSALLDA
+//C1BMXFTM DD DISP=SHR,DSN=&MyOPT2Library
+//         DD DISP=SHR,DSN=&MyOPTNLibrary
+//* * NETWORK DATA MOVER COPY/RUN COMMAND DATASETS
+//* * NETWORK DATA MOVER MODEL CONTROL CARD DATASET
+//* ******************************************************************
+//C1BMXNWM DD DISP=SHR,DSN=&MyOPT2Library
+//         DD DISP=SHR,DSN=&MyOPTNLibrary
+//*
+//C1BMXNWM DD DISP=SHR,DSN=&MyOPT2Library
+//         DD DISP=SHR,DSN=&MyOPTNLibrary
+//C1BMXRJC DD DISP=SHR,DSN=&MySEN2Library
+//         DD DISP=SHR,DSN=&MySENULibrary
+//*
+//C1BMXNWC DD DSN=&&XNWC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+// DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+// UNIT=SYSALLDA
+//*
+//* ******************************************************************
+//* *  SHIPMENT DATE/TIME READ BY INLINE HOST CONFIRMATION STEP
+//* ******************************************************************
+//*
+//C1BMXDTM DD DSN=&&XDTM,DISP=(NEW,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+//* ******************************************************************
+//* *  HOST STAGING DATASET DELETION STATEMENTS (IDCAMS)
+//* ******************************************************************
+//*
+//C1BMXDEL DD DSN=&&HDEL,DISP=(NEW,PASS),SPACE=(TRK,(10,10)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*
+//* ******************************************************************
+//* *  REMOTE JCL MODEL MEMBERS
+//* ******************************************************************
+//*
+//C1BMXMDL DD DISP=SHR,DSN=&MyOPT2Library
+//         DD DISP=SHR,DSN=&MyOPTNLibrary
+//*
+//* ******************************************************************
+//* *  JCL SEGMENTS TO CREATE GROUP SYMBOLICS FOR MODELLING
+//* ******************************************************************
+//*
+//C1BMXHJC DD DATA,DLM=##
+//&Userid¬9 JOB (2SH1SH20),MA1N.SB,
+//         MSGLEVEL=(1,1),MSGCLASS=H,CLASS=J,
+//         NOTIFY=&SYSUID TYPRUN=HOLD
+/*XEQ GROUP1
+/*JOBPARM S=&SENDNODE
+//*------------------------------------------------------  SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE  = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*------------------------------------------------------  SHIPLOCL
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXHCN DD DATA,DLM=##
+//* *--------------------------------------------* ISPSLIB(SHIPLOCL) *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//*                                                        SHIPLOCL
+//CONFGE12 EXEC PGM=NDVRC1,REGION=4096K,COND=(12,GT,$XM_STEP),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0012,$DEST_ID'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//* *--------------------------------------------* SHIPLOCLSHIPLOCL(CONT
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFGE08 EXEC PGM=NDVRC1,REGION=4096K,COND=(08,NE,$XM_STEP),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0008,$DEST_ID'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFGE04 EXEC PGM=NDVRC1,REGION=4096K,COND=(04,NE,$XM_STEP),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0004,$DEST_ID'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFGE00 EXEC PGM=NDVRC1,REGION=4096K,COND=(00,NE,$XM_STEP),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0000,$DEST_ID'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,         SHIPLOCL
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,AB,****,********'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//* *--------------------------------------------* ISPSLIB(SHIPLOCL) *
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXRCN DD DATA,DLM=##
+//*----PACKAGE SHIPMENT JOB #4 --------------------------  SHIPLOCL
+//* *--Package Shipment Confirmation/Notification* ISPSLIB(SHIPLOCL) *
+//*
+//* *================================================================*
+//* *  INSTREAM DATASET CONTAINING REMOTE CONFIRMATION JCL
+//* *================================================================*
+//*
+//CONFGT12 EXEC PGM=IEBGENER,COND=(12,GE)                  SHIPLOCL
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
+//&Userid¬9 JOB (2SH1SH20),MA1N.SB,
+//         MSGLEVEL=(1,1),MSGCLASS=H,CLASS=J,
+//         NOTIFY=&SYSUID TYPRUN=HOLD
+/*XEQ GROUP1
+/*JOBPARM S=&SENDNODE
+//*------------------------------------------------------  SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE  = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*------------------------------------------------------  SHIPLOCL
+//*--- Confirmation/Notification job -----RC=12------------SHIPLOCL
+//CONFCOPY EXEC PGM=NDVRC1,                                SHIPLOCL
+//         PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,GE,0012,$DEST_ID'
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//* *--------------------------------------------* SHIPLOCL (CONT.)  *
+//*--------------------------------------------------------SHIPLOCL
+//SHIPLOCL EXEC PGM=IRXJCL,COND=(8,LE),                    SHIPLOCL
+//        PARM='UPDTTGGR &Destination / &Package'
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//SYSEXEC   DD DSN=SYSDE32.NDVR.TEAM.REXX,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//*------------------------------------------------------- SHIPLOCL
+$$
+//SYSUT2   DD  DSN=PUBLIC.LOCAL.D&Date6.T&Time6.NOTIFY,
+//             DISP=(,CATLG),SPACE=(TRK,(1,0)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//             UNIT=SYSALLDA
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//* *--------------------------------------------* SHIPLOCL (CONT.)  *
+//*
+//CONFGT08 EXEC PGM=IEBGENER,COND=(08,NE,FASTCOPY)         SHIPLOCL
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
+//&Userid¬9 JOB (2SH1SH20),MA1N.SB,
+//         MSGLEVEL=(1,1),MSGCLASS=H,CLASS=J,
+//         NOTIFY=&SYSUID TYPRUN=HOLD
+/*XEQ GROUP1
+/*JOBPARM S=&SENDNODE
+//*------------------------------------------------------  SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE  = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*------------------------------------------------------  SHIPLOCL
+//*--- Confirmation/Notification job ------RC=08-----------SHIPLOCL
+//CONFCOPY EXEC PGM=NDVRC1,                                SHIPLOCL
+//         PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,EQ,0008,$DEST_ID'
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*--------------------------------------------------------SHIPLOCL
+//SHIPLOCL EXEC PGM=IRXJCL,COND=(8,LE),                    SHIPLOCL
+//        PARM='UPDTTGGR &Destination / &Package'
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//SYSEXEC   DD DSN=SYSDE32.NDVR.TEAM.REXX,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//*------------------------------------------------------- SHIPLOCL
+$$
+//SYSUT2   DD  DSN=PUBLIC.LOCAL.D&Date6.T&Time6.NOTIFY,
+//             DISP=(,CATLG),SPACE=(TRK,(1,0)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//             UNIT=SYSALLDA
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//*
+//* *----------------------------------------------------------------*
+//*
+//CONFGT04 EXEC PGM=IEBGENER,COND=(04,NE,FASTCOPY)         SHIPLOCL
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
+//&Userid¬9 JOB (2SH1SH20),MA1N.SB,
+//         MSGLEVEL=(1,1),MSGCLASS=H,CLASS=J,
+//         NOTIFY=&SYSUID TYPRUN=HOLD
+/*XEQ GROUP1
+/*JOBPARM S=&SENDNODE
+//*------------------------------------------------------  SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE  = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*------------------------------------------------------  SHIPLOCL
+//*--- Confirmation/Notification job ------RC=04-----------SHIPLOCL
+//CONFCOPY EXEC PGM=NDVRC1,                                SHIPLOCL
+//         PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,EQ,0004,$DEST_ID'
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*--------------------------------------------------------SHIPLOCL
+//SHIPLOCL EXEC PGM=IRXJCL,COND=(8,LE),                    SHIPLOCL
+//        PARM='UPDTTGGR &Destination / &Package'
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//SYSEXEC   DD DSN=SYSDE32.NDVR.TEAM.REXX,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//*------------------------------------------------------- SHIPLOCL
+$$
+//SYSUT2   DD  DSN=PUBLIC.LOCAL.D&Date6.T&Time6.NOTIFY,
+//             DISP=(,CATLG),SPACE=(TRK,(1,0)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//             UNIT=SYSALLDA
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//*
+//* *----------------------------------------------------------------*
+//*
+//CONFGT00 EXEC PGM=IEBGENER,COND=(00,NE,FASTCOPY)         SHIPLOCL
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
+//&Userid¬9 JOB (2SH1SH20),MA1N.SB,
+//         MSGLEVEL=(1,1),MSGCLASS=H,CLASS=J,
+//         NOTIFY=&SYSUID TYPRUN=HOLD
+/*XEQ GROUP1
+/*JOBPARM S=&SENDNODE
+//*------------------------------------------------------  SHIPLOCL
+//*------------------------------------------------------  SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE  = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*------------------------------------------------------  SHIPLOCL
+//*--- Confirmation/Notification job ------RC=00-----------SHIPLOCL
+//CONFCOPY EXEC PGM=NDVRC1,                                SHIPLOCL
+//      PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,EQ,0000,$DEST_ID'
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*--------------------------------------------------------SHIPLOCL
+//SHIPLOCL EXEC PGM=IRXJCL,COND=(8,LE),                    SHIPLOCL
+//        PARM='UPDTTGGR &Destination / &Package'
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//SYSEXEC   DD DSN=SYSDE32.NDVR.TEAM.REXX,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//*------------------------------------------------------- SHIPLOCL
+$$
+//SYSUT2   DD  DSN=PUBLIC.LOCAL.D&Date6.T&Time6.NOTIFY,
+//             DISP=(,CATLG),SPACE=(TRK,(1,0)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//             UNIT=SYSALLDA
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//*
+//* *----------------------------------------------------------------*
+//*
+//CONFABND EXEC PGM=IEBGENER,COND=ONLY EXECUTED AT THE REMOTE SITE
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
+//&Userid¬9 JOB (2SH1SH20),MA1N.SB,
+//         MSGLEVEL=(1,1),MSGCLASS=H,CLASS=J,
+//         NOTIFY=&SYSUID TYPRUN=HOLD
+/*XEQ GROUP1
+/*JOBPARM S=&SENDNODE
+//*------------------------------------------------------  SHIPLOCL
+//*------------------------------------------------------  SHIPLOCL
+//* MY DESTNAME = &Destination
+//* MY FROMNODE = &SENDNODE
+//* MY PACKAGE  = &Package
+//* MY VNBCPARM = C1BMX000,&Date8,&Time8
+//*------------------------------------------------------  SHIPLOCL
+//*--- Confirmation/Notification job ------Abend-----------SHIPLOCL
+//CONFCOPY EXEC PGM=NDVRC1,                                SHIPLOCL
+//         PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,AB,****,$DEST_ID'
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*--------------------------------------------------------SHIPLOCL
+//SHIPLOCL EXEC PGM=IRXJCL,COND=(8,LE),                    SHIPLOCL
+//        PARM='UPDTTGGR &Destination / &Package'
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//SYSEXEC   DD DSN=SYSDE32.NDVR.TEAM.REXX,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//*------------------------------------------------------- SHIPLOCL
+//* *--------------------------------------------* SHIPLOCL (CONT.)  *
+$$
+//SYSUT2   DD  DSN=PUBLIC.LOCAL.D&Date6.T&Time6.NOTIFY,
+//             DISP=(,CATLG),SPACE=(TRK,(1,0)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//             UNIT=SYSALLDA
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//* *--------------------------------------------* SHIPLOCL (CONT.)  *
+//SUBMIT   EXEC PGM=IKJEFT01
+//SYSOUT    DD  SYSOUT=*
+//SYSTSPRT  DD  SYSOUT=*
+//SYSTSIN   DD  *
+ SUBMIT 'PUBLIC.LOCAL.D&Date6.T&Time6.NOTIFY'
+//*                                                           SHIPLOCL
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//C1BMXLIB DD DATA,DLM=##
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+##
+//*
+//* *--------------------------------------------* C1BMXJOB (CONT.)  *
+//*
+//* ******************************************************************
+//* *  SHIP PACKAGE PKG-ID TO DESTINATION DEST-ID ( OPTION BACKOUT ) .
+//* ******************************************************************
+//*
+//* THE FOLLOWING DD STATEMENT MUST BE THE *LAST* CARD IN THIS MEMBER.
+//* ISPSLIB MEMBER C1BMXIN IS INCLUDED AFTER IT AS THE INSTREAM DATA.
+//*
+//C1BMXIN  DD *  *-------------------------------* ISPSLIB(C1BMXIN)  *
+SHIP PAC '&Package' TO DEST &Destination OPT &ShipOutput .
+//* *============================================* ISPSLIB(C1BMXLOC) *
+//* *==============================================================* *
+//* *==============================================================* *
+//* *==============================================================* *
+//* *==============================================================* *
+//*
+//C1BMXLOC EXEC PGM=IKJEFT01,COND=(12,LE,NDVRSHIP)         SHIPLOCL
+//SYSTSIN   DD DSN=&&XLCC,DISP=(OLD,PASS)
+//SYSTSPRT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//* *--------------------------------------------* ISPSLIB(SHIPLOCL) *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//*                                                        SHIPLOCL
+//CONFGE12 EXEC PGM=NDVRC1,REGION=4096K,COND=(12,GT),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0012,***L****'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//* *--------------------------------------------* SHIPLOCLSHIPLOCL(CONT
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//* *--------------------------------------------------------------* *
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFGE08 EXEC PGM=NDVRC1,REGION=4096K,COND=(08,NE),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0008,***L****'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFGE04 EXEC PGM=NDVRC1,REGION=4096K,COND=(04,NE),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0004,***L****'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFGE00 EXEC PGM=NDVRC1,REGION=4096K,COND=(00,NE),
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,GE,0000,***L****'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//*                                                        SHIPLOCL
+//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,         SHIPLOCL
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,AB,****,********'
+//*                                                        SHIPLOCL
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//*                                                        SHIPLOCL
+//* ******************************************************************
+//* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS
+//* ******************************************************************
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTU
+//         DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQAUTH
+//*        DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//CONLIB   DD DISP=SHR,DSN=CAPRD.NDVR.V180CA06.CSIQLOAD
+//*
+//*********************************************************************
+//*             ESI TRACE IN BATCH MODE                               *
+//*********************************************************************
+//*EN$TRESI DD SYSOUT=*
+//*EN$TRALC DD SYSOUT=*
+//*
+//SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT *************************
+//SYMDUMP  DD DUMMY
+//C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES *********
+//*                                                        SHIPLOCL
+//* *--------------------------------------------* ISPSLIB(SHIPLOCL) *
+//* ISPSLIB(C1BMXEOJ) - END OF JOB

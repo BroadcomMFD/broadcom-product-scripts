@@ -1,0 +1,40 @@
+)ATTR DEFAULT(%+_)
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */
+   # TYPE(INPUT) INTENS(HIGH) CAPS(ON)  JUST(LEFT)
+   $ TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)
+   _ TYPE(OUTPUT) INTENS(LOW)
+   | TYPE(OUTPUT) INTENS(HIGH) CAPS(OFF)
+)BODY EXPAND(\\)
+%\-\ Form 210%\-\
+ˆCommand ===>#VARWKCMD                                                     \ \+
+%
+% Sample Form - 210 entry:
+
+    Bag Selection ===>#BAGTYPE  + %(PAPER   / PLASTIC)
+     Call in air  ===>#HEADTAIL + %(HEADS   / TAILS )
+     another fld  ===>#ANOTHER+   %(A/B/C/D)
+Coffee preference ===>#REGUDCAF + %(REGULAR / DECAF )
+
++  Comment:
++ >$MESSAGE                                                           +
++ >$MESSAGE2                                                          +
++ >$MESSAGE3                                                          +
++ >$MESSAGE4                                                          +
++ >$MESSAGE5                                                          +
++ >$MESSAGE6                                                          +
+%
++     (PRESS%ENTER+ or%PF3+TO CANCEL OR END)
+)INIT
+ &USERID = &ZUSER
+ &VARWKCMD  = ''
+ .CURSOR = VARWKCMD                    /* reposition cursor   */
+)PROC
+ VER (&BAGTYPE,LIST,PAPER,PLASTIC)
+ VER (&HEADTAIL,LIST,HEADS,TAILS)
+ VER (&REGUDCAF,LIST,REGULAR,DECAF)
+ VER (&ANOTHER,LIST,A,B,C,D)
+ &FIELDS ='BAGTYPE HEADTAIL REGUDCAF MESSAGE MESSAGE2 MESSAGE3'
+ &FIELDS ='&FIELDS MESSAGE4 MESSAGE5 MESSAGE6 ANOTHER'
+)END

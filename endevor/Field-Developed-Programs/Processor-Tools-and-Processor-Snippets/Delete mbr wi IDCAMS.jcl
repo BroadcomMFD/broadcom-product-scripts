@@ -1,0 +1,6 @@
+//DELMEMB EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//PDS DD DSN=libraryname,DISP=SHR
+//SYSIN DD *
+ALLOC DDN(INFILE) SHR REUSE DSN('libraryname ')
+DELETE libraryname(membername) FILE(PDS)

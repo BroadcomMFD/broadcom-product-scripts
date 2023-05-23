@@ -1,0 +1,78 @@
+       PROCESS OUTDD(DISPLAYS) DYNAM
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. C1UEXT07.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. IBM-390 WITH DEBUGGING MODE.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+
+       DATA DIVISION.
+       FILE SECTION.
+      *                                                                *
+
+       WORKING-STORAGE SECTION.
+
+       LINKAGE SECTION.
+       COPY PKGXBLKS.
+
+       PROCEDURE DIVISION USING
+               PACKAGE-EXIT-BLOCK
+               PACKAGE-REQUEST-BLOCK
+               PACKAGE-EXIT-HEADER-BLOCK
+               PACKAGE-EXIT-FILE-BLOCK
+               PACKAGE-EXIT-ACTION-BLOCK
+               PACKAGE-EXIT-APPROVER-MAP
+               PACKAGE-EXIT-BACKOUT-BLOCK
+               PACKAGE-EXIT-SHIPMENT-BLOCK
+               PACKAGE-EXIT-SCL-BLOCK.
+
+           MOVE 0 TO PECB-NDVR-EXIT-RC.
+           IF  SETUP-EXIT-OPTIONS
+*******        DISPLAY 'C1UEXT07:   INTO SETUP-EXIT-OPTIONS'
+               MOVE 'Y'   TO PECB-BEFORE-CAST
+*******        MOVE 'Y'   TO PECB-MID-CAST
+               MOVE 'Y'   TO PECB-AFTER-CAST
+*******        MOVE 'Y'   TO PECB-AFTER-EXEC
+               MOVE ZEROS TO RETURN-CODE
+               MOVE 0000 TO PECB-UEXIT-HOLD-FIELD
+               GO TO 1100-EXIT .
+
+           IF CAST-PACKAGE AND PECB-BEFORE  AND
+              PECB-UEXIT-HOLD-FIELD = 0000  AND
+              PHDR-PACKAGE-STATUS = 'IN-EDIT'
+                MOVE 0001 TO PECB-UEXIT-HOLD-FIELD
+                PERFORM 500-ADD-APPROVER-GROUPS
+           ELSE
+           IF CAST-PACKAGE AND PECB-AFTER
+               MOVE 0000 TO PECB-UEXIT-HOLD-FIELD
+           END-IF.
+
+           GO TO 1100-EXIT .
+
+       500-ADD-APPROVER-GROUPS.
+
+           IF PECB-PACKAGE-ID(1:2) = 'FI'
+              MOVE 'Y'        TO PECB-USENDING-APP-GRPS
+              MOVE 'PRD'      TO PAPP-ENVIRONMENT
+              MOVE 1          TO PAPP-QUORUM-COUNT
+              MOVE 1          TO PAPP-CURRENT-VERSION
+              MOVE 'PAPP'     TO PAPP-BLOCK-ID
+              MOVE 56         TO PAPP-LENGTH
+              MOVE 1          TO PAPP-SEQUENCE-NUMBER
+              MOVE SPACES     TO PAPP-APPROVAL-DATA(16)
+              MOVE 'WALJO11'  TO PAPP-APPROVAL-ID(1)
+              MOVE 'WALJO12'  TO PAPP-APPROVAL-ID(2)
+              MOVE 2          TO PAPP-APPROVER-NUMBER
+              MOVE 1          TO PECB-NBR-APPR-GRPS-SENT
+              MOVE 'NDVRTEAM' TO PAPP-GROUP-NAME
+********      DISPLAY 'ADDING APPROVER GROUP ' PAPP-GROUP-NAME
+           END-IF .
+
+       1100-EXIT.
+
+*******    DISPLAY WS-TIME ': 1100-EXIT  '
+*******       ' PECB-REQ-SCL-RECORDS=' PECB-REQ-SCL-RECORDS
+*******       ' PECB-NDVR-EXIT-RC=' PECB-NDVR-EXIT-RC.
+           GOBACK.
+
