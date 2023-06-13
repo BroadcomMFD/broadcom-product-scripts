@@ -130,9 +130,9 @@
                PACKAGE-EXIT-SHIPMENT-BLOCK
                PACKAGE-EXIT-SCL-BLOCK.
       ****
-*********  IF PECB-USER-BATCH-JOBNAME(1:7) NOT = 'WALJO11' AND
-*********     PECB-USER-BATCH-JOBNAME(1:7) NOT = 'PL05958'
-*********     GOBACK.
+           IF PECB-USER-BATCH-JOBNAME(1:7) NOT = 'WALJO11' AND
+              PECB-USER-BATCH-JOBNAME(1:7) NOT = 'PL05958'
+              GOBACK.
       ****
 
 *********  DISPLAY 'C1UEXT07: GOT INTO EXIT 7' .
@@ -239,6 +239,8 @@
               'PHDR_PKG_STGID ="' PHDR-PKG-STGID '";'
                  DELIMITED BY SIZE
               'PECB_MODE = "' PECB-MODE '";'
+                 DELIMITED BY SIZE
+              'PECB_AUTOCAST ="' PECB-AUTOCAST '";'
                  DELIMITED BY SIZE
               'PECB_REQUEST_RETURNCODE=' WS-PECB-REQUEST-RETURNCODE ';'
                  DELIMITED BY SIZE
@@ -388,7 +390,7 @@
 
            IF PECB-BATCH-MODE
               STRING 'ALLOC DD(SYSEXEC) ',
-                'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                'DA(SHARE.ENDV.SHARABLE.REXX)'
                      DELIMITED BY SIZE
                         ' SHR REUSE'
                      DELIMITED BY SIZE
@@ -396,7 +398,7 @@
               END-STRING
            ELSE
               STRING 'ALLOC DD(REXFILE7) ',
-                'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                'DA(SHARE.ENDV.SHARABLE.REXX)'
                      DELIMITED BY SIZE
                         ' SHR REUSE'
                      DELIMITED BY SIZE
