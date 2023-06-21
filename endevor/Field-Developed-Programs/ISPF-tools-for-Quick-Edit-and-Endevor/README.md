@@ -67,9 +67,9 @@ This edit macro can be executed from Quick-Edit on Endevor processors, JCL, PROC
 
 While editing a processor (or JCL) where a dataset name is found, enter the name of either of these on the command line, move the cursor to the first character of the dataset name, and press Enter. You will then be Browsing or Editing the dataset.
 
-## QEXPAND and QEXPANDW
+## QEX or  QEXPAND and QEXPANDW
 
-These two items can be used in Quick-Edit as an "expand includes" utility. After you enter "QEXPAND" on the command line, and move the cursor to a "COPY", "++INCLUDE", or "-INC" statement, and press Enter, the content of the referenced member is copied into the edit session as NOTE lines.
+These items can be used in Quick-Edit as an "expand includes" utility. After you enter "QEXPAND" on the command line, and move the cursor to a "COPY", "++INCLUDE", "-INC" or other statement, and press Enter, the content of the referenced member is copied into the edit session as NOTE lines.
 
 The image below for example, shows an include member named **SETSTMTS** expanded from a "++INCLUDE" statement within a processor.
 
