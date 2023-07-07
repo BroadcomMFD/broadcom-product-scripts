@@ -6,7 +6,7 @@
 //*----.....ENDEVOR.MODELS(SHIPMODL)----------------------------------  SHIPMODL
 //  SET PACKAGE=&Package
 //  SET DEST=&Destination
-//  SET HLQ=WALJO11.SHIP.&Destination
+//  SET HLQ=&userid.SHIP.&Destination
 //  SET AUTHLIB1=CADEMO.ENDV.RUN.CSIQAUTU                               SHIPMODL
 //  SET AUTHLIB2=CADEMO.ENDV.RUN.CSIQAUTH                               SHIPMODL
 //  SET   CONLIB=CADEMO.ENDV.RUN.CSIQLOAD                               SHIPMODL

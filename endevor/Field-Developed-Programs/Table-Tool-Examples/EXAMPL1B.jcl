@@ -1,4 +1,4 @@
-//EXAMPLE1 JOB (55800000),'ENDEVOR JOB',MSGLEVEL=(1,1),                 JOB0
+//EXAMPL1B JOB (55800000),'ENDEVOR JOB',MSGLEVEL=(1,1),                 JOB0
 //         CLASS=B,REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID
 //*--------------------------------------------------------------------*
 //*- Report Elements in DEV, flagging those in parallel development
@@ -44,14 +44,14 @@ LIST ELEMENT '*'
   $StripData = 'N'
   If $row# = 1 then x = BuildFromMODEL(HEADING)
   entry = Element Type
-  flag = '   '
-  if entry = lastentry then flag ='***'
+  dup = '   '
+  if entry = lastentry then dup ='***'
   lastentry = entry
 //HEADING  DD  *
          --- Elements in the DEV Environment ---
 Element- Type---- Dup System-- Subsys-- --Date-- Signout
 //MODEL    DD  *
-&Element &Type &flag &System &Subsys &Date &Userid
+&Element &Type &dup &System &Subsys &Date &Userid
 //TABLE    DD  DSN=&&CSVFILE2,DISP=(OLD,DELETE)
 //SYSTSPRT DD SYSOUT=*
 //SYSEXEC  DD DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQCLS0

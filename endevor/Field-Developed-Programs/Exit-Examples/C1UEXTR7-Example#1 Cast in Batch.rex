@@ -105,6 +105,8 @@ Submit_n_save_jobInfo: /* submit CastPackageModel job and save job info */
       Exit(12)
       End
    CALL OUTTRAP "OFF"
+   Address TSO "PROFILE INTERCOM"       /* turn on  msg notific      */
+
    JobData   = Strip(out.1);
    jobinfo         = Word(JobData,2) ;
    If jobinfo = 'JOB' then,
