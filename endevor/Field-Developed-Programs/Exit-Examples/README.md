@@ -8,6 +8,6 @@ In each case the REXX operates on fields in the exit blocks using variable names
 
 References to ispf messages can be removed from the code if you prefer, or to use them find them in the **ISPF-tools-for-Quick-Edit-and-Endevor** folder.
 
-The **C1UEXT02 Reuse CCID and Comment.cob** member offers an exit that can re-use CCID and Comment values, waiving the requirement for them with each software change. Only the first sortware change requires them, and if left blank on subsequent changes the values entered the first time are used again.
+The **C1UEXTx2 Reuse CCID and Comment** members offer an approach for re-using CCID and Comment values, waiving the requirement for them with each software change. Only the first software change requires them, and if left blank on subsequent changes the values entered the first time are used again. If you have users on Quick-Edit and/or Endevor, then include the **CIUU01.ispfmsg** item too.
 
 See additional examples of Endevor exits in the **Package-Automation** folder.
