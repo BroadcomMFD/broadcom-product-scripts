@@ -38,7 +38,7 @@
       *****************************************************************
        WORKING-STORAGE SECTION.
 
-       77  WS-TRACE                          PIC X    VALUE 'Y'.
+       77  WS-TRACE                          PIC X    VALUE 'N'.
        77  FLAGS                             PIC S9(8) BINARY.
        77  REXX-RETURN-CODE                  PIC S9(8) BINARY.
        77  DUMMY-ZERO                        PIC S9(8) BINARY VALUE 0.
@@ -130,13 +130,6 @@
                           TGT-ENVIRONMENT-BLOCK
                           TGT-ELEMENT-MASTER-INFO-BLOCK
                           TGT-FILE-CONTROL-BLOCK.
-
-           MOVE  'INFO DD(C1UEXT02) ' TO ALLOC-TEXT.
-           PERFORM 9000-DYNAMIC-ALLOC-DEALLOC.
-           IF RETURN-CODE = ZERO
-              MOVE 'Y' TO WS-TRACE
-              DISPLAY 'C1UEXT02: WS-TRACE  =' WS-TRACE
-           END-IF.
 
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: RETURN-CODE =' RETURN-CODE  .
@@ -325,7 +318,7 @@
               DISPLAY 'C1UEXT02: Stringing SRC vars   '
                       'SRC-ENV-IO-TYPE=' SRC-ENV-IO-TYPE .
 
-           IF SRC-ENV-TYPE-OF-BLOCK = 'C'
+           IF SRC-ENV-LENGTH GREATER THAN ZERO
               MOVE SRC-ELM-ACTION-CCID TO WS-INSPECT-CCID
               INSPECT WS-INSPECT-CCID
                  REPLACING ALL '"' BY X'7D'
@@ -416,12 +409,14 @@
                      DELIMITED BY SIZE
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
-              END-STRING .
+              END-STRING
+              END-IF .
 
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Stringing TGT vars   '
+           END-IF .
 
-           IF TGT-ENV-TYPE-OF-BLOCK = "C"
+           IF TGT-ENV-LENGTH GREATER THAN ZERO
               STRING
                   'TGT_ENV_ENVIRONMENT_NAME = "'
                      DELIMITED BY SIZE

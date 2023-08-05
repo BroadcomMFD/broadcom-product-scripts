@@ -19,6 +19,16 @@
 
    Sa= 'You called ....CLSTREXX(C1UEXTR2) '
 
+   /* In case these are not provided by the Exit */
+   SRC_ELM_ACTION_CCID = ' '
+   SRC_ELM_LEVEL_COMMENT = ' '
+   TGT_ELM_ACTION_CCID = ' '
+   TGT_ELM_LEVEL_COMMENT = ' '
+   /* These Element Actions determine whehter to */
+   /* use SRC or TGT variables                   */
+   ActionsThatUse_SRC = 'RETRIEVE MOVE DELETE GENERATE'
+   ActionsThatUse_TGT = 'UPDATE '
+
    Arg Parms
    Parms = Strip(Parms)
    sa= 'Parms len=' Length(Parms)
@@ -72,9 +82,10 @@
 
 Update_CCID:
 
-   IF SRC_ENV_TYPE_OF_BLOCK = 'C' then,
+   If Wordpos(ECB_ACTION_NAME,ActionsThatUse_SRC) > 0 then,
       Replace_CCID = SRC_ELM_ACTION_CCID
    Else,
+   If Wordpos(ECB_ACTION_NAME,ActionsThatUse_TGT) > 0 then,
       Replace_CCID = TGT_ELM_ACTION_CCID
 
    /* Still missing a CCID?                      */
@@ -94,9 +105,10 @@ Update_CCID:
 
 Update_COMMENT:
 
-   IF SRC_ENV_TYPE_OF_BLOCK = 'C' then,
+   If Wordpos(ECB_ACTION_NAME,ActionsThatUse_SRC) > 0 then,
       Replace_COMMENT = SRC_ELM_LEVEL_COMMENT
    Else,
+   If Wordpos(ECB_ACTION_NAME,ActionsThatUse_TGT) > 0 then,
       Replace_COMMENT = TGT_ELM_LEVEL_COMMENT
 
    If Substr(Replace_COMMENT,1,1) < 'a' then,
