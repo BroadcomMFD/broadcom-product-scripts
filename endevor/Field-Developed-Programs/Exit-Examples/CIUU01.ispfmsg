@@ -1,0 +1,6 @@
+CIUU010E '*OVERLAYING ANOTHER USER'                      .ALARM=YES
+'***Cannot OVERLAY another Users Source*** '
+CIUU011E '*CCID and COMMENT required'                    .ALARM=YES
+'**Both CCID and  COMMENT are required****'
+CIUU012E '*Invalid/Missing CCID*'                        .ALARM=YES
+'***CCID must be provided for this action '
