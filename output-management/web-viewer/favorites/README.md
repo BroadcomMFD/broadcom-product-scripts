@@ -80,3 +80,9 @@ Other OS:
 
     npm run generate-sdk
     ./gradlew run
+
+### Login
+
+1. Enter the URL and confirm with "OK" to activate the application wizard.
+   URL example: `http://<HOSTNAME>:<PORT>/web-viewer`
+2. Provide your login credential to launch **"Web Viewer - Favorites" Wizard.

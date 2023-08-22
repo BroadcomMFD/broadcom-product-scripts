@@ -261,7 +261,7 @@ public class Download extends Common implements Initializable {
     }
 
     final String distribution = distributionId.get();
-    if (distribution == null || distribution.isEmpty() || distribution.length() > 8) {
+    if (distribution == null || distribution.isEmpty() || distribution.length() > 32) {
       return false;
     }
 

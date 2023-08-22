@@ -210,7 +210,7 @@ public class DefineFavorite extends Common implements Initializable {
   private boolean isDistributionValid() {
     final String distribution = getDistributionId();
 
-    if (distribution == null || distribution.isEmpty() || distribution.length() > 8) {
+    if (distribution == null || distribution.isEmpty() || distribution.length() > 32) {
       return false;
     }
 
