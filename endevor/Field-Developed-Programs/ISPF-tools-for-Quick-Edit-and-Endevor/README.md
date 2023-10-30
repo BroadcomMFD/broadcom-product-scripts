@@ -67,9 +67,9 @@ This edit macro can be executed from Quick-Edit on Endevor processors, JCL, PROC
 
 While editing a processor (or JCL) where a dataset name is found, enter the name of either of these on the command line, move the cursor to the first character of the dataset name, and press Enter. You will then be Browsing or Editing the dataset.
 
-## EXP  
+## EXP and EXP#LIBS (and Example#2) 
 
-This item can be used as an **"expand input component"** utility. After you enter "EXP" on the command line, and move the cursor to a "COPY", "++INCLUDE", "-INC" or other statement, and press Enter, the content of the referenced input is copied into your edit session. NOTE lines are used so that you are not making changes to your source.
+These items work together as an **"expand input component"** utility. Enter "EXP" on the command line, and move the cursor to a "COPY", "++INCLUDE", "-INC" or other statement, and press Enter. Then the content of the referenced input is copied into your edit session. INFO lines are used so that you are not making changes to your source.
 
 EXP can  be used while Browsing an element in Quick-Edit or Endevor. However the **ISPF BROWSE OR VIEW MODE** option must be set to 'V'. It can be used to expand JCL, assembler and others as well.
 
@@ -99,4 +99,4 @@ Command ===>                                                Scroll ===>CSR
 =NOTE=//             EXPINC=N,                                                
 ~~~
 
-Some simple tailoring of QEXPANDW is likely required. See references to INCLUDE_LIBRARY_LIST within the REXX member.
+The Rexx program EXP remains as-is, and is to be placed into your REXX library. However, see EXP#LIBS and EXP#LIBS_Example#2. You must tailor your own version of these, and name it EXP#LIBA. Using the variables provided (via VGET) for Endevor Env, Sys, Sub, Type, determine what keywords and libraries are to be used for expansions. For example, if the edited element is COBOL and you support expansions of includes using the -INC syntax, then your list of keywods might be 'COPY -INC' and your list of libraries might be 'DEV.copybook QA.copybook PROD.copybook'.
