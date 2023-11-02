@@ -1,10 +1,10 @@
 /* REXX  */
 
    ADDRESS ISPEXEC
-         'VGET (ENVBENV ENVBSYS ENVBSBS ENVBTYP ENVBSTGI ENVBSTGN
-                ENVSENV ENVSSYS ENVSSBS ENVSTYP ENVSSTGI ENVSSTGN
-                ENVELM  ENVPRGRP ENVCCID ENVCOM ENVGENE ENVOSIGN)
-          PROFILE'
+            'VGET (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ',
+                 ' EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ',
+                 ' EN$ELM DOTRACE) ',
+            'SHARED'
 
    if DoTrace = 'Y' then Trace ?r
 
@@ -24,7 +24,7 @@
    /* you could assign Search_Words to 'COPY ++INCLUDE'.*/
 
    Search_Words = 'COPY' ;
-   IF ENVSTYP = 'PROCESS' | ENVBTYP = 'PROCESS' THEN,
+   IF EN$STYP = 'PROCESS' | EN$BTYP = 'PROCESS' THEN,
       do
       Search_Words = '-INC' ;
       INCLUDE_LIBRARY_LIST =,
@@ -32,80 +32,80 @@
             'NDVR.PEN.COPYLIB'
       end;
 
-   If ENVBTYP = 'JCL' | ENVBTYP = 'JOB' then lastnode = 'PROCLIB'
+   If EN$BTYP = 'JCL' | EN$BTYP = 'JOB' then lastnode = 'PROCLIB'
    ELSE                                      lastnode = 'COPYLIB'
 
    /* Looking at the DEV Environment  ?   */
-   IF ENVBENV = 'TEST' & ENVBSTGI = 'T' THEN,
+   IF EN$BENV = 'TEST' & EN$BSTGI = 'T' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.T'ENVBSYS'.'lastnode,
-            'NDVR.C'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.T'EN$BSYS'.'lastnode,
+            'NDVR.C'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'TEST' & ENVBSTGI = 'C' THEN,
+   IF EN$BENV = 'TEST' & EN$BSTGI = 'C' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.C'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.C'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'QA'  & ENVBSTGI = 'A' THEN,
+   IF EN$BENV = 'QA'  & EN$BSTGI = 'A' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'PROD' & ENVBSTGI = 'Z' THEN,
+   IF EN$BENV = 'PROD' & EN$BSTGI = 'Z' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.Z'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.Z'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'PROD' & ENVBSTGI = 'P' THEN,
+   IF EN$BENV = 'PROD' & EN$BSTGI = 'P' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'PREP'  & ENVBSTGI = 'S' THEN,
+   IF EN$BENV = 'PREP'  & EN$BSTGI = 'S' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.S'ENVBSYS'.'lastnode,
-            'NDVR.J'ENVBSYS'.'lastnode,
-            'NDVR.Y'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.S'EN$BSYS'.'lastnode,
+            'NDVR.J'EN$BSYS'.'lastnode,
+            'NDVR.Y'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'PREP'  & ENVBSTGI = 'J' THEN,
+   IF EN$BENV = 'PREP'  & EN$BSTGI = 'J' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.S'ENVBSYS'.'lastnode,
-            'NDVR.J'ENVBSYS'.'lastnode,
-            'NDVR.Y'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.S'EN$BSYS'.'lastnode,
+            'NDVR.J'EN$BSYS'.'lastnode,
+            'NDVR.Y'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'PARQA' & ENVBSTGI = 'Y' THEN,
+   IF EN$BENV = 'PARQA' & EN$BSTGI = 'Y' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.Y'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.Y'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'MAINT' & ENVBSTGI = 'M' THEN,
+   IF EN$BENV = 'MAINT' & EN$BSTGI = 'M' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.M'ENVBSYS'.'lastnode,
-            'NDVR.I'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.M'EN$BSYS'.'lastnode,
+            'NDVR.I'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'MAINT' & ENVBSTGI = 'I' THEN,
+   IF EN$BENV = 'MAINT' & EN$BSTGI = 'I' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.I'ENVBSYS'.'lastnode,
-            'NDVR.A'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.I'EN$BSYS'.'lastnode,
+            'NDVR.A'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'ADMIN' & ENVBSTGI = 'D' THEN,
+   IF EN$BENV = 'ADMIN' & EN$BSTGI = 'D' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.D'ENVBSYS'.'lastnode,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.D'EN$BSYS'.'lastnode,
+            'NDVR.P'EN$BSYS'.'lastnode
    Else,
-   IF ENVBENV = 'ADMIN' & ENVBSTGI = 'P' THEN,
+   IF EN$BENV = 'ADMIN' & EN$BSTGI = 'P' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'NDVR.P'ENVBSYS'.'lastnode
+            'NDVR.P'EN$BSYS'.'lastnode
 
   If lastnode = 'COPYLIB' then,
     Search_Words = "COPY ++INCLUDE -INC INCLUDE PROC" ;

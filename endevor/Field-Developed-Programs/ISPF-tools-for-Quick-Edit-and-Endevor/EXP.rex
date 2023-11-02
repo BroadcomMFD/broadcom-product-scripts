@@ -36,8 +36,9 @@
               support information.
 
               */
+
    ADDRESS ISREDIT "MACRO (PARMS)"
-   if rc > 0 | wordpos("HELP",translate(parms)) > 0 then signal Help
+   if wordpos("HELP",translate(parms)) > 0 then signal Help
 
    ADDRESS ISREDIT;
  /*                                                                 */
@@ -46,7 +47,7 @@
  /*                                                                 */
  /*                                                                 */
    CALL BPXWDYN "INFO FI(EXP) INRTDSN(DSNVAR) INRDSNT(myDSNT)"
-   if RESULT = 0 then  Trace ?r
+   if RESULT = 0 then  Trace DoTrace = 'Y'
 
    reference_expanded = "N" ;     /* Flag Expand Status           */
    THISPRFX = ''                  /* Default no prefix/indenting  */
@@ -66,11 +67,13 @@
    ELSE,
       Do
       Call Get_Endevor_Classification ;
-      ADDRESS ISPEXEC
-            'VPUT (ENVBENV ENVBSYS ENVBSBS ENVBTYP ENVBSTGI ENVBSTGN
-                   ENVSENV ENVSSYS ENVSSBS ENVSTYP ENVSSTGI ENVSSTGN
-                   ENVELM  ENVPRGRP ENVCCID ENVCOM ENVGENE ENVOSIGN)
-             PROFILE'
+
+      ADDRESS ISPEXEC,
+         'VPUT (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ',
+              ' EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ',
+              ' EN$ELM ',
+              ' DOTRACE) ',
+         'SHARED'
       End
 
    ADDRESS ISREDIT "HILIGHT ON"
@@ -87,7 +90,7 @@
   /*           INCLUDE_LIBRARY_LIST. Example code is shown below.    */
   /*                                                                 */
   /*        Use the variables from Quick Edit                        */
-  /*          ENVBENV ENVSSYS ENVSSBS ENVSTYP ENVSSTGI ENVELM        */
+  /*          EN$BENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$ELM        */
   /*                 as                                              */
   /*          envrionment system subsystem type stage-id element     */
   /*        However, beware if user enters QuickEdit on a split      */
@@ -289,12 +292,12 @@ Get_Endevor_Classification:
      ADDRESS ISREDIT "(DATALINE)=LINE" ENVLINE
      tmp = DATALINE
      If Words(tmp) < 7 then leave /* we didn't get all the data */
-     ENVBENV     = Word(tmp,03) ;
-     ENVSENV     = Word(tmp,03) ;
-     ENVBSYS     = Word(tmp,05) ;
-     ENVSSYS     = Word(tmp,05) ;
-     ENVBSBS     = Word(tmp,07) ;
-     ENVSSBS     = Word(tmp,07) ;
+     EN$BENV     = Word(tmp,03) ;
+     EN$SENV     = Word(tmp,03) ;
+     EN$BSYS     = Word(tmp,05) ;
+     EN$SSYS     = Word(tmp,05) ;
+     EN$BSBS     = Word(tmp,07) ;
+     EN$SSBS     = Word(tmp,07) ;
 
      ADDRESS ISREDIT "SEEK '**    TYPE:       ' "
      ADDRESS ISREDIT "(TYPLINE ELECHAR)=CURSOR"
@@ -302,10 +305,10 @@ Get_Endevor_Classification:
      tmp = DATALINE
      If Words(tmp) < 6 then leave /* we didn't get all the data */
      reference_expanded = "P" ;   /* We found a valid banner */
-     ENVBTYP     = Word(tmp,03) ;
-     ENVSTYP     = Word(tmp,03) ;
-     ENVBSTGI    = Word(tmp,06) ;
-     ENVSSTGI    = Word(tmp,06) ;
+     EN$BTYP     = Word(tmp,03) ;
+     EN$STYP     = Word(tmp,03) ;
+     EN$BSTGI    = Word(tmp,06) ;
+     EN$SSTGI    = Word(tmp,06) ;
 
      /* ToDo: This area needs to be expanded for LONG element names  */
      /*       as they can extend over multiple lines - on the other  */
@@ -315,7 +318,7 @@ Get_Endevor_Classification:
      ADDRESS ISREDIT "(DATALINE)=LINE" ELELINE
      tmp = DATALINE
      If Words(tmp) < 3 then leave /* we didn't get all the data */
-     ENVELMV     = Word(tmp,03) ;
+     EN$ELMV     = Word(tmp,03) ;
    end
 
    RETURN;

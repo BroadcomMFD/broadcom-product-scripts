@@ -1,10 +1,11 @@
 /* REXX  */
 
+
    ADDRESS ISPEXEC
-         'VGET (ENVBENV ENVBSYS ENVBSBS ENVBTYP ENVBSTGI ENVBSTGN
-                ENVSENV ENVSSYS ENVSSBS ENVSTYP ENVSSTGI ENVSSTGN
-                ENVELM  ENVPRGRP ENVCCID ENVCOM ENVGENE ENVOSIGN)
-          PROFILE'
+            'VGET (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ',
+                 ' EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ',
+                 ' EN$ELM DOTRACE) ',
+            'SHARED'
 
    if DoTrace = 'Y' then Trace ?r
 
@@ -24,7 +25,7 @@
    /* you could assign Search_Words to 'COPY ++INCLUDE'.*/
 
    /* If we are editing a processor             */
-   IF ENVSTYP = 'PROCESS' | ENVBTYP = 'PROCESS' THEN,
+   IF EN$STYP = 'PROCESS' | EN$BTYP = 'PROCESS' THEN,
       Do
       /* If editing a processor, look for these references */
       Search_Words = '++INCLUDE' ;
@@ -35,7 +36,7 @@
       End;
 
    /* If editing a JCL element ...                                 */
-   If ENVBTYP = 'JCL' | ENVBTYP = 'JOB' then,
+   If EN$BTYP = 'JCL' | EN$BTYP = 'JOB' then,
       Do
       Search_Words = "PROC= ++INCLUDE -INC EXEC   " ;
       lastnode = 'PROC'
@@ -48,23 +49,23 @@
       End
 
 
-   /* Looking at the DEV Environment  ?   */
-   IF ENVBENV = 'DEV' THEN,
+   /* Looking at the DEV EN$ironment  ?   */
+   IF EN$BENV = 'DEV' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.'ENVBENV'.'ENVBSYS'.'ENVBSBS'.'lastnode,
-            'SYSDE32.NDVR.QAS.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'ENVBSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.'EN$BENV'.'EN$BSYS'.'EN$BSBS'.'lastnode,
+            'SYSDE32.NDVR.QAS.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
             'SYSDE32.NDVR.SHARED.PROD.'lastnode
    Else,
-   IF ENVBENV = 'QAS' THEN,
+   IF EN$BENV = 'QAS' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.QAS.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'ENVBSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.QAS.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
             'SYSDE32.NDVR.SHARED.PROD.'lastnode
    Else,
-   IF ENVBENV = 'PRD' THEN,
+   IF EN$BENV = 'PRD' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.PRD.'ENVBSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
             'SYSDE32.NDVR.SHARED.PROD.'lastnode
 
 
