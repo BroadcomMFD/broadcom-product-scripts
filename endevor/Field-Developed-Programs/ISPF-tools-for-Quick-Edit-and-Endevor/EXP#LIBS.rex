@@ -20,7 +20,7 @@
 
    /* Optionally assign a list of space delimited values*/
    /* to the Search_Words variable.                     */
-   /* You are editing a COBOL element for example,      */
+   /* If You are editing a COBOL element for example    */
    /* and you support ++INCLUDE references, then        */
    /* you could assign Search_Words to 'COPY ++INCLUDE'.*/
 

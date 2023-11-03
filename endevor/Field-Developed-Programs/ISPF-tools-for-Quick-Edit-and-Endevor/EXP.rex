@@ -16,6 +16,8 @@
               Classification details, you name the libraries to be
               searched, and the keywords to be used for them.
               See the examples EXP#LIBS and EXP#LIBS#example#2.
+              See also the ENDIEIM1 for EXP.rex for minor updates
+              necessary for your ENDIEIM1 member.
 
               Use the RESET command, to remove all expanded INFO and
               MSG lines.
@@ -82,25 +84,16 @@
       RC > 0 THEN EXIT ; /* todo: Why Exit it highlight didn't work??? */
 
   /*                                                                 */
-  /*  APPLICATION CUSTOMIZATIONS HERE                                */
-  /*     are required for ENHANCED mode only.....                    */
   /*                                                                 */
-  /*        If wanting to use Enhanced mode, you must assign a       */
-  /*           list of libraries to search in the variable           */
-  /*           INCLUDE_LIBRARY_LIST. Example code is shown below.    */
-  /*                                                                 */
-  /*        Use the variables from Quick Edit                        */
+  /*        Create a REXX member named EXP#LIBS and assign a         */
+  /*          list of libraries to search in the variable            */
+  /*          INCLUDE_LIBRARY_LIST. Examples are provided.           */
+  /*          in members EXP#LIBS and EXP#LIBS_Example#2.rex. *      */
+  /*          Use the name EXP#LIBS and place into your REXX library.*/
+  /*          Use the variables named                                */
   /*          EN$BENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$ELM        */
   /*                 as                                              */
   /*          envrionment system subsystem type stage-id element     */
-  /*        However, beware if user enters QuickEdit on a split      */
-  /*        screen these values might be out of sync!                */
-  /*                                                                 */
-  /*        You may also change the value for SEARCH_STRING .        */
-  /*          This variable contains the word that indicates that    */
-  /*           an input component name follows. It defaults to       */
-  /*           the value you would want for COBOL - "COPY", but you  */
-  /*           may change it to whatever you want.                   */
   /*                                                                 */
 
   /*  Call EXP#LIBS for Search_Words and INCLUDE_LIBRARY_LIST        */
