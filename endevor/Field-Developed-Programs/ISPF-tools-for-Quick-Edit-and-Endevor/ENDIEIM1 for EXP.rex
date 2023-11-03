@@ -32,10 +32,9 @@
                    ENVELM  ENVPRGRP ENVCCID ENVCOM ENVGENE ENVOSIGN)
              PROFILE'
 
-/* Variables should be stored in the shared pool, not the profile    */
-/* pool.  There's only one profile pool, shared by all screens.      */
-/* Dialogs can get the wrong value when split screens (or the same   */
-/* userid on multiple LPARs) is used.                                */
+/* If you already have modifications in your ENDIEIM1 member         */
+/* Just insert the next several lines, including the VPUT command,    */
+/* Just insert the next several lines below the VGET you see above.  */
   en$benv = envbenv
   en$bsys = envbsys
   en$bsbs = envbsbs
