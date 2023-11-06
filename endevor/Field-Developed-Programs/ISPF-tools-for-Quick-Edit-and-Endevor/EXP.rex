@@ -49,7 +49,7 @@
  /*                                                                 */
  /*                                                                 */
    CALL BPXWDYN "INFO FI(EXP) INRTDSN(DSNVAR) INRDSNT(myDSNT)"
-   if RESULT = 0 then  Trace DoTrace = 'Y'
+   if RESULT = 0 then  DoTrace = 'Y'
 
    reference_expanded = "N" ;     /* Flag Expand Status           */
    THISPRFX = ''                  /* Default no prefix/indenting  */
