@@ -37,6 +37,42 @@ Two detail lines are shown in the example above. Each detail line shows an envir
 
 These items can be used only from Quick-Edit where the PDA is active. The user can enter "TSO RETRO" on the command line, and use the cursor to point to a PDA Note line that shows another element. Then, an assisted PDM execution will be invoked.
 
+## EXP EXP#LIBS EXP#LIBS_Example#2 ENDIEIM1 for EXP
+
+These items work together as an **"expand input component"** utility. Enter "EXP" on the command line, and move the cursor to a "COPY", "++INCLUDE", "-INC" or other statement, and press Enter. Then the content of the referenced input is copied into your edit session. INFO lines are used so that you are not making changes to your source.
+
+EXP can be used while Browsing an element in Quick-Edit or Endevor. However the **ISPF BROWSE OR VIEW MODE** option must be set to 'V'. It can be used to expand JCL, assembler and others as well.
+
+The image below for example, shows an include member named **SETSTMTS** expanded from a "++INCLUDE" statement within a processor.
+
+~~~
+GCOBOL     + TO: ADMIN/1/CATSNDVR/ENDEVOR/PROCESS       COLUMNS0000100072
+Command ===>                                                Scroll ===>CSR 
+000001//*******************************************************************   
+000002//**                                                               **   
+000003//**    COBOL COMPILE AND LINK-EDIT PROCESSOR                           
+000004//**                                                               **   
+000005//*******************************************************************   
+000006//GCOBOLJJ PROC AAAX='',                                                
+- - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 12 Line(s) not Displayed 
+000019       ++INCLUDE SETSTMTS    Standard processor includes                
+=NOTE=       FROM: SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE(SETSTMTS)          
+=NOTE=//*   Top of SETSTMTS                                                   
+=NOTE=//             CIICOMP='SYS1.COB2COMP',                                 
+=NOTE=//*            CIILIB='SYS1.COB2LIB',                                   
+=NOTE=//             CIILIB='IGY.SIGYCOMP',                                   
+=NOTE=//             CLECOMP='IGY.SIGYCOMP',                                  
+=NOTE=//             CLELKED='CEE.SCEELKED',                                  
+=NOTE=//             CLERUN='CEE.SCEERUN',                                    
+=NOTE=//             CSIQCLS0='NDVR.R1801.CSIQCLS0',                 
+=NOTE=//             CSYSLIB='&HLQ..COPYBOOK',                                
+=NOTE=//             EXPINC=N,                                                
+~~~
+
+The Rexx program EXP remains as-is, and is to be placed into your REXX library. Create your own REXX version of EXP#LIBS from the EXP#LIBS and EXP#LIBS_Example#2 examples. Tailor your version to identify keywords and libraries to be used for expansions. You can leverage the variables provided (via VGET) for Endevor Env, Sys, Sub, Type, as shown in the examples. If for example, the edited element is COBOL and you support expansions of includes using the -INC syntax, then your list of keywords might be 'COPY -INC' and your list of libraries might be 'DEV.copybook QA.copybook PROD.copybook'.
+
+See also the minor changes required for your ENDIEIM1 REXX program.  
+
 ## PKGMAINT and PMAINTPN
 
 These items offer Quick-Edit and Endevor users a fast method for managing packages. While displaying a list of packages, enter "TSO PKGMAINT" on the command line. From the panel displayed is prepared and submitted a job to COMMIT/RESET/DELETE the packages listed.
@@ -67,36 +103,3 @@ This edit macro can be executed from Quick-Edit on Endevor processors, JCL, PROC
 
 While editing a processor (or JCL) where a dataset name is found, enter the name of either of these on the command line, move the cursor to the first character of the dataset name, and press Enter. You will then be Browsing or Editing the dataset.
 
-## EXP  
-
-This item can be used as an **"expand input component"** utility. After you enter "EXP" on the command line, and move the cursor to a "COPY", "++INCLUDE", "-INC" or other statement, and press Enter, the content of the referenced input is copied into your edit session. NOTE lines are used so that you are not making changes to your source.
-
-EXP can  be used while Browsing an element in Quick-Edit or Endevor. However the **ISPF BROWSE OR VIEW MODE** option must be set to 'V'. It can be used to expand JCL, assembler and others as well.
-
-The image below for example, shows an include member named **SETSTMTS** expanded from a "++INCLUDE" statement within a processor.
-
-~~~
-GCOBOL     + TO: ADMIN/1/CATSNDVR/ENDEVOR/PROCESS       COLUMNS0000100072
-Command ===>                                                Scroll ===>CSR 
-000001//*******************************************************************   
-000002//**                                                               **   
-000003//**    COBOL COMPILE AND LINK-EDIT PROCESSOR                           
-000004//**                                                               **   
-000005//*******************************************************************   
-000006//GCOBOLJJ PROC AAAX='',                                                
-- - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 12 Line(s) not Displayed 
-000019       ++INCLUDE SETSTMTS    Standard processor includes                
-=NOTE=       FROM: SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE(SETSTMTS)          
-=NOTE=//*   Top of SETSTMTS                                                   
-=NOTE=//             CIICOMP='SYS1.COB2COMP',                                 
-=NOTE=//*            CIILIB='SYS1.COB2LIB',                                   
-=NOTE=//             CIILIB='IGY.SIGYCOMP',                                   
-=NOTE=//             CLECOMP='IGY.SIGYCOMP',                                  
-=NOTE=//             CLELKED='CEE.SCEELKED',                                  
-=NOTE=//             CLERUN='CEE.SCEERUN',                                    
-=NOTE=//             CSIQCLS0='NDVR.R1801.CSIQCLS0',                 
-=NOTE=//             CSYSLIB='&HLQ..COPYBOOK',                                
-=NOTE=//             EXPINC=N,                                                
-~~~
-
-Some simple tailoring of QEXPANDW is likely required. See references to INCLUDE_LIBRARY_LIST within the REXX member.

@@ -1,143 +1,194 @@
- /* REXX   */
-   'ISREDIT MACRO ' ;
+/*     REXX - Edit Macro to Expand the COPYBOOK or INCLUDE member on
+              the line that the cursor is currently positioned.
+
+       Usage: EXP (help) (with cursor positoned on the line to expand)
+
+              Depending on the element type, it will look for keywords
+              like COPY, INCLUDE, PROC, -INC, etc. and then attempt
+              to parse a member name (following that keyword). If
+              found will search a set of libraries (defined by your
+              administrator) to find and insert that member as
+              INFOLINEs (denoted by '======' in the number/sequence
+              column).
+
+              You must code your own subroutine named EXP#LIBS, where
+              based on the variables that provide the Endevor
+              Classification details, you name the libraries to be
+              searched, and the keywords to be used for them.
+              See the examples EXP#LIBS and EXP#LIBS#example#2.
+              See also the ENDIEIM1 for EXP.rex for minor updates
+              necessary for your ENDIEIM1 member.
+
+              Use the RESET command, to remove all expanded INFO and
+              MSG lines.
+
+              Note: INFOLINES can not be searched, but if necessary
+              you can convert INFOLINES to regular data using the
+              MDn or MDD...MDD line commands, just remember to delete
+              them again before saving! Or you can use the MSGLINE
+              prompt to identify where the member was found and open
+              that member in a split screen.
+
+              Hint: Set 'EXP' as a PFKEY (like shift+F5) to avoid
+              having to use <home> to type the EXP command and then
+              reposition the cursor.
+
+       Note:  This command is provided ASIS as part of the FDP
+              Developed Program) bundle, see doc for warranty and
+              support information.
+
+              */
+
+   ADDRESS ISREDIT "MACRO (PARMS)"
+   if wordpos("HELP",translate(parms)) > 0 then signal Help
 
    ADDRESS ISREDIT;
  /*                                                                 */
- /*    You must change the contents of EXP                          */
- /*        according to the comments below to point to potential    */
- /*        library names where input components can be found.       */
+ /*    You must not change the contents of EXP. Rather, make        */
+ /*    your specific your changes within your version of EXP#LIBS   */
  /*                                                                 */
- /*    See various examples for assigning lists of library names    */
- /*    to INCLUDE_LIBRARY_LIST                                      */
- /*                                                                 */
- /*    See the Get_COPY_library_name_list section, where you can    */
- /*    use the varaiables provided by Quick-Edit for                */
- /*    ENVBENV ENVBSYS ENVBSBS ENVBTYP ENVBSTGI                     */
- /*    to build a list of library names in INCLUDE_LIBRARY_LIST     */
  /*                                                                 */
    CALL BPXWDYN "INFO FI(EXP) INRTDSN(DSNVAR) INRDSNT(myDSNT)"
-   if RESULT = 0 then DoTrace = 'Y'
+   if RESULT = 0 then  DoTrace = 'Y'
 
-   Use_Long_Name_Search = 'N'  ;  /* Suppport 9 or 10 char names? */
-   LP = 1   ;                     /* Line position is 1           */
-   CP = 1   ;                     /* Char position is 1           */
+   reference_expanded = "N" ;     /* Flag Expand Status           */
+   THISPRFX = ''                  /* Default no prefix/indenting  */
 
-   ADDRESS ISPEXEC  "CONTROL ERRORS RETURN" ;
-   X = OUTTRAP(LINE.);
+   /*  Save line pointed to by user  */
+   ADDRESS ISREDIT "(STRTLINE STRTCHAR) = CURSOR"
+   ADDRESS ISREDIT "(ENTSTAT) = USER_STATE"        /* and status */
+
+   ADDRESS ISPEXEC "CONTROL ERRORS RETURN" ;
 
    /* Determine whether we are in Edit or View  */
    ADDRESS ISREDIT "(EDITVIEW,TMP) = SESSION"
    x = EDITVIEW
 
-   IF EDITVIEW = "EDIT" then,
-      Do
-      ADDRESS ISPEXEC
-            'VGET (ENVBENV ENVBSYS ENVBSBS ENVBTYP ENVBSTGI ENVBSTGN
-                   ENVSENV ENVSSYS ENVSSBS ENVSTYP ENVSSTGI ENVSSTGN
-                   ENVELM  ENVPRGRP ENVCCID ENVCOM ENVGENE ENVOSIGN)
-             PROFILE'
-      End
+   IF EDITVIEW = "EDIT" then nop
    /* If in View, then we have to get Env,Sys,Sub etc from banner */
    ELSE,
+      Do
       Call Get_Endevor_Classification ;
 
-   ADDRESS ISREDIT 'HILIGHT ON'
+      ADDRESS ISPEXEC,
+         'VPUT (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ',
+              ' EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ',
+              ' EN$ELM ',
+              ' DOTRACE) ',
+         'SHARED'
+      End
+
+   ADDRESS ISREDIT "HILIGHT ON"
 
    IF EDITVIEW = "EDIT" &,
-      RC > 0 THEN EXIT ;
+      RC > 0 THEN EXIT ; /* todo: Why Exit it highlight didn't work??? */
 
   /*                                                                 */
-  /*  APPLICATION CUSTOMIZATIONS HERE                                */
-  /*     are required for ENHANCED mode only.....                    */
   /*                                                                 */
-  /*        If wanting to use Enhanced mode, you must assign a       */
-  /*           list of libraries to search in the variable           */
-  /*           INCLUDE_LIBRARY_LIST. Example code is shown below.    */
-  /*                                                                 */
-  /*        Use the variables from Quick Edit                        */
-  /*          ENVBENV ENVSSYS ENVSSBS ENVSTYP ENVSSTGI ENVELM        */
+  /*        Create a REXX member named EXP#LIBS and assign a         */
+  /*          list of libraries to search in the variable            */
+  /*          INCLUDE_LIBRARY_LIST. Examples are provided.           */
+  /*          in members EXP#LIBS and EXP#LIBS_Example#2.rex. *      */
+  /*          Use the name EXP#LIBS and place into your REXX library.*/
+  /*          Use the variables named                                */
+  /*          EN$BENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$ELM        */
   /*                 as                                              */
   /*          envrionment system subsystem type stage-id element     */
-  /*        You may also change the value for SEARCH_STRING .        */
-  /*          This variable contains the word that indicates that    */
-  /*           an input component name follows. It defaults to       */
-  /*           the value you would want for COBOL - "COPY", but you  */
-  /*           may change it to whatever you want.                   */
   /*                                                                 */
 
-  Call Get_COPY_library_name_list;
+  /*  Call EXP#LIBS for Search_Words and INCLUDE_LIBRARY_LIST        */
+  Working_Values       = EXP#LIBS()
 
-  ADDRESS ISREDIT  "(STRTLINE STRTCHAR)=CURSOR"
+  If RC > 1 then,
+        Do
+        ZERRLM   = "Cannot find your version of EXP#LIBS."
+        ZERRSM   = "EXP#LIBS is missing "
+        ZERRALRM = "YES"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+        Exit(8)
+        End
 
-  If lastnode = 'COPYBOOK' then,
-    SEARCH_WORDS = "COPY ++INCLUDE -INC INCLUDE " ;
-  If lastnode = 'PROC' then,
-    SEARCH_WORDS = "PROC= ++INCLUDE -INC EXEC   " ;
-     reference_expanded = "N" ;
-     ADDRESS ISREDIT "CURSOR = "STRTLINE" 1 " ;
-     ADDRESS ISREDIT  "(DATALINE)=LINE" STRTLINE
-     DO WORD# = 1 TO WORDS(DATALINE)
-        TEMP = WORD(DATALINE,WORD#) ;
-        IF WORDPOS(TEMP,SEARCH_WORDS) > 0 THEN,
-           do
-           SEARCH_STRING = WORD(DATALINE,WORD#) ;
-           Call Search_for_keyword;
-           LEAVE ;
-           end ; /* IF WORDPOS(TEMP..... */
-     END; /* DO WORD# = 1 .....  */
+  PARSE VAR Working_Values SEARCH_WORDS "||" INCLUDE_LIBRARY_LIST
+  If Words(SEARCH_WORDS) = 0 then,
+     SEARCH_WORDS = "COPY ++INCLUDE -INC INCLUDE PROC" ;
 
-  ADDRESS ISREDIT "CURSOR =" LP CP ;
+  reference_expanded = "W" ;     /* Flag Expand Status - search for word */
+
+
+  ADDRESS ISREDIT "CURSOR = "STRTLINE" 1 " ;
+  ADDRESS ISREDIT "(DATALINE)=LINE" STRTLINE
+  DO WORD# = 1 TO WORDS(DATALINE)
+     TEMP = WORD(DATALINE,WORD#) ;
+     IF WORDPOS(TEMP,SEARCH_WORDS) > 0 THEN,
+        do
+        SEARCH_STRING = WORD(DATALINE,WORD#) ;
+        Call Search_for_keyword;
+        LEAVE ;
+        end ; /* IF WORDPOS(TEMP..... */
+  END; /* DO WORD# = 1 .....  */
+
+  /* report what happened and get out */
+  select
+     When reference_expanded = "P" then do
+        ZERRLM   = "Parsing the Endevor banner complete,",
+                   "but some other error happened - nothing expanded"
+        ZERRSM   = "Unexpected error Status: 'P'"
+        ZERRALRM = "YES"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+     end
+     When reference_expanded = "W" then do
+        ZERRLM   = "The Cursor is not on a valid copy, or include line. ",
+                   "Could not find one of the copy keywords ("SEARCH_WORDS")",
+                   "on line:" strip(STRTLINE,"L","0"),
+                   "- '"strip(DATALINE,"B")"'"
+        ZERRSM   = "Invalid Cusror line"
+        ZERRALRM = "YES"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+     end
+     When reference_expanded = "V" then do
+        ZERRLM   = "VIEW mode detected, but unable to",
+                   "parse the Endevor banner/flower box"
+        ZERRSM   = "No Banner"
+        ZERRALRM = "YES"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+     end
+     When reference_expanded = "N" then do
+        ZERRLM   = "Nothing to expand here: '"Dataline"'"
+        ZERRSM   = "Nothing to expand"
+        ZERRALRM = "YES"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+     end
+     When reference_expanded = "S" then do
+        ZERRLM   = "Couldn't find member: '"INCLNAME"'",
+        "while searching:" INCLUDE_LIBRARY_LIST
+        ZERRSM   = "Can't find '"INCLNAME"'"
+        ZERRALRM = "YES"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+     end
+     When reference_expanded = "Y" then do
+        ZERRLM   = "Expanded from: '"FROMDSN"'"
+        ZERRSM   = "Expanded '"INCLNAME"'"
+        ZERRALRM = "NO"
+        ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
+     end
+  otherwise
+     say "Unexpected state:'"reference_expanded"'"
+  end
+   /*  Return cursor to place where user pointed*/
+  ADDRESS ISREDIT "RESET FIND" /* don't flag any found or seeked lines */
+  ADDRESS ISREDIT "CURSOR = (STRTLINE STRTCHAR)"
+  ADDRESS ISREDIT "USER_STATE = (ENTSTAT)"         /* and status */
 
   exit
 
-Get_COPY_library_name_list:
-
-   if DoTrace = 'Y' then Trace ?r
-
-   INCLUDE_LIBRARY_LIST = ' ' ;
-
-   SEARCH_STRING = 'COPY' ;
-   IF ENVSTYP = 'PROCESS' | ENVBTYP = 'PROCESS' THEN,
-      do
-      SEARCH_STRING = '++INCLUDE' ;
-      INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE',
-            'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM2.INCLUDE'
-      end;
-
-   If ENVBTYP = 'JCL' | ENVBTYP = 'JOB' then lastnode = 'PROC'
-   ELSE                                      lastnode = 'COPYBOOK'
-
-   /* Looking at the DEV Environment  ?   */
-   IF ENVBENV = 'DEV' THEN,
-      INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.'ENVBENV'.'ENVBSYS'.'ENVBSBS'.'lastnode,
-            'SYSDE32.NDVR.QAS.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
-   Else,
-   IF ENVBENV = 'QAS' THEN,
-      INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.QAS.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
-   Else,
-   IF ENVBENV = 'PRD' THEN,
-      INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.PRD.'ENVBSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
-
-  return ;
-
 Search_for_keyword:
 
-   if DoTrace = 'Y' then Trace ?r
 
    DO FOREVER ;
-      ADDRESS ISREDIT  "FIND '"SEARCH_STRING"' .ZCSR .ZCSR " ;
+      ADDRESS ISREDIT "SEEK '"SEARCH_STRING"' .ZCSR .ZCSR " ;
       IF RC > 0 THEN LEAVE  ;
-      ADDRESS ISREDIT  "(LP CP)=CURSOR"
-      ADDRESS ISREDIT  "(DATALINE)=LINE" LP
+      ADDRESS ISREDIT "(LP CP)=CURSOR"
+      ADDRESS ISREDIT "(DATALINE)=LINE" LP
       SA= "DATALINE = " DATALINE ;
       PLACE = WORDPOS(SEARCH_STRING,DATALINE) ;
       PLACE = PLACE + 1;
@@ -147,6 +198,8 @@ Search_for_keyword:
          INCLNAME = WORD(DATALINE,PLACE) ;
          If Substr(INCLNAME,1,5) = 'PROC=' then,
             INCLNAME = Substr(INCLNAME,6)
+         If pos('(',INCLNAME) > 2 then /* was there a '(' */
+            INCLNAME = left(INCLNAME,pos('(',INCLNAME)-1)
          INCLNAME = STRIP(INCLNAME,T,'.');
          INCLNAME = STRIP(INCLNAME,T,';');
          INCLNAME = STRIP(INCLNAME);
@@ -154,15 +207,17 @@ Search_for_keyword:
          CALL EXPAND_INCLUDE ;
          END ;
 /*                                                                    */
-      ADDRESS ISREDIT  "CURSOR = "STRTLINE STRTCHAR ;
       LEAVE ;
    END ; /* DO FOREVER */
 
   return ;
 
 EXPAND_INCLUDE :
+   reference_expanded = "S" ;  /* Searching for an include member */
    call Search_library_list ;
    if result > 0 then Return;
+
+   reference_expanded = "Y" ;  /* Yes we got one! */
 
    ADDRESS TSO,
       "ALLOC F(INCLLIB)",
@@ -175,94 +230,116 @@ EXPAND_INCLUDE :
 
    WHERE = 'LINE_AFTER' ;
 
-   reference_expanded = "Y" ;
+   INTROLINE = "     FROM:" left(FROMDSN,54) ;
+
+   'ISREDIT LINE_AFTER  .ZCSR = NOTELINE "'INTROLINE'*END*  "' ;
+
+   /* Note use INFO lines so it's not truncated to 72 bytes and is
+      scrollable - yes that'll make it white... but that's better than
+      truncated - maybe only if in VIEW mode?
+      Use NOTELINE for the start/end INTROLINEs so they have a diff colour
+      */
    DO I = ENDEVOR.0 TO 1 BY -1
-      IF EDITVIEW = 'VIEW' THEN,
-         ENDEVOR.I = COPIES(' ',09) || ENDEVOR.I
-      SPECIAL_CHAR = '&' ; /* AMPERSAND */
-      POSITION  = POS(SPECIAL_CHAR,ENDEVOR.I) ;
-      ENDEVOR.I = TRANSLATE(ENDEVOR.I,"'",'"') ;
-      IF POSITION > 0 THEN CALL HANDLE_SPECIAL_CHARACTER;
-      'ISREDIT ' WHERE '.ZCSR = NOTELINE "'ENDEVOR.I'"' ;
+      thisline = ThisPrfx || Endevor.i
+      'ISREDIT ' WHERE '.ZCSR = INFOLINE (thisline)' ;
    END ; /* DO I = 1 TO ENDEVOR.0*/
 
-   INTROLINE = "       FROM:" FROMDSN ;
-   'ISREDIT LINE_AFTER  .ZCSR = NOTELINE "'INTROLINE'"' ;
-
-   RETURN;
-
-HANDLE_SPECIAL_CHARACTER:
-   DO FOREVER ;
-      NEW_STRING = SUBSTR(ENDEVOR.I,1,POSITION) ||,
-                   SPECIAL_CHAR || SPECIAL_CHAR || SPECIAL_CHAR ||,
-                   SUBSTR(ENDEVOR.I,(POSITION+1)) ;
-      ENDEVOR.I = NEW_STRING ;
-      POSITION = POS(SPECIAL_CHAR,ENDEVOR.I,(POSITION+4));
-      IF POSITION = 0 THEN LEAVE ;
-   END ; /* DO FOREVER */
+   'ISREDIT LINE_AFTER  .ZCSR = NOTELINE "'INTROLINE'*START*"' ;
 
    RETURN;
 
 Search_library_list:
 
-   if DoTrace = 'Y' then Trace ?r
 
    sa = INCLUDE_LIBRARY_LIST  ;
-   X = OUTTRAP(LINE.);
+   X = OUTTRAP("LINE.",99,"CONCAT")
 
    DO LIB = 1 TO WORDS(INCLUDE_LIBRARY_LIST) ;
       FROMDSN = WORD(INCLUDE_LIBRARY_LIST,LIB) ||,
                 "("INCLNAME")" ;
-      IF SYSDSN("'"FROMDSN"'") = 'OK' THEN RETURN(0) ;
+      IF SYSDSN("'"FROMDSN"'") = 'OK' THEN do
+         X = OUTTRAP("OFF")
+         RETURN(0)
+      end
    END ;
 
+   X = OUTTRAP("OFF")
+   if LINE.0 > 1 then do /* didn't find anything maybe there's a message */
+      Say "Could not find member ("INCLNAME") in any dataset"
+      say "in:" INCLUDE_LIBRARY_LIST
+      do i = 1 to LINE.0
+         say LINE.i
+      end
+   end
    RETURN(1) ;
 
 Get_Endevor_Classification:
 
+   reference_expanded = "V" ;     /* We are looking for a banner  */
+   /*  Find Endevor banner info (are we in Browse/History/Changes view) */
+   ADDRESS ISREDIT "SEEK '**    ENVIRONMENT:' First "
+   if RC = 0 then do /* if we found a valid banner */
+     /* Yes - then set an indent prefix and save the values like QE */
+     THISPRFX = COPIES(' ',09) /* ...view mode, then indent */
+     ADDRESS ISREDIT "(ENVLINE ENVCHAR)=CURSOR"
+     ADDRESS ISREDIT "(DATALINE)=LINE" ENVLINE
+     tmp = DATALINE
+     If Words(tmp) < 7 then leave /* we didn't get all the data */
+     EN$BENV     = Word(tmp,03) ;
+     EN$SENV     = Word(tmp,03) ;
+     EN$BSYS     = Word(tmp,05) ;
+     EN$SSYS     = Word(tmp,05) ;
+     EN$BSBS     = Word(tmp,07) ;
+     EN$SSBS     = Word(tmp,07) ;
 
-   /*  Save line pointed to by user  */
-   ADDRESS ISREDIT "(STRTLINE STRTCHAR)=CURSOR"
+     ADDRESS ISREDIT "SEEK '**    TYPE:       ' "
+     ADDRESS ISREDIT "(TYPLINE ELECHAR)=CURSOR"
+     ADDRESS ISREDIT "(DATALINE)=LINE" TYPLINE
+     tmp = DATALINE
+     If Words(tmp) < 6 then leave /* we didn't get all the data */
+     reference_expanded = "P" ;   /* We found a valid banner */
+     EN$BTYP     = Word(tmp,03) ;
+     EN$STYP     = Word(tmp,03) ;
+     EN$BSTGI    = Word(tmp,06) ;
+     EN$SSTGI    = Word(tmp,06) ;
 
-   /*  Find Endevor banner info      */
-   ADDRESS ISREDIT "CURSOR = 1 1 " ;
-   ADDRESS ISREDIT "FIND '**    ENVIRONMENT:' First "
-   ADDRESS ISREDIT  "(ENVLINE ENVCHAR)=CURSOR"
-   ADDRESS ISREDIT  "(DATALINE)=LINE" ENVLINE
-   tmp = DATALINE
-   If Words(tmp) < 7 then exit
-   ENVBENV     = Word(tmp,03) ;
-   ENVSENV     = Word(tmp,03) ;
-   ENVBSYS     = Word(tmp,05) ;
-   ENVSSYS     = Word(tmp,05) ;
-   ENVBSBS     = Word(tmp,07) ;
-   ENVSSBS     = Word(tmp,07) ;
-
-   ADDRESS ISREDIT "FIND '**    TYPE:       ' "
-   ADDRESS ISREDIT  "(TYPLINE ELECHAR)=CURSOR"
-   ADDRESS ISREDIT  "(DATALINE)=LINE" TYPLINE
-   tmp = DATALINE
-   If Words(tmp) < 6 then exit
-   ENVBTYP     = Word(tmp,03) ;
-   ENVSTYP     = Word(tmp,03) ;
-   ENVBSTGI    = Word(tmp,06) ;
-   ENVSSTGI    = Word(tmp,06) ;
-
-   ADDRESS ISREDIT "FIND '**    ELEMENT:       '"
-   ADDRESS ISREDIT  "(ELELINE ELECHAR)=CURSOR"
-   ADDRESS ISREDIT  "(DATALINE)=LINE" ELELINE
-   tmp = DATALINE
-   If Words(tmp) < 3 then exit
-   ENVELMV     = Word(tmp,03) ;
-
-   /*  Return cursor to place where user pointed*/
-   ADDRESS ISREDIT "CURSOR = "STRTLINE STRTCHAR
-
-   /*  FREE Working libraries */
-   ADDRESS TSO "FREE  F(ELEMLIST) "
-   ADDRESS TSO "FREE  F(SYSIN)    "
-   ADDRESS TSO "FREE  F(MSGFILE)  "
-   ADDRESS TSO "FREE  F(BSTAPI)   "
-   ADDRESS TSO "FREE  F(BSTERR)   "
+     /* ToDo: This area needs to be expanded for LONG element names  */
+     /*       as they can extend over multiple lines - on the other  */
+     /*       hand EXP doesn't need to know the CURRENT element name */
+     ADDRESS ISREDIT "SEEK '**    ELEMENT:       '"
+     ADDRESS ISREDIT "(ELELINE ELECHAR)=CURSOR"
+     ADDRESS ISREDIT "(DATALINE)=LINE" ELELINE
+     tmp = DATALINE
+     If Words(tmp) < 3 then leave /* we didn't get all the data */
+     EN$ELMV     = Word(tmp,03) ;
+   end
 
    RETURN;
+
+Help: /* Display Macro Help Text */
+
+/* This routine can be called by Signaling HELP at any point and
+   will  parse/echo to the display any lines from the prolog/comment box
+   until a lone terminator is found - as an excercize for the reader it's
+   clear that if there were a LOT of help it'd be nicer to allow the
+   text to scroll, perhaps in a pop-up window...
+   */
+blockFound = 0
+Do i = 1 to Sourceline()   /* First letss check there IS a comment block */
+   if wordpos("/*",Sourceline(i)) = 1 then    /* yes found a block start */
+      blockFound = i                          /* save the start line */
+   if blockFound > 0 then                     /* look for the end */
+      if strip(sourceline(i)) == "*/" then do /* look for a terminator */
+         say ' '                              /* leave a space... */
+         do j = BlockFound to I               /* and for each line found */
+            say Sourceline(j)                 /* echo it to the terminal */
+         end
+         exit /* exit with high RC to keep command on screen */
+      end
+end
+
+/* if we're still here we didn't find a valid comment block, let the user
+   know we tried, and get out
+   */
+Say "Unfortuantely this Rexx doesn't do help, Please contact the developer"
+exit 28
