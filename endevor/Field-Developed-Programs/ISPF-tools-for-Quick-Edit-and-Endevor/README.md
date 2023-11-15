@@ -37,7 +37,7 @@ Two detail lines are shown in the example above. Each detail line shows an envir
 
 These items can be used only from Quick-Edit where the PDA is active. The user can enter "TSO RETRO" on the command line, and use the cursor to point to a PDA Note line that shows another element. Then, an assisted PDM execution will be invoked.
 
-## EXP EXP#LIBS EXP#LIBS_Example#2 ENDIEIM1 for EXP
+## EXP EXP#LIBS EXP#LIBS_Example#n ENDIEIM1 for EXP
 
 These items work together as an **"expand input component"** utility. Enter "EXP" on the command line, and move the cursor to a "COPY", "++INCLUDE", "-INC" or other statement, and press Enter. Then the content of the referenced input is copied into your edit session. INFO lines are used so that you are not making changes to your source.
 
@@ -73,8 +73,29 @@ The Rexx program EXP remains as-is, and is to be placed into your REXX library. 
 
 See also the minor changes required for your ENDIEIM1 REXX program.  
 
-## PKGMAINT and PMAINTPN
+## EXPLIBS ##
 
+EXPLIBS can be used independently or with the previously mentioned **EXP** and **EXP#LIBS** tools. While editing an Endevor element, enter EXPLIBS on the command line to see a concatenated list of input component libraries, as in this example:
+
+~~~ 
+                         Current Data Set Allocations             Row 1 of 3
+Command ===>                                                Scroll ===>PAGE
+                                                                               
+ Volume   DispositionActDDname   Data Set Name  Actions: B E V M F C I Q  
+ TSOD32   SHR,KEEP  >  EXPLIB3 SYSDE32.NDVR.DEV.FINANCE.ACTP0007.COPYBOOK  
+ TSOB32   SHR,KEEP  >          SYSDE32.NDVR.QAS.FINANCE.ACCTPAY.COPYBOOK   
+ TSOC32   SHR,KEEP  >          SYSDE32.NDVR.PRD.FINANCE.ACCTPAY.COPYBOOK   
+--------------------------End of Allocation List-----------------------------
+~~~                                                                             
+
+The display from **EXPLIBS** allows you to search an element's' "Input component libraries" to find a specific member, or using srchfor, for a particular string.  It uses your sites EXP#LIBS to determine the libraries you need based on your current/last Endevor actions and invokes ISRDDN to provide the UI for browsing/viewing/searching those libraries.  
+
+Press PF1 from ISRDDN to review help on all the commands available.
+
+
+
+## PKGMAINT and PMAINTPN
+**
 These items offer Quick-Edit and Endevor users a fast method for managing packages. While displaying a list of packages, enter "TSO PKGMAINT" on the command line. From the panel displayed is prepared and submitted a job to COMMIT/RESET/DELETE the packages listed.
 
 ## ENDIEIM1 and ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro

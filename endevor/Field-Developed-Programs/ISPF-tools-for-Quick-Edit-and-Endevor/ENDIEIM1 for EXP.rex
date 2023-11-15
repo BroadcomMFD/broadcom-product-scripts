@@ -32,32 +32,32 @@
                    ENVELM  ENVPRGRP ENVCCID ENVCOM ENVGENE ENVOSIGN)
              PROFILE'
 
-/* If you already have modifications in your ENDIEIM1 member         */
-/* Just insert the next several lines, including the VPUT command,    */
-/* Just insert the next several lines below the VGET you see above.  */
-  en$benv = envbenv
-  en$bsys = envbsys
-  en$bsbs = envbsbs
-  en$btyp = envbtyp
-  en$bstgi = envbstgi
-  en$bstgn = envbstgn
-  en$senv = envsenv
-  en$ssys = envssys
-  en$ssbs = envssbs
-  en$styp = envstyp
-  en$sstgi = envsstgi
-  en$sstgn = envsstgn
-  en$elm = envelm
-  en$prgrp = envprgrp
-  en$ccid = envccid
-  en$com = envcom
-  en$gene = envgene
-  en$osign = envosign
-
-  ADDRESS ISPEXEC
-            'VPUT (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN
-                   EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN
-                   EN$ELM  EN$PRGRP EN$CCID EN$COM EN$GENE EN$OSIGN)
-             SHARED'
+/* If you already have modifications in your ENDIEIM1 member         *
+/* Just insert the next several lines, including the VPUT command,    
+/* this will allow EXP and similar commands to find the current ele  *
+  en$benv = envbenv                                                     
+  en$bsys = envbsys                                                     
+  en$bsbs = envbsbs                                                     
+  en$btyp = envbtyp                                                     
+  en$bstgi = envbstgi                                                   
+  en$bstgn = envbstgn                                                   
+  en$senv = envsenv                                                     
+  en$ssys = envssys                                                     
+  en$ssbs = envssbs                                                     
+  en$styp = envstyp                                                     
+  en$sstgi = envsstgi                                                   
+  en$sstgn = envsstgn                                                                                                  
+  en$elm = envelm                                                      
+  en$prgrp = envprgrp                                                  
+  en$ccid = envccid                                                    
+  en$com = envcom                                                      
+  en$gene = envgene                                                    
+  en$osign = envosign                                                  
+  ADDRESS ISPEXEC                                                      
+            'VPUT (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN   
+                   EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN   
+                   EN$ELM  EN$PRGRP EN$CCID EN$COM EN$GENE EN$OSIGN)   
+             SHARED'                                                   
+/*-------------------------------------------------------------------*/
 
 EXIT 0
