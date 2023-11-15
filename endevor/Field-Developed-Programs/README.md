@@ -7,7 +7,7 @@ They are tested, secure and available for your use.
 
 Do you just want to copy and upload the code? 
 
-Here is a simple procedure you can use. Start from [GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts) and find the green box containing the text **'<> Code'**.  Choose one of the options that appears. If you select the **Download ZIP** option, then GitHub will create a zip file that you can extract to your desktop, and use TSO SEND tool to upload to a mainframe.  
+Here is a simple procedure you can use. Start from [GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts) and find the green box containing the text **'<> Code'**.  Choose one of the options that appears. If you select the **Download ZIP** option, then GitHub will create a zip file that you can extract to your desktop, and use TSO SEND to upload to a mainframe.  
 
 ## ACM-build-without-Generates
 
