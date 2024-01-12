@@ -72,7 +72,6 @@ command "compare (@SITE) x"
 Remember after editing your @<sysid> member be sure to save a local copy so it will be re-used
 next time.
 
-
 ![Alt text](image-7.png)
 
 ### Execute @@START2
