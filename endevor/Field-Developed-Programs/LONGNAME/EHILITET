@@ -1,0 +1,123 @@
+)ATTR DEFAULT(^+~)                                                              
+   AREA(SCRL) EXTEND(ON)                                                       
+ 01 type(text) color(White)  Hilite(reverse)                                    
+ 02 type(text) color(Red)    Hilite(reverse)                                    
+ 03 type(text) color(Pink)   Hilite(reverse)                                    
+ 04 type(text) color(Yellow) Hilite(reverse)                                    
+ 05 type(text) color(Green)  Hilite(reverse)                                    
+ 06 type(text) color(Blue)   Hilite(reverse)                                    
+ 07 type(text) color(Turq)   Hilite(reverse)                                    
+ 11 type(text) color(White)                                                     
+ 12 type(text) color(Red)                                                       
+ 13 type(text) color(Pink)                                                      
+ 14 type(text) color(Yellow)                                                    
+ 18 type(text) color(Green)                                                     
+ 16 type(text) color(Blue)                                                      
+ 17 type(text) color(Turq)                                                      
+)BODY EXPAND (\\) CMD(ZCMD)                                                     
+^TUTORIAL \-\ Endevor Hilite Help \-\ TUTORIAL                                  
+^Command ===>~ZCMD                                                             +
++                                                                               
++The^Endevor Hilite+option provides enhanced message highlighting when          
++browsing or viewing Endevor messages, or listings.                             
++Features include;                                                              
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+^*Enable Highlighting                                                           
++   You can enable or disable Endevor message highlighting using the^EHIlite    
++   command.  If enabled, messages are highlighted according to severity;       
++  White +-  Severe messages (Messages ending in 'S')                          
++  Red   +-  Error messages                                                    
++  Pink  +-  Caution messages                                                  
++  Yellow+-  Warning messages                                                  
++  Green +-  Notification messages                                             
++  Blue  +-  Information messages                                              
++                                                                               
++   Note: in VIEW mode BLUE and GREEN are reversed.                             
++                                                                               
+^*Message Summary                                                               
++   When^VIEW+mode is used to display Endevor messages the command              
++  ^EndvHiSc+(Endevor Hilite-Scan) can be used to scan the entire               
++   message file and build a summary of messages at the bottom found            
++   along with the line numbers where the message was found and the first       
++   message text.  You can optionally use the^IMACRO ENDVHISC+command           
++   to allow this command to run every time you open files of this              
++   type (determined by the final qualifier).                                   
++                                                                               
+^*Highlight Flower-Box                                                          
++   If enabled, Endevor will hilite the contents of^"flower boxes"+(lines       
++   that start with "** ") inTurquoise.+Normally this will make Endevor        
++   location information standout, but it might cause some non-flower           
++   box lines to be highlighted incorectly, If this is an issue use the         
++  ^EHIlite+command to turn disable it.                                         
++                                                                               
+^*Scroll Bar                                                                    
++   As you navigate through a report file, Endevor Hilite will keep track     +
++   of where messages were found and build a quick reference bar using        +
++   reverse video blocks along the right side of the data.  ^As shown here==> +
++   In small files the bar colours will have a one-to-one correspondence      +
++   to the data lines.  If the file is larger, then the bar will be           +
++   compressed relative to the file size and this compression may be          +
++   adjusted as you scroll within the file. By positioning the cursor in      +
++   the scroll bar area, and pressing^ENTER+you can navigate to the           +
++   represented area of the file.  However, with very large files this will   +
++   become less accurate as each "block" will start to represent more         +
++   than a page of data.  Each block will change colour to represent the      +
++   highest severity in the corresponding section of the file, for            +
++   example, theRED+blocks in the sample on the left indicate an error       +
++   message near the top and bottom of the file. White is used to mark        +
++   the current page, in this case, about half way down the file.             +
++                                                                               
++   Note: The Scroll Bar is disabled by default, but you can enable it          
++   using the^EHIlite+command.                                                  
++                                                                               
+^*View/Edit Highlighting                                                        
++   Endevor HiLite can optionally be enabled when in VIEW or EDIT modes         
++   but note, if enabled, it may conflict with normal ISPF highlighting and     
++   the results may be unpredictable.  Turning off ISPF highlighting using      
++   the^HILITE OFF+command will enable highlighting of just the messages.       
++                                                                               
+^*Toggle Browse/View                                                            
++   The new^EVEdit+command can be used to switch from^Browse+mode to^VIEW+      
++   more or vice versa.  When switching to^VIEW+mode it will also enable        
++   the scan^(EndvHiSc)+to build the Message Summary automatically.             
++                                                                               
+^*Global Support                                                                
++   Because the panels currently used for Browsing/Viewing/Editing messages     
++   could also be used in normal ISPF Edit/Browse, Endevor highlighting is      
++   disabled by default when not in Endevor (applid CTLI) but if you wish,      
++   you can override this behavior and enable Endevor Hilite outside Endevor    
++   for example when Browsing or Editing Endevor logs using^SysView+or^SDSF.+   
++                                                                               
+^*Point-n-Shoot                                                                 
++   If your emulator supoorts it, you can use the mouse to double click on      
++   either the scroll bar, or a line number in the^Message Summary+to jump      
++   to the corresponding location in the file.  Alternatively, just move the    
++   cursor to these locations and press^ENTER.+                                 
++                                                                               
+^*Quick Edit Compiler messages                                                  
++   If your Endevor Administrator has enabled support for this feature (with    
++   processor and initial edit macro changes) this option will toggle how       
++   Quick Edit will display compiler error messages the next time you edit      
++   an element where the processor detected(and saved) compiler error messages. 
++   The goal is to have compiler error messages inserted as=NOTE=+and==MSG>+  
++   lines in the appropriate location while editing the source, making it easy  
++   to identify and correct compiler errors without having to refer back to the 
++   listing.                                                                    
++                                                                               
++                                                                               
++\ \ ^COMING SOON!!! \ \                                                        
++\ \ +(Ideas on the backlog) \ \                                                
++                                                                               
+^*Batch Mode                                                                    
++   While colour highlighting might not make sense in batch mode, support       
++   for a message summary^(C1MSGS3)+could be enabled to generate an extra       
++   Messages file after an Endevor step if it gets a non-zero return code.      
++                                                                               
++*More Info                                                                     
++   For more information, or to comment on this prototype, see the discussion   
++   at https://communities.ca.com/ideas/105149027                               
++                                                                               
++\ \ (^ENTER+to continue,^END+to return) \ \                                    
+)PROC                                                                           
+)END                                                                            

@@ -1,0 +1,33 @@
+/* Rexx - Invoke IBM SDSF with Endevor HiLite enabled overrides */              
+parse arg parms               /* get any parms */                               
+/* Setup */                                                                     
+/* Variable settings for each site --->           */                            
+   WhereIam =  WHERE@M1()                                                       
+   interpret 'Call' WhereIam "'MyCLS2Library'"                                  
+   MyCLS2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyPEN2Library'"                                  
+   MyPEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyMEN2Library'"                                  
+   MyMEN2Library = Result                                                       
+/* Tailor the following LIBDEFs as needed to include Endevor HiLite support */  
+"ALTLIB ACT APPLICATION(CLIST) DATASET(",             /* Clist/Rexx  */         
+                                 "'"MyCLS2Library"'",                           
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPPLIB DATASET stack ID(",           /* Panels      */         
+                                 "'"MyPEN2Library"'",                           
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPMLIB DATASET stack ID(",           /* Messages    */         
+                                 "'"MyMen2Library"'",                           
+                                 ")"                                            
+/* tailor the invocatino method as appropriate for your installation            
+   by commenting/uncommenting the appropriate syntax...                         
+                                                                                
+address ispexec "select PANEL(ISFSDOP2) opt("parms")",                          
+                "NEWAPPL(ISF) SCRNAME(SDSF) PASSLIB"                            
+*/                                                                              
+address ispexec "select PGM(ISFISP) parm("parms")",                             
+                "NOCHECK NEWAPPL(ISF) SCRNAME(SDSF) PASSLIB"                    
+/* clean up */                                                                  
+"ISPEXEC LIBDEF ISPPLIB"                                                        
+"ISPEXEC LIBDEF ISPMLIB"                                                        
+"ALTLIB DEACTIVATE APPLICATION(CLIST)"                                          

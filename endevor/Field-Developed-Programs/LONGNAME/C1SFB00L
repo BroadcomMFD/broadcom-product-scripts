@@ -1,0 +1,42 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   @ TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)                              
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)      /* UNIQUE ATTRIBUTES FOR   */          
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  /* DASHES AND NULL PADDING */          
+   › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                      
+   | TYPE(OUTPUT) INTENS(LOW)                                                   
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI)                                
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM)                                
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES)                                
+)BODY                                                                           
+%-----------------------------  ARCHIVE ELEMENTS  ------------------------------
+%OPTION  ===>_ZCMD                                                             +
++                                                                               
++CCID%===>^EEVCCID     +  COMMENT%===>^EEVCOMM                                 +
++                                                                               
++ACTION OPTIONS:                                                                
++  DELETE 'FROM' ELEMENT%===>_Z+(Y/N)                                           
++  OVERRIDE SIGNOUT     %===>_Z+(Y/N) +                                         
++                                                                               
++TO FILE DD Statement Information:                                              
+%===>_TOFILE1                                                                 + 
+%===>_TOFILE2                                                                 + 
+%===>_TOFILE3                                                                 + 
+%===>_TOFILE4                                                                 + 
+%===>_TOFILE5                                                                 + 
++                                                                               
+)INIT                                                                           
+  .HELP = CITFB000                                                              
+  .ZVARS = '(VNBF9NOD C1SISOFR)'                                                
+  &LIST2 = 'Y N'                                                                
+  VGET (TOFILE1 TOFILE2 TOFILE3 TOFILE4) PROFILE                                
+  IF (&TOFILE1 = ' ')                                                           
+      &TOFILE1 = '//ARCHIVE DD ....'                                            
+  IF (&VARWHPNL = ' ')                                                          
+    &VARWHPNL = 'N'                                                             
+)PROC                                                                           
+  VER  (&VARWHPNL,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VPUT (TOFILE1 TOFILE2 TOFILE3 TOFILE4) PROFILE                                
+)END                                                                            

@@ -1,0 +1,153 @@
+/* Rexx ********************************************************/               
+/* Function:                                                   */               
+/*                                                             */               
+/* The purpose of this utility is to submit a job and to       */               
+/* determine it's job name/number.  Armed with this            */               
+/* information, the utility will wait till the specified job   */               
+/* finished (subject to a timeout) and then return to the      */               
+/* caller.                                                     */               
+/*                                                             */               
+/* Syntax:                                                     */               
+/*                                                             */               
+/* TSO %EzSubWat [T:20] DS <job_D/S>                           */               
+/*                                                             */               
+/* The job name and number will be pared from the input parms  */               
+/* note: job number and timeout values are optional            */               
+/*                                                             */               
+/* Retrn Code Summary                                          */               
+/*   3 - All Good -                                            */               
+/*   4 - Multiple jobs matched selection argument              */               
+/*   8 - Unable to use SYSCALL/SYSVIEW                         */               
+/*                                                             */               
+/***************************************************************/               
+/***************************************************************/               
+/* Trap errors                                                 */               
+/* Set Default RC=3 - ISPF can sometimes exit with zero BAD    */               
+/*                                                             */               
+IF SYSCALLS('ON')>3 THEN                                                        
+    DO                                                                          
+    SAY 'Unable to establish the SYSCALL environment'                           
+    SAY 'Return code was 'RC                                                    
+    Exit 8                                                                      
+    END                                                                         
+/* save ISPF environment and trap errors */                                     
+ADDRESS ISPEXEC 'CONTROL ERRORS RETURN'                                         
+signal on halt    /* branch to Halt if interuppted by Attn- HI */               
+/*                                                             */               
+/* Initialise variables                                        */               
+/*                                                             */               
+  MyRc = 3      /* set default return code to 3                */               
+  cards = 1     /* only allow one job to be copllected for now */               
+  start = Time('E')         /* initialise Elapsed time counter */               
+  FoundJOb. = ''            /* In case we find many....        */               
+/*                                                             */               
+/* parse input (timeout)                                       */               
+/*                                                             */               
+  parse Upper Arg "T:" timeout discard                                          
+  timeout = strip(timeout)                                                      
+  if Datatype(timeout,"numeric") then                                           
+    timeout = timeout + 0 /* make suer we have at least a zero */               
+  else                                                                          
+    timeout = 20                                                                
+/*                                                             */               
+/* parse input (JCL D/S)                                       */               
+/*                                                             */               
+  parse UPPER Arg leftbit "DS " JCLDS discard                                   
+  If Pos("'",JCLDS) = 0 &  SYSVAR(SYSPREF) <> '' then ,                         
+    JCLDS = SYSVAR(SYSPREF) || '.' || JCLDS                                     
+  Else JCLDS = Strip(Translate(JCLDS,"","'"))                                   
+/*                                                             */               
+/* if ISPCTLn is pre-allocated the temporary D/S will not be   */               
+/* Allocated, which will cause teh SYSDSN check to fail...     */               
+/* but since we should only be called with a valid DS, lets    */               
+/* just assume that the JOB is OK, and let the message if the  */               
+/* Submit fails provide the necessary feedback in that case    */               
+/*                                                                              
+  CHKLIB = SYSDSN("'"JCLDS"'")                                                  
+  If  CHKLIB <> 'OK' then                                                       
+  do                                                                            
+    Say  'ERROR -' JCLDS 'not found. Check name and quotes.'                    
+    MyRC = 12                           /* exit RC=12          */               
+  end                                                                           
+ */                                                                             
+/*                                                             */               
+/* Confirm Parms....                                           */               
+/*                                                             */               
+/*say "Timeout:" timeout "JCL in:" JCLDS "-" CHKLIB */                          
+/*                                                             */               
+/* Submit the job and save the job name and number             */               
+/*                                                             */               
+  Address TSO "PROFILE NOINTERCOM" /* turn off msg notific     */               
+  CALL MSG "ON"                                                                 
+  CALL OUTTRAP "out."                                                           
+  Address TSO "SUBMIT '" || JCLDS || "'"                                        
+  CALL OUTTRAP "OFF"                                                            
+  DO k = 1 TO out.0                                                             
+    if pos('JOB ', out.k) = 0 then iterate                                      
+    PARSE VAR out.k WITH . "JOB " jobnam "(" JOBNUM ")" .                       
+  END                                                                           
+/*                                                             */               
+/* Show first message                                          */               
+/*                                                             */               
+sa= "Waiting for Job:" jobnam "Jobid: (" || jobnum || ")"                       
+ZEDSMSG = "" /* reset short msg so long msg shows */                            
+ZEDLMSG = jobnam || "(" || jobnum || ") Submitted..."                           
+ADDRESS ISPEXEC 'CONTROL DISPLAY LOCK'                                          
+ADDRESS ISPEXEC 'DISPLAY MSG(ISRZ000)'                                          
+ADDRESS SYSCALL 'Sleep ' 2   /* Allow user to read message     */               
+/*                                                             */               
+/* Now Wait for job to end...                                  */               
+/*                                                             */               
+GetJob:                                                                         
+                                                                                
+reset = Time('R')                       /* Reset Elapsed time counter */        
+laststat = ''                           /* Reset last status flag     */        
+                                                                                
+do forever                                                                      
+/* Check Job Status? */                                                         
+  CALL OUTTRAP "out."                                                           
+  Address TSO "STATUS" JOBNAM || "(" || JOBNUM || ")"                           
+  CALL OUTTRAP "OFF"                                                            
+  parse UPPER var out.1 "JOB" JOBNAM"("JOBNUM")" STATUS                         
+  status = strip(status)                                                        
+  If status \== laststat then do                                                
+    Sa= "Job:" jobnam || "(" || jobnum || ")    Status:" status                 
+    laststat = status                                                           
+    if laststat == 'EXECUTING' then reset = Time('R')                           
+  end                                                                           
+  /* decode job status */                                                       
+  select                                                                        
+    when status == 'ON OUTPUT QUEUE'        then savque = 'OUTP'                
+    when status == 'WAITING FOR EXECUTION'  then savque = 'INPUT'               
+    when status == 'WAITING FOR EXECUTION, IN HOLD STATUS' ,                    
+         then savque = 'HOLD'                                                   
+    when status == 'EXECUTING'              then savque = 'EXEC'                
+    otherwise savque = 'OTHR'                                                   
+  end                                                                           
+  /* update message */                                                          
+  if savque == 'OUTP' then leave        /* if job is ready, get out */          
+  if TIME('E')< (timeout * 60) then  /* check elapsed time for job */           
+    do                                                                          
+      ZEDLMSG = jobnam || "(" || jobnum || ")" Savque TRUNC(TIME('E'))          
+      ADDRESS ISPEXEC 'CONTROL DISPLAY LOCK'                                    
+      ADDRESS ISPEXEC 'DISPLAY MSG(ISRZ000)'                                    
+      ADDRESS SYSCALL 'Sleep ' 2   /* sleep better than racing!    */           
+      iterate                      /* go check again - is it ready?*/           
+    end                                                                         
+  else                                                                          
+    DO                                                                          
+      ZEDLMSG = '*Error - Timeout waiting for job:(' ||,                        
+        jobnam || '(' || jobnum || ') Status:' || status || ')'                 
+      ADDRESS ISPEXEC 'SETMSG  MSG(ISRZ000)'                                    
+      MyRc  = 8                                                                 
+    end                                                                         
+end                            /* end main loop */                              
+Address TSO "PROFILE INTERCOM" /* TODO: Restore intercom  */                    
+                                                                                
+exit MyRC                                                                       
+halt:                                                                           
+      say '***Caution - Wait for  job: ' ||,                                    
+        jobnam || '(' || jobnum || ') Status:' || status || ')',                
+        'Cancelled by user ATTN!'                                               
+      MyRc  = 8                                                                 
+exit MyRc                                                                       

@@ -1,0 +1,295 @@
+/*  REXX   */                                                                   
+/*                                                                   */         
+/* Place mesages from caller into the edit session.                  */         
+/*                                                                   */         
+/* THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF       */         
+/* "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE       */         
+/* FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES     */         
+/* ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE         */         
+/* CORRECTED.                                                        */         
+/*                                                                   */         
+/* Copyright (C) 1986-2017 CA. All Rights Reserved.                  */         
+/*                                                                   */         
+/*                                                                   */         
+/*    WRITTEN BY DAN WALTHER & EOIN O'CLEIRIGH                       */         
+/*                                                                   */         
+/* Change History:                                                   */         
+/* - Add support for empty files (May still get CURSOR = 1 1 warning)*/         
+/* - Allow LINE_AFTER text to be queued in "natural" read order      */         
+/* - Capture and report non-zero edit command return codes           */         
+/* - Detect and report queued 'blank' (single space) lines           */         
+/* - If queued line count didn't match available insert record       */         
+/*      counts - insert <End-Of-Queue> debugging messages.           */         
+/* - Remove support/detection of duplicate insert DATALINES          */         
+/* - SUpport for INSERT/END-INSERT blocks to remove need to count    */         
+/*   inserted lines... better to use FIND 'string' çnext|First|Etc.Ÿ */         
+/*   and then an INSERT ... END-INSERT block                         */         
+/*   Note because END-INSERT becomes a "special keyword" in the event*/         
+/*   that you need to insert this, insert some other value and then  */         
+/*   issue a change command.                                         */         
+/* - Inserted DataLines are now marked with lables corresponding to  */         
+/*   the insert order .OAAAA, .OAAAB etc. this serves two purposes   */         
+/*   a) New data lines  will hi highlighted and can be navigated     */         
+/*      using "locate label" command                                 */         
+/*   B) In the event that you need to debug WITHMSGS input, the      */         
+/*      insert order can help identify which queued record is        */         
+/*      which.  Note: NOTE, MSG, and INFO lines will also advance    */         
+/*      the label number, but will not show a label.                 */         
+/* - The old logic for non-command input çsearch string|linesŸçNumŸ  */         
+/*   was a bit erratic and could just "leave" without draining the   */         
+/*   queue.  The logic is extended using a select statement to close */         
+/*   the gaps and make the search/insert more consistent.            */         
+/*                                                                   */         
+/*   The key logic is now;                                           */         
+/*    - if there is only one numeric operand - treat it as the number*/         
+/*      of lines to insert.                                          */         
+/*    - if there is only one alphabetic op - treat is as a search str*/         
+/*    - If there are two operands;                                   */         
+/*      - one numeric, one alphabetic - perofrm a search and insert  */         
+/*      - if they are both numeric - assume first is insert but warn */         
+/*      - if they are both alpha - then assume a multi-word search   */         
+/*    - If there are more than two words - search for the whole str  */         
+/*                                                                   */         
+/*   Additionally, if there is any non-zero return code from a search*/         
+/*   issue a warning message to assist with debugging.  There should */         
+/*   be no warnings issued for shipping factories.                   */         
+/*                                                                   */         
+/*  2017/03/13 - DW  Support the INSERT edit macro command           */         
+/*                   Also engage the MaxRC variable to allow the     */         
+/*                   driver to determine when warning msgs appear    */         
+   'ISREDIT MACRO'                                                              
+  Trace Off                                                                     
+  'ISREDIT RESET'                                                               
+                                                                                
+  X = OUTTRAP(LINE.);                                                           
+  MaxRC   = 0                                                                   
+  msgtype = "DATALINE"                                                          
+  msgtype = "NOTELINE"                                                          
+  msgtype = "INFOLINE" ;                                                        
+  msgtype = "MSGLINE"                                                           
+  WHERE = 'LINE_BEFORE' ;                                                       
+  Lable# = 0                         /* Keep track of inserted lines */         
+                                                                                
+  /* Walk thru all the Queued items (commands)   */                             
+  Do Forever                                                                    
+     If QUEUED() = 0 then Leave;                                                
+     Parse Pull QuedMessage ;                                                   
+     If QuedMessage = ' ' then                                                  
+        DO                                                                      
+        Say "Unexpected Queued command <blank>.  Skipping..."                   
+        iterate ;                                                               
+        END                                                                     
+     MsgCommand  = Word(QuedMessage,1)                                          
+     MsgVariable = Word(QuedMessage,2)                                          
+     /* Check for variations of the queued command */                           
+     If MsgCommand = 'MSGTYPE' then,                                            
+        Do                                                                      
+        msgtype = MsgVariable                                                   
+        Iterate;                                                                
+        End                                                                     
+     /* WHERE can be LINE_BEFORE or LINE_AFTER     */                           
+     if MsgCommand = 'WHERE' then,                                              
+        Do                                                                      
+        WHERE = MsgVariable;                                                    
+        Iterate                                                                 
+        End                                                                     
+     /* MACRO names a separate edit macro to call  */                           
+     if MsgCommand = 'MACRO' then,                                              
+        Do                                                                      
+        ADDRESS ISREDIT MsgVariable                                             
+        Iterate                                                                 
+        End                                                                     
+     /* MaxRC sets the return code for warnings/errors  */                      
+     if MsgCommand = 'MaxRC' then,                                              
+        Do                                                                      
+        Interpret QuedMessage                                                   
+        Iterate                                                                 
+        End                                                                     
+     /* Check for valid edit macro commands        */                           
+     ISPFEditCommands = 'EXCLUDE CHANGE CAPS FIND SEEK LOCATE ',                
+                        'TABSLINE TABS UP DOWN TOP BOTTOM PROFILE' ,            
+                        'HILITE CURSOR RESET SORT LABEL'                        
+     if WordPos(translate(MsgCommand),ISPFEditCommands) > 0 |,                  
+       (MsgCommand = 'INSERT' & Words(QuedMessage) > 1) then,                   
+        Do                                                                      
+        ADDRESS ISPEXEC "CONTROL ERRORS RETURN"                                 
+        ADDRESS ISREDIT QuedMessage                                             
+        EditRC = RC                                                             
+        ADDRESS ISPEXEC "CONTROL ERRORS CANCEL"                                 
+        if EditRC > MaxRC then                                                  
+           Say "Unexpected RC:"EditRc "in WithMsgs from command:",              
+               "'"QuedMessage"'"                                                
+        Iterate;                                                                
+        End                                                                     
+                                                                                
+     /* Insert Block Start...                      */                           
+     if MsgCommand = 'INSERT' then,                                             
+        Do                                                                      
+        /* Pull in queued text to insert        */                              
+        drop MsgLines.                   /* Clear Saved insert text */          
+        msg# = 0                         /* and initialise counter  */          
+        Do forever /* while we have data...   */                                
+           Parse Pull ThisLine           /*    get a line of data   */          
+           if rc > 4 ,                   /*    End of file or marker*/          
+            | strip(ThisLine) == 'END-INSERT' then leave /* wayout! */          
+            msg# = Msg# + 1              /*    increment msg count  */          
+            MsgLines.msg# = ThisLine     /*    save this message    */          
+        End /* forever loop               *end loop             */              
+        MsgLines.0 = msg#                /* save count of lines     */          
+        Sa= "Read" msg# "lines to insert"                                       
+        End                                                                     
+     else Do /* not insert command? Check for legacy format :-)     */          
+                                                                                
+     /* The logic around parsing the find string/insert counts is heavily     */
+     /* updated to make it more consistent and plug the gaps - the conditions */
+     /* marked with "*" below are departures from the legacy logic.  In the   */
+     /* even that you are seeing strange bahavior consider re-coding the      */
+     /* input to use FIND and INSERT commands for clarity.                    */
+     /*                                                                       */
+        w1 = word(QuedMessage,1) /* Use short vars to make select readable    */
+        w2 = word(QuedMessage,2)                                                
+        wc = words(QuedMessage)  /* how many words? */                          
+        n1 = datatype(w1,w)      /* is 1st word a number? */                    
+        n2 = datatype(w2,w)                                                     
+        numMsg = 0               /* Assume no insert lines follow */            
+        Search = ''              /* Assume no search necessary either */        
+        select                   /* Decide what to do...                      */
+           when wc = 0                    then iterate      /* Null input*    */
+           when wc = 1 & n1 = 1                  then       /* Num only       */
+                NumMsg = W1                                 /*                */
+           when wc = 1 & n1 = 0                  then       /* Alf Only*      */
+                Search = W1                                 /*                */
+           when wc = 2 & n1 = 1 & w2 == 'LINES'  then       /* Num Lines*     */
+                NumMsg = W1                                 /*                */
+           when wc = 2 & n2 = 1 & w1 == 'LINES'  then       /* Lines Num      */
+                NumMsg = W2                                 /*                */
+           when wc = 2 & n1 = 0 & n2 = 1         then do    /* Alf Num        */
+                NumMsg = W2                                 /*                */
+                Search = W1                                 /*                */
+                end                                         /*                */
+           when wc = 2 & n1 = 0 & n2 = 0         then       /* alf alf*       */
+                search = QuedMessage                        /*                */
+           when wc = 2 & n1 = 1 & n2 = 0         then do    /* Num Alf*       */
+                NumMsg = W1                                 /*                */
+                Search = W2                                 /*                */
+                end                                         /*                */
+           when wc = 2 & n1 = 1 & n2 = 1         then do    /* Num Num*       */
+                NumMsg = W1                                 /*                */
+                Say "Warning!  Ambigious queued command",   /*                */
+                    QuedMessage "found."                    /*                */
+                Say "...Two numeric operands found," ,      /*                */
+                    "assuming the first ("NumMsg") is the", /*                */
+                Say "...number of insert lines to follow.", /*                */
+                    " No search is performed"               /*                */
+                end                                         /*                */
+           when wc > 2                           then       /*blah blah blah* */
+                search = QuedMessage                        /*                */
+        otherwise say 'hit otherwise' QuedMessage           /*Catch all       */
+        end                                                                     
+                                                                                
+     /* If we need to perform a search dispatch it now */                       
+        If Search /= '' then do                                                 
+           if pos("'",Search) > 0 then                                          
+              ADDRESS ISREDIT ' FIND "'search'" NEXT '                          
+           else                                                                 
+              ADDRESS ISREDIT " FIND '"search"' NEXT "                          
+           if rc > MaxRC then do                                                
+              say "Unexpected RC:"RC "from Find string:'"Search"'"              
+              say "...Cursor may not be correctly positioned"                   
+           end                                                                  
+        end                                                                     
+                                                                                
+     /* Pull in queued text (if any) to insert        */                        
+        drop MsgLines.                                                          
+        Do msg# = 1 to NumMsg;                                                  
+           Parse Pull MsgLines.Msg#                                             
+           if rc > 4 ,                   /* End of file in batch? */            
+            | MsgLines.Msg# == '' then   /* or null string? */                  
+              Msglines.msg# = '<End-Of-Queue>'                                  
+        End /*  Do msg# = 1 to NumMsg */                                        
+        MsgLines.0 = NumMsg                                                     
+      end /* End Legacy format */                                               
+                                                                                
+CheckEmpty:                                                                     
+     'isredit (CurLine,CurCol) = cursor' /* where are we? */                    
+     if RC > MaxRC then                                                         
+        Say "Unexpected RC:"Rc "in WithMsgs from command:",                     
+            "'"Cursor"'"                                                        
+     if CurLine = 0 then /* if cursor at top, or no lines insert after */       
+        Where = "LINE_AFTER"                                                    
+                                                                                
+InsertMsgs:                                                                     
+     /* Wherever we are, insert messages     */                                 
+     /* Insert before or after, but in natural order, (the way we pulled em) */ 
+     if WHERE == "LINE_BEFORE" then do                                          
+        MsgStart = 1                                                            
+        MsgInc   = 1                                                            
+        MsgEnd   = MsgLines.0                                                   
+        LabLine  = CurLine +0                                                   
+     end                                                                        
+     else do                                                                    
+        MsgStart = MsgLines.0                                                   
+        MsgInc   = -1                                                           
+        MsgEnd   = 1                                                            
+        LabLine  = CurLine +1                                                   
+     end                                                                        
+     ADDRESS ISPEXEC "CONTROL ERRORS RETURN"                                    
+     Do msg# = MsgStart to MsgEnd by MsgInc                                     
+        /* following support (check for dup-line) has been dropped              
+           due to the potential danger of repositioning (quietly) the           
+           current insert point, and the possible need to insert what           
+           might look like a duplicate line... e.g. a comment line.             
+                                                                                
+           If msgtype = "DATALINE" then,                                        
+              Do                                                                
+              ADDRESS ISREDIT " FIND '"MsgLines.msg#"' 1 "                      
+              /* if insert text is already there dont add it */                 
+              /* Note: If the dataline is FOUND the cursor is*/                 
+              /*       repositioned and the next line might  */                 
+              /*       be out of place (beware!)             */                 
+              If RC =0 then Leave ;                                             
+              End;                                                              
+        */                                                                      
+        MsgText = MsgLines.msg#                                                 
+        'ISREDIT ' WHERE '.ZCSR =' msgtype '(MsgText)' ;                        
+        if RC > MaxRC then do                                                   
+           Say "Unexpected RC:"Rc "in WithMsgs inserting:",                     
+               "'"WHERE ".ZCSR =" msgtype "(MsgText)'"                          
+           Say "MsgText:" MsgText                                               
+        end                                                                     
+        /* Add labels to inserted data */                                       
+        If msgtype = "DATALINE" then do                                         
+           'ISREDIT LABEL' LabLine '= .O'D2AAAA(lable#+msg#-1) 0                
+           if WHERE == "LINE_BEFORE" then                                       
+              LabLine  = LabLine +1                                             
+        end                                                                     
+     End /*  Do MsgLines */                                                     
+     lable# = Lable# + msg#                                                     
+     ADDRESS ISPEXEC "CONTROL ERRORS CANCEL"                                    
+  End  /* Do Forever  */                                                        
+                                                                                
+  IF SYSVAR(SYSENV) ='BACK' THEN ,                                              
+     DO                                                                         
+     ADDRESS ISREDIT " SAVE  "                                                  
+     ADDRESS ISREDIT " CANCEL "                                                 
+     END                                                                        
+                                                                                
+  Exit                                                                          
+                                                                                
+/* Procedures and Functions */                                                  
+                                                                                
+D2AAAA: procedure /* converts decimal to AAAA format */                         
+trace o                                                                         
+arg innum                                                                       
+if datatype(innum,'W') /=1 then return "NotWholeNumber"                         
+if innum <  0              then return "NumTooSmall"                            
+if innum >= (26 ** 4)      then return "NumTooBig"                              
+output = ''                                                                     
+A2Z = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'                                              
+do I = 3 to 0 by -1                                                             
+   divisor = 26**I                                                              
+   units = innum %  divisor                 /* unit part        */              
+   innum = innum // divisor                 /* remainder        */              
+   output = output || substr(A2Z,units+1,1) /* convert to alpha */              
+end                                                                             
+return output                                                                   

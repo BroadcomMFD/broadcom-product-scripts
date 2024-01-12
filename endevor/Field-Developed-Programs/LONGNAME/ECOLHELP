@@ -1,0 +1,44 @@
+/* Rexx - This rexx inserts the hint lines into the ECOLS member */             
+address ISREDIT                                                                 
+"MACRO (PARMS)"                                                                 
+"BUILTIN RESET SPECIAL" /* reset any notes or warnings */                       
+ShowNote: /* add a few notes to help new users */                               
+'ISREDIT LINE_AFTER 0 = NOTELINE " "'                                           
+'ISREDIT LINE_AFTER 0 = NOTELINE "Make changes to the non-comment lines',       
+                                 'below and press END to save them."'           
+'ISREDIT LINE_AFTER 0 = MSGLINE  " "'                                           
+'ISREDIT LINE_AFTER 0 = MSGLINE  "    Endevor Edit Columns Utility  "'          
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "  _ TYPE(INPUT)  COLOR(RED)    CAPS(ON)',
+                                      ' INTENS(HIGH) PADC(_) JUST(LEFT)"'       
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "  @ TYPE(OUTPUT) COLOR(BLUE)  ',         
+                                      'CAPS(OFF) INTENS(LOW)"'                  
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "  › TYPE(OUTPUT) COLOR(WHITE) ',         
+                                      'CAPS(OFF) INTENS(HIGH)"'                 
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "  µ TYPE(OUTPUT) COLOR(RED)   ',         
+                                      'CAPS(OFF)"'                              
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "  º TYPE(OUTPUT) COLOR(TURQ)  ',         
+                                      'CAPS(OFF)"'                              
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "  ¶ TYPE(OUTPUT) COLOR(YELLOW)',         
+                                      'CAPS(OFF)"'                              
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "The attribute characters you may use',   
+                                      'are as follows;"'                        
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE " "'                                      
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "To Reset to default, use the RESET',     
+                                      'command"'                                
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE " "'                                      
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "appropriate column (Len Pri, or Len',    
+                                      'Alt) or leave blank to use dft Len"'     
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "Change the width of a column in the',    
+                                      'Pri or Alt view by overtyping in the"'   
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE " "'                                      
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "Use the ''SORT PRI|ALT'' to sort' ,      
+                                      'by the Pri or Alternate sequence col"'   
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "or, overtype the sequence fields and..."'
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "Use the ''NUM PRI|ALT'' to ''freeze''',  
+                                      'the column order (reqsequence them)"'    
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE "Simply arrange the rows in the order',   
+                                      'you want using M|A|B Line commands."'    
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE " "'                                      
+'ISREDIT LINE_AFTER .ZLAST = MSGLINE  "Notes/Help                        "'     
+'ISREDIT LINE_AFTER .ZLAST = NOTELINE " "'                                      
+return                                                                          

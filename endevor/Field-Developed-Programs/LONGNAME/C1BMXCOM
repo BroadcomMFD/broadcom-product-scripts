@@ -1,0 +1,57 @@
+)CM  PACKAGE SHIPMENT BATCH JCL -  XCOM FOR MVS - ISPSLIB(C1BMXCOM)             
+)CM                                                                             
+)CM  THIS SKELETON CONTAINS XCOM JCL.  THE &&XXCC DATASET WAS BUILT             
+)CM  BY THE PACKAGE SHIPMENT UTILITY AND CONTAINS COMMANDS TO TRANSFER          
+)CM  THE STAGING DATASETS TO THE REMOTE SITE(S).                                
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  TAILORING INSTRUCTIONS:                                                    
+)CM                                                                             
+)CM  1.  MODIFY THE "STEPLIB" AND "XCOMCNTL"                                    
+)CM      DSNAMES USING SITE SPECIFIC PREFIX, QUALIFIER, AND NAME.               
+)CM                                                                             
+)CM      "CAIPROD.XCOM" IS THE PREFIX/QUALIFIER OF THE XCOM LIBRARIES.          
+)CM                                                                             
+)CM  2.  MODIFY THE DFLTAB=XCOMDFLT PARAMETER, IF NECESSARY.                    
+)CM                                                                             
+)CM ISPSLIB(SCMM@SYM) - IMBEDDED MBR TO SET STANDARD VARIABLES,                 
+)CM                     TAILORED BY THE HOST SITE.                              
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+//* *============================================* ISPSLIB(C1BMXCOM) *          
+//* *==============================================================* *          
+//* *==============================================================* *          
+//* *==============================================================* *          
+//* *==============================================================* *          
+)IM SCMM@SYM                                                                    
+//COMMANDI EXEC PGM=IEBUPDTE,PARM=NEW,COND=(12,LE,NDVRSHIP)                     
+//SYSPRINT DD  DUMMY                                                            
+//SYSUT2   DD  DISP=(NEW,CATLG),UNIT=SYSDA,                                     
+//             DSN=&VARMODHL..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE,             
+//             SPACE=(TRK,(5,1,45)),                                            
+//             DCB=(RECFM=FB,LRECL=80)                                          
+//SYSUT1   DD  DUMMY                                                            
+//SYSIN    DD  DISP=SHR,                                                        
+//             DSN=&I@PRFX..&I@QUAL..SOURCE(#PS#XCOM)                           
+//* *==============================================================* *          
+//COMMANDP EXEC PGM=IEBUPDTE,PARM=MOD,COND=(12,LE,NDVRSHIP)                     
+//SYSPRINT DD  DUMMY                                                            
+//SYSUT1   DD  DISP=SHR,                                                        
+//             DSN=&VARMODHL..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE              
+//SYSUT2   DD  DISP=SHR,                                                        
+//             DSN=&VARMODHL..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE              
+//SYSIN    DD  DSN=&&&&XXCC,DISP=(OLD,PASS)                                     
+//* *==============================================================* *          
+//&VNBXSTP EXEC PGM=XCOMJOB,COND=(12,LE,NDVRSHIP),                              
+//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
+//STEPLIB  DD DISP=SHR,DSN=CAIPROD.XCOMR11.CA11.CAILIB                          
+//*        DD DISP=SHR,DSN=CAIPROD.XCOM.DEFAULT.TABLES                          
+//*XCOMCNTL DD DISP=SHR,DSN=CAIPROD.XCOM.XCOMCNTL                               
+//SYSIN01  DD DISP=SHR,                                                         
+//         DSN=&VARMODHL..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
+//* *==============================================================* *          
+//CONTROLD EXEC PGM=IDCAMS                                                      
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD *                                                                 
+ DELETE &VARMODHL..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)                

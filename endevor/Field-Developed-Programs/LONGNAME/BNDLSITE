@@ -1,0 +1,22 @@
+/*  REXX   */                                                                   
+/* THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF       */         
+/* "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE       */         
+/* FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES     */         
+/* ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE         */         
+/* CORRECTED.                                                        */         
+/*                                                                   */         
+   'ISREDIT MACRO'                                                              
+/*                                                                   */         
+   /* WRITTEN BY DAN WALTHER */                                                 
+/*                                                                   */         
+    trace o                                                                     
+                                                                                
+  "ISREDIT RESET"                                                               
+  Message = "****** Tailor the contents of the member "                         
+  "ISREDIT LINE_BEFORE 1 = NOTELINE '"Message"'"                                
+  Message = "******        to contain Site-Specific",                           
+            "settings..."                                                       
+  "ISREDIT LINE_BEFORE 1 = NOTELINE '"Message"'"                                
+                                                                                
+  Exit                                                                          
+                                                                                

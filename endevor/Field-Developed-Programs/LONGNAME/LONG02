@@ -1,0 +1,86 @@
+LONG020I '&EMULTREQ Pending Requests'                     .TYPE=N NOKANA        
+'LONG020I There are already &EMULTREQ pending requests, plus the current '    + 
+'one.  Contained in a total of &EMULTTOT. SCL lines'                            
+                                                                                
+LONG020W '&EMULTREQ Pending Requests'                     .TYPE=A NOKANA        
+'LONG020W There are &EMULTREQ pending requests, do you want to submit them? ' + 
+'You may Edit, or Submit them now, or exit without submitting them, '         + 
+'but if you exit ISPF without submitting them, they will be lost.'              
+                                                                                
+LONG020C '&EMULTREQ Pending Requests'                     .TYPE=N NOKANA        
+'LONG020C There are &EMULTREQ. pending requests, either recovered from a '     +
+'prior session, or from another split screen.  You may continue adding '      + 
+'new requests or use the Sub/Edit commands to process them now. Note: '       + 
+'There are a total of &EMULTCNT. SCL lines saved.'                              
+                                                                                
+LONG020E 'No Pending Requests'                            .TYPE=W NOKANA        
+'LONG020E Submit or Edit requested, but there are no pending requests.'         
+                                                                                
+LONG021E 'Pending Actions'                                .TYPE=W NOKANA        
+'LONG021E If you have requested a Move, Delete, or Transfer you can not do '  + 
+'anything else to this element till the batch jobs have finished and/or '     + 
+'you have refreshed the list.'                                                  
+                                                                                
+LONG022I 'Use SUB or END'                                 .TYPE=W NOKANA        
+'LONG022I &EMULTREQ requests have been added to this job.  You can now '      + 
+'either use the SUB command to submit them, or use END without submitting '   + 
+'to discard these requests.  Of course, you can also copy or save the SCL '   + 
+'to use elsewhere, as package SCL for example.'                                 
+                                                                                
+LONG023E 'Error from F/G'                                 .TYPE=W NOKANA        
+'LONG023E Requests were attempted in F/G, but the return code:&FGAPIRC. '     + 
+'indicates that not everything worked.  If the error is because Foreground '  + 
+'is not supported, you can retry the request in batch.'                         
+                                                                                
+LONG024E 'F/G not available'                              .TYPE=W NOKANA        
+'LONG024E &EMULTTOT scllines are pending processing but the maximum for '     + 
+'foreground API request is just 25'  If this problem occures often '          + 
+'please report it to your Endevor Admin, and request the limit to be raised.'   
+                                                                                
+LONG025E 'Invalid Environment'                            .TYPE=W NOKANA        
+'LONG025E Long-Name does not currently support wild cards in the '            + 
+'environment Name.  Specify a valid Environment to continue.'                   
+                                                                                
+LONG026W 'Invalid Location'                               .TYPE=W NOKANA        
+'LONG026W Inventory location fields must conform to general naming '          + 
+'conventions but PlaceHolder(%) and WildCard(*) are also allowed'               
+                                                                                
+LONG026E 'Invalid Location'                               .TYPE=W NOKANA        
+'LONG026W Inventory location fields must conform to general naming '          + 
+'conventions and PlaceHolder(%)/WildCard(*) are not allowed on create.'         
+                                                                                
+LONG027C '&LNLASACT. Action Failed'                       .TYPE=W NOKANA        
+'LONG027C The foreground &LNLASACT. request failed with rc:&FGAPIRC. '        + 
+'Review the message log to see what caused the error.  If you were in '       + 
+'the middle of editing/creating an element, you will be returned to '         + 
+'edit mode to you can attempt to recover. '                                     
+                                                                                
+LONG027E 'Add/Update Failed'                              .TYPE=W NOKANA        
+'LONG027E The update for the element you were editing failed with '           + 
+'rc:&FGAPIRC.  If the error was related to CCID, Comment or '                 + 
+'Signout;- you can change these options from the Action bar '                 + 
+'(Edit menu...).  Or, if  the error is permanent;- use CUT or '               + 
+'COPY/RREPLACE/CREATE commands to save a copy of your work before '           + 
+'canceling.'                                                                    
+                                                                                
+LONG028W 'Pkg Create Cancelled'                           .TYPE=W NOKANA        
+'LONG028W Package Create request abandoned, but batch requests '              + 
+'are still outstanding.'                                                        
+                                                                                
+LONG028C 'Pkg Submit Cancelled'                           .TYPE=W NOKANA        
+'LONG028C Package Cast/Validate/Execute job request aborted, but '            + 
+'package:&Package has been created.'                                            
+                                                                                
+LONG028E 'Pkg Create Failed'                              .TYPE=W NOKANA        
+'LONG028E Error creating package &PACKAGE RC:&ENBPRC..  Review messages to '  + 
+'determine the cause of the error.  The SCL Requests have been saved to retry.' 
+                                                                                
+LONG029I 'Request saved'                                  .TYPE=I NOKANA        
+'LONG029I There are now &EMULTREQ pending requests, contained in a'       +     
+'total of &EMULTTOT. SCL lines.  You may continue to save requests or use ' +   
+'the SUB command to return to the processing actions screen and either '      + 
+'Submit them for batch processing or create a package.'                         
+                                                                                
+LONG029C 'All Requests Cleared'                           .TYPE=W NOKANA        
+'LONG029C all previously pending requests have been cleared.'                   
+                                                                                

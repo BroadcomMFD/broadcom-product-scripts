@@ -1,0 +1,47 @@
+/* rexx */                                                                      
+/*                                                                              
+   Special line command processor for DirList and RexxAdd                       
+   *update* 'S' was a PROC in sys2.clist, renamed and now 'S' not recognized    
+   if 'S' is entered it will try browse or Edit, but the                        
+          path is uppercased so it (always) fails                               
+          I can intercept the 's' command and report it's invalid               
+          but I can't substitute it                                             
+   is 's' is entered for a file SHOULD it be considered a select, or navigate?  
+   is 'l' is entered for a directory - navigation is correct                    
+   if UP is selected for a directory, again should it navigate there or select  
+          that directory?                                                       
+   The real 3.4 doesn't have these limitations... s is processed correctly      
+   and if entered for a directory responds ISRU710 - invalid file type          
+   but if I want to trap and return to the caller I need screen overrides...    
+*/                                                                              
+address ispexec                                                                 
+"vget (ZUDLCMD ZUDPATH ZUDFTYPE ZUDMESSG)"                                      
+say "ZUDLCMD"  ZUDLCMD                                                          
+say "ZUDPATH"  ZUDPATH                                                          
+say "ZUDFTYPE" ZUDFTYPE                                                         
+say "ZUDMESSG" ZUDMESSG                                                         
+parse arg ndvselds                                                              
+say "ndvselds" ndvselds                                                         
+if ZUDLCMD  = 'S' ,                                                             
+ & ZUDFTYPE = 'D' then                                                          
+do                                                                              
+   ZUDMESSG = "Invalid Type"                                                    
+   "vput (ZUDMESSG) shared"                                                     
+   exit 8                                                                       
+end                                                                             
+if ZUDLCMD  = 'S' ,                                                             
+ & ZUDFTYPE = 'F' then                                                          
+do                                                                              
+   ZUDMESSG = "List DirSubstituted"                                             
+   ZUDLCMD  = "L"                                                               
+   "vput (ZUDMESSG ZUDLCMD) shared"                                             
+   exit 1                                                                       
+end                                                                             
+if ZUDFTYPE = 'F' then                                                          
+do                                                                              
+   ndvselds = "'"ZUDPATH"'"                                                     
+   ndvselnw = YES /* user has selected something */                             
+end                                                                             
+ZUDMESSG = "Endevor Select" ndvselds                                            
+"vput (ndvselds) profile"                                                       
+"vput (ndvselnw ZUDMESSG) shared"                                               

@@ -1,0 +1,4 @@
+LONG030I 'Press Enter to Sort...'                         .TYPE=I NOKANA        
+'LONG030I The sort command based on the cursor position has been built. '     + 
+'Press ENTER to accept, and perform the actual sort'                            
+                                                                                

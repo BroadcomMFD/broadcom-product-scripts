@@ -1,0 +1,2 @@
+/* Rexx - IVP call the sample FDP start program to test all is working */       
+"exec '&MyCLS2Library(STARTFDP)'"                                               

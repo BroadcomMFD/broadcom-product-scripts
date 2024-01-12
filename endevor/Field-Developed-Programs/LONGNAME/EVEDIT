@@ -1,0 +1,78 @@
+/* rexx - Toggle the View/Browse mode on the current dataset */                 
+address ispexec                                                                 
+trace o                                                                         
+"vget (ZDSNT ZDSN ZMEMB ZDSVOL EHICALR) shared"                                 
+/*                                                                              
+  say ,                                                                         
+    "ZDSNT....:" ZDSNT    ,                                                     
+    "ZDSN.....:" ZDSN     ,                                                     
+    "ZMEMB....:" ZMEMB    ,                                                     
+    "ZDSVOL...:" ZDSVOL   ,                                                     
+    "EHICALR..:" EHICALR                                                        
+  */                                                                            
+/* Save Entry Values so I can restore them on exit                           */ 
+MyDSNT   = ZDSNT                                                                
+MyDSN    = ZDSN                                                                 
+MyMEMB   = ZMEMB                                                                
+MyDSVOL  = ZDSVOL                                                               
+MyHICalr = EHICALR                                                              
+/* Depending on where the caller is coming from there are different defaults */ 
+callers = 'ISRBROBA ISREDDE2 ISREDDHI C1SPBROW C1SPVIEW C1SPEDIT'               
+dftMode = 'VIEW     VIEW     BROWSE   VIEW     BROWSE   BROWSE  '               
+dftPanl = 'ISREDDHI ISREDDHI ISRBROBA C1SPVIEW C1SPBROW C1SPBROW'               
+dftDsnN = 'ZDSNT    ZDSN     ZDSN     ZDSNT    ZDSN     ZDSN    '               
+/* comment out the following block to disable support for SDSF */               
+callers = callers  'ENDIE300 ISFBPAN4 ISFEPAN4'                                 
+dftMode = dftMode  'VIEW     VIEW     BROWSE  '                                 
+dftPanl = dftPanl  'ISREDDHI ISFEPAN4 ISFBPAN4'                                 
+dftDsnN = dftDsnN  'ZDSN     ZDSNT    ZDSN    '                                 
+                                                                                
+chkCalr = wordpos(ehicalr,callers)                                              
+if chkcalr = 0 then chkcalr = 1        /* if we don't know for sure dflt */     
+modopt  = word(dftmode,chkCalr)                                                 
+panopt  = 'PANEL(' || word(dftPanl,chkCalr) || ')'                              
+dsnvar  = word(dftDsnN,chkCalr)                                                 
+dsnnam  = value(dsnvar)                                                         
+if dsnNam = '' then do                 /* move along, nothing to see here*/     
+   "setmsg msg(EHIL005C)"                                                       
+   exit                                                                         
+end                                                                             
+dsnopt  = "DATASET('" || dsnnam || "')"                                         
+if ZDSVOL > ' ' then VOLOPT = 'VOLUME('ZDSVOL')'                                
+else volopt = ''                                                                
+if ZMEMB  /= '' then MEMOPT = 'MEMBER('ZMEMB')'                                 
+else MEMOPT = ''                                                                
+SHROPT = 'ENQ(SHR)'                                                             
+handle = "DATAID(&DDEV)"               /* set a handle for DD'd file */         
+/* special cases - set up required values */                                    
+if EHICALR == 'C1SPBROW' then do                                                
+   "vget (VPHOPKID VPHCOMM)"                                                    
+   VARSLPKG = VPHOPKID                                                          
+   VARPNLID = 'VIEW'                                                            
+end                                                                             
+if EHICALR == 'C1SPVIEW' then do                                                
+   "vget (VARSLPKG VPHCOMM)"                                                    
+   VPHOPKID = VARSLPKG                                                          
+   VARPNLID = 'DISPLAY'                                                         
+end                                                                             
+"LMINIT DATAID(DDEV)" dsnopt VOLOPT SHROPT                                      
+if RC > 0 then do                                                               
+   "setmsg msg(EHIL003C)"                                                       
+   exit                                                                         
+end                                                                             
+if modopt  == 'VIEW' then                                                       
+   macopt = 'MACRO(ENDVHISC)'                                                   
+else                                                                            
+   macopt = ''                                                                  
+address ispexec modopt handle MEMOPT panopt macopt                              
+if RC > 0 then do                                                               
+   "setmsg msg(EHIL004C)"                                                       
+end                                                                             
+"LMFREE" handle                                                                 
+/* now put back the origianl values at entry - so we can be called again! */    
+ZDSNT    =   MyDSNT                                                             
+ZDSN     =   MyDSN                                                              
+ZMEMB    =   MyMEMB                                                             
+ZDSVOL   =   MyDSVOL                                                            
+EHICALR  =   MyHICalr                                                           
+"vput (ZDSNT ZDSN ZMEMB ZDSVOL EHICALR) shared"                                 

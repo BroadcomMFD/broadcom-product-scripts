@@ -1,0 +1,214 @@
+/*     REXX - Routine to scan an input file for message; compiler,              
+              Linker etc. and write message to Endevor log via                  
+              ENUSSUTL                                                          
+                                                                                
+       Use:   Designed to be called as an optional step when an                 
+              Endevor processor gets a high step RC                             
+                                                                                
+                                                                                
+   THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+   "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+   FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+   ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+   CORRECTED.                                                                   
+                                                                                
+   Copyright (C) 1986-2017 CA. All Rights Reserved.                             
+                                                                                
+   */                                                                           
+                                                                                
+trace on                                                                        
+dummy = time(r) /* start a clock */                                             
+                                                                                
+/* Specify keywords to hilight                                                  
+                                                                                
+   EndvhiPr will automatically hilight warning, caution Error and               
+   Severe messages, but there are some info messages that you may               
+   wish to hilight, and some error messages (e.g. BSTPPARS) that                
+   don't follow the usual rules.  You can add them here, or better,             
+   in a user tailorable Rexx (ENDVHIMS) that just extends the MsgWords          
+   and severity codes which will be loaded once by the panel or here if         
+   not already set.                                                             
+   */                                                                           
+/* Get a list of special message codes and severities                     */    
+parse value "" with MsgWords MsgSever                                           
+if MsgWords = '' then do                                                        
+   result = ENDVHIMS(MsgWords "(" MsgSever)                                     
+   parse value result with MsgWords " ( " MsgSever                              
+end                                                                             
+                                                                                
+/* Set up translate table of valid keyword charaters */                         
+trtable='ABCDEFGHIJKLMNOPQRSTUVWXYZ$#@0123456789_.-'                            
+trtable=translate(xrange('00'x,'FF'x),,trtable,' ')                             
+                                                                                
+                                                                                
+/* Set up translate table for MSG severity values - should match ENDVHIGH */    
+                                                                                
+trtMsgS='~-INFWCES' /* info, flower, warning, Caution, Error, Severe */         
+trtDspS='iiINiWCES' /* Use these mappings for Display purposes... */            
+trtSevS='012345678' /* numeric code for compare */                              
+trtAttr='BBBGTYPRW' /* Equivalent Attribute / colour code */                    
+trtAtRv='?AAHNMZEX' /* Equivalent Reverse Vide code +1    */                    
+                                                                                
+/* Initialise counts and summary data                               */          
+   CntHiLn = 0      /* Hilighted lines */                                       
+   CntSpcl = 0      /* Special Lines */                                         
+   MaxRC   = 0      /* Highest RC (this exec) */                                
+   MaxSev  = 0      /* Highest Sev   */                                         
+   FndMsg  = ''     /* Messages found */                                        
+   MaxMCL  = 8      /* Default Max Message Code Length */                       
+   smpMsg. = ''     /* Sample Message */                                        
+   linMsg. = ''     /* Line(s) of msg */                                        
+   RelLine = 0      /* relative line number */                                  
+   ShaToc  = '-'    /* May abandon all use of ShaToc, but keep for now */       
+   Head1   = Copies("*",80)                                                     
+   Head2   = "**"                                                               
+                                                                                
+/* Now process each line in the file                                */          
+                                                                                
+Do Forever                                                                      
+  "EXECIO 1 DISKR input"                                                        
+   If RC > 0 then Leave                                                         
+   Parse Pull ThisLine                                                          
+   RelLine = RelLine + 1                    /* relative line number */          
+                                                                                
+                                                                                
+   zdatacopy=translate(ThisLine)            /* Uppercase first      */          
+   zdatacopy=translate(zdatacopy,,trtable,' ') /* Remove special chr*/          
+   zdatacopy=strip(zdatacopy,'T')           /* remove trailing spcs */          
+                                                                                
+   if RelLine < 32767 then                  /* Check for max size!  */          
+      LineSev = substr(shatoc,RelLine,1)    /* line number & current*/          
+   else                                     /* otherwise default    */          
+      LineSev = '~'                         /* line number & current*/          
+   linerc  = translate('~',trtSevS,trtMsgS) /* default line sev     */          
+   do j = 1 to max(5,words(zdatacopy))      /* and scan each word   */          
+      /* note to limit scanning consider adding a max here          */          
+      thisword = word(zdatacopy,j)          /* consider this word   */          
+      /* deal with the special cases first  - is it in the lookup?  */          
+      if wordpos(thisword,MsgWords) > 0 then do                                 
+         linerc = translate(left(word(MsgSever,                                 
+                 ,wordpos(thisword,MsgWords)),1),                               
+                 ,trtSevS,trtMsgS) /* convert msg suffix to number  */          
+         CntSpcl = CntSpcl +1      /* Count Special Lines           */          
+         if linerc > 3 then call SaveMsg     /* was line hilighted? */          
+         leave                     /* special found, ignore rest    */          
+         end                                                                    
+      else do                                                                   
+      /* Next check if it's a valid message format...               */          
+      /* Length 8 characters, ending in I, W, C, E or S,            */          
+      /* ...starting with uppercase letter, at least a 2 digit msg  */          
+      /* number and the whole thing alphaNumeric?                   */          
+         thissuff = right(thisword,1)       /* grab the message sev */          
+         if length(thisword) \= 8 ,                                             
+          | pos(thissuff,'IWCES')               = 0 ,                           
+          | datatype(substr(thisword,1,1),'U') \= 1 ,                           
+          | datatype(substr(thisword,6,2),'W') \= 1 ,                           
+          | datatype(thisword,            'A') \= 1 then                        
+         /* before we give up, check if it's a cobol message... */              
+         if length(thisword) \= 11 ,        /* Cobol? IGYPS2072-S */            
+          | left(thisword,3) \== 'IGY',                                         
+          | datatype(substr(thisword,6,4),'W') \= 1 ,                           
+          | pos(thissuff,'IWCES') = 0 then iterate                              
+         else nop                                                               
+         /* still here?  Must be a valid message! */                            
+         linerc = max(linerc, translate(thissuff,trtSevS,trtMsgS))              
+         if linerc > 2 then call SaveMsg    /* was line hilighted? */           
+      end                                                                       
+   end                                                                          
+   /* convert the line severity to a character code */                          
+   linesev = translate(linerc,trtMsgS,trtSevS)                                  
+   if RelLine < 32767 then                  /* Check max size              */   
+      shatoc=overlay(linesev,shatoc,RelLine)/* beware max variable size 32k*/   
+   /* Count HilIted lines */                                                    
+   if LineRc > 2 then                                                           
+      CntHiLn = CntHiLn + 1                                                     
+End /* Do Forever */                                                            
+                                                                                
+"EXECIO 0 DISKR EN$DPMSG (FINIS " /* Close input */                             
+                                                                                
+   ScanElap = trunc(time(e),3)                                                  
+   ScanLins = RelLine                                                           
+   ScanMsgF = words(FndMsg)                                                     
+   ScanMsgS = translate(MaxSev,trtDspS,trtSevS)                                 
+                                                                                
+/* address ispexec "VPUT (SHATOC SCANMSGF) SHARED" -  update TOC & Find vars */ 
+                                                                                
+   if CntHiLn > 0 then do     /* any lines to hilite? */                        
+      sa= ' EHIL007I Report Scanned, MaxSev:'ScanMsgS                           
+      sa= ' EHIL007I Report Scanned, MaxSev:'ScanMsgS                           
+      sa= ' EndvhiPr processed' Scanlins 'lines in',                            
+           ScanElap 'secs and highlighted:'CntHiLn'+'CntSpcl 'lines.  '         
+      sa= ' Highest Msg severity:'ScanMsgS' in:'FndMsg'.'                       
+                                                                                
+      Queue Head1                              /* Copyright line       */       
+      Queue Head2                              /* Report Title         */       
+      Queue '**' ||copies(' ',14) || ,         /* Sub title            */       
+            '( E R R O R   M E S S A G E   S U M M A R Y )'                     
+      Queue '**'                               /* Line Space           */       
+      Queue '**'                               /* Line Space           */       
+      Queue '** Message Summary (Line)'                                         
+      "Execio 6 DISKW ENUSSIN"                                                  
+      if ScanMsgF = 0 then do /* no Sev 2 or higher messages */                 
+         Queue '**'                                                             
+         Queue '**  (No Warning or Higher messages found)'                      
+         "Execio 2 DISKW ENUSSIN"                                               
+      end                                                                       
+      else                                                                      
+      do i = 1 to ScanMsgF                                                      
+         thismsg = word(FndMsg,i)                                               
+         if length(linmsg.thismsg) <= (80-6-MaxMcl) then                        
+            trnkmsg ="**" left(thismsg,MaxMCL) "("linmsg.thismsg")"             
+         else                                                                   
+            trnkmsg ="**" left(thismsg,MaxMCL) ,                                
+            "("Left(linmsg.thismsg,(80-6-MaxMcl-4))" ...)"                      
+         queue trnkmsg                                                          
+         "Execio 1 DISKW ENUSSIN"                                               
+         prfxmsg = '**' copies(' ',(MaxMCL))                                    
+         maxFitL = 80-4-MaxMcl                                                  
+         trnkmsg = strip(smpmsg.thismsg,"B")                                    
+         do while length(trnkmsg) > maxFitL                                     
+            FitLen = lastpos(' ',trnkmsg,MaxFitL)                               
+            if FitLen = 0  then FitLen = MaxFitL                                
+            queue prfxmsg left(trnkmsg,FitLen)                                  
+            "Execio 1 DISKW ENUSSIN"                                            
+            trnkmsg = substr(trnkmsg,FitLen+1)                                  
+         end                                                                    
+         queue prfxmsg trnkmsg                                                  
+         "Execio 1 DISKW ENUSSIN"                                               
+      end                                                                       
+   end                                                                          
+   else do                                                                      
+      sa= ' EHIL007W Report Scanned, NoMsgs'                                    
+      sa= 'EndvhiPr processed' Scanlins 'lines in',                             
+           ScanElap 'secs, but found no messages to highlight.'                 
+   end                                                                          
+                                                                                
+Queue '**'                                     /* Line Space           */       
+Queue copies('*',80)                                                            
+"Execio 2 DISKW ENUSSIN  (FINIS " /* Close output */                            
+                                                                                
+return MaxRc                                                                    
+                                                                                
+SaveMsg:                                                                        
+   if pos(thisword,FndMsg) = 0 then do /* new message?                     */   
+      FndMsg = FndMsg thisword         /* append the new message code      */   
+      linMsg.thisword = RelLine        /* and relative line number         */   
+      sampMsg = strip(ThisLine,"B")    /* and save a sample line     */         
+      if pos('   ',sampMsg) > 0 then do /* is there lots of space?         */   
+         compMsg = ''                                                           
+         do k = 1 to words(sampMsg)                                             
+            compMsg = compMsg word(sampMsg,k) /* append this word */            
+         end                                                                    
+         sampMsg = strip(compMsg,"L")                                           
+      end                                                                       
+      smpMsg.thisword = sampMsg              /* and save a sample line     */   
+      MaxMCL = max(MaxMCL,length(thisword)) /* keep track of largest msg   */   
+   end                                                                          
+   else                                /* otherwise append the line number */   
+      linMsg.thisword = linmsg.thisword RelLine                                 
+   /* check for Cobol messages and replace with long version               */   
+   if left(smpMsg.thisword,2) == '==',                                          
+    & left(strip(ThisLine,"L"),2) \== '==' then                                 
+      smpMsg.thisword = strip(ThisLine,"B")                                     
+   MaxSev = max(MaxSev,LineRc)         /* and keep track of the highest sev*/   
+   return                                                                       

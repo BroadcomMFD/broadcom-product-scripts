@@ -1,0 +1,188 @@
+/* REXX EDIT MACRO */                                                           
+ADDRESS ISPEXEC                                                                 
+"VGET (VARPFX VNTCCOLS) SHARED" /* Get current control variable if set */       
+"VGET (ZPANELID)"                    /* Get current panel (caller)          */  
+/*Check if CCOLS is on, if so supress ECOLS on 250 + 110 panels */              
+If VNTCCOLS = E & WORDPOS(ZPANELID, ENDIE250 ENDIE110) > 0 then Do              
+ zedsmsg = 'Ecols not supported'                                                
+ zedlmsg = 'ECOLS command is not supported while CCOLS is enabled.',            
+           'Use CCOLS instead, or turn it off (CD19002_QE_CCOLS).'              
+ "SETMSG MSG(ISRZ000)"                                                          
+ return 0                                                                       
+end                                                                             
+/* if this is one of the WideScreen panels that supports Left/Right scrolling*/ 
+if WORDPOS(ZPANELID, 'C1SF2120 C1SSLE2  C1SSLE3  ENDIE250 ENDIE251',            
+                     'ENDIE910 ENDIE911 LONGLIST LONGLIS2 XFERSELS XFERSEL2',   
+                     'SUMLEVLS SUMLEVL2 C1SP9300 C1SP9301 PKGESELS PKGESEL2') , 
+   > 1 then                                                                     
+   AUTOENTR = 'YES'                  /*   we can use Control non-displ enter */ 
+else                                 /* Otherwise                            */ 
+   AUTOENTR = 'NO'                   /*   Don't press enter for the user     */ 
+                                                                                
+"VPUT (AUTOENTR) SHARED"             /* Save state of flag for ECOLPARS */      
+if VARPFX == '' then VARPFX = ENDQ   /* default to QuickEdit option prefix */   
+parse ARG Option                     /* get the passed options */               
+UOPTIONS = ' '||translate(option)    /* upper case the arguments */             
+if wordpos('DISP',UOPTIONS) > 0 then /* We want to change Display options */    
+  VARPFX = ENWD          /* Select the ISPF Display option variable prefix */   
+if wordpos('RETR',UOPTIONS) > 0 then /* We want to change Retrieve options */   
+  VARPFX = ENWR          /* Select the ISPF Display option variable prefix */   
+if wordpos('QE',UOPTIONS) > 0 then   /* We want to change QuickEdit opts  */    
+  VARPFX = ENDQ          /* Select the QuickEdit option variable prefix */      
+if wordpos('LONG',UOPTIONS) > 0 then /* We want to change LongName options */   
+  VARPFX = ENWL          /* Select the ISPF Display option variable prefix */   
+if wordpos('SUMM',UOPTIONS) > 0 then /* We want to change Summary of Levels*/   
+  VARPFX = ENLS          /* Select the ISPF Display option variable prefix */   
+if wordpos('SHIP',UOPTIONS) > 0 then /* We want to change Shipment Stauts  */   
+  VARPFX = EN93          /* Select the ISPF Display option variable prefix */   
+if wordpos('PKGE',UOPTIONS) > 0 then /* We want to change Package Ele Cols */   
+  VARPFX = PKGE          /* Select the ISPF Display option variable prefix */   
+if wordpos('ENSY',UOPTIONS) > 0 then /* We want to change Sync-IP Ele Cols */   
+  VARPFX = ENSY          /* Select the Q/E SyncInPlace Opt variable prefix */   
+if wordpos('WRAPNO',UOPTIONS) > 0 ,     /* user requested WRAP:NO */            
+ | wordpos('WRAPOFF',UOPTIONS) > 0 then /* or WrapOFF...          */            
+do                                                                              
+  ESRCHWRP= "NO"                                                                
+  ECOLREF = "YES"                                                               
+  "VPUT (ESRCHWRP) PROFILE"                                                     
+  "VPUT (ECOLREF) SHARED"                                                       
+  zedsmsg = 'WRAP:NO'                                                           
+  zedlmsg = 'Wrapping long line option set to off, long lines will be truncated'
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  return 0                                                                      
+end                                                                             
+if wordpos('WRAPON',UOPTIONS) > 0 ,      /* user requested WRAP:ON   */         
+ | wordpos('WRAPBOTH',UOPTIONS) > 0 then /* or WRAP:BOTH */                     
+do                                                                              
+  ESRCHWRP= "BOTH"                                                              
+  ECOLREF = "YES"                                                               
+  "VPUT (ESRCHWRP) PROFILE"                                                     
+  "VPUT (ECOLREF) SHARED"                                                       
+  zedsmsg = 'WRAP:BOTH'                                                         
+  zedlmsg = 'Wrapping long line option set to ON for both Pri and Alt views'    
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  return 0                                                                      
+end                                                                             
+if wordpos('WRAPPRI',UOPTIONS) > 0 then /* user requested WRAP:PRI */           
+do                                                                              
+  ESRCHWRP= "PRI"                                                               
+  ECOLREF = "YES"                                                               
+  "VPUT (ESRCHWRP) PROFILE"                                                     
+  "VPUT (ECOLREF) SHARED"                                                       
+  zedsmsg = 'WRAP:PRI'                                                          
+  zedlmsg = 'Wrapping long line option set ON for Primary View only'            
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  return 0                                                                      
+end                                                                             
+if wordpos('WRAPALT',UOPTIONS) > 0 then /* user requested WRAP:ALT */           
+do                                                                              
+  ESRCHWRP= "ALT"                                                               
+  ECOLREF = "YES"                                                               
+  "VPUT (ESRCHWRP) PROFILE"                                                     
+  "VPUT (ECOLREF) SHARED"                                                       
+  zedsmsg = 'WRAP:ALT'                                                          
+  zedlmsg = 'Wrapping long line option set ON for Alternate View only'          
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  return 0                                                                      
+end                                                                             
+if wordpos('DEBUG',UOPTIONS) > 0 then /* user requested Debug */                
+do                                                                              
+  ESRCHWRP= "DEBUG"                                                             
+  ECOLREF = "YES"                                                               
+  "VPUT (ESRCHWRP) PROFILE"                                                     
+  "VPUT (ECOLREF) SHARED"                                                       
+  zedsmsg = 'DEBUG ON'                                                          
+  zedlmsg = 'Use ECLOS WRAPOFF to disable trace'                                
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  return 0                                                                      
+end                                                                             
+if wordpos('OFF',UOPTIONS) > 0 then /* user requested reset */                  
+do                                                                              
+  interpret ' address ISPEXEC "VERASE ('VARPFX'0H1 'VARPFX'1H1) PROFILE" '      
+  interpret ' address ISPEXEC "VERASE ('VARPFX'0H2 'VARPFX'1H2) PROFILE" '      
+  interpret ' address ISPEXEC "VERASE ('VARPFX'0VR 'VARPFX'1VR) PROFILE" '      
+  interpret ' address ISPEXEC "VERASE ('VARPFX'0CL 'VARPFX'1CL) PROFILE" '      
+  interpret ' address ISPEXEC "VERASE ('VARPFX'0M1 'VARPFX'1M1) PROFILE" '      
+  interpret ' address ISPEXEC "VERASE ('VARPFX'0M2 'VARPFX'1M2) PROFILE" '      
+  ECOLREF = "YES"                                                               
+  "VPUT (ECOLREF) SHARED"                                                       
+  zedsmsg = 'Columns Default'                                                   
+  zedlmsg = 'Personal Column options discarded, Use ECols to restore'           
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  address ISPEXEC "CONTROL NONDISPL END" /* get us out of here so reset works */
+  return 0                                                                      
+end                                                                             
+if wordpos('DUMP',UOPTIONS) > 0 then /* user requested DUMP */                  
+do                                                                              
+  "VGET (ZUSER ZPREFIX ZSYSID ZSCREEN)"        /* Get current userid etc*/      
+  /* decide on temporary datasetname prefix....                         */      
+  if zSYSID = SPECIAL then                 /* is this a special system? */      
+     /* insert system specific logic if required here                   */      
+     DumpDsPrefix = left(zUSER,3)||'.'||zUser'.'ZSYSID||'.ECOL'||ZSCREEN        
+  else /* otherwise we use some sensible defautls                       */      
+    if zPrefix \= '',                      /* is Prefix set?  and NOT.. */      
+     & zPrefix \= zUSER then               /* the same as userid?       */      
+       DumpDsPrefix = zPrefix ||'.'|| zUser'.'ZSYSID || '.ECOL'||ZSCREEN        
+    else                                   /* otherwise use user name   */      
+       DumpDsPrefix = zUser ||'.'|| ZSYSID || '.ECOL' || ZSCREEN                
+  CALL OUTTRAP "out."                                                           
+  address TSO "DELETE '"DumpDsPrefix".DUMPOUT' "                                
+  CALL OUTTRAP "OFF"                                                            
+  address TSO "ALLOC DD(DUMPOUT) DA('"DumpDsPrefix".DUMPOUT') SP(1,0) ",        
+     "TR NEW RELEASE LRECL(256) BLKSIZE(0) RECFM(V,B) REU "                     
+  interpret ' address ISPEXEC "VGET ('VARPFX'0H1 'VARPFX'1H1)" '                
+  interpret ' address ISPEXEC "VGET ('VARPFX'0H2 'VARPFX'1H2)" '                
+  interpret ' address ISPEXEC "VGET ('VARPFX'0VR 'VARPFX'1VR)" '                
+  interpret ' address ISPEXEC "VGET ('VARPFX'0CL 'VARPFX'1CL)" '                
+  interpret ' address ISPEXEC "VGET ('VARPFX'0M1 'VARPFX'1M1)" '                
+  interpret ' address ISPEXEC "VGET ('VARPFX'0M2 'VARPFX'1M2)" '                
+              queue "WideScreen Variables dump"                                 
+              queue "                       "                                   
+              queue " VarPrefix:" VARPFX  "OPTN Member: CTLI" || VARPFX         
+              queue "                       "                                   
+              queue "Primary Screen Variables"                                  
+  interpret ' queue "'VARPFX'0H1: " 'VARPFX'0H1'                                
+  interpret ' queue "'VARPFX'0H2: " 'VARPFX'0H2'                                
+  interpret ' queue "'VARPFX'0M1:" 'VARPFX'0M1'                                 
+  interpret ' queue "'VARPFX'0M2:" 'VARPFX'0M2'                                 
+  interpret ' queue "'VARPFX'0VR:" 'VARPFX'0VR'                                 
+  interpret ' queue "'VARPFX'0CL:" 'VARPFX'0CL'                                 
+              queue "                       "                                   
+              queue "Alternate Screen Variables"                                
+  interpret ' queue "'VARPFX'1H1: " 'VARPFX'1H1'                                
+  interpret ' queue "'VARPFX'1H2: " 'VARPFX'1H2'                                
+  interpret ' queue "'VARPFX'1M1:" 'VARPFX'1M1'                                 
+  interpret ' queue "'VARPFX'1M2:" 'VARPFX'1M2'                                 
+  interpret ' queue "'VARPFX'1VR:" 'VARPFX'1VR'                                 
+  interpret ' queue "'VARPFX'1CL:" 'VARPFX'1CL'                                 
+  Queue ""  /* null line to terminate */                                        
+  address TSO "EXECIO * DISKW DUMPOUT (FINIS"                                   
+  zedsmsg = 'Columns Dumped'                                                    
+  zedlmsg = 'Variables used to build table panels have been displayed'          
+  address ISPEXEC "SETMSG MSG(ISRZ000)"                                         
+  address ISPEXEC "VIEW DATASET('"DumpDsPrefix".DUMPOUT')"                      
+  address TSO "FREE FILE(DUMPOUT)"                                              
+  CALL OUTTRAP "out."                                                           
+  address TSO "DELETE '"DumpDsPrefix".DUMPOUT' "                                
+  CALL OUTTRAP "OFF"                                                            
+  return 0                                                                      
+end                                                                             
+/* if we're still here then the original/default action of the Rexx appiles     
+   go edit the settings member for the type we're interested in, but first      
+   make sure the prefix and suffix members are saved                            
+*/                                                                              
+  "VPUT (VARPFX) SHARED"      /* save control var for later */                  
+  DSI_RC = LISTDSI("ISPPROF" "FILE")   /* find info on current PROFILE */       
+  If DSI_RC= 0 then MyProf = sysdsname /* if found we use that... */            
+  ELSE MyProf = ZUSER".ISPF.ISPPROF"   /* try a common default    */            
+  "EDIT DATASET('"MyProf"(CTLI"VARPFX")')" ,                                    
+       "MACRO(ECOLIMAC)"                                                        
+  If rc > 4  Then                /* Return codes                     */         
+    Do                           /*  4 - Data not saved (OK)         */         
+      Say "UnExpected RC:"rc "from Edit of PROFILE Member, investigate"         
+    End                          /* 12 - LOCK specified              */         
+  Else NOP                       /* 14 - Member or sequential        */         
+                                 /*      data set in use             */         
+                                 /* 16 - No members in library       */         
+                                 /* 18 - VSAM processing unavailable */         
+                                 /* 20 - Severe error                */         

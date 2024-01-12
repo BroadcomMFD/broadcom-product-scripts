@@ -1,0 +1,60 @@
+ /* REXX   */                                                                   
+/* THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+   "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+   FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+   ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+   CORRECTED.                                                                   
+*/                                                                              
+   /* WRITTEN BY DAN WALTHER */                                         00257000
+  TRACE  O                                                                      
+                                                                                
+  ADDRESS ISPEXEC                                                               
+     "VGET (ZSCREEN) SHARED"                                                    
+  ADDRESS ISPEXEC                                                               
+     "TBSTATS EN"ZSCREEN"IE250 STATUS1(STATUS1) STATUS2(STATUS2)"               
+                                                                                
+/* for table status...                                             */           
+/*  1 = table exists in the table input library chain              */           
+/*  2 = table does not exist in the table input library chain      */           
+/*  3 = table input library is not allocated.                      */           
+/*                                                                 */           
+/*  1 = table is not open in this logical screen                   */           
+/*  2 = table is open in NOWRITE mode in this logical screen       */           
+/*  3 = table is open in WRITE mode in this logical screen         */           
+/*  4 = table is open in SHARED NOWRITE mode in this logical screen*/           
+/*  5 = table is open in SHARED WRITE mode in this logical screen. */           
+/*                                                                 */           
+     IF STATUS2 /= 3 THEN,                                                      
+        do                                                                      
+        say "Must invoke ARCHIVES from an",                                     
+            "Element list Screen (ENDLONG)" ;                                   
+        exit ;                                                                  
+        end;                                                                    
+                                                                                
+  "TBQUERY EN"ZSCREEN"IE250 KEYS(KEYLIST) NAMES(VARLIST) ROWNUM(ROWNUM)"        
+  IF RC > 0 THEN EXIT                                                           
+                                                                                
+  VARWKCMD =  "" ;                                                              
+  "VGET (VNBF9NOD C1SISOFR) PROFILE "                                           
+                                                                                
+  "TBTOP   EN"ZSCREEN"IE250 "                                                   
+  "VGET (EEVCCID EEVCOMM) PROFILE "                                             
+  "FTOPEN TEMP"                                                                 
+                                                                                
+  "FTINCL LISTSKL1"                                                             
+                                                                                
+  Do row = 1 to rownum                                                          
+     "TBSKIP EN"ZSCREEN"IE250 "                                                 
+     "FTINCL LISTSKL2"                                                          
+  end; /* do row = 1 to rownum */                                               
+                                                                                
+  "FTCLOSE "                                                                    
+  "VGET (ZUSER ZTEMPF ZTEMPN) ASIS" ;                                           
+   X = OUTTRAP("OFF")                                                           
+                                                                                
+   ADDRESS ISPEXEC "LMINIT DATAID(DDID) DDNAME(&ZTEMPN)"                        
+   ADDRESS ISPEXEC "EDIT DATAID(&DDID)"                                         
+   ADDRESS ISPEXEC "LMFREE DATAID(&DDID)"                                       
+                                                                                
+  exit                                                                          
+                                                                                

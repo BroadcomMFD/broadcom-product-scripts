@@ -1,0 +1,39 @@
+)ATTR DEFAULT(^+~)                                                              
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY EXPAND (\\)                                                               
+^TUTORIAL \-\ Long-Name Help \-\ TUTORIAL                                       
+^Command ===>~ZCMD                                                             +
++                                                                               
++  Leave the^Command+field blank to display an element selection list.          
++  From the selection list, enter one of the following line commands:           
+çSAREA38                                                                       ç
+)AREA SAREA38                                                                   
++        Type  To                                                               
+^           B+ Browse an element                                                
+^           E+ Edit an element                                                  
+^          EA+ Edit an element in^ASCII+mode                                    
+^          EU+ Edit an element in^UTF-8+mode                                    
+^           M+ Display Master Control File information                          
+^           S+ Display Summary of Levels panel                                  
+^           C+ Display element changes for the current level                    
+^           H+ Display element change history                                   
+^           V+ View an element (read only)                                      
+^          VA+ View an element in^ASCII+mode                                    
+^          VU+ View an element in^UTF-8+mode                                    
+^          LL+ Display the element listing                                      
+^          BX+ Display the element component list                               
+^          Ux+ Invoke User CMD (UsrRtnUx) passing current row information       
+^           U+ Invoke User CMD - Select                                         
+^          UN+ Invoke User CMD - Un-Select                                      
+^          UA+ Invoke User CMD - Alter Meta Data                                
+^          UD+ Invoke User CMD - Alter User Data                                
+^          UC+ Invoke User CMD - Clear message                                  
+^          UP+ Invoke User CMD - Update element                                 
+^     D|DU|DP+ Differences between elements, next up the map or Prod            
++                                                                               
++  These line commands create^SCL+and a^job stream+for batch or Package submit: 
+^           G+ Generate an element    ^ #+ Delete an element                    
+^           O+ Move an element        ^ T+ Transfer an element                  
++                                                                               
++\ \ (^END+to return) \ \                                                       
+)END                                                                            

@@ -1,0 +1,146 @@
+//&UseridµB JOB (&AltIDAcctCode),'LONGNAME FDP INST',                           
+//      MSGLEVEL=(1,1),CLASS=&AltIDJobClass,REGION=0M,                          
+//      MSGCLASS=&AltIDMsgClass,NOTIFY=&SYSUID                                  
+//*-------------------------------------------------------------------*         
+//  SET APARM='DECK,NOOBJECT,NOTERM,XREF(FULL),MX,PC(MSOURCE)'                  
+//  SET LPARM='LIST,MAP,XREF'                                DAN                
+//*-------------------------------------------------------------------*         
+//COPY01 EXEC PGM=IEBCOPY                                                       
+//SYSIN     DD DISP=SHR,DSN=&ThisLib(@IEBCOPY)                                  
+//          DD *                                                                
+  COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
+  SELECT MEMBER=((&WhereIam,,R))                                                
+*                                                                               
+* NOTE: If these FDP utilities might be executed on multiple LPARs              
+*    Uncomment/edit the following lines to create extra copies of               
+*    &WhereIam to match all your LPAR names                                     
+*                                                                               
+* COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
+* SELECT MEMBER=((&WhereIam,@CA11,R))                                           
+* COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
+* SELECT MEMBER=((&WhereIam,@CA31,R))                                           
+* COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
+* SELECT MEMBER=((&WhereIam,@CA32,R))                                           
+* COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
+* SELECT MEMBER=((&WhereIam,@XAD1,R))                                           
+//INDD      DD DISP=SHR,DSN=&ThisLib                                            
+//CSIQCLS2  DD DSN=&MyCLS2Library,                                              
+//             SPACE=(CYL,(5,5,45)),                                            
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=80,RECFM=FB,BLKSIZE=32720,DSORG=PO)                   
+//CSIQMEN2  DD DSN=&MyMEN2Library,                                              
+//             SPACE=(CYL,(1,1,45)),                                            
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=80,RECFM=FB,BLKSIZE=32720,DSORG=PO)                   
+//CSIQPEN2  DD DSN=&MyPEN2Library,                                              
+//             SPACE=(CYL,(1,1,45)),                                            
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=80,RECFM=FB,BLKSIZE=32720,DSORG=PO)                   
+//CSIQSEN2  DD DSN=&MySEN2Library,                                              
+//             SPACE=(CYL,(1,1,45)),                                            
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=80,RECFM=FB,BLKSIZE=32720,DSORG=PO)                   
+//CSIQTEN2  DD DSN=&MyTEN2Library,                                              
+//             SPACE=(CYL,(1,1,45)),                                            
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=80,RECFM=FB,BLKSIZE=32720,DSORG=PO)                   
+//CSIQSRC2  DD DSN=&MySRC2Library,                                              
+//             SPACE=(CYL,(1,1,45)),                                            
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=80,RECFM=FB,BLKSIZE=32720,DSORG=PO)                   
+//CSIQLOA2  DD DSN=&MyLOA2Library,                                              
+//             SPACE=(TRK,(1,1,1)),                                             
+//             DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                           
+//             DCB=(LRECL=0,RECFM=U,BLKSIZE=32760,DSORG=PO)                     
+//SYSPRINT  DD SYSOUT=*                                                         
+//*-------------------------------------------------------------------*         
+//*     ASSEMBLE LOADTABL                                            **         
+//*-------------------------------------------------------------------*         
+//ASMLT    EXEC PGM=ASMA90,COND=(4,LT),                                         
+//         PARM='&APARM'                                                        
+//SYSLIB   DD DSN=SYS1.MACLIB,DISP=SHR                                          
+//         DD DSN=SYS1.MODGEN,DISP=SHR                                          
+//         DD DSN=&MyOPTNLibrary,DISP=SHR                                       
+//SYSIN    DD DSN=&ThisLib(LOADTABL),                                           
+//            DISP=SHR                                                          
+//SYSPUNCH DD DSN=&&SYSLIN,DISP=(,PASS,DELETE),                                 
+//            UNIT=SYSALLDA,SPACE=(3120,(100,100),RLSE),                        
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120)                              
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSUT2   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSUT3   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSPRINT DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*     LINK EDIT THE ELEMENT                                        **         
+//*-------------------------------------------------------------------*         
+//LKEDLT   EXEC PGM=IEWL,COND=(4,LT),                                           
+//         PARM='&LPARM'                                                        
+//SYSLIN   DD DSN=&&SYSLIN,DISP=(OLD,DELETE)                                    
+//SYSLMOD  DD DSN=&MyLOA2Library(LOADTABL),DISP=SHR                             
+//SYSLIB   DD DSN=&MyLOA2Library,DISP=SHR                                       
+//         DD DSN=&MyAUTULibrary,DISP=SHR                                       
+//         DD DSN=&MyAUTHLibrary,DISP=SHR                                       
+//         DD DSN=&MyLOADLibrary,DISP=SHR                                       
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSPRINT DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*     ASSEMBLE APIAESCL                                            **         
+//*-------------------------------------------------------------------*         
+//ASMAPI   EXEC PGM=ASMA90,COND=(4,LT),                                         
+//         PARM='&APARM'                                                        
+//SYSLIB   DD DSN=SYS1.MACLIB,DISP=SHR                                          
+//         DD DSN=SYS1.MODGEN,DISP=SHR                                          
+//         DD DSN=&MyOPTNLibrary,DISP=SHR                                       
+//SYSIN    DD DSN=&ThisLib(APIAESCL),                                           
+//            DISP=SHR                                                          
+//SYSPUNCH DD DSN=&&SYSLIN,DISP=(,PASS,DELETE),                                 
+//            UNIT=SYSALLDA,SPACE=(3120,(100,100),RLSE),                        
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120)                              
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSUT2   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSUT3   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSPRINT DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*     LINK EDIT THE ELEMENT                                        **         
+//*-------------------------------------------------------------------*         
+//LKEDAPI  EXEC PGM=IEWL,COND=(4,LT),                                           
+//         PARM='&LPARM'                                                        
+//SYSLIN   DD DSN=&&SYSLIN,DISP=(OLD,DELETE)                                    
+//SYSLMOD  DD DSN=&MyLOA2Library(APIAESCL),DISP=SHR                             
+//SYSLIB   DD DSN=&MyLOA2Library,DISP=SHR                                       
+//         DD DSN=&MyAUTULibrary,DISP=SHR                                       
+//         DD DSN=&MyAUTHLibrary,DISP=SHR                                       
+//         DD DSN=&MyLOADLibrary,DISP=SHR                                       
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSPRINT DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*     ASSEMBLE CTLIENQ                                             **         
+//*-------------------------------------------------------------------*         
+//ASMENQ   EXEC PGM=ASMA90,COND=(4,LT),                                         
+//         PARM='&APARM'                                                        
+//SYSLIB   DD DSN=SYS1.MACLIB,DISP=SHR                                          
+//         DD DSN=SYS1.MODGEN,DISP=SHR                                          
+//         DD DSN=&MyAUTHLibrary,DISP=SHR                                       
+//         DD DSN=&MyLOADLibrary,DISP=SHR                                       
+//SYSIN    DD DSN=&ThisLib(CTLIENQ),                                            
+//            DISP=SHR                                                          
+//SYSPUNCH DD DSN=&&SYSLIN,DISP=(,PASS,DELETE),                                 
+//            UNIT=SYSALLDA,SPACE=(3120,(100,100),RLSE),                        
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120)                              
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSUT2   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSUT3   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSPRINT DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*     LINK EDIT THE ELEMENT                                        **         
+//*-------------------------------------------------------------------*         
+//LKEDENQ  EXEC PGM=IEWL,COND=(4,LT),                                           
+//             PARM='&LPARM'                                                    
+//SYSLIN   DD DSN=&&SYSLIN,DISP=(OLD,DELETE)                                    
+//SYSLMOD  DD DSN=&MyLOA2Library(CTLIENQ),DISP=SHR                              
+//SYSLIB   DD DSN=&MyLOA2Library,DISP=SHR                                       
+//         DD DSN=&MyAUTULibrary,DISP=SHR                                       
+//         DD DSN=&MyAUTHLibrary,DISP=SHR                                       
+//         DD DSN=&MyLOADLibrary,DISP=SHR                                       
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(1,1))                                   
+//SYSPRINT DD SYSOUT=*                                                          

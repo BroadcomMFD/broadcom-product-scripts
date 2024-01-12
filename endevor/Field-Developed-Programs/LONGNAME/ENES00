@@ -1,0 +1,26 @@
+ENES001E 'Invalid Panel'              .HELP=C1ESRHLP   .ALARM=YES               
+'ENES001E Invalid screen - ESrchfor can only be invoked from ' +                
+'the Endevor QuickEdit Element Selection List (ENDIE250/ENDIE251)' +            
+'or the CopyElm selection List (ENDIE910/ENDIE911) panels'                      
+                                                                                
+ENES002I 'Elements Found'             .HELP=C1ESRHLP   .ALARM=NO                
+'ENES002I &ZEDLMSG'                                                             
+                                                                                
+ENES003E 'String not found'           .HELP=C1ESRHLP   .ALARM=YES               
+'ENES003E &ZEDLMSG'                                                             
+                                                                                
+ENES004I 'Enter Search String...'     .HELP=C1ESRHLP   .ALARM=NO                
+'ENES004I Enter the command ESRchfor "String" [WORD|PREFIX|SUFFIX] ' +          
+'[<fromCol>:<ToCol>] ' +                                                        
+'[CHAnges|HISTory|SUMmary|CCID|COMment|MASTer|LISTing|COMPonent] ' +            
+'[REFresh]'                                                                     
+                                                                                
+ENES005E 'Allocate Error' .T=CRITICAL .HELP=C1ESRHLP   .ALARM=YES               
+'ENES005E &ZEDLMSG'                                                             
+                                                                                
+ENES006E 'Read I/O Error' .T=CRITICAL .HELP=C1ESRHLP   .ALARM=YES               
+'ENES006E &ZEDLMSG'                                                             
+                                                                                
+ENES007I 'Submit Cancelled'           .HELP=C1ESRHLP   .ALARM=NO                
+'ENES007I Submit of Batch Search job cancelled by user'                         
+                                                                                

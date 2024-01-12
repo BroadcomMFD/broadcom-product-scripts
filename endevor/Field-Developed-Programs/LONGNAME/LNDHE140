@@ -1,0 +1,23 @@
+)BODY EXPAND (\\)                                                               
+%TUTORIAL \-\ Long-Name Help \-\ TUTORIAL                                       
+%Command ===>_ZCMD                                                             +
++                                                                               
++The%Action Options+fields allow you to further define your                     
++action request.                                                                
++                                                                               
+%CCID+- The CCID associated with this request. The CCID must                    
++   conform to CCID syntax rules.                                               
+%Comment+- The comment associated with this request. Comments can be up         
++   to 40 characters and cannot include both Apost(') and quotation(") marks.   
+%Processor Group+- The processor group to be associated with the                
++   element. If you do not specify a group, the default processor for           
++   the type will be assigned.  See the User's Manual for information.          
+%Override Signout+- Indicates whether you can edit or generate this             
++   element when it has been signed out to a user other than yourself.          
+%   Y+- Override the current signout and allow access to the element.           
+%   N+- (Default). Do not override the current signout.                         
++                                                         %-Continued-%         
++\ \ (%ENTER+to continue,%END+to return) \ \                                    
+)PROC                                                                           
+  &ZCONT = LNDHE150                                                             
+)END                                                                            

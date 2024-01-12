@@ -1,0 +1,76 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   @ TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)                              
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)      /* UNIQUE ATTRIBUTES FOR   */          
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  /* DASHES AND NULL PADDING */          
+   › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                      
+   | TYPE(OUTPUT) INTENS(LOW)                                                   
+   ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI)                              
+   ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM)                              
+   ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES)                              
+)BODY EXPAND(\\)                                                                
+%\-\ Apply List Filters \-\                                                     
+%OPTION  ===>_ZCMD                                                             +
++                                                                               
++Apply List Filters %===>_Z+(Y/N)                                               
++                                                                               
++Filter Options:                                                                
++  Where CCID EQ    %===>^EEVWCCID    +                                         
++  Where USERID EQ  %===>_EEVWUID +                                             
++  Where PROC GRP EQ%===>_EEVWPGRP+                                             
++                                                                               
++For Where CCID/USERID, compare to:                                             
++  Current    %===>_Z+(Y/N)                                                     
++  Generate   %===>_Z+(Y/N)                                                     
++  Last Action%===>_Z+(Y/N)                                                     
++  Retrieve   %===>_Z+(Y/N)                                                     
++                                                                               
++Element Backout Status:            +Element Locked Status:                     
++  Backout    %===>_Z+(Y/N)         +  Locked     %===>_Z+(Y/N)                 
++                                                                               
++Inventory Location:                                                            
++  Stageid(s) %===>_LNFILST           +(Stage ID to show, or blank for all)     
++                                                                               
++\ \** Hit%ENTER+to process,%END+to return **\ \                                
++                                                                               
+)INIT                                                                           
+  .HELP = LNDHE130                                                              
+  .ZVARS = '(EEVALF EEVWCUT1 EEVWCUT2 EEVWCUT3 EEVWCUT4 LNFILBK LNFILLK)'       
+  &LIST2 = 'Y N'                                                                
+  IF (&EEVWCUT1 = ' ')                                                          
+    &EEVWCUT1 = 'Y'                                                             
+  IF (&EEVWCUT2 = ' ')                                                          
+    &EEVWCUT2 = 'Y'                                                             
+  IF (&EEVWCUT3 = ' ')                                                          
+    &EEVWCUT3 = 'Y'                                                             
+  IF (&EEVWCUT4 = ' ')                                                          
+    &EEVWCUT4 = 'Y'                                                             
+  IF (&LNFILBK  = ' ')                                                          
+    &LNFILBK  = 'N'                                                             
+  IF (&LNFILLK  = ' ')                                                          
+    &LNFILLK  = 'N'                                                             
+)PROC                                                                           
+  VER (&EEVALF,NB,LISTV,&LIST2,MSG=CIFV005)                                     
+  VER (&EEVWCUT1,NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER (&EEVWCUT2,NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER (&EEVWCUT3,NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER (&EEVWCUT4,NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER (&LNFILBK, NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER (&LNFILLK, NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  IF (&EEVWCCID ^= ' ')                                                         
+    IF (&EEVWCUT2 = 'N')                                                        
+      IF (&EEVWCUT3 = 'N')                                                      
+        IF (&EEVWCUT4 = 'N')                                                    
+          IF (&EEVWCUT1 = 'N')                                                  
+            .MSG = CIFV012                                                      
+  IF (&EEVWUID  ^= ' ')                                                         
+    IF (&EEVWCUT2 = 'N')                                                        
+      IF (&EEVWCUT3 = 'N')                                                      
+        IF (&EEVWCUT4 = 'N')                                                    
+          IF (&EEVWCUT1 = 'N')                                                  
+            .MSG = CIFV012                                                      
+  VPUT (EEVALF  EEVWCUT1 EEVWCUT2 EEVWCUT3 EEVWCUT4 EEVWCCID +                  
+        EEVWUID EEVWPGRP LNFILBK LNFILLK LNFILST) profile                       
+)END                                                                            

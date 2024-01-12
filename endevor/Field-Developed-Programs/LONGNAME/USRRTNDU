@@ -1,0 +1,306 @@
+/* REXX - Routine to store the current row/line for Difference Display          
+          And then look up the map for the next element                         
+          */                                                                    
+parse arg PassParm                                                              
+PassName = strip(PassParm,,"'")                                                 
+ADDRESS ISPEXEC "VGET ("PassName") SHARED"                                      
+interpret 'ALLVALS = 'PassName                                                  
+ADDRESS ISPEXEC "VGET ("ALLVALS") SHARED"                                       
+ADDRESS ISPEXEC "VGET (DiffSet1 Diffset2 ) profile"                             
+  /*                                                                            
+       On entry save the selected row as the 'NEW' file for compare             
+  */                                                                            
+  Call Save_Entry_Parms                                                         
+  /*                                                                            
+       Now find the next occurance of the element looking up the map            
+  */                                                                            
+  Call Build_List_CSV_SCL                                                       
+  /*                                                                            
+        Call the CSV Util to perform the actions                                
+  */                                                                            
+  Call Execute_CSV_Action                                                       
+  /*                                                                            
+       Scan the CSV output to find our element and the next up the map          
+  */                                                                            
+  Call Parse_CSVOUT                                                             
+  /*                                                                            
+       we have two distinct elements to compare, call compare routine           
+  */                                                                            
+  Call UsrRtnDC                                                                 
+exit 0                                                                          
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Save_Entry_Parms:                         /* Save the selected row details      
+                                          */                                    
+DiffNum = 1                               /* we're always 1 (or new)      */    
+DiffLbl = word("New Old ???",DiffNum)                                           
+if value('DiffSet'DiffNum) == 'YES' then  /* if we already have a set line */   
+  call UsrRtnDR "'"DiffNum"'"             /* reset row pointed to  */           
+sa= value('DiffSet'DiffNum,'YES')         /* value has been set  flag */        
+sa= value('DiffTbl'DiffNum,USERTABL)                                            
+sa= value('DiffRow'DiffNum,USERROW )                                            
+sa= value('DiffEle'DiffNum,EEVETKEL)                                            
+sa= value('DiffEnv'DiffNum,EEVETKEN)                                            
+sa= value('DiffStg'DiffNum,EEVETKSI)                                            
+sa= value('DiffSys'DiffNum,EEVETKSY)                                            
+sa= value('DiffSbs'DiffNum,EEVETKSB)                                            
+sa= value('DiffTyp'DiffNum,EEVETKTY)                                            
+sa= value('DiffVvl'DiffNum,EEVETDVL)                                            
+DiffVars = 'DiffSet'DiffNum,                                                    
+           'DiffTbl'DiffNum,                                                    
+           'DiffRow'DiffNum,                                                    
+           'DiffEle'DiffNum,                                                    
+           'DiffEnv'DiffNum,                                                    
+           'DiffStg'DiffNum,                                                    
+           'DiffSys'DiffNum,                                                    
+           'DiffSbs'DiffNum,                                                    
+           'DiffTyp'DiffNum,                                                    
+           'DiffVvl'DiffNum                                                     
+USERMSG =  '*Diff:'DiffLbl                                                      
+ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                         
+ADDRESS ISPEXEC "VPUT ("DiffVars") profile"                                     
+return                                                                          
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Build_List_CSV_SCL:                                                             
+                                                                                
+   sa=SAVESCL(RESET)                    /* reset our cache of SCL lines */      
+   /* retrieve for first element */                                             
+   sa=SAVESCL(" LIST ELEMENT ")                                                 
+   sa=SAVESCL("'"DiffEle1"'")                                                   
+   sa=SAVESCL(" FROM ENVIRONMENT "DiffEnv1 " SYSTEM "DiffSys1)                  
+   sa=SAVESCL("      SUBSYSTEM   "DiffSbs1 " TYPE   "Difftyp1 " STAGE" DiffStg1)
+   sa=SAVESCL(" DATA BASIC")                                                    
+   sa=SAVESCL(" TO DDNAME 'EXTRACTM' OPTIONS SEARCH")                           
+   sa=SAVESCL("    RETURN ALL DELIMITERS 'º'  .")                               
+   return;                                                                      
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Build_Retrieve_SCL:                                                             
+                                                                                
+   ADDRESS TSO,                                                                 
+   "ALLOC F(NEWDD) LRECL(4096) BLKSIZE(0) SPACE(5,5) ",                         
+    "DSORG(PS)",                                                                
+     "RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                                 
+                                                                                
+   "ALLOC F(OLDDD) LRECL(4096) BLKSIZE(0) SPACE(5,5) ",                         
+    "DSORG(PS)",                                                                
+     "RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                                 
+                                                                                
+   sa=SAVESCL(RESET)                    /* reset our cache of SCL lines */      
+   /* retrieve for first element */                                             
+   sa=SAVESCL(" RETRIEVE ELEMENT ")                                             
+   sa=SAVESCL("'"DiffEle1"'")                                                   
+   IF LENGTH(DiffVvl1) = 4 THEN,                                                
+      sa=SAVESCL(" VERSION" SUBSTR(DiffVvl1,1,2),                               
+               "LEVEL " SUBSTR(DiffVvl1,3,2));                                  
+   ELSE,                                                                        
+      sa=SAVESCL("* Current Version Level")                                     
+   sa=SAVESCL(" FROM ENVIRONMENT "DiffEnv1 " SYSTEM "DiffSys1)                  
+   sa=SAVESCL(" SUBSYSTEM "DiffSbs1 " TYPE "Difftyp1 " STAGE" DiffStg1)         
+   sa=SAVESCL(" TO DDNAME 'NEWDD' OPTIONS NO SIGNOUT NOSEARCH REPLACE.")        
+   /* retrieve for second element */                                            
+   sa=SAVESCL(" RETRIEVE ELEMENT ")                                             
+   sa=SAVESCL("'"DiffEle2"'")                                                   
+   IF LENGTH(DiffVvl2) = 4 THEN,                                                
+      sa=SAVESCL(" VERSION" SUBSTR(DiffVvl2,1,2),                               
+               "LEVEL " SUBSTR(DiffVvl2,3,2));                                  
+   ELSE,                                                                        
+      sa=SAVESCL("* Current Version Level")                                     
+   sa=SAVESCL(" FROM ENVIRONMENT "DiffEnv2 " SYSTEM "DiffSys2)                  
+   sa=SAVESCL(" SUBSYSTEM "DiffSbs2 " TYPE "Difftyp2 " STAGE" DiffStg2)         
+   sa=SAVESCL(" TO DDNAME 'OLDDD' OPTIONS NO SIGNOUT NOSEARCH REPLACE.")        
+   /* Append an EOF flag */                                                     
+   sa=SAVESCL(" EOF. ")                                                         
+   return;                                                                      
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Execute_CSV_Action:                                                             
+   ADDRESS TSO,                                                                 
+   "ALLOC F(EXTRACTM) LRECL(2800) BLKSIZE(28000) SPACE(1,5) ",                  
+    "DSORG(PS)",                                                                
+     'RECFM(V B) BLOCK(28000) NEW UNCATALOG REUSE ' ;                           
+                                                                                
+   "ALLOC FI(BSTIPT01) BLKSIZE(0) TRACKS LRECL(80) SPACE(5 5)",                 
+    "DSORG(PS)",                                                                
+       "RECFM(F B) NEW REUSE UNCATALOG" ;                                       
+                                                                                
+   sa=SAVESCL(EXECIO, BSTIPT01)         /* write our cache to temp file */      
+                                                                                
+   ADDRESS LINK 'BC1PCSV0'              /* load from authlib */                 
+   call_rc = rc                                                                 
+                                                                                
+   "FREE F(BSTIPT01)"                   /* always free the input file */        
+                                                                                
+   If call_rc > 0 then Return call_rc;  /* nothing to see */                    
+                                                                                
+  /* debug CSV values                                                           
+   ADDRESS ISPEXEC "LMINIT  DATAID(DDID) DDNAME(EXTRACTM)"                      
+   ADDRESS ISPEXEC "VIEW    DATAID(&DDID)"                                      
+   ADDRESS ISPEXEC "LMFREE  DATAID(&DDID)"                                      
+  */                                                                            
+   return ;                                                                     
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Parse_CSVOUT:                                                                   
+                                                                                
+  SA= "Parse_CSVOUT: "                                                          
+  Match_Found = 'NO'                   /* flag indicate we found origin ele */  
+  Diffr_Found = 0                      /* in case we need them later init   */  
+  UpMap_Found = 0                      /* the 'where found' record numbers  */  
+                                                                                
+  "EXECIO * DISKR EXTRACTM (STEM API. finis"                                    
+  /* "FREE F(EXTRACTM)" */                                                      
+  IF API.0 < 2 THEN RETURN 8 ;         /* we need more than a header! */        
+                                       /* a possible optimisation would */      
+  varbs= API.1;                        /* be to check for at least 3 records */ 
+                                       /* the current element should always */  
+  varbs = translate(varbs,"_"," ") ;   /* be first (unless it was deleted) */   
+  varbs = translate(varbs," ",'º"') ;  /* and so we could start at rec 3...*/   
+  varbs = translate(varbs,"@","/") ;                                            
+  varbs = translate(varbs,"@",")") ;                                            
+  varbs = translate(varbs,"@","(") ;                                            
+                                                                                
+  Do rec# = 2 to API.0                                                          
+     valus= API.rec# ;                                                          
+     call SplitAtDelim                 /* split the data at delimiters */       
+     Do # = 1 to Words(varbs)                                                   
+        if pos("'",CSVWORD.#) > 0 then /* any apost? */                         
+          tmp = Word(varbs,#) '= "'CSVWORD.#'"'                                 
+        else                                                                    
+          tmp = Word(varbs,#) "= '"CSVWORD.#"'"                                 
+        SA= # tmp ;                                                             
+        interpret tmp;                                                          
+     End;                              /* Do # = 1 to Words(varbs) */           
+                                                                                
+     DiffEle2 = FULL_ELM_NAME                                                   
+     DiffEnv2 = ENV_NAME                                                        
+     DiffStg2 = STG_ID                                                          
+     DiffSys2 = SYS_NAME                                                        
+     DiffSbs2 = SBS_NAME                                                        
+     Difftyp2 = TYPE_NAME                                                       
+     DiffVvl2 = right(ELM_VV,2,'0') || right(ELM_LL,2,'0')                      
+                                                                                
+  /* check if we found the 'origin' element  - should still be there */         
+     if DiffEle2 = DiffEle1 ,                                                   
+      & DiffEnv2 = DiffEnv1 ,                                                   
+      & DiffStg2 = DiffStg1 ,                                                   
+      & DiffSys2 = DiffSys1 ,                                                   
+      & DiffSbs2 = DiffSbs1 ,                                                   
+      & Difftyp2 = Difftyp1 ,                                                   
+      & DiffVvl2 = DiffVvl1  then do                                            
+        Match_Found = rec#                /* save where we found it */          
+        iterate                                                                 
+        end                                                                     
+     else do                                                                    
+        Diffr_Found = rec#                /* it's not a match */                
+        if DiffEnv2 = DiffEnv1 ,          /* but is it up the map? */           
+         & DiffStg2 = DiffStg1  then      /* look some more */                  
+           iterate                                                              
+        else do                           /* we've found our element */         
+           UpMap_Found = rec#             /* save it's pos */                   
+           if USERCMD = 'DP',             /* did we want the ProdVersion? */    
+           & rec# < Api.0 then            /* but there are more records? */     
+             iterate                      /* keep going... */                   
+           leave                          /* Otherwise we have a valid up-map*/ 
+        end                                                                     
+     end                                                                        
+  end                                     /* Do rec# = 1 to API.0 */            
+If Match_Found == 'NO' then               /* check we found the ele */          
+   ADDRESS ISPEXEC "SETMSG MSG(LONG019C)" /* warn user, refresh needed     */   
+/*                                                                              
+  Otherwise - we've found the 2nd element - save it and call compare            
+  */                                                                            
+                                                                                
+DiffNum = 2                               /* Now we've found the old...   */    
+DiffLbl = word("New Old ???",DiffNum)                                           
+if value('DiffSet'DiffNum) == 'YES' then  /* if we already have a set line */   
+  call UsrRtnDR "'"DiffNum"'"             /* reset row pointed to  */           
+Diffset2 = 'YES'                          /* value has been set  flag */        
+DiffTbl2 = DiffTbl1                       /* Try this table           */        
+DiffRow2 = DiffRow1                       /* ...and Row               */        
+DiffVars = 'DiffSet'DiffNum,                                                    
+           'DiffTbl'DiffNum,                                                    
+           'DiffRow'DiffNum,                                                    
+           'DiffEle'DiffNum,                                                    
+           'DiffEnv'DiffNum,                                                    
+           'DiffStg'DiffNum,                                                    
+           'DiffSys'DiffNum,                                                    
+           'DiffSbs'DiffNum,                                                    
+           'DiffTyp'DiffNum,                                                    
+           'DiffVvl'DiffNum                                                     
+USERMSG =  '*Diff:'DiffLbl                                                      
+ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                         
+ADDRESS ISPEXEC "VPUT ("DiffVars") profile"                                     
+  RETURN ;                                                                      
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+SplitAtDelim:                                                                   
+  CSVWORDS. = ''                                                                
+  CSVDATA = valus                                                               
+  do i = 1 to Words(varbs)                                                      
+    j = pos('º',CSVDATA)                                                        
+    if J > 3 then do                       /* found next delimiter */           
+      CSVWORD.I = substr(csvdata,2,(j-3))                                       
+      CSVDATA = substr(csvdata,(j+1))                                           
+    end                                                                         
+    else                                                                        
+      CSVWORD.I = ''                                                            
+  end                                                                           
+                                                                                
+  return ;                                                                      
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+SaveScl : procedure  expose SCLLINE. /* This routine handles accumulating       
+                                        SCL lines until it's time to pass       
+                                        them off to the execute routine         
+                                                                                
+                                        Eventually it might handle auto         
+                                        formatting long lines but at first      
+                                        the goal is just to save each line      
+                                        passed and increment the counter.       
+                                        */                                      
+if ARG(1) == 'RESET' then do         /* reset */                                
+   SCLLINE. = ''                     /* reset stem var */                       
+   SCLLINE.0 = 0                     /* and counter */                          
+   return SCLLINE.0                  /* normaly return the number of lines */   
+end                                                                             
+                                                                                
+if ARG(1) == 'EXECIO' then do        /* We need to write our lines to arg(2) */ 
+   OUTDD = ARG(2)                    /* reset Output   */                       
+   "EXECIO * DISKW" OUTDD "(STEM SCLLINE. FINIS" /* write all output */         
+   return RC                         /* Return The RC in this case */           
+end                                                                             
+                                                                                
+if ARG(1) == 'GETALL' then do        /* Return all SCL */                       
+   ALLSCL = ''                       /* reset Output   */                       
+   do I = 1 to SCLLINE.0             /* For each saved line */                  
+     ALLSCL = ALLSCL || LEFT(SCLLINE.i,80) /* append the SCL line */            
+   end                                                                          
+   return ALLSCL                     /* Return all the SCL as a single str */   
+end                                                                             
+        /* still here?  Must have some SCL to save... */                        
+   do j = 1  by 72 while j < length(ARG(1))                                     
+      i = SCLLINE.0 + 1              /* increment the line count */             
+      SCLLINE.i = substr(ARG(1),j,72)/* save next chunk */                      
+      SCLLINE.0 = i                  /* and the new count */                    
+   end                                                                          
+   return SCLLINE.0                  /* always return the number of lines */    
+                                                                                
+exit 999                             /* should never hit this */                

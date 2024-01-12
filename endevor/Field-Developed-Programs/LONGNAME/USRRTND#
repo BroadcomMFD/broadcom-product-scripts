@@ -1,0 +1,51 @@
+/* REXX - Routine to store the current row/line for Difference Display          
+          */                                                                    
+parse arg PassParm                                                              
+PassName = strip(PassParm,,"'")                                                 
+ADDRESS ISPEXEC "VGET ("PassName") SHARED"                                      
+interpret 'ALLVALS = 'PassName                                                  
+ADDRESS ISPEXEC "VGET ("ALLVALS") SHARED"                                       
+ADDRESS ISPEXEC "VGET (DiffSet1 Diffset2 ) profile"                             
+/*                                                                              
+  Save the selected row details                                                 
+*/                                                                              
+DiffCmd = USERCMD                                                               
+Select                                                                          
+  When DiffCmd == 'D1' | DiffCmd == 'DN' Then DiffNum = 1                       
+  When DiffCmd == 'D2' | DiffCmd == 'DO' Then DiffNum = 2                       
+  When DiffCmd == 'DU' Then DiffNum = 1                                         
+  When DiffCmd == 'DP' Then DiffNum = 2                                         
+  otherwise do                                                                  
+    DiffNum = 3                                                                 
+  end                                                                           
+end                                                                             
+DiffLbl = word("New Old ???",DiffNum)                                           
+if value('DiffSet'DiffNum) == 'YES' then  /* if we already have a set line */   
+  call UsrRtnDR "'"DiffNum"'"             /* reset row pointed to  */           
+sa= value('DiffSet'DiffNum,'YES')         /* value has been set  flag */        
+sa= value('DiffTbl'DiffNum,USERTABL)                                            
+sa= value('DiffRow'DiffNum,USERROW )                                            
+sa= value('DiffEle'DiffNum,EEVETKEL)                                            
+sa= value('DiffEnv'DiffNum,EEVETKEN)                                            
+sa= value('DiffStg'DiffNum,EEVETKSI)                                            
+sa= value('DiffSys'DiffNum,EEVETKSY)                                            
+sa= value('DiffSbs'DiffNum,EEVETKSB)                                            
+sa= value('DiffTyp'DiffNum,EEVETKTY)                                            
+sa= value('DiffVvl'DiffNum,EEVETDVL)                                            
+DiffVars = 'DiffSet'DiffNum,                                                    
+           'DiffTbl'DiffNum,                                                    
+           'DiffRow'DiffNum,                                                    
+           'DiffEle'DiffNum,                                                    
+           'DiffEnv'DiffNum,                                                    
+           'DiffStg'DiffNum,                                                    
+           'DiffSys'DiffNum,                                                    
+           'DiffSbs'DiffNum,                                                    
+           'DiffTyp'DiffNum,                                                    
+           'DiffKen'DiffNum,                                                    
+           'DiffVvl'DiffNum                                                     
+USERMSG =  '*Diff:'DiffLbl                                                      
+ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                         
+ADDRESS ISPEXEC "VPUT ("DiffVars") profile"                                     
+If DiffSet1 == 'YES' & DiffSet2 = 'YES' then                                    
+  Call UsrRtnDC                                                                 
+EXIT 0                                                                          

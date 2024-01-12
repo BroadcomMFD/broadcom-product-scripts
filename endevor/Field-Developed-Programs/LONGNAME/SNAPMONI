@@ -1,0 +1,14 @@
+/* Rexx - SNAPMONI Sample Edit Macro                                            
+                                                                                
+          You may customize this macro to your sites standards for              
+          to turn on hilighting, change refresh commands etc.                   
+          The key for hilighting support is to recognize numbers                
+          */                                                                    
+address isredit                                                                 
+'MACRO (PARMS)' /* don't expect any parms on Imacro, but supported */           
+"DEFINE  SNAPMONR MACRO"                 /* Define macro to refresh*/           
+"DEFINE  REFRESH  ALIAS SNAPMONR"        /* Set a nice alias       */           
+"DEFINE  REF      ALIAS SNAPMONR"        /* Set a nice alias       */           
+"DEFINE  R        ALIAS SNAPMONR"        /* Set a nice alias       */           
+"RECOVERY OFF NOWARN" /* turn off recovery to stop msg             */           
+"NUM STD"       /* Ask Edit/View to honour numbers in source       */           

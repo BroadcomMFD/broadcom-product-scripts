@@ -1,0 +1,297 @@
+/* REXX - Routine to retrieve/use the saved rows for Difference Display         
+          */                                                                    
+/*                                                                              
+  MAIN LINE LOGIC                                                               
+                                                                                
+       First Check we have valid parms to work with... SCL to retrieve them     
+  */                                                                            
+  Call Retrieve_Profile_Vars                                                    
+  /*                                                                            
+       we have two distinct elements to compare, build SCL to retrieve them     
+  */                                                                            
+  Call Build_Retrieve_SCL                                                       
+  /*                                                                            
+        Call the API to perform the actions                                     
+  */                                                                            
+  Call Execute_API_Action                                                       
+  /*                                                                            
+        Invoke SuperC to compare and browse the report                          
+  */                                                                            
+  Call Compare_Files                                                            
+  /*                                                                            
+        Reset the status                                                        
+  */                                                                            
+  do DiffNum = 1 to 2                                                           
+     call UsrRtnDR "'"DiffNum"' '"NewStatus"'"                                  
+  end                                                                           
+  /*                                                                            
+        Finally (re)set the message for the current row                         
+  */                                                                            
+  USERMSG = NewStatus                                                           
+  ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                       
+                                                                                
+exit 0                                                                          
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Retrieve_Profile_Vars:                                                          
+                                                                                
+do DiffNum = 1 to 2                                                             
+  DiffVars = 'DiffSet'DiffNum,                                                  
+             'DiffTbl'DiffNum,                                                  
+             'DiffRow'DiffNum,                                                  
+             'DiffEle'DiffNum,                                                  
+             'DiffEnv'DiffNum,                                                  
+             'DiffStg'DiffNum,                                                  
+             'DiffSys'DiffNum,                                                  
+             'DiffSbs'DiffNum,                                                  
+             'DiffTyp'DiffNum,                                                  
+             'DiffVvl'DiffNum                                                   
+  ADDRESS ISPEXEC "VGET ("DiffVars") profile"                                   
+  /* interpret "say 'Vars #' "DiffNum" ':' "DiffVars */                         
+end                                                                             
+/*                                                                              
+  Check we have different elements to compare                                   
+*/                                                                              
+NT = DiffEnv1'/'DiffStg1'/'DiffSys1'/'DiffSbs1'/'DiffTyp1'/'DiffEle1':'DiffVvl1 
+OT = DiffEnv2'/'DiffStg2'/'DiffSys2'/'DiffSbs2'/'DiffTyp2'/'DiffEle2':'DiffVvl2 
+if NT = OT then                                                                 
+   do                                                                           
+     ADDRESS ISPEXEC "SETMSG MSG(LONG017E)"                                     
+     Exit 4                                                                     
+   end                                                                          
+                                                                                
+/****************************************************************************/  
+                                                                                
+Build_Retrieve_SCL:                                                             
+                                                                                
+   ADDRESS TSO,                                                                 
+   "ALLOC F(NEWDD) LRECL(4096) BLKSIZE(0) SPACE(5,5) ",                         
+    "DSORG(PS)",                                                                
+     "RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                                 
+                                                                                
+   "ALLOC F(OLDDD) LRECL(4096) BLKSIZE(0) SPACE(5,5) ",                         
+    "DSORG(PS)",                                                                
+     "RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                                 
+                                                                                
+   sa=SAVESCL(RESET)                    /* reset our cache of SCL lines */      
+   /* retrieve for first element */                                             
+   sa=SAVESCL(" RETRIEVE ELEMENT ")                                             
+   sa=SAVESCL("'"DiffEle1"'")                                                   
+   IF LENGTH(DiffVvl1) = 4 THEN,                                                
+      sa=SAVESCL(" VERSION" SUBSTR(DiffVvl1,1,2),                               
+               "LEVEL " SUBSTR(DiffVvl1,3,2));                                  
+   ELSE,                                                                        
+      sa=SAVESCL("* Current Version Level")                                     
+   sa=SAVESCL(" FROM ENVIRONMENT "DiffEnv1 " SYSTEM "DiffSys1)                  
+   sa=SAVESCL(" SUBSYSTEM "DiffSbs1 " TYPE "Difftyp1 " STAGE" DiffStg1)         
+   sa=SAVESCL(" TO DDNAME 'NEWDD' OPTIONS NO SIGNOUT NOSEARCH REPLACE.")        
+   /* retrieve for second element */                                            
+   sa=SAVESCL(" RETRIEVE ELEMENT ")                                             
+   sa=SAVESCL("'"DiffEle2"'")                                                   
+   IF LENGTH(DiffVvl2) = 4 THEN,                                                
+      sa=SAVESCL(" VERSION" SUBSTR(DiffVvl2,1,2),                               
+               "LEVEL " SUBSTR(DiffVvl2,3,2));                                  
+   ELSE,                                                                        
+      sa=SAVESCL("* Current Version Level")                                     
+   sa=SAVESCL(" FROM ENVIRONMENT "DiffEnv2 " SYSTEM "DiffSys2)                  
+   sa=SAVESCL(" SUBSYSTEM "DiffSbs2 " TYPE "Difftyp2 " STAGE" DiffStg2)         
+   sa=SAVESCL(" TO DDNAME 'OLDDD' OPTIONS NO SIGNOUT NOSEARCH REPLACE.")        
+   /* Append an EOF flag */                                                     
+   sa=SAVESCL(" EOF. ")                                                         
+   return;                                                                      
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Execute_API_Action:                                                             
+                                                                                
+   MY_PARMS = SAVESCL(GETALL)           /* retrieve the accumulated SCL */      
+   SA= my_parms ;                                                               
+                                                                                
+/* testing - consider keeping the APIMSG/APILIST for debugging                  
+   ADDRESS TSO "ALLOC F(APIMSGS)  DUMMY REUSE"                                  
+   ADDRESS TSO "ALLOC F(APILIST)  DUMMY REUSE"                                  
+   */                                                                           
+   ADDRESS TSO,                                                                 
+   "ALLOC F(APIMSGS) LRECL(133) BLKSIZE(26600) SPACE(5,5) ",                    
+     "DSORG(PS) RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                       
+   ADDRESS TSO,                                                                 
+   "ALLOC F(APILIST) LRECL(133) BLKSIZE(26600) SPACE(5,5) ",                    
+     "DSORG(PS) RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                       
+   ADDRESS TSO,                                                                 
+   "ALLOC F(C1MSGS1) LRECL(133) BLKSIZE(26600) SPACE(5,5) ",                    
+     "DSORG(PS) RECFM(V B) TRACKS NEW UNCATALOG REUSE " ;                       
+   ADDRESS TSO "ALLOC FI(SYSOUT)  DUMMY SHR REUSE"                              
+   ADDRESS LINKMVS 'APIAESCL MY_PARMS'                                          
+   Temp_RC = RC ;                                                               
+   If Temp_RC > 4  THEN,                                                        
+      Do                                                                        
+      ADDRESS ISPEXEC "LMINIT DATAID(DDID) DDNAME(C1MSGS1)"                     
+      ADDRESS ISPEXEC "VIEW DATAID(&DDID)"                                      
+      ADDRESS ISPEXEC "LMFREE DATAID(&DDID)"                                    
+      End;                                                                      
+                                                                                
+   RETURN;                                                                      
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+Compare_Files:                                                                  
+/*  This routine performs a SuperC compare of two previously                    
+    retrieved files (OLDDD and NEWDD) and allows the user to browse the output  
+    If the files are determined to be equal, RC:9 is returned, even though the  
+    RC from SuperC was 0, a normal compare (differences found) returns 1 and in 
+    all other cases, the SuperC return code is returned as is                   
+*/                                                                              
+SUPCRC = 0                                          /* initialise search RC  */ 
+  ADDRESS ISPEXEC "VGET (ZAPPLID ZSCREEN zUSER zSYSID zPREFIX)"                 
+  /* Decide on Temporary Dataset name prefix...                         */      
+  if zSYSID = SPECIAL then                 /* is this a special system? */      
+     /* insert system specific logic if required here                   */      
+     SUPRCOUT = left(zUSER,3)||'.'||zUser'.'ZSYSID||'.SOUT'||ZSCREEN            
+  else /* otherwise we use some sensible defautls                       */      
+    if zPrefix \= '',                      /* is Prefix set?  and NOT.. */      
+     & zPrefix \= zUSER then               /* the same as userid?       */      
+       SUPRCOUT = zPrefix ||'.'|| zUser'.'ZSYSID || '.SOUT'||ZSCREEN            
+    else                                   /* otherwise use user name   */      
+       SUPRCOUT = zUser ||'.'|| ZSYSID || '.SOUT' || ZSCREEN                    
+  CALL MSG "ON"                                                                 
+  CALL OUTTRAP "out."                                                           
+  "DELETE '"SUPRCOUT"'"                             /* delete any old output */ 
+  CALL OUTTRAP "OFF"                                                            
+ADDRESS TSO                                                                     
+  "ALLOC DD(OUTDD) SP(1,10) TR NEW RELEASE  REU ",                              
+    "LRECL(202) BLKSIZE(27876) RECFM(F,B) DA('"SUPRCOUT"')",                    
+    "DSORG(PS)"                                                                 
+  "ALLOC DD(SYSIN) SP(1,0) BLOCK(8000) NEW RELEASE",                            
+     "LRECL(80) BLKSIZE(8000) RECFM(F,B) REU NEW UNCATALOG",                    
+    "DSORG(PS)"                                                                 
+                                                                                
+ADDRESS MVS                                                                     
+/* The max length for parameters is 72, but the max allowed             */      
+/*  for a title is just 53 so we may need to trim the titles            */      
+Queue "*"                                                                       
+Queue "****+****|****+****|****+****|****+****|****+****|****+****|****+****|"  
+Queue "*"                                                                       
+Queue "* The Following Endevor elements were compared"                          
+Queue "*"                                                                       
+Queue "* New: Environment..:"Left(DiffEnv1,15)"Old: Environment..:"DiffEnv2     
+Queue "*      Stage........:"Left(DiffStg1,15)"     Stage........:"DiffStg2     
+Queue "*      System.......:"Left(DiffSys1,15)"     System.......:"DiffSys2     
+Queue "*      SubSystem....:"Left(DiffSbs1,15)"     SubSystem....:"DiffSbs2     
+if length(DiffEle1) < 16 & length(DiffEle2) < 16 then                           
+Queue "*      Element......:"Left(DiffEle1,15)"     Element......:"DiffEle2     
+Queue "*      Type.........:"Left(DiffTyp1,15)"     Type.........:"DiffTyp2     
+Queue "*      VVLL.........:"Left(DiffVvl1,15)"     VVLL.........:"DiffVvl2     
+Queue "*"                                                                       
+if length(DiffEle1) > 15 | length(DiffEle2) > 15 then do                        
+Queue "* New  Element......:"Left(DiffEle1,42)                                  
+do i = 43 to length(diffEle1) by 42                                             
+Queue "*                   :"Substr(DiffEle1,i,42)                              
+end                                                                             
+Queue "*"                                                                       
+Queue "* Old  Element......:"Left(DiffEle2,42)                                  
+do i = 43 to length(diffEle2) by 42                                             
+Queue "*                   :"Substr(DiffEle2,i,42)                              
+end                                                                             
+Queue "*"                                                                       
+end                                                                             
+Queue "*"                                                                       
+Queue "****+****|****+****|****+****|****+****|****+****|****+****|****+****|"  
+Queue "*"                                                                       
+Queue "NTITLE '"Elipsize(NT)"'"                                                 
+Queue "OTITLE '"Elipsize(OT)"'"                                                 
+Queue "*"                                                                       
+/* if there are any process options append them to the request file */          
+ADDRESS ISPEXEC "VGET (LNDIFS1 LNDIFS2 LNDIFS3 LNDIFS4 LNDIFS5) PROFILE"        
+if LNDIFS1 /= '' then Queue LNDIFS1                                             
+if LNDIFS2 /= '' then Queue LNDIFS2                                             
+if LNDIFS3 /= '' then Queue LNDIFS3                                             
+if LNDIFS4 /= '' then Queue LNDIFS4                                             
+if LNDIFS5 /= '' then Queue LNDIFS5                                             
+Queue ""                                                                        
+"EXECIO * DISKW SYSIN (FINIS"                                                   
+                                                                                
+ADDRESS ISPEXEC "VGET (LNDIFPRM ) PROFILE"                                      
+if LNDIFPRM = '' then         /* if options never set, set a default */         
+   LNDIFPRM = 'LINECMP,LONGL,WIDE,NOPRTCC'                                      
+                                                                                
+ADDRESS ISPEXEC "SELECT PGM(ISRSUPC)" ,                                         
+  "PARM("LNDIFPRM")"                                                            
+  /*  LONGL|DELTAL|CHNGL LINECMP|WORDCMP|BYTECMP (NO)SEQ COBOL ASCII NOSUMS */  
+  SUPCRC = RC                                                                   
+ADDRESS TSO "FREE DD(OUTDD)"                                                    
+If SUPCRC = 0 then do                                                           
+   SUPCRC = 9                                                                   
+   NewStatus = '*NoDiff'                                                        
+   ADDRESS ISPEXEC "SETMSG MSG(LONG017W)" /* no differences found */            
+   end                                                                          
+else do                                                                         
+   ADDRESS ISPEXEC "SETMSG MSG(LONG017I)" /* differences found */               
+   ADDRESS ISPEXEC "VIEW DATASET('"SUPRCOUT"')"                                 
+   NewStatus = '*DiffFound'                                                     
+   end                                                                          
+/*                                                                              
+ADDRESS TSO                                                                     
+  "FREE DD(OUTDD) "                                                             
+  "FREE DD(NEWDD) "                                                             
+  "FREE DD(OLDDD) "                                                             
+  "FREE DD(SYSIN) "                                                             
+*/                                                                              
+                                                                                
+return SUPCRC                                                                   
+                                                                                
+/****************************************************************************/  
+                                                                                
+Elipsize: procedure /* This procedure returns a 'truncated' version of          
+                       the passed Endevor location where the long name          
+                       is considered the least important part if if the         
+                       total string is gt than 53 characters the name           
+                       will be shortened and elipses added preserving           
+                       the last 5 characters (typically :vvll)                  
+                    */                                                          
+if length(arg(1)) <= 53 then return arg(1)                                      
+else return left(arg(1),45) || '...' || right(arg(1),5)                         
+                                                                                
+                                                                                
+/****************************************************************************/  
+                                                                                
+SaveScl : procedure  expose SCLLINE. /* This routine handles accumulating       
+                                        SCL lines until it's time to pass       
+                                        them off to the execute routine         
+                                                                                
+                                        Eventually it might handle auto         
+                                        formatting long lines but at first      
+                                        the goal is just to save each line      
+                                        passed and increment the counter.       
+                                        */                                      
+if ARG(1) == 'RESET' then do         /* reset */                                
+   SCLLINE. = ''                     /* reset stem var */                       
+   SCLLINE.0 = 0                     /* and counter */                          
+   return SCLLINE.0                  /* normaly return the number of lines */   
+end                                                                             
+                                                                                
+if ARG(1) == 'EXECIO' then do        /* We need to write our lines to arg(2) */ 
+   OUTDD = ARG(2)                    /* reset Output   */                       
+   "EXECIO * DISKW" OUTDD "(STEM SCLLINE. FINIS" /* write all output */         
+   return RC                         /* Return The RC in this case */           
+end                                                                             
+                                                                                
+if ARG(1) == 'GETALL' then do        /* Return all SCL */                       
+   ALLSCL = ''                       /* reset Output   */                       
+   do I = 1 to SCLLINE.0             /* For each saved line */                  
+     ALLSCL = ALLSCL || LEFT(SCLLINE.i,80) /* append the SCL line */            
+   end                                                                          
+   return ALLSCL                     /* Return all the SCL as a single str */   
+end                                                                             
+        /* still here?  Must have some SCL to save... */                        
+   do j = 1  by 72 while j < length(ARG(1))                                     
+      i = SCLLINE.0 + 1              /* increment the line count */             
+      SCLLINE.i = substr(ARG(1),j,72)/* save next chunk */                      
+      SCLLINE.0 = i                  /* and the new count */                    
+   end                                                                          
+   return SCLLINE.0                  /* always return the number of lines */    
+                                                                                
+exit 999                             /* should never hit this */                

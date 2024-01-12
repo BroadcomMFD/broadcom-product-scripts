@@ -1,0 +1,41 @@
+XFER010W 'No match'                                 .ALARM=Y .TYPE=W NOKANA     
+'No elements qualify for XFER processing, check element Sandbox or '      +     
+'filters.'                                                                      
+                                                                                
+XFER010E 'Invalid Panel'                            .ALARM=Y .TYPE=W NOKANA     
+'You must invoke the XFerEles Deploy to Test utility from a valid '       +     
+'element selection list (Quick/Edit, Classic Endevor, or LongName FDP.'         
+                                                                                
+XFER011I '&MYCOUNT Transferred'                     .ALARM=Y .TYPE=W NOKANA     
+'&MYCOUNT elements selected by the XFER process. Use "Select Elements" '  +     
+'to modify the selected elements, or just press ENTER to select all'            
+                                                                                
+XFER012W 'Caution! Invalid Sandbox'                 .ALARM=Y .TYPE=W NOKANA     
+'One or more of the selected FROM SubSystem elemens is in a Subsystem '   +     
+'that does not start with "#" or "SIQ". '                                 +     
+'Contact your Endevor Administrator to complete Deploy to Test '          +     
+'configuration tasks.'                                                          
+                                                                                
+XFER012E 'Incorrect Target Subsystem'               .ALARM=Y .TYPE=W NOKANA     
+'Enter one of the target subsystems listed on the panel, or use '         +     
+'point-n-shoot to select a target from the list.'                               
+                                                                                
+XFER012S 'No Valid Targets'                         .ALARM=Y .TYPE=A NOKANA     
+'Search for a valid Target SubSystem in this Env/System failed. '         +     
+'A valid Target SubSystem is one where the Next SubSys is defined '       +     
+'as either "DEPLOY2T" or "INVALID". '                                     +     
+'Contact your Endevor Administrator to complete Deploy to Test '          +     
+'configuration tasks.'                                                          
+                                                                                
+XFER013W 'Request Cancelled'                        .ALARM=Y .TYPE=W NOKANA     
+'Request cancelled at user request'                                             
+                                                                                
+XFER014W 'Nothing Selected'                         .ALARM=Y .TYPE=W NOKANA     
+'No elemenets selected/excluded, default to all Selected'                       
+                                                                                
+XFER015E 'Enter "S" or "U"'                         .ALARM=Y .TYPE=W NOKANA     
+'Enter "S" to Select an Element, "U" to Un-Select, or the command '       +     
+'"Select (All)" to mark all elements as selected.'                              
+                                                                                
+XFER018I 'Select Elems for XFER'                    .ALARM=Y .TYPE=W NOKANA     
+'Use this screen to select elements for XFER processing'                        

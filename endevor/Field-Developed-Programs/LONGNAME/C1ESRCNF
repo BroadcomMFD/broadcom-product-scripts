@@ -1,0 +1,40 @@
+)ATTR DEFAULT(%+_)                                                              
+/*-----------------------------------------------------------------------*/     
+/* Copyright (C) 1986-2012 CA. All Rights Reserved.                      */     
+/*-----------------------------------------------------------------------*/     
+ › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                        
+ | TYPE(OUTPUT) INTENS(LOW)                                                     
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)                                    
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)                        
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)                        
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)                        
+)BODY EXPAND(\\) CMD(ZCMD)                                                      
+%                                                                               
+%Command ===>_ZCMD                                                  \ \     +   
++                                                                               
++ Complete the JCL JOB card and press%ENTER+to submit the search job.           
++ Enter the%END+command to terminate the submit.                                
++                                                                               
++  _C1ESJ1                                                                  +   
++  _C1ESJ2                                                                  +   
++  _C1ESJ3                                                                  +   
++  _C1ESJ4                                                                  +   
++                                                                               
++ The Batch job will perform the retrieve/print requests required to            
++ satisfy your search request.  ESRchfor will wait for this job to              
++ finish before continuing, but you can cancel the wait by hitting              
++ the%ATTN+key.                                                                 
++                                                                               
+)INIT                                                                           
+&ZWINTTL = 'ESRchfor Batch Submit'                                              
+VGET (C1ESJ1 C1ESJ2 C1ESJ3 C1ESJ4)  /* get the ESRchfor Job cards */            
+VGET (C1BJC1 C1BJC2 C1BJC3 C1BJC4)  /* and the QuickEdit ones as defaults */    
+IF (&C1ESJ1 = &Z) &C1ESJ1 = &C1BJC1  /* if the ESRchfor card is null use it */  
+IF (&C1ESJ2 = &Z) &C1ESJ2 = &C1BJC2                                             
+IF (&C1ESJ3 = &Z) &C1ESJ3 = &C1BJC3                                             
+IF (&C1ESJ4 = &Z) &C1ESJ4 = &C1BJC4                                             
+IF (&C1ESJ1 = &Z) &C1ESJ1 = '//&ZUSER  JOB  NOTIFY=NONE'                        
+)PROC                                                                           
+VPUT (C1ESJ1 C1ESJ2 C1ESJ3 C1ESJ4) PROFILE                                      
+VPUT (C1ESJ1 C1ESJ2 C1ESJ3 C1ESJ4) SHARED                                       
+)END                                                                            

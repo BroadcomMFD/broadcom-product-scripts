@@ -1,0 +1,82 @@
+/* REXX - This routine to allow user to set the SuperC options used in          
+          the Difference utility                                                
+          */                                                                    
+address ispexec                                                                 
+                                                                                
+do forever                                                                      
+  "ADDPOP"                                                                      
+  "display panel(ENDVPRJM)"                                                     
+  dispRC = rc                                                                   
+  "REMPOP"                                                                      
+  /* "VGET (LNPRSRCH LNPRPROC LNPRFFND LNPRCCID LNPRCOMM) profile" */           
+  "VGET (",                                                                     
+        "EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8",                      
+        "EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8",                      
+        "EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8",                      
+        ") profile"                                                             
+  datachg = 'NO'                               /* reset flag */                 
+  call CheckFavs                                                                
+  if datachg = 'YES' then                                                       
+     "VPUT (",                                                                  
+        "EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8",                      
+        "EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8",                      
+        "EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8",                      
+        ") profile"                                                             
+  if dispRC > 0 then leave                     /* end to exit */                
+end                                                                             
+return                                         /* exit and save */              
+                                                                                
+CheckFavs:                                                                      
+  /* are all favourite at the top? */                                           
+  InSeq = "Yes"                                /* assume all good */            
+  prevFav = "/"                                /* Favs at top */                
+  do i = 1 to 8                                                                 
+     thisFav = value('EPRV'||right(i,1,'0'))                                    
+     if thisFav = prevFav then                 /* still in Seq? */              
+        iterate                                /* check next */                 
+     if thisFav \= '/' then do                 /* end favs? */                  
+        prevFav = thisFav                      /* toggle search */              
+        j = i                                  /* save first non-fav */         
+     end                                                                        
+     else                                      /* otherwise not in seq */       
+        signal ReSeq                           /* Shuffle from here */          
+  end                                          /* check next */                 
+  sa= "in seq"                                                                  
+return                                         /* we're good */                 
+                                                                                
+ReSeq:                                                                          
+  sa= "re-seq"                                                                  
+  datachg = 'YES'                              /* we need to change data */     
+  favsFR. = ""                                 /* init stacks and counters */   
+  favsPR. = ""                                                                  
+  nonfFR. = ""                                                                  
+  nonfPR. = ""                                                                  
+  CntFav = 0                                                                    
+  CntNfv = 0                                                                    
+  do i = j to 8                                /* from first non-fav to end */  
+     thisFav = value('EPRV'||right(i,1,'0'))                                    
+     if thisfav = '/' then do                  /* is it a fav? */               
+        cntFav = CntFav + 1                    /* increment */                  
+        favsFR.CntFav =value('EPRN'||right(i,1,'0'))                            
+        favsPR.CntFav = value('EPRL'||right(i,1,'0'))                           
+     end                                                                        
+     else do                                   /* othwise */                    
+        cntNfv = CntNfv + 1                    /* increment */                  
+        nonfFR.CntNfv =value('EPRN'||right(i,1,'0'))                            
+        nonfPR.CntNfv = value('EPRL'||right(i,1,'0'))                           
+     end                                                                        
+  end                                                                           
+  do i = 1 to cntFav                           /* insert favs */                
+     dmy = value('EPRV'||right(j,1,'0'),'/') /* mark Fav */                     
+     dmy = value('EPRN'||right(j,1,'0'),favsFR.i) /* FrName */                  
+     dmy = value('EPRL'||right(j,1,'0'),favsPR.i) /* PrName */                  
+     j = j + 1                                 /* increment tgt */              
+  end                                                                           
+  do i = 1 to cntNfv                           /* insert non-favs */            
+     dmy = value('EPRV'||right(j,1,'0'),'')    /* mark non-fav */               
+     dmy = value('EPRN'||right(j,1,'0'),nonfFR.i) /* FrName */                  
+     dmy = value('EPRL'||right(j,1,'0'),nonfPR.i) /* PrName */                  
+     j = j + 1                                 /* increment tgt */              
+  end                                                                           
+  drop favsFR.  favsPR.  nonfFR.  nonfPR.      /* finished with stack */        
+return                                                                          

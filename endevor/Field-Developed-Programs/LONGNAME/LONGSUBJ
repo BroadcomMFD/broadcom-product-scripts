@@ -1,0 +1,72 @@
+)ATTR DEFAULT(%+_)                                                              
+/*-----------------------------------------------------------------------*/     
+/* Copyright (C) 1986-2013 CA. All Rights Reserved.                      */     
+/*-----------------------------------------------------------------------*/     
+ › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                        
+ | TYPE(OUTPUT) INTENS(LOW)                                                     
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)                                    
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)                        
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)                        
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)                        
+)BODY EXPAND(\\) CMD(VARWKCMD)                                                  
+%\-\ LongName Action Mode \-\                                                   
+%Command ===>_VARWKCMD                                                         +
++                                                                               
++ Complete the JCL JOB card and press%ENTER+to submit, or choose an alternative 
++ request mode.  Enter the%END+command to cancel the%CURRENT+action.            
++ Enter%CANCEL+to cancel this, AND all queued requests.                         
++                                                                               
++  _LNBJC1                                                                  +   
++  _LNBJC2                                                                  +   
++  _LNBJC3                                                                  +   
++  _LNBJC4                                                                  +   
++  _LNBJC5                                                                  +   
++  _LNBJC6                                                                  +   
++  _LNBJC7                                                                  +   
++  _LNBJC8                                                                  +   
++                                                                               
++ Action Request Mode....._Z       +(Submit/Edit/Append/Package/ForeGround)     
++ Enable AUTO processing.._Z+(Y/N) +(Bypass confirmation for this session only) 
++ Substitute Variables...._Z+(Y/N) %Hint:+Prefix variables with '&&'            
++ Include additional JCL.._Z+(Y/N)       +Use UX command to discover var names  
++                                        +EG &&LNLASACT or &&C1ELEMENT          
+)INIT                                                                           
+  .ZVARS = '(ENABSUBJ ENABAUTO LNINTERP EEVINJCL)'                              
+  VGET (ENABSUBJ) PROFILE                                                       
+  VGET (ENABAUTO) SHARED                                                        
+  &ENABSUBJ = TRANS(TRUNC(&ENABSUBJ,1)                                          
+     S,SUBMIT E,EDIT A,APPEND P,PACKAGE F,F/G *,SUBMIT)                         
+  if (&ENABAUTO EQ &Z)                                                          
+     &ENABAUTO = 'N'                                                            
+  if (&LNINTERP EQ &Z)                                                          
+     &LNINTERP = 'N'                                                            
+  if (&EEVINJCL EQ &Z)                                                          
+     &EEVINJCL = 'N'                                                            
+  if (&ENABAUTO = 'Y')            /* are we bypassing this screen? */           
+     .MSG = ''                    /* clear the messages */                      
+     .resp = ENTER                /* and auto-navigate /*                       
+)PROC                                                                           
+  if (&VARWKCMD EQ E,Edit,S,Sub,A,Append,P,Pkg,Package,F,F/G)                   
+     &ENABSUBJ = &VARWKCMD                                                      
+     &VARWKCMD = ''                                                             
+  &ENABSUBJ = TRANS(TRUNC(&ENABSUBJ,1)                                          
+     E,EDIT A,APPEND P,PACKAGE S,SUBMIT F,F/G *,*)                              
+  if (&ENABSUBJ = F/G)            /* If F/G requested ? */                      
+     VGET (EMULTTOT) SHARED       /* check how many lines are pending */        
+     if (&EMULTTOT > 25)          /* max scl lines for API */                   
+        &VARWKCMD = ''            /* reset any command, and */                  
+        .msg = LONG024E           /* tell user to try other */                  
+  VER(&VARWKCMD,LIST CAN,CANCEL)  /* only other commands allowed */             
+  VER(&ENABSUBJ,NB,LIST SUBMIT,EDIT,APPEND,PACKAGE,F/G)                         
+  VER(&ENABAUTO,NB,LIST N,Y MSG=CIFV005)                                        
+  VER(&LNINTERP,NB,LIST N,Y MSG=CIFV005)                                        
+  VPUT (LNINTERP ENABSUBJ) PROFILE                                              
+  VPUT (ENABAUTO) SHARED                                                        
+  VER(&EEVINJCL,NB,LIST N,Y MSG=CIFV005)                                        
+                                                                                
+/*if (&VARWKCMD EQ 'CAN','CANCEL')   /* don't mask the cancel command */        
+/*   &VARWKCMD = ''                  /* we need to be able to detect  */        
+/*   .resp = END                     /* it and react accordingly      */        
+)FIELD                                                                          
+  FIELD(VARWKCMD) SCROLL(NO)  LEN(255)                                          
+)END                                                                            
