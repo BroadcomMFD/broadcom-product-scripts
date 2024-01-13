@@ -12,6 +12,18 @@ These older versions remain available only on the community website:
 
 To install older versions see the **LongNameInstall.V43.pdf** file on the community site.
 
+## Encoding 
+
+Here is what you can do in VSCode to ensure it uses the correct encodings:
+In the workspace folder where you are putting the files (meaning ultimately in your Git repository) do this:
+
+1) create folder called ".vscode" (if it doesn't already exist)
+2) In the folder, create the file "settings.json"
+3) Into the settings.json, put this content (including the brackets):
+
+        {
+        "files.encoding": "iso8859-1"
+        }
 
 
 ## Installation steps from GitHub
