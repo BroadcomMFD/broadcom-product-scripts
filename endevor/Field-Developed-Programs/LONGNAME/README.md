@@ -3,7 +3,19 @@
 This is the V70 version of items formerly referenced as the **LongName Utility FDP**, and found on the [Endevor community website
 ](https://community.broadcom.com/mainframesoftware/viewdocument/longname-utility-fdp?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2&tab=librarydocuments&LibraryFolderKey=&DefaultView=folder).
 
-These older versions remain available only on the community website:
+
+High level features of this solution include:
+
+- WideScreen - [Endevor QE Widescreen Support](https://community.broadcom.com//viewidea/?IdeationKey=73921ed5-8d52-4f32-b9eb-4571d9087ba1)
+- ESrchfor - [As an End  user I need a better search tool](https://community.broadcom.com//viewidea/?IdeationKey=fa5a61e9-e975-4a45-bd92-896731cd0e5c)
+- Diff Tool - [Enhanced element compare](https://communities.ca.com/ideas/235715290)
+- User Extension Points - [User Extension Points in QuickEdit and Endevor](https://community.broadcom.com//viewidea/?IdeationKey=ddd501cf-852a-4ffd-bdc0-2f0ce8d0f81d) ...
+- Project Switcher - [Endevor Project Switcher](https://community.broadcom.com//viewidea/?IdeationKey=5863efae-6330-4582-b2c0-63e1634145ed)
+
+
+
+Older versions remain available only on the [Endevor community website
+](https://community.broadcom.com/mainframesoftware/viewdocument/longname-utility-fdp?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2&tab=librarydocuments&LibraryFolderKey=&DefaultView=folder):
 
 - LongNameFDP_V69.zip
 - LongNameFDP_V67.zip
