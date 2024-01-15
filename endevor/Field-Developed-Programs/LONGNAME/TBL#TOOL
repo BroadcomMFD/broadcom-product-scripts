@@ -1,5 +1,5 @@
 /*     REXX   */
-/*  Written by Dan Walther                                         */
+/*  Written by Dan Walther        (v126)                              */
 /*  PURPOSE:                                                          */
 /*     The TBL#TOOL tool is a generic "Table lookup" Rexx             */
 /*     routine that processes every row of an input table, and        */
