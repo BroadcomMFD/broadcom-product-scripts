@@ -86,7 +86,7 @@ EnterLOGForUsers:
    WriteThismany = Min(HowManyEntries, usr.0)
    sa= 'Have' WriteThismany
    Push thisElement "@"DATE('S') TIME(),
-        "Processor="thisProcessor ECB_HIGH_RC
+        "Processor="thisProcessor REQ_ACTION_RC
    "Execio 1 DISKW USERLOG "
    "Execio" WriteThismany,
                "DISKW USERLOG (Stem usr. Finis"
@@ -102,7 +102,7 @@ EnterLOGForProcessors:
    WriteThismany = Min(HowManyEntries, prc.0)
    sa= 'Have' WriteThismany
    Push Userid() "@"DATE('S') TIME(),
-        "Element="thisElement ECB_HIGH_RC
+        "Element="thisElement REQ_ACTION_RC
    "Execio 1 DISKW PROCLOG "
    "Execio" WriteThismany,
                "DISKW PROCLOG (Stem prc. Finis"
