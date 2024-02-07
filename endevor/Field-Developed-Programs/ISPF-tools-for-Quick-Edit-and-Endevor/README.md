@@ -95,7 +95,7 @@ Press PF1 from ISRDDN to review help on all the commands available.
 
 
 ## PKGMAINT and PMAINTPN
-**
+
 These items offer Quick-Edit and Endevor users a fast method for managing packages. While displaying a list of packages, enter "TSO PKGMAINT" on the command line. From the panel displayed is prepared and submitted a job to COMMIT/RESET/DELETE the packages listed.
 
 ## ENDIEIM1 and ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro
