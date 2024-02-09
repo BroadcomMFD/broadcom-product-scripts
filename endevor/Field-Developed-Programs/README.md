@@ -3,6 +3,12 @@
 "Field Developed Program" (FDP) is a term used to refer to programs that were created to address specific needs or requirements of customers. These were constructed by your trusted Broadcom Services team and have been implemented at multiple Endevor customer sites.
 They are tested, secure and available for your use.
 
+## New to GitHub ? ## 
+
+Do you just want to copy and upload the code? 
+
+Here is a simple procedure you can use. Start from [GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts) and find the green box containing the text **'<> Code'**.  Choose one of the options that appears. If you select the **Download ZIP** option, then GitHub will create a zip file that you can extract to your desktop, and use TSO SEND to upload to a mainframe.  
+
 ## ACM-build-without-Generates
 
 Since 2005 [this FDP](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/Field-Developed-Processes/endevor/Field-Developed-Programs/ACM-build-without-Generates) has been used at sites that had not built their Automated Configuration Manager data. Generating elements at the time of conversion remains the best approach, but if the opportunity was missed this FDP can catch things up quickly and without risk.

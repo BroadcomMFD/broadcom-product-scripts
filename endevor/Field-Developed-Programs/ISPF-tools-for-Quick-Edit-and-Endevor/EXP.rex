@@ -4,7 +4,7 @@
        Usage: EXP (help) (with cursor positoned on the line to expand)
 
               Depending on the element type, it will look for keywords
-              like COPY, INCLUDE, PROC, -INC, etc. and then attempt
+              like COPY, INCLUDE, PROC, -INC  etc. and then attempt
               to parse a member name (following that keyword). If
               found will search a set of libraries (defined by your
               administrator) to find and insert that member as
@@ -40,7 +40,7 @@
               */
 
    ADDRESS ISREDIT "MACRO (PARMS)"
-   if wordpos("HELP",translate(parms)) > 0 then signal Help
+   if rc > 0 | wordpos("HELP",translate(parms)) > 0 then signal Help
 
    ADDRESS ISREDIT;
  /*                                                                 */
@@ -61,10 +61,12 @@
    ADDRESS ISPEXEC "CONTROL ERRORS RETURN" ;
 
    /* Determine whether we are in Edit or View  */
+   ADDRESS ISPEXEC "VGET (NDUSRXV) SHARED"
    ADDRESS ISREDIT "(EDITVIEW,TMP) = SESSION"
    x = EDITVIEW
 
-   IF EDITVIEW = "EDIT" then nop
+   IF NDUSRXV == "NDUSRXV" ,   /* if we're running under View User Command */
+    | EDITVIEW = "EDIT" then nop
    /* If in View, then we have to get Env,Sys,Sub etc from banner */
    ELSE,
       Do
@@ -137,8 +139,9 @@
         ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"
      end
      When reference_expanded = "W" then do
-        ZERRLM   = "The Cursor is not on a valid copy, or include line. ",
-                   "Could not find one of the copy keywords ("SEARCH_WORDS")",
+        ZERRLM   = "The Cursor is not on a valid copy, or include line.",
+                   "Could not find one of the copy keywords",
+                || "("SEARCH_WORDS")",
                    "on line:" strip(STRTLINE,"L","0"),
                    "- '"strip(DATALINE,"B")"'"
         ZERRSM   = "Invalid Cusror line"
@@ -251,7 +254,6 @@ EXPAND_INCLUDE :
 Search_library_list:
 
 
-   sa = INCLUDE_LIBRARY_LIST  ;
    X = OUTTRAP("LINE.",99,"CONCAT")
 
    DO LIB = 1 TO WORDS(INCLUDE_LIBRARY_LIST) ;
@@ -276,7 +278,7 @@ Search_library_list:
 Get_Endevor_Classification:
 
    reference_expanded = "V" ;     /* We are looking for a banner  */
-   /*  Find Endevor banner info (are we in Browse/History/Changes view) */
+   /*  Find Endevor banner info (are we in Browse/History/Changes */
    ADDRESS ISREDIT "SEEK '**    ENVIRONMENT:' First "
    if RC = 0 then do /* if we found a valid banner */
      /* Yes - then set an indent prefix and save the values like QE */
@@ -325,8 +327,8 @@ Help: /* Display Macro Help Text */
    text to scroll, perhaps in a pop-up window...
    */
 blockFound = 0
-Do i = 1 to Sourceline()   /* First letss check there IS a comment block */
-   if wordpos("/*",Sourceline(i)) = 1 then    /* yes found a block start */
+Do i = 1 to Sourceline()   /* First lets check there IS a comment block */
+   if wordpos("/*",Sourceline(i)) = 1 then    /* yes found a blk start */
       blockFound = i                          /* save the start line */
    if blockFound > 0 then                     /* look for the end */
       if strip(sourceline(i)) == "*/" then do /* look for a terminator */
@@ -343,3 +345,4 @@ end
    */
 Say "Unfortuantely this Rexx doesn't do help, Please contact the developer"
 exit 28
+

@@ -1,6 +1,5 @@
 /* REXX  */
 
-
    ADDRESS ISPEXEC
             'VGET (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ',
                  ' EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ',
@@ -9,8 +8,9 @@
 
    if DoTrace = 'Y' then Trace ?r
 
-   /* Start with an Empty list of Library names */
-   INCLUDE_LIBRARY_LIST = ' ' ;
+   /* Start with an Empty list of Library names & search words */
+   INCLUDE_LIBRARY_LIST = ''
+   Search_Words = ''
 
    /* Use the VGET variables to know the Endevor Classification  */
    /* for the element being Edited or Viewed                     */
@@ -32,7 +32,8 @@
       INCLUDE_LIBRARY_LIST =,
             'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE',
             'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM2.INCLUDE'
-      return Search_Words ' || ' INCLUDE_LIBRARY_LIST
+      /* Return both lists separated by double bar */
+      return strip(Search_Words,'B')'||'strip(INCLUDE_LIBRARY_LIST,'B')
       End;
 
    /* If editing a JCL element ...                                 */
@@ -48,8 +49,7 @@
       Search_Words = "COPY ++INCLUDE -INC INCLUDE PROC" ;
       End
 
-
-   /* Looking at the DEV EN$ironment  ?   */
+   /* Looking at the DEV ENvironment      */
    IF EN$BENV = 'DEV' THEN,
       INCLUDE_LIBRARY_LIST =,
             'SYSDE32.NDVR.'EN$BENV'.'EN$BSYS'.'EN$BSBS'.'lastnode,
@@ -63,11 +63,16 @@
             'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
             'SYSDE32.NDVR.SHARED.PROD.'lastnode
    Else,
+   IF EN$BENV = 'EMER' THEN,
+      INCLUDE_LIBRARY_LIST =,
+            'SYSDE32.NDVR.EMER.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSDE32.NDVR.SHARED.PROD.'lastnode
+   Else,
    IF EN$BENV = 'PRD' THEN,
       INCLUDE_LIBRARY_LIST =,
             'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
             'SYSDE32.NDVR.SHARED.PROD.'lastnode
 
-
-  return Search_Words ' || ' INCLUDE_LIBRARY_LIST
-
+  /* Return both lists separated by double bar */
+  return strip(Search_Words,'B')'||'strip(INCLUDE_LIBRARY_LIST,'B')

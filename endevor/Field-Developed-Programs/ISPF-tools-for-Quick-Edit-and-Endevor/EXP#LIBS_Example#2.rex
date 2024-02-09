@@ -112,5 +112,6 @@
   If lastnode = 'PROCLIB' then,
     Search_Words = "PROC= ++INCLUDE -INC EXEC   " ;
 
-  return Search_Words ' || ' INCLUDE_LIBRARY_LIST
+  /* Return both lists separated by double bar */
+  return strip(Search_Words,'B')'||'strip(INCLUDE_LIBRARY_LIST,'B')
 
