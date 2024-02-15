@@ -12,4 +12,4 @@ Currently available samples:
   implement a batch downloader for text reports into a merged local file.
 
 - [Find Failed Jobs](find-failed-jobs) - A bash script leveraging the View plug-in for Zowe CLI to
-  locate failed jobs and optinally download and search within their content.
+  locate failed jobs and optionally search for text within their output.

@@ -12,9 +12,9 @@
 ###     - https://formulae.brew.sh/formula/coreutils
 ###     - https://formulae.brew.sh/formula/grep
 ###
-### Zowe CLI and the Zowe CLI View plugin must be installed and configured
-### before use. You must also specify a value for any empty variable in the
-### CONFIGURATION section below.
+### Zowe CLI and the View plug-in must be installed and configured before use.
+### You must also specify a value for any empty variable in the CONFIGURATION
+### section below.
 ###
 
 ### CONFIGURATION ###
@@ -45,9 +45,9 @@ USAGE
 
     $0 [OPTION]...
 
-    The script will use the View Zowe CLI plugin to locate failed jobs in a single View database and
-    optionally search for text within the job outputs. Any combination of the following arguments
-    can be specified to customize the script behavior.
+    The script uses the View plug-in for Zowe CLI to locate failed jobs in a single View database
+    and optionally search for text within the job outputs. Any combination of the following
+    arguments can be specified to customize the script behavior.
 
         --help              Prints this help text, then exits.
 
