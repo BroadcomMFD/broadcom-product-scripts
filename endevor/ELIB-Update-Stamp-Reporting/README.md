@@ -15,7 +15,7 @@ When you complete the setup and submit the JCL, you will be given a report like 
     CADEMO.ENDV.ELIB.DEVQE.DELTA00.COBBAT        CLUSTER  VS  ?? 2109  
     CADEMO.ENDV.ELIB.DEVQE.DELTA00.COPY          CLUSTER  VS  ?? 897   
 
-The report only lists ELIB datasets whose "LAST UPDATE STAMP" value is equal to or greater than the THRESHLD value. Report details include the ELIB dataset name, CLUSTER or NONVSAM, the DSORG and RECFM values, and the "LAST UPDATE STAMP" value.
+The report only lists ELIB datasets whose "LAST UPDATE STAMP" value is equal to or greater than the THRESHLD value as set in the JCL. Report details include the ELIB dataset name, CLUSTER or NONVSAM, the DSORG and RECFM values, and the "LAST UPDATE STAMP" value.
 
 To setup the JCL for your use:
  
