@@ -4,6 +4,8 @@
 //*-------------------------------------------------------------------
 //  EXPORT SYMLIST=(*)
 //*--                       / Search Libraries with this prefix
+//   SET HLQ=CADEMO.ENDV.PRCS.EMERQE
+//   SET HLQ=SHARE.ENDV.ELIB
 //   SET HLQ=CADEMO.ENDV
 //   SET ELIBS='.BASE .DELT .LIST'      <- text that implies ELIB
 //   SET THRESHLD=500      <- Report DSNS GE this STAMP value
@@ -11,7 +13,7 @@
 //**=================================================================**
 //LISTDSNS EXEC PGM=IDCAMS      <- List datasets with ELIBS hlq
 //SYSIN    DD  *,SYMBOLS=JCLONLY
- LISTCAT LEVEL('&HLQ') NAME
+ LISTCAT LEVEL('&HLQ') ALL
 //STEPLIB  DD DISP=SHR,DSN=SYS1.LINKLIB   <- Confirm or remove
 //AMSDUMP  DD SYSOUT=*
 //SYSPRINT  DD DSN=&&LISTCAT,DISP=(,PASS),
@@ -24,9 +26,14 @@
 //POSITION  DD *                <- Usable fields in IDCAM's SYSPRINT
   WhatKind 2 8
   Dataset 18 61
+  AVGLRECL_lit 38 45
+  inpAvgLrecl  58 63
 //OPTIONS   DD *,SYMBOLS=JCLONLY   <- Rexx snippet for Table Tool
+  $Table_Type = "positions"
   IF $row# < 1 THEN $SkipRow = 'Y'
+  If AVGLRECL_lit = "AVGLRECL" then  AvgLrecl = Strip(inpAvgLrecl)
   If WhatKind /= 'CLUSTER' & WhatKind /= 'NONVSAM' then $SkipRow = 'Y'
+  If WhatKind  = 'CLUSTER' & AvgLrecl /= '4088'    then $SkipRow = 'Y'
 **//Examine Dataset to determine whether it is an Elib  \\
   wanted = 'N'; srchStrings = '&ELIBS'
 *    loop thru your listed values for the JCL variable 'ELIBS'
@@ -38,8 +45,10 @@
 **\\Examine Dataset to determine whether it is an Elibs //
 **- Get physical attributes of Dataset
   X = LISTDSI("'"Dataset"'" DIRECTORY RECALL SMSINFO)
+  If SYSDSORG ='DA' then Say Dataset SYSLRECL SYSDSORG
 **- DSORG must be DA or VS for Elibs -
-  If SYSDSORG/='DA' & SYSDSORG/='VS' THEN $SkipRow = 'Y'
+  If SYSDSORG/='DA' & SYSDSORG/='VS'  THEN $SkipRow = 'Y'
+  If SYSDSORG ='DA' & SYSLRECL/= 4096 THEN $SkipRow = 'Y'
   ThisDSORG = Right(SYSDSORG,3)
   ThisRECFM = Right(SYSRECFM,3)
 **- Call BC1PNLIB with the INQUIRE request (in SYSIN)
