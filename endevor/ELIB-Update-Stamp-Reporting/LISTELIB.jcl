@@ -28,9 +28,7 @@
   NOTHING   NOTHING  SCANNING  A
   MODEL     REPORT   REPORTNG  1
 //POSITION  DD *                <- Usable fields in IDCAM's SYSPRINT
-  record        1 70             CLUSTER  or NONVSAM
   whatKind      2 8              CLUSTER  or NONVSAM
-  CLUSTER_lit   9 15             "CLUSTER"
   Dataset      18 61             Dataset name
   AVGLRECL_lit 38 45             "AVGLRECL"
   AvgLRECL     58 63             Average LRECL for CLUSTER
@@ -64,7 +62,7 @@
      If SYSLRECL = 4096 & SYSDSORG = 'DA' then, +
         ELIB_List = ELIB_List Dataset; +
      End;
-//REPORTNG  DD *,SYMBOLS=JCLONLY   <- Run BC1PNLIB for listed ELIBs
+//REPORTNG  DD *,SYMBOLS=JCLONLY   <- Run BC1PNLIB and report ELIBs
   Do w# = 1 to Words(ELIB_List); +
      Dataset = Word(ELIB_List,w#); +
      Say 'Processing' Dataset ; +

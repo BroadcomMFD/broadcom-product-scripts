@@ -16,7 +16,7 @@
     ADDRESS LINK 'BC1PNLIB'   ;  /* load from authlib */
     callRC= RC
 /*  CALL BC1PNLIB ;                                                  */
-    Say 'BC1PNLIB RC for' Dataset 'is' callRC;
+    Say 'ELIBSCAN - BC1PNLIB RC for' Dataset 'is' callRC;
 /*                                                                   */
 /*  If BC1PNLIB gets a high RC, then Dataset is not ELIB - skip it   */
     If callRC > 4 then Exit (0)
