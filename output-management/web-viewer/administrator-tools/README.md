@@ -1,6 +1,6 @@
 # Web Viewer 14 - Administrator Tools
 
-This directory contains several examples CLI scripts designed for use by Web Viewer 14
+This directory contains several example CLI scripts designed for use by Web Viewer 14
 administrators.
 
 ## Software Requirements
