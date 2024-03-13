@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ###
 ### Common logic shared by multiple sample scripts in the directory.

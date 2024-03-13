@@ -15,6 +15,9 @@ All the included scripts have been designed to be compatible with the following 
     - https://formulae.brew.sh/formula/bash
     - https://formulae.brew.sh/formula/coreutils
     - https://formulae.brew.sh/formula/grep
+  Make sure that the Bash 5 installation location is specified in your PATH environment
+  variable ahead of the system-provided (old) Bash executable. This should normally
+  happen automatically when using Homebrew.
 
 Additionally, Zowe CLI and the View plug-in are required for the following scripts:
 
