@@ -13,3 +13,6 @@ Currently available samples:
 
 - [Find Failed Jobs](find-failed-jobs) - A bash script leveraging the View plug-in for Zowe CLI to
   locate failed jobs and optionally search for text within their output.
+
+- [Administrator Tools](administrator-tools) - A set of script-based tools covering various
+  use cases targeted at product administrators.

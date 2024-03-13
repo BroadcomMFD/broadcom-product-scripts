@@ -1,0 +1,42 @@
+### Overview
+#
+# This file contains definitions for all the Web Viewer 14 servers in
+# your deployment that you wish to manage using the provided sample
+# scripts.
+#
+
+### File syntax
+#
+# 1. Empty lines are ignored.
+# 2. Lines starting with a # character are ignored.
+# 3. Lines starting with a [ bracket character define a group of servers.
+#    The group name must be fully enclosed in brackets ([...]).
+#    The value can contain spaces.
+# 4. Other lines contain Web Viewer 14 server definitions.
+#
+# At least one group must be defined and all server definitions must
+# be placed under a group.
+#
+
+### Server definition syntax
+# 
+# A server definition consists of the following properties separated by
+# semicolons in the following order:
+#
+# 1. Name - Single alphanumeric word uniquely identifying the instance.
+# 2. Protocol - The protocol used to access the instance: 'https' or 'http'
+# 3. Hostname - The fully qualified instance hostname or IP address.
+# 4. Port - The (TCP) port used by the instance.
+# 5. Description - Optional instance description (can contain spaces).
+#
+# Property values can not contain semicolons.
+#
+
+### Examples
+
+#[Primary]
+#PRIMARY;https;prod.example.com;443;Main production instance.
+#SECONDARY;https;prod.example.com;1443;Secondary production instance.
+
+#[Backup]
+#DR01;https;dr01.example.com;443;Disaster recovery instance.
