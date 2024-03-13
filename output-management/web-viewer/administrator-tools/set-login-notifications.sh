@@ -197,7 +197,7 @@ function printOperationSummary() {
     echo "Include server directory ... $(readableBoolean ${includeServers})"
     echo "Include server status ...... $(readableBoolean ${includeStatus})"
     echo "  ... with status legend ... $(readableBoolean ${includeStatusLegend})"
-    echo "Include timestatmp ......... $(readableBoolean ${includeTimestamp})"
+    echo "Include timestamp .......... $(readableBoolean ${includeTimestamp})"
     if [ ${#contentFiles[@]} -le 0 ]; then
     echo "Include static content ..... $(readableBoolean false)"
     else
