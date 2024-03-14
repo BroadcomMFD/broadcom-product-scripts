@@ -1,0 +1,52 @@
+PROC 0 DEBUG(NOO)                                                               
+/*-------------------------------------------------------------------*/         
+/*                                                                   */         
+/*  (C) 2002 COMPUTER ASSOCIATES INTERNATIONAL, INC.                 */         
+/*                                                                   */         
+/* NAME: ENDEVOR                                                     */         
+/*                                                                   */         
+/* FUNCTION: THIS CLIST ALLOWS THE ENDEVOR USER TO INVOKE            */         
+/*  ENDEVOR FOR OS/390 FROM WITHIN AN ISPF SESSION WITHOUT           */         
+/*  ALLOCATING THE ENDEVOR LIBRARIES TO THE STANDARD ISPF LIBRARY    */         
+/*  DEFINITIONS.  THE CLIST USES ISPF LIBDEF SEVICES TO ALLOCATE THE */         
+/*  PANEL (CSIQPENU), MESSAGE (CSIQMENU) AND SKELETON (CSIQSENU)     */         
+/*  DATA SETS. CSIQTENU IS ALSO NECESARY TO EXECUTE ESORT, ETC.      */         
+/*   THIS CLIST ALSO ESTABLISH AN ALTERNATE CLIST LIBRARY THROUGH    */         
+/*  THE TSO/E ALTLIB SERVICE.  THE ALTLIB SERVICE IS AVAILABLE ONLY  */         
+/*  WITH TSO/E VERSION 2 OR GREATER.  IF YOU ARE NOT RUNNING WITH    */         
+/*  TSO/E VERSION 2 THEN THE TWO ALTLIB COMMANDS MUST BE REMOVED OR  */         
+/*  COMMENTED.                                                       */         
+/*                                                                   */         
+/*   NOTE: IF THE ENDEVOR LOAD MODULES HAVE NOT BEEN PLACED IN       */         
+/*         LPA, LINKLST OR STEPLIB LIBRARIES, THE ISPF ISPLLIB DD    */         
+/*         STATEMENT CAN BE USED AS A SUBSTITUTE. ISPLLIB MUST BE    */         
+/*         ALLOCATED TO THE ENDEVOR AUTHORIZED LOAD LIBRARIES        */         
+/*         PRIOR TO INVOKING ENDEVOR.                                */         
+/*   NOTE: ALL DATA SET NAMES MUST BE CUSTOMIZED TO YOU SITE'S       */         
+/*         NAMING STANDARDS.                                         */         
+/*                                                                   */         
+/*-------------------------------------------------------------------*/         
+CONTROL NOLIST NOMSG                                                            
+IF (&STR(&DEBUG) EQ YES) THEN +                                                 
+  CONTROL LIST MSG                                                              
+                                                                                
+/*-------------------------------------------------------------------*/         
+/* VERIFY THAT ISPF IS ACTIVE.  IF ISPF IS NOT ACTIVE, WRITE AN ERROR*/         
+/* MESSAGE AND TERMINATE THE CLIST.                                  */         
+/*-------------------------------------------------------------------*/         
+IF (&STR(&SYSISPF) NE &STR(ACTIVE)) THEN +                                      
+  DO                                                                            
+    WRITE &STR(*------------------------------------------------*)              
+    WRITE &STR(* THIS CLIST IS AVAILABLE ONLY IF ISPF IS ACTIVE *)              
+    WRITE &STR(*------------------------------------------------*)              
+    EXIT CODE(16)                                                               
+  END                                                                           
+                                                                                
+/*-------------------------------------------------------------------*/         
+/* INVOKE THE ENDEVOR/MVS EDIT ELEMENT DIALOG DRIVER.                */         
+/*-------------------------------------------------------------------*/         
+ISPEXEC SELECT CMD(LONGNAME) NEWAPPL(CTLI) PASSLIB                              
+/*-------------------------------------------------------------------*/         
+/* TERMINATE WITH A RETURN CODE ZERO.                                */         
+/*-------------------------------------------------------------------*/         
+EXIT CODE(0)                                                                    

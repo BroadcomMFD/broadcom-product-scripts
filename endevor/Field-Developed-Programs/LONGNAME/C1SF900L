@@ -1,0 +1,96 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+/* Following lines inserted for Endevor Action Bar/CUA support...        */     
+ 0C TYPE(PT)                /* Panel Title */                                   
+ 0A TYPE(NT)                /* normal text */                                   
+ 0B TYPE(AB)                /* Action bar Item */                               
+ 2D TYPE(ABSL) GE(ON)       /* action bar separator */                          
+ 16 TYPE(VOI) PADC(USER)    /* Var output info - Panel Title/navigation */      
+ 1D TYPE(LI) PADC(USER)     /* Scroll Indicator Var                     */      
+ 27 AREA(SCRL) EXTEND(ON)   /* Scrollable area - support small screens */       
+ 28 TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+ 14 TYPE(NEF) CAPS(ON) PADC(USER) /* Normal Entry Field - cmd, scroll etc*/     
+ 0d TYPE(PS)                /* Point and shoot */                               
+/* End Action Bar Support Attributes                                     */     
+   @ TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)                              
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)      /* UNIQUE ATTRIBUTES FOR   */          
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  /* DASHES AND NULL PADDING */          
+   › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                      
+   | TYPE(OUTPUT) INTENS(LOW)                                                   
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI)                                
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM)                                
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES)                                
+)BODY EXPAND(\\) CMD(ZCMD)                                                      
+%\-\  TRANSFER LONGNAME ELEMENTS  \-\                                           
+%Command ===>_ZCMD                                                             +
++                                                                               
++CCID%===>^EEVCCID     +  Comment%===>^EEVCOMM                                 +
++                                                                               
++From Location:                         Action Options:                         
++  ENVIRONMENT%===>_ENVIRON +             Delete 'FROM' Elm%===>_Z+(Y/N)        
++  SYSTEM     %===>_SYSTEM  +             Generate Element %===>_Z+(Y/N)        
++  SUBSYSTEM  %===>_SUBSYS  +             Override Signout %===>_Z+(Y/N)        
++  ELEMENT:                               Procerror Group  %===>_VARFPGRP+      
+%>@ELEMENT                                                                   Z 
++  TYPE       %===>_TYPE    +             Sync             %===>_Z+(Y/N)        
++  STAGE      %===>_Z+                    With History     %===>_Z+(Y/N)        
+                                    +     Retain Signout   %===>_Z+(Y/N)        
++To Location:                             Signout To       %===>_VARSETSO+      
++  ENVIRONMENT%===>_VNBF9ENV+             Ignore Gen Failed%===>_Z+(Y/N)        
++  SYSTEM     %===>_VNBF9SYS+             Uppercase Element%===>_Z+(Y/N)        
++  SUBSYSTEM  %===>_VNBF9SBS+                                                   
++  ELEMENT:                                                                     
+%>@ELEMENTT                                                                  Z 
++  TYPE       %===>_VNBF9TYP+                                                   
++  STAGE      %===>_Z+                                                          
++                                                                               
+)INIT                                                                           
+  .HELP = CITF9000                                                              
+  .ZVARS = '(VNBF9NOD VNBF9NOG +                                                
+             C1SISOFR ELEMENI VARSYNC STAGE VNBF9HIS VARRTNSO +                 
+             EVLNUIGN EVLNUPYN ELEMENTI VNBF9STG )'                             
+  &LIST2 = 'Y N'                                                                
+  &VNBF9ENV = &ENVIRON                                                          
+  &VNBF9SYS = &SYSTEM                                                           
+  &VNBF9SBS = &SUBSYS                                                           
+  &VNBF9TYP = &TYPE                                                             
+  &ELEMENTT = &ELEMENT                                                          
+  &VNBF9STG = &STAGE                                                            
+  IF (&VNBF9NOD = ' ')                                                          
+    &VNBF9NOD = 'N'                                                             
+  IF (&VNBF9NOG = ' ')                                                          
+    &VNBF9NOG = 'Y'                                                             
+  IF (&C1SISOFR = ' ')                                                          
+    &C1SISOFR = 'N'                                                             
+  IF (&VARSYNC  = ' ')                                                          
+    &VARSYNC  = 'N'                                                             
+  IF (&VNBF9HIS = ' ')                                                          
+    &VNBF9HIS = 'N'                                                             
+  IF (&VARRTNSO = ' ')                                                          
+    &VARRTNSO = 'N'                                                             
+  IF (&EVLNUIGN = ' ')                                                          
+    &EVLNUIGN = 'N'                                                             
+  IF (&EVLNUPYN = ' ')                                                          
+    &EVLNUPYN = 'Y'                                                             
+)PROC                                                                           
+  VER  (&VNBF9NOD,NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&VNBF9NOG,NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&C1SISOFR,NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&VARSYNC, NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&VNBF9HIS,NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&VARRTNSO,NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&EVLNUIGN,NB,LIST N,Y MSG=CIFV005)                                      
+  VER  (&EVLNUPYN,NB,LIST N,Y MSG=CIFV005)                                      
+  IF (&EVLNUPYN = 'Y')                                                          
+     &ELEMENT  = UPPER(ELEMENT)                                                 
+     &ELEMENTT = UPPER(ELEMENTT)                                                
+  VPUT (VNBF9NOD VNBF9NOG EVLNUIGN EVLNUPYN) PROFILE                            
+  VPUT (C1SISOFR VARSYNC STAGE VNBF9HIS VARRTNSO VNBF9STG) PROFILE              
+  VPUT (VNBF9SYS VNBF9SBS VNBF9TYP ELEMENTT VNBF9ENV VNBF9STG) PROFILE          
+)FIELD                                                                          
+  FIELD(ZCMD)     SCROLL(NO)  LEN(255)                                          
+  FIELD(ELEMENT)  SCROLL(YES) LEN(250) IND(ELEMENI)                             
+  FIELD(ELEMENTT) SCROLL(YES) LEN(250) IND(ELEMENTI)                            
+)END                                                                            

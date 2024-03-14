@@ -1,0 +1,307 @@
+//********************************************************************  00000100
+//* EHISAMPRC:  Endevor sample processor for Assemblies                 00000200
+//*                                                                     00000300
+//*        This sample version demonstrates the changes required        00000301
+//*        to check the return code from the compile/assemble           00000302
+//*        and if there are errors to use the ENDVHIPR rexx routine     00000303
+//*        to extract and summarise these messages which are then       00000304
+//*        passed by ENUSSUTL to so they can be seen in the C1MSGS.     00000305
+//*                                                                     00000306
+//*        This might be enough for some users - if they get into       00000307
+//*        habit of viewing C1MSGS when the RC>0 they will see a        00000308
+//*        quick recap of their source errors.                          00000309
+//*                                                                     00000310
+//*        Then the processor saves a copy of the erros in a            00000311
+//*        new catalogued file (the old one if any is deleted)          00000312
+//*        so that the Quick Edit Initialisation macro can parse        00000313
+//*        and insert the messages into the element being edited        00000314
+//*        (see sample clist IEDITERR) which checks the users           00000315
+//*        preference (EHIQEM) to decide if the messages should         00000316
+//*        be inserted.  For assembler this is simple you want          00000317
+//*        All the TRM messages, for other compilers you need to        00000318
+//*        skip/ignore all other content.                               00000319
+//*                                                                     00000320
+//*        Follow the references to ASMTRM and ASMERR to find the       00000324
+//*        important changes if you want to retrofit this support       00000325
+//*        into your own processors.                                    00000326
+//*                                                                     00000327
+//*        Note: Review the dataset name assigned to ASMERR it may      00000328
+//*        be appropriate to chose a naming standard that allows        00000329
+//*        any user to view (public) and/or set a dataset retention     00000330
+//*        so that these files are automatically discarded after        00000331
+//*        a few days and NOT migrated.                                 00000332
+//*                                                                     00000333
+//*        Every symbolic is more or less self explanatory.             00000340
+//*        See Type defn for ASMPGM and related Pprocessor Groups.      00000400
+//*        Processor Group naming standard:  ccoed[zzz]                 00000500
+//*          cc = Compiler                                              00000600
+//*            LE = LE version of standard IBM compiler                 00000700
+//*            PR = Pre-LE version of standard IBM compiler             00000800
+//*            NI = Non-IBM compiler                                    00000900
+//*          o = Operating system                                       00001000
+//*            M = MVS                                                  00001100
+//*            V = VM                                                   00001200
+//*            E = VSE                                                  00001300
+//*          e = Environment                                            00001400
+//*            B = Batch or TSO environment                             00001500
+//*            C = CICS environment                                     00001600
+//*            I = IMS/DC environment                                   00001700
+//*            D = IDMS/DC environment                                  00001800
+//*          d = Database requirement                                   00001900
+//*            X = No database required                                 00002000
+//*            1 = Datacom database required (the preferred #1 db)      00002100
+//*            2 = DB2 database required (the db with a 2 in its name)  00002200
+//*            3 = IMS database required (the db with a 3-char name)    00002300
+//*            4 = IDMS database required (the db with a 4-char name)   00002400
+//*          zzz = Unique requirements (blank if none)                  00002500
+//********************************************************************  00002600
+//GASM     PROC PARMA=,                     CONPARMS first parms        00002700
+//              PARMZ=,                     CONPARMS last  parms        00002800
+//              RELINK=NO,                  RELINK Impacted loads?      00002900
+//              PHL=PHL,                    Set product dsname HLQ      00003000
+//              PFX='&PHL..&#BASEPRFX.',    Endevor dsname prefix       00003100
+// GAPFX='&PHL..&C1SY..&SUBSYS..&C1EN(1,1)&C1S#.', EA DSN prefix        00003200
+//              ADATA='N',                  Create SYSADATA?            00003300
+// ADATADSN='PUBLIC.&C1SY..&C1SU..&C1EN(1,1)&C1S#..ADATA',              00003400
+//   ASMERR='PUBLIC.&C1SY..&C1SU..&C1EN(1,1)&C1S#..&C1TY..&C1ELEMENT',  00003500
+//              SUBSYS='BASE',              Subsys for main code line   00003600
+//              LL='LOADLIB',               Last qualifier of loadlib   00003700
+//              VIO='SYSDA',                UNIT= for utility data sets 00003800
+//              MACLIB='SYS1.MACLIB',       z/OS SYS1.MACLIB            00003900
+//              MODGEN='SYS1.MODGEN',       z/OS SYS1.MODGEN            00004000
+//              XMACLIB1='SYS1.MACLIB',     External macro library      00004100
+//              XMACLIB2='SYS1.MACLIB',     External macro library      00004200
+//              CLELKED='CEE.SCEELKED',     COBOL\LE CALL library       00004300
+//              CIILIB='IBMPROD.V1R4M0.COB2LIB',  COBOL II CALL lib     00004400
+//              SDSNLOAD='&#SDSNLOAD',      DB2 SDSNLOAD                00004500
+//              SDFHLOAD='&#SDFHLOAD',      CICS SDFHLOAD               00004600
+//              XOBJLIB1='NULLFILE',        External macro library      00004700
+//              XOBJLIB2='NULLFILE',        External macro library      00004800
+//              XDCMAC='SYSDEV.XDC.MACLIB', External macro library      00004900
+//              SEQLIST='N'                 Create sequential listing   00005000
+//*==================================================================== 00005100
+//*        Allocate the output listing and object data sets             00005200
+//*==================================================================== 00005300
+//INITLIST EXEC PGM=BC1PDSIN,MAXRC=0                                    00005400
+//C1INIT01 DD   DSN=&&ASMLST,DISP=(,PASS),                              00005500
+//              SPACE=(CYL,(5,5)),                                      00005600
+//              DCB=(RECFM=FBA,LRECL=133,DSORG=PS)                      00005700
+//C1INIT02 DD   DSN=&&ASMTRM,DISP=(,PASS),                              00005800
+//              SPACE=(CYL,(5,5)),                                      00005900
+//              DCB=(RECFM=FBA,LRECL=133,DSORG=PS)                      00006000
+//C1INIT03 DD   DSN=&&LNKLST,DISP=(,PASS),                              00006100
+//              SPACE=(CYL,(2,1)),                                      00006200
+//              DCB=(RECFM=FBA,LRECL=121,BLKSIZE=1210,DSORG=PS)         00006300
+//C1INIT04 DD   DSN=&&ASMOBJ,DISP=(,PASS,DELETE),                       00006400
+//              SPACE=(CYL,(3,5),RLSE),                                 00006500
+//              DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS)           00006600
+//C1INIT05 DD   DSN=&&ASMSUM,DISP=(,PASS,DELETE),                       00006700
+//              SPACE=(TRK,(3,5),RLSE),                                 00006800
+//              DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS)           00006900
+//*                                                                     00007000
+//IFADAT1  IF   ('&ADATA' EQ 'Y') THEN                                  00007100
+//ADATA    EXEC PGM=IEFBR14                                             00007200
+//DD1      DD   DSN=&ADATADSN,DISP=(MOD,CATLG),                         00007300
+//         SPACE=(TRK,(1,150,10)),                                      00007400
+//         DSNTYPE=LIBRARY,                                             00007500
+//         DCB=(RECFM=VB,LRECL=32756,BLKSIZE=32760)                     00007600
+//IFADAT1  ENDIF                                                        00007700
+//*==================================================================== 00007800
+//*        Invoke Assembler                                             00007900
+//*==================================================================== 00008000
+//COMPILE  EXEC PGM=CONPARMX,COND=(0,NE,INITLIST),MAXRC=4,              00008100
+//             PARM=(ASMA90,'(&PARMA)',$$$$DFLT,&C1PRGRP,               00008200
+//                   &C1ELEMENT,'(&PARMZ)','Y','N')                     00008300
+//*                                                                     00008400
+//STEPLIB  DD DSN=&MyLOADLibrary,DISP=SHR                               00008500
+//*                                                                     00008600
+//PARMSDEF DD DISP=SHR,DSN=&PFX..PARMS,                                 00008700
+//         MONITOR=COMPONENTS,ALLOC=PMAP                                00008800
+//*-------------------------------------------------------------------- 00008900
+//*        Expand libraries needed by ASMA90.                           00009000
+//*!!!!!!! SYSLIB DD is last; can add to concatenation list inline !!!! 00009100
+//*-------------------------------------------------------------------- 00009200
+//SYSIN    DD   DSN=&C1BASELIB(&C1ELEMENT),DISP=SHR                     00009310
+//SYSLIN   DD   DSN=&&ASMOBJ,DISP=(OLD,PASS)                            00009320
+//SYSPUNCH DD   DUMMY                                                   00009330
+//SYSUT1   DD   UNIT=&VIO,SPACE=(CYL,(5,3)),DCB=BLKSIZE=32760           00009340
+//SYSUT2   DD   UNIT=&VIO,SPACE=(CYL,(5,3))                             00009350
+//SYSUT3   DD   UNIT=&VIO,SPACE=(CYL,(5,3))                             00009360
+//SYSPRINT DD   DSN=&&ASMLST,DISP=(OLD,PASS)                            00009370
+//SYSTERM  DD   DSN=&&ASMTRM,DISP=(OLD,PASS)                            00009380
+//*------------------------------------------------------------------   00009390
+//*        Macro libraries for this Endevor System                      00009391
+//*------------------------------------------------------------------   00009392
+//SYSLIB   DD   DSN=&PFX..ASMMAC,                                       00009393
+//         DISP=SHR,MONITOR=COMPONENTS,ALLOC=PMAP                       00009394
+//IFEA     IF   ('&C1SU' EQ 'EA') THEN                                  00009395
+//         DD   DSN=&GAPFX..ASMMAC,                                     00009396
+//         DISP=SHR,MONITOR=COMPONENTS,ALLOC=PMAP                       00009397
+//IFEA     ENDIF                                                        00009398
+//*------------------------------------------------------------------   00009399
+//*        z/OS system macro libraries                                  00009400
+//*------------------------------------------------------------------   00009401
+//         DD   DSN=&MACLIB,DISP=SHR,MONITOR=COMPONENTS                 00009402
+//         DD   DSN=&MODGEN,DISP=SHR,MONITOR=COMPONENTS                 00009403
+//*------------------------------------------------------------------   00009404
+//*        External macro libraries                                     00009405
+//*------------------------------------------------------------------   00009406
+//         DD   DSN=&XMACLIB1,DISP=SHR,MONITOR=COMPONENTS               00009407
+//         DD   DSN=&XMACLIB2,DISP=SHR,MONITOR=COMPONENTS               00009408
+//         DD   DSN=CAI.S910.MACLIB,DISP=SHR,MONITOR=COMPONENTS         00009409
+//IFADAT2  IF   ('&ADATA' EQ 'Y') THEN                                  00009410
+//         DD   DSN=&XDCMAC,DISP=SHR                                    00009500
+//IFADAT2  ENDIF                                                        00009600
+//IFADAT3  IF   ('&ADATA' EQ 'Y') THEN                                  00009700
+//SYSADATA DD    DISP=SHR,DSN=&ADATADSN(&C1ELEMENT),                    00009800
+//         MONITOR=COMPONENTS,                                          00009900
+//         SPACE=(TRK,(1,150,10),RLSE)                                  00010000
+//IFADAT3  ENDIF                                                        00010100
+//*==================================================================== 00010200
+//*        Copy object to .OBJLIB data set                              00010300
+//*==================================================================== 00010400
+//OBJCOPY  EXEC PGM=IEBGENER,MAXRC=0,COND=(5,LT)                        00010500
+//SYSPRINT DD   DUMMY                                                   00010600
+//SYSUT1   DD   DSN=&&ASMOBJ,DISP=(OLD,DELETE)                          00010700
+//SYSUT2   DD   DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE,            00010800
+//              DSN=&PFX..OBJLIB(&C1ELEMENT.)                           00010900
+//SYSIN    DD   DUMMY                                                   00011000
+//*                                                                     00011100
+//*---------------------------------------------------------------------00011200
+//* Clean up old Error Message file if it exists                        00011300
+//*   Note: Public.data sets will probably just expire but we don't     00011400
+//*         want them to hang around if there are no errors.  Using     00011500
+//*         idcams will remove migrated datasets without recall.        00011600
+//*---------------------------------------------------------------------00011700
+//DELERRS  EXEC PGM=IDCAMS,MAXRC=0                                      00011800
+//SYSPRINT DD SYSOUT=*                                                  00011900
+//FILEDD   DD DISP=SHR,DSN=&ASMERR,ALLOC=COND                           00012000
+//SYSIN    DD *                                                         00012100
+  DELETE &ASMERR -                                                      00012200
+    PURGE SCRATCH FILE(FILEDD)                                          00012300
+  IF MAXCC = 8 THEN -                                                   00012400
+    DO                                                                  00012500
+      SET MAXCC = 0                                                     00012600
+    END                                                                 00012700
+//*-------------------------------------------------------------------- 00012800
+//*     ANY COMPILER MESSAGES?                                          00012900
+//*-------------------------------------------------------------------- 00013000
+//IFCMPERR IF (COMPILE.RC > 0) THEN                                     00013100
+//*                                                                     00013200
+//ENDVHIPR EXEC PGM=IRXJCL,PARM='ENDVHIPR'                              00013300
+//INPUT    DD   DSN=&&ASMTRM,DISP=(OLD,PASS)                            00013400
+//ENUSSIN  DD   DSN=&&ASMSUM,DISP=(OLD,PASS)                            00013500
+//SYSTSPRT DD   SYSOUT=*                                                00013600
+//SYSEXEC  DD DISP=SHR,DSN=&MyCLS2Library                               00013700
+//* IF SYSEXEC DD USED IN F/G DON'T NEED IT HERE                        00014000
+//*    BUT THEN FOR BATCH ADD TO SCMM@LIB OR SKELETON                   00014100
+//*-------------------------------------------------------------------- 00014200
+//*        Now use ENUSSUTL to log the messages in C1MSGS1              00014300
+//*-------------------------------------------------------------------- 00014400
+//ENUSSMSG EXEC PGM=ENUSSUTL                                            00014500
+//ENUSSIN  DD   DSN=&&ASMSUM,DISP=(OLD,PASS)                            00014600
+//*                                                                     00014700
+//*-------------------------------------------------------------------- 00014800
+//*        Copy ASMTRM to PUBLIC.Dataset to assist Q/E users            00014900
+//*-------------------------------------------------------------------- 00015000
+//TRMCOPY  EXEC PGM=IEBGENER,MAXRC=0                                    00015100
+//SYSPRINT DD   DUMMY                                                   00015200
+//SYSUT1   DD   DSN=&&ASMTRM,DISP=(OLD,PASS)                            00015300
+//SYSUT2   DD   DSN=&ASMERR,DISP=(,CATLG,DELETE),                       00015400
+//              SPACE=(TRK,(45,45),RLSE),                               00015500
+//              DCB=(RECFM=FBA,LRECL=133,DSORG=PS)                      00015600
+//SYSIN    DD   DUMMY                                                   00015700
+//*                                                                     00015800
+//IFCMPER$ ENDIF   * End of Compiler error code                         00015900
+//*                                                                     00016000
+//IFCOMPOK IF (COMPILE.RC < 5) AND (&RELINK EQ 'YES') THEN              00016100
+//*                                                                     00016200
+//*-------------------------------------------------------------------- 00016300
+//*        Fetch LINK DECK from concat for System  (Required)           00016400
+//*-------------------------------------------------------------------- 00016500
+//SYSLIN   EXEC PGM=IEBUPDTE,MAXRC=0                                    00016600
+//SYSPRINT DD   DUMMY                                                   00016700
+//SYSIN    DD   *                                                       00016800
+./  REPRO NEW=PS,NAME=&C1ELEMENT                                        00016900
+//SYSUT1   DD   DISP=SHR,DSN=&PFX..LNK,                                 00017000
+//              MONITOR=COMPONENTS,ALLOC=PMAP                           00017100
+//SYSUT2   DD   DSN=&&SYSLIN,DISP=(,PASS),                              00017200
+//              SPACE=(TRK,(10,10)),                                    00017300
+//              DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)                   00017400
+//*==================================================================== 00017500
+//*        LINK all impacted loads                                      00017600
+//*==================================================================== 00017700
+//RELINK   EXEC PGM=IEWL,MAXRC=4,                                       00017800
+//              COND=(0,LT,SYSLIN),                                     00017900
+//              PARM='LIST,MAP,XREF'                                    00018000
+//*-------------------------------------------------------------------- 00018100
+//*        Expand libraries needed by Binder.                           00018200
+//*!!!!!!! SYSLIB DD is last; can add to concatenation list inline !!!! 00018300
+//*-------------------------------------------------------------------- 00018400
+//SYSLIN   DD   DSN=&&SYSLIN,DISP=(OLD,DELETE)                          00018510
+//SYSLMOD  DD   DISP=SHR,MONITOR=COMPONENTS,FOOTPRNT=CREATE,            00018520
+//              DSN=&PFX..&LL                                           00018530
+//SYSUT1   DD   UNIT=&VIO,SPACE=(TRK,(1,1))                             00018540
+//SYSPRINT DD   DSN=&&LNKLST,DISP=(OLD,PASS)                            00018550
+//INCLIB   DD   DSN=&PFX..LNKINC,                                       00018560
+//              DISP=SHR,MONITOR=COMPONENTS,ALLOC=PMAP                  00018570
+//ASIQMOD  DD   DSN=&PFX..OBJLIB,                                       00018580
+//              DISP=SHR,MONITOR=COMPONENTS,ALLOC=PMAP                  00018590
+//SYSLIB   DD   DISP=SHR,DSN=&#H..$EMPTY    Empty lib to start concat   00018591
+//       IF ('&C1PRGRP(1,2)' EQ 'LE') THEN                              00018592
+//         DD   DISP=SHR,DSN=&CLELKED       COBOL\LE CALL library       00018593
+//       ELSE                                                           00018594
+//         DD   DISP=SHR,DSN=&CIILIB        COBOL II CALL libarary      00018595
+//       ENDIF                                                          00018596
+//       IF (&XOBJLIB1 NE 'NULLFILE') THEN                              00018597
+//         DD   DISP=SHR,MONITOR=COMPONENTS,DSN=&XOBJLIB1  Ext obj lib  00018598
+//       ENDIF                                                          00018599
+//       IF (&XOBJLIB2 NE 'NULLFILE') THEN                              00018600
+//         DD   DISP=SHR,MONITOR=COMPONENTS,DSN=&XOBJLIB2  Ext obj lib  00018601
+//       ENDIF                                                          00018602
+//         DD   DISP=SHR,DSN=&#SDFHLOAD,    CICS lib                    00018603
+//             MONITOR=COMPONENTS                                       00018604
+//         DD   DISP=SHR,DSN=&#SDSNLOAD,    DB2  lib                    00018605
+//             MONITOR=COMPONENTS                                       00018606
+//*==================================================================== 00018610
+//*        Copy listing to .LLISTLIB data set                           00018700
+//*==================================================================== 00018800
+//CONLIST  EXEC PGM=CONLIST,PARM=STORE,COND=EVEN                        00018900
+//C1LLIBO  DD   DSN=&PFX..LLISTLIB,                                     00019000
+//              DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE             00019100
+//C1BANNER DD   UNIT=&VIO,SPACE=(TRK,(1,1)),                            00019200
+//              DCB=(RECFM=FBA,LRECL=121,BLKSIZE=6171,DSORG=PS)         00019300
+//LIST01   DD   DSN=&&LNKLST,DISP=(OLD,DELETE)                          00019400
+//*                                                                     00019500
+//IFCOMPOK ENDIF                                                        00019600
+//*                                                                     00019700
+//*==================================================================== 00019800
+//*        Copy listing to .LISTLIB data set                            00019900
+//*==================================================================== 00020000
+//CONLIST  EXEC PGM=CONLIST,PARM=STORE,COND=EVEN                        00020100
+//C1LLIBO  DD   DSN=&PFX..LISTLIB,                                      00020200
+//              DISP=OLD,MONITOR=COMPONENTS,FOOTPRNT=CREATE             00020300
+//C1BANNER DD   UNIT=&VIO,SPACE=(TRK,(1,1)),                            00020400
+//              DCB=(RECFM=FBA,LRECL=121,BLKSIZE=6171,DSORG=PS)         00020500
+//       IF ((&C1EN EQ 'PRD') AND (&C1S# EQ '2') AND                    00020600
+//          (&SEQLIST EQ 'Y')) THEN                                     00020700
+//LIST01   DD   DSN=&&ASMTRM,DISP=(OLD,PASS)                            00020800
+//LIST02   DD   DSN=&&ASMLST,DISP=(OLD,PASS)                            00020900
+//       ELSE                                                           00021000
+//LIST01   DD   DSN=&&ASMTRM,DISP=(OLD,DELETE)                          00021100
+//LIST02   DD   DSN=&&ASMLST,DISP=(OLD,DELETE)                          00021200
+//       ENDIF                                                          00021300
+//*==================================================================== 00021400
+//*        Copy listing to sequential ds if PROD STAGE 2 & requested    00021500
+//*==================================================================== 00021600
+//       IF ((&C1EN EQ 'PRD') AND (&C1S# EQ '2') AND                    00021700
+//          (&SEQLIST EQ 'Y')) THEN                                     00021800
+//CONLIST2 EXEC PGM=CONLIST,PARM=PRINT,COND=EVEN                        00021900
+//C1PRINT  DD   DSN=&PHL..&#LISTDSN,DISP=(NEW,CATLG),                   00022000
+//              SPACE=(TRK,(15,15),RLSE),                               00022100
+//              DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)            00022200
+//C1BANNER DD   UNIT=&VIO,SPACE=(TRK,(1,1)),                            00022300
+//              DCB=(RECFM=FBA,LRECL=121,BLKSIZE=6171,DSORG=PS)         00022400
+//LIST01   DD   DSN=&&ASMTRM,DISP=(OLD,DELETE)                          00022500
+//LIST02   DD   DSN=&&ASMLST,DISP=(OLD,DELETE)                          00022600
+//       ENDIF                                                          00022700

@@ -1,0 +1,233 @@
+)CM *----------------------------------------------------------------*          
+)CM *                                                                *          
+)CM *  (C) 1987,2005 COMPUTER ASSOCIATES INTERNATIONAL, INC.         *          
+)CM *                                                                *          
+)CM * NAME: ENDSEESR                                                 *          
+)CM *                                                                *          
+)CM * PURPOSE: THIS SKELETON IS USED BY THE QUICK-EDIT ESRCHFOR CMD  *          
+)CM * TO CREATE JCL TO RETRIEVE A SELECTED SET OF ELEMENTS.          *          
+)CM *                                                                *          
+)CM *----------------------------------------------------------------*          
+)SEL &C1ESJ1 NE &Z                                                              
+&C1ESJ1                                                                         
+)ENDSEL                                                                         
+)SEL &C1ESJ2 NE &Z                                                              
+&C1ESJ2                                                                         
+)ENDSEL                                                                         
+)SEL &C1ESJ3 NE &Z                                                              
+&C1ESJ3                                                                         
+)ENDSEL                                                                         
+)SEL &C1ESJ4 NE &Z                                                              
+&C1ESJ4                                                                         
+)ENDSEL                                                                         
+//***************************************************************               
+//* Include Standard Symbols                                                    
+//**************************************************************                
+)IM SCMM@SYM                                                                    
+//***************************************************************               
+//* AUTHADD - AUTHORIZE LIBRARIES USING SYSVIEW                                 
+//**************************************************************                
+//*AUTHADD  EXEC PGM=IRXJCL,PARM='EZAUTH STEPLIB ADD'                           
+//*SYSEXEC  DD DISP=SHR,DSN=BST.SUPPNDVR.ISRCLIB                                
+//*SYSPRINT DD SYSOUT=*                                                         
+//*SYSTSPRT DD SYSOUT=*                                                         
+)CM )IM SCMM@LIB                                                                
+//*-------------------------------------------------------------------*         
+//*  ENDEVOR JCL STATEMENTS                                           *         
+//*-------------------------------------------------------------------*         
+//ENDESESR EXEC PGM=NDVRC1,                                                     
+//             DYNAMNBR=1500,                                                   
+//             REGION=6M,                                                       
+//             PARM='C1BM3000'                                                  
+//*                                                                             
+)IM SCMM@LIB                                                                    
+//*                                                                             
+)SEL &VARSILEV = Y                                                              
+//*-------------------------------------------------------------------*         
+//*  PANVALET AND LIBRARIAN SUPPORT.                                  *         
+//*-------------------------------------------------------------------*         
+//C1TPDD01 DD  UNIT=SYSDA,                                                      
+//             SPACE=(CYL,(1,1)),                                               
+//             DCB=(RECFM=VB,LRECL=260,BLKSIZE=6160)                            
+//C1TPDD02 DD  UNIT=SYSDA,                                                      
+//             SPACE=(CYL,(1,1)),                                               
+//             DCB=(RECFM=VB,LRECL=260,BLKSIZE=6160)                            
+//C1TPLSIN DD  UNIT=SYSDA,                                                      
+//             SPACE=(CYL,(1,1)),                                               
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=6160)                             
+//C1TPLSOU DD  UNIT=SYSDA,                                                      
+//             SPACE=(CYL,(1,1))                                                
+//C1PLMSGS DD  SYSOUT=*                                                         
+)ENDSEL                                                                         
+//*-------------------------------------------------------------------*         
+//*  OUTPUT DATA SETS                                                 *         
+//*-------------------------------------------------------------------*         
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSOUT   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+)SEL &PRNTOPT NE &Z                                                             
+//*-------------------------------------------------------------------*         
+//*  PRINT TO DDS (NEED ONE FOR EACH PRINT REQUEST)                   *         
+//*-------------------------------------------------------------------*         
+)DOT &ELSELTBN                                                                  
+//&ESRTGTEL DD DISP=SHR,                                                        
+//         DSN=&ESRCHPFX..&ESRCHSFX(&ESRTGTEL)                                  
+)ENDDOT                                                                         
+//*-------------------------------------------------------------------*         
+//*  TURN OFF SPARKY - NOT SUPPORTED FOR PRINT                        *         
+//*-------------------------------------------------------------------*         
+//EN$CAP00  DD DUMMY - DISABLE CONCURRENT PROCESSING                            
+)ENDSEL                                                                         
+)SEL &PRNTOPT EQ &Z                                                             
+//*-------------------------------------------------------------------*         
+//*  SET NUMBER OF CONCURRENT PROCESSORS DEPENDING ON NEED            *         
+//*-------------------------------------------------------------------*         
+//EN$CAP&CNTDYN DD DUMMY - ENABLE CONCURRENT PROCESSING                         
+)ENDSEL                                                                         
+//*-------------------------------------------------------------------*         
+//*  ENDEVOR CONTROL STATEMENTS                                       *         
+//*-------------------------------------------------------------------*         
+//BSTIPT01 DD *                                                                 
+)SEL &PRNTOPT EQ &Z                                                             
+SET OPTIONS COMMENT "RETRIEVE NO SIGNOUT FOR ENDEVOR SEARCH".                   
+SET OPTIONS CCID "ESRCHFOR".                                                    
+SET TO DSN  "&ESRCHPFX..&ESRCHSFX".                                             
+SET OPTIONS REPLACE NO SIGNOUT NOSEARCH.                                        
+)BLANK 1                                                                        
+)DOT &ELSELTBN                                                                  
+RETRIEVE ELE "&EEVETKEL"                                                        
+ FRO ENV "&EEVETKEN"  STA "&EEVETKSI" SYS "&EEVETKSY"                           
+ SUB "&EEVETKSB" TYP "&EEVETKTY" TO MEM "&ESRTGTEL".                            
+)BLANK 1                                                                        
+)ENDDOT                                                                         
+)ENDSEL                                                                         
+)SEL &PRNTOPT NE &Z                                                             
+SET OPTIONS COMMENT "PRINT &PRNTOPTN FOR ENDEVOR SEARCH".                       
+SET OPTIONS CCID "ESRCHFOR".                                                    
+SET OPTIONS NOSEARCH &PRNTOPT..                                                 
+)BLANK 1                                                                        
+)DOT &ELSELTBN                                                                  
+PRINT ELE "&EEVETKEL"                                                           
+ FRO ENV "&EEVETKEN"  STA "&EEVETKSI" SYS "&EEVETKSY"                           
+ SUB "&EEVETKSB" TYP "&EEVETKTY" TO DDN "&ESRTGTEL".                            
+)BLANK 1                                                                        
+)ENDDOT                                                                         
+)ENDSEL                                                                         
+)SEL &EEVINJCL = Y                                                              
+//*-------------------------------------------------------------------*         
+//*  INCLUDED JCL                                                     *         
+//*-------------------------------------------------------------------*         
+)SEL &VNBDD01 NE &Z                                                             
+&VNBDD01                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD02 NE &Z                                                             
+&VNBDD02                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD03 NE &Z                                                             
+&VNBDD03                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD04 NE &Z                                                             
+&VNBDD04                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD05 NE &Z                                                             
+&VNBDD05                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD06 NE &Z                                                             
+&VNBDD06                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD07 NE &Z                                                             
+&VNBDD07                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD08 NE &Z                                                             
+&VNBDD08                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD09 NE &Z                                                             
+&VNBDD09                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD10 NE &Z                                                             
+&VNBDD10                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD11 NE &Z                                                             
+&VNBDD11                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD12 NE &Z                                                             
+&VNBDD12                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD13 NE &Z                                                             
+&VNBDD13                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD14 NE &Z                                                             
+&VNBDD14                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD15 NE &Z                                                             
+&VNBDD15                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD16 NE &Z                                                             
+&VNBDD16                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD17 NE &Z                                                             
+&VNBDD17                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD18 NE &Z                                                             
+&VNBDD18                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD19 NE &Z                                                             
+&VNBDD19                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD20 NE &Z                                                             
+&VNBDD20                                                                        
+)ENDSEL                                                                         
+)ENDSEL                                                                         
+//**********************************************************************        
+//* DELETE ESRCHFOR TEMP LIBS                                                   
+//**********************************************************************        
+//DELALOC  EXEC PGM=IDCAMS                                                      
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD *                                                                 
+  DELETE &ESRCHPFX..ESRCHREP                                                    
+  SET MAXCC=0                                                                   
+//*                                                                             
+//*                                                                             
+//* NOW DO SUPERC/E                                                             
+//*                                                                             
+//SEARCH  EXEC PGM=ISRSUPC,                                           *         
+//            PARM=(SRCHCMP,                                                    
+//            '&OPTANYC &OPTMIXD FMSTOP LONGLN NOPRTCC NOSUMS IDPFX')           
+//NEWDD  DD DISP=SHR,DSN=&ESRCHPFX..&ESRCHSFX                                   
+//OUTDD  DD DSN=&ESRCHPFX..ESRCHREP,                                            
+//       DISP=(NEW,CATLG),RECFM=FB,UNIT=SYSDA,     * unit or mgmtclass          
+//       LRECL=202,BLKSIZE=27876,SPACE=(TRK,(1,10))   ,MGMTCLAS=MCWRKD          
+//SYSIN  DD *                                                                   
+NTITLE   'ENDEVOR SEARCHFOR'                                                    
+SLIST    OFF                                                                    
+)SETF LeftCMD = &LEFT(&SRCHCMD,23)                                              
+)IF &LeftCmd NE 'Extended-Search-Query' THEN )DO                                
+SRCHFOR  &SRCHCMD                                                               
+)ENDDO                                                                          
+)ELSE )DO                                                                       
+)SEL &SRCHCMD1 ^= &Z                                                            
+&SRCHCMD1                                                                       
+)ENDSEL                                                                         
+)SEL &SRCHCMD2 ^= &Z                                                            
+&SRCHCMD2                                                                       
+)ENDSEL                                                                         
+)SEL &SRCHCMD3 ^= &Z                                                            
+&SRCHCMD3                                                                       
+)ENDSEL                                                                         
+)SEL &SRCHCMD4 ^= &Z                                                            
+&SRCHCMD4                                                                       
+)ENDSEL                                                                         
+)SEL &SRCHCMD5 ^= &Z                                                            
+&SRCHCMD5                                                                       
+)ENDSEL                                                                         
+)SEL &SRCHCMD6 ^= &Z                                                            
+&SRCHCMD6                                                                       
+)ENDSEL                                                                         
+)ENDDO                                                                          
+)SEL &ESRNIGNC EQ '/'                                                           
+DPLINE '//*',1:3 * IGNORE JCL COMMENT LINES                                     
+)ENDSEL                                                                         
+//* ENDESESR GENERATED BY &ZUSER ON &ZDATE AT &ZTIME                            

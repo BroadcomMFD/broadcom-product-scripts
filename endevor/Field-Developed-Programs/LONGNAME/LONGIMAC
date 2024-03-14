@@ -1,0 +1,59 @@
+/* Rexx - LongName sample Edit Macro                                            
+                                                                                
+          You may customize this macro to your sites standards for example to   
+          enforce profile usage based on element type, CCID, Comments etc.      
+          however the delivered code should be de-activated only if you         
+          fully understand the implications - for example the FORCEAVE section  
+          is used to ensure that an END can be distinguished from an CANCEL     
+          when re-trying a failed update.                                       
+          */                                                                    
+address isredit                                                                 
+'MACRO (PARMS)' /* don't expect any parms on Imacro, but supported if needed */ 
+                                                                                
+/*        Use VGET to get the Current Element name (long), Environment, System  
+          Subsystem, Type and the optios; CCID, COmment and Override signout    
+                */                                                              
+address ispexec 'vget (EEVETKEL C1ENVMNT EEVETKSY EEVETKSB EEVETKTY' ,          
+                      'EEVOOSGN EEVCCID EEVCOMM FORCESAV EEVOOPRE)'             
+/*        Also get the other row variables like the last action date and time   
+          and package infor like the last source package or backout status      
+                */                                                              
+address ispexec 'vget (LNLADATE LNLATIME LNLACOMM LNDESCRP LNELMNAM LNLASACT' , 
+                      'LNDPKGIS LNDPKGIO LNDPKGDO LNDPKGBO EEVETDVL' ,          
+                      'EEVETDMS EEVETNS  EEVETPGR EEVETUID EEVETCCI' ,          
+                      'EEVETPRC EEVETNRC EEVETSO  USERDATA LNCSVSEQ' ,          
+                      'LNDPKGLK LNLKDATE LNLKTIME LNLOCKED',                    
+                      'EEVETKSI)'                                               
+                                                                                
+ChkEmpty: /* This check turns off ISPFs annoying default of NUM STD if empty */ 
+"(TOTLINES) = LINENUM .ZLAST"         /* Get the number of lines             */ 
+if TOTLINES = 0 then "NUM OFF"        /* If no data, turn off numbers        */ 
+                                                                                
+/* The following line changes to a profile that matches the Endevor type     */ 
+/* However the LongName utility now does that in the EDIT/VIEW service call  */ 
+/* so uncomment/adjust this line if that method doesn't work for you         */ 
+/* 'PROFILE' EEVETKTY '0' */                                                    
+                                                                                
+                                                                                
+if FORCESAV == 'YES' then do          /* If we are re-trying a failed edit   */ 
+   "change p'=' p'=' first"           /* make a pretend change so that END   */ 
+   "builtin reset change"             /* will perform a save                 */ 
+   'LINE_AFTER 0 = MSGLINE  "-WARNING- Add/Update failed - Use: END to',        
+                            'Save/retry, or CANCEL to Exit."'                   
+end                                                                             
+                                                                                
+if LNDPKGBO = 'Y' then                   /* If the element is backed out?    */ 
+   'LINE_AFTER 0 = MSGLINE  "-CAUTION- Element is backed out."'                 
+                                                                                
+if LNLOCKED = 'Y' then                   /* If the element is locked for Pkg */ 
+   'LINE_AFTER 0 = MSGLINE  "-WARNING- Element Locked for Pkg:' ,               
+                            ||LNDPKGLK 'From:'LNLKDATE left(LNLKTIME,5)'"'      
+                                                                                
+if EEVCCID == '' & EEVCOMM == '' then do /* CCID and Commment omitted?       */ 
+   'LINE_AFTER 0 = MSGLINE  "-CAUTION- Both CCID and Comment are blank, Use:',  
+                            'Edit menu to change."'                             
+end                                                                             
+else                                                                            
+   'LINE_AFTER 0 = NOTELINE "INFO - CCID:' EEVCCID 'Comment:' EEVCOMM'"'        
+                                                                                
+exit 1          /* always exit with RC:1 to reposition cursor to top line    */ 

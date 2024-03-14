@@ -1,0 +1,327 @@
+/* Rexx by Eoin O'Cleirigh                                           */         
+/*                                                                   */         
+/* Sample panel exit to simulate HILITE for Endevor messages in      */         
+/* ISPF browse                                                       */         
+/*                                                                   */         
+/* This will work in ISPF for OS/390 R10 or later.                   */         
+/*                                                                   */         
+/* Setup:                                                            */         
+/*                                                                   */         
+/*  Add the following lines to panel isrbroba:                       */         
+/*                                                                   */         
+/*  In the )attr section                                             */         
+/*                                                                   */         
+/*    /* Inserted Dynamic Attribute Character codes for EndvHigh */  */         
+/*     T  TYPE(CHAR) COLOR(TURQ)    /* Flower Box */                 */         
+/*     W  TYPE(CHAR) COLOR(WHITE)   /* Severe     */                 */         
+/*     R  TYPE(CHAR) COLOR(RED)     /* Error      */                 */         
+/*     Z  TYPE(CHAR) COLOR(PINK)    /* caution    */                 */         
+/*     Y  TYPE(CHAR) COLOR(YELLOW)  /* Warning    */                 */         
+/*     G  TYPE(CHAR) COLOR(GREEN)   /* Note       */                 */         
+/*     B  TYPE(CHAR) COLOR(BLUE)    /* default    */                 */         
+/*                                                                   */         
+/*  At the end of the )init section and the beginning of the )reinit:*/         
+/*                                                                   */         
+/*   &SHADOW=&ZDATA                                                  */         
+/*   PANEXIT((ZDATA,SHADOW,SHATOC,ZWIDTH,ZUSER,ZDSNT,ZMEMB,          */         
+/*            ZLINES,ZCOLUMS),REXX,%ENDVHIGH)                        */         
+/*                                                                   */         
+/*  In the )BODY section add a shadow variable called SHADOW by      */         
+/*   adding ,SHADOW after the word ZDATA                             */         
+/*                                                                   */         
+/*  At the end of the )proc section:                                 */         
+/*                                                                   */         
+/*   if (.resp = END) /* reset shadow Table of Contents */           */         
+/*       &SHATOC = ''                                                */         
+/*                                                                   */         
+/*  Usage:                                                           */         
+/*    Use Browse to browse this sample.  If you created your own     */         
+/*    browse panel, use the BROWSE service with the PANEL keyword.   */         
+/*                                                                   */         
+/*  Notes:                                                           */         
+/*                                                                   */         
+/*    Since this is only a 'screen scraper' it will not handle words */         
+/*    that have not been "seen" e.g. scrolling right/down etc.       */         
+/*                                                                   */         
+/*                                                                   */         
+/* THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF       */         
+/* "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE       */         
+/* FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES     */         
+/* ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE         */         
+/* CORRECTED.                                                        */         
+/*                                                                   */         
+/* Copyright (C) 1986-2017 CA. All Rights Reserved.                  */         
+/*                                                                   */         
+/*********************************************************************/         
+trace E                                                                         
+call isprexpx 'I'   /* Set up variables passed in to the panel exit  */         
+/* sa= "ZDSNT...:" ZDSNT    */                                                  
+/* sa= "ZMEMB...:" ZMEMB    */                                                  
+/* sa= "zuser...:" zuser    */                                                  
+/* sa= "zdata...:" zdata    */                                                  
+/* sa= "shadow..:" shadow   */                                                  
+/* sa= "MsgWords:" MsgWords */                                                  
+/* sa= "MsgSever:" MsgSever */                                                  
+/*                                                                              
+   Parse Endevor Hi-Lite options                                                
+   */                                                                           
+PARSE VAR EHILITEP  EHIMSG +1 EHIFBX +1 EHISBR +1 EHIVED +1 EHIGLB +1 EHIMAX    
+if datatype(EHIMAX,W) = 0,              /* catch invalid EHIMAX      */         
+ | EHIMAX = 0 then EHIMAX = 5000        /* set a reasonable default  */         
+EHIMAX = max(EHIMAX, Length(shatoc))    /* Bump up max if scanned    */         
+CALLMODE = 'BROWSE'                     /* Default call mode         */         
+LENNUM   = 0                            /* how wide is line numbers  */         
+if length(ZSHADOW) > 0 then do          /* Coming from View/Edit?    */         
+   CALLMODE = 'VIEW'                    /* Mode Flag                 */         
+   LENNUM   = 8                         /* how wide is line# + ATTRs */         
+   if EHIVED /== '/',                                                           
+    | EHIGLB /== '/' & ZAPPLID /== 'CTLI' then do                               
+      shadow = zshadow                                                          
+      signal getout                                                             
+   end                                                                          
+end                                                                             
+SHADOW=copies(' ',length(SHADOW))       /* we have a starting point  */         
+if EHIMSG /== '/' ,                     /* hilite disabled?  exit!   */         
+ | EHIGLB /== '/' & ZAPPLID /== 'CTLI' then /* not Endevor & Global  */         
+   signal GetOut                                                                
+                                                                                
+/* Specify keywords to hilight                                                  
+                                                                                
+   Endvhigh will automatically hilight warning, caution Error and               
+   Severe messages, but there are some info messages that you may               
+   wish to hilight, and some error messages (e.g. BSTPPARS) that                
+   don't follow the usual rules.  You can add them here, or better,             
+   in a user tailorable Rexx (ENDVHIMS) that just extends the MsgWords          
+   and severity codes which will be loaded once by the panel.                   
+*/                                                                              
+                                                                                
+/* Set up translate table of valid keyword charaters */                         
+                                                                                
+trtable='ABCDEFGHIJKLMNOPQRSTUVWXYZ$#@0123456789_.-'                            
+trtable=translate(xrange('00'x,'FF'x),,trtable,' ')                             
+                                                                                
+                                                                                
+/* Set up translate table for MSG severity values    */                         
+                                                                                
+trtMsgS='~-INFWCES' /* info, flower, warning, Caution, Error, Severe */         
+trtSevS='012345678' /* numeric code for compare */                              
+trtAttr='BBBGTYPRW' /* Equivalent Attribute / colour code */                    
+trtAtRv='?AAHNMZEX' /* Equivalent Reverse Vide code +1    */                    
+                                                                                
+/* Make a copy of zdata with only alphanumerics.  This will be used */          
+/* as the reference string for finding keywords.                    */          
+                                                                                
+zdatacopy=translate(zdata)                  /* Uppercase first      */          
+zdatacopy=translate(zdatacopy,,trtable,' ') /* Remove special chars */          
+zdatacopy=strip(zdatacopy,'T')              /* remove trailing spcs */          
+                                                                                
+Dlines = length(zdatacopy) %  zwidth        /* How many lines passed*/          
+                                                                                
+/* If we're in VIEW mode use the first visible line number... */                
+if CALLMODE = 'VIEW' then do                                                    
+   do i = 1 to length(ZDATA) by ZWIDTH                                          
+      lincmd = substr(zdata,i+1,6)            /* grab the line cmd pfx are   */ 
+      if datatype(lincmd,'W') then leave      /* does it look like a number? */ 
+   end                                                                          
+                                              /* Check we found a good one   */ 
+   if datatype(lincmd,'W') /= 1 then          /* no good numbers guess 0     */ 
+      ZLINES = 0                                                                
+   else                                       /* else assume msgs etc.       */ 
+      ZLINES = lincmd - (i % zwidth)          /* mignt be negative for msgs   */
+                      /* note may think bot=top if scrolled till only bottom */ 
+                      /* line is seen ****** **** Bottom of Data *** but we  */ 
+                      /* don't have a better guess because we can't see any  */ 
+                      /* numbers                                             */ 
+end                                                                             
+   /* say "found:" lincmd "on line:" ((i % zwidth)+1) "ZLINES:" ZLINES       */ 
+                                                                                
+/* Extend Toc if need Note: Use overlay so as not to change len     */          
+lenToc = max(length(strip(shatoc,'T','01'x)),1)  /* len of data bit */          
+lentgt = ZLINES + 1 + Dlines                                                    
+if lenToc < lentgt then                                                         
+   if lentgt <= ehimax then                                                     
+      shatoc = overlay('~',SHATOC,lenToc,(lentgt - lentoc),'~')                 
+   else do /* file is too big for current max */                                
+   /* say "L:"lentoc "T:"lentgt "M:" ehimax */                                  
+      shatoc = overlay('~',SHATOC,lenToc,(ehimax - lentoc),'~')                 
+   end                                                                          
+                                                                                
+do i = 1 to length(zdatacopy) by zwidth     /* For each line        */          
+   RelLine =  ZLINES + (i % zwidth) + 1     /* Work out the relative*/          
+   if RelLine < 1 then iterate              /* skip msg lines etc.  */          
+   if RelLine <32767 then                   /* check for Max Size   */          
+      LineSev =  substr(shatoc,RelLine,1)   /* line number & current*/          
+   else                                     /* if out of range...   */          
+      LineSev = '~'                         /* line number & current*/          
+   if LineSev \== '-',                      /* Severity if set...   */          
+    & LineSev \== '~' then iterate          /*   skip to next line  */          
+   /* Note:that the use of translate in the options below could be              
+      optimized for performance by hard coding the values 4 & 1                 
+      however looking them up in the translate table makes it safer             
+      if additional codes are added later or highlighting changed   */          
+   if EHIFBX == '/',                        /* FlowerBox req'd      */          
+    & left(strip(substr(,                   /* examine left bit...  */          
+      zdata,(i+lennum),(zwidth-lennum)),"L"),3) == "** " then                   
+      linerc=translate('F',trtSevS,trtMsgS) /* Flag FlowerBox       */          
+   else                                                                         
+      linerc=translate('-',trtSevS,trtMsgS) /* default line sev     */          
+   thisline = substr(zdatacopy,i,zwidth)    /* grab the current line*/          
+   do j = 1 to max(5,words(thisline))       /* and scan each word   */          
+      /* note to limit scanning consider adding a max here - try 5  */          
+      thisword = word(thisline,j)           /* consider this word   */          
+      /* deal with the special cases first  - is it in the lookup?  */          
+      if wordpos(thisword,MsgWords) > 0 then do                                 
+         linerc = translate(left(word(MsgSever,                                 
+                 ,wordpos(thisword,MsgWords)),1),                               
+                 ,trtSevS,trtMsgS) /* convert msg suffix to number  */          
+         leave                     /* special found, ignore rest    */          
+         end                                                                    
+      else do                                                                   
+      /* Next check if it's a valid message format...               */          
+      /* Length 8 characters, ending in I, W, C, E or S,            */          
+      /* ...starting with uppercase letter, a three digit message   */          
+      /* Actually C1BMLxxs messages only have 2 digits...           */          
+      /* number and the whole thing alphaNumeric?                   */          
+         thissuff = right(thisword,1)       /* grab the message sev */          
+         if length(thisword) \= 8 ,                                             
+          | pos(thissuff,'IWCES')               = 0 ,                           
+          | datatype(substr(thisword,1,1),'U') \= 1 ,                           
+          | datatype(substr(thisword,6,2),'W') \= 1 ,                           
+          | datatype(thisword,            'A') \= 1 then                        
+         /* before we give up, check if it's a cobol message... */              
+         if length(thisword) \= 11 ,        /* Cobol? IGYPS2072-S */            
+          | left(thisword,3) \== 'IGY',                                         
+          | datatype(substr(thisword,6,4),'W') \= 1 ,                           
+          | pos(thissuff,'IWCES') = 0 then iterate                              
+         else nop                                                               
+         /* still here?  Must be a valid message! */                            
+         linerc = max(linerc, translate(thissuff,trtSevS,trtMsgS))              
+      end                                                                       
+   end                                                                          
+   /* convert the line severity to a character code */                          
+   linesev = translate(linerc,trtMsgS,trtSevS)                                  
+   /* sa= right(relline,3) linesev left(thisline,zwidth -10) */                 
+   /* Store the code at the appropriate offset */                               
+   if RelLine <= EHIMAX,     /* check for max TOC */                            
+    & RelLine  < 32767  then /* Absolute max!     */                            
+      shatoc=overlay(linesev,shatoc,RelLine)                                    
+end                                                                             
+/* Loop through setting line colours to match the error messages     */         
+/* and highlight flowerbox content                                   */         
+do i = 1 to length(zdata) by zwidth                                             
+   RelLine =  ZLINES + (i % zwidth) + 1                                         
+   if RelLine < 1 then iterate  /* skip msg, cols, note lines etc.   */         
+   if RelLine > EHIMAX ,                                                        
+    | RelLine >= 32767 then leave                                               
+   LineSev =  substr(shatoc,RelLine,1)                                          
+   LineClr = translate(LineSev,trtAttr,trtMsgS) /* c'vrt MsgSec Attr */         
+   if EHIFBX  == '/' ,                                                          
+    & LineSev = 'F' then      /* are we doing flower box ?           */         
+      do j = i to i + zwidth  /* ...if so don't colour the '*'s      */         
+         if substr(zdata,j,1) \= '*' then                                       
+            shadow=overlay(LineClr,shadow,j,1)                                  
+      end                                                                       
+   else                       /* otherwise, colour the whole line    */         
+      shadow=overlay(LineClr,shadow,i,zwidth,LineClr)                           
+end                                                                             
+                                                                                
+/* scale the TOC line if needed... */                                           
+      /* optimize by setting a flag if any data changed */                      
+lenmax = zwidth - 21                                                            
+lentoc = length(strip(shatoc,'T','01'x))    /* get len of data bit     */       
+if lentoc <= lenmax then do                                                     
+   shafac = 1                                                                   
+   shazom = left(shatoc,length(shazom))     /* don't change the length */       
+end                                                                             
+else do                                                                         
+   shafac = ((lentoc+1) / lenmax )                                              
+   shasev = translate(shatoc,trtSevS||copies('0',255), ,                        
+                             trtMsgS||xrange('00'x,'FF'x))                      
+/* shasev = overlay('8',shasev,(ZLINES+1))  don't mark current loc     */       
+   tmpzom = ''                                                                  
+   chunkmax = 0                                                                 
+   j = 0                                                                        
+   do i = 1 to lentoc                                                           
+      thisind = trunc(i/shafac)                                                 
+      if thisind <= j then                                                      
+         chunkmax = max(chunkmax,substr(shasev,i,1,'0'))                        
+      else do /* start a new chunk */                                           
+         tmpzom = tmpzom || chunkmax                                            
+         j = J + 1                                                              
+         chunkmax = substr(shasev,i,1,'0')                                      
+      end                                                                       
+   end                                                                          
+   tmpzom = tmpzom || chunkmax /* the last chunk */                             
+   tmpzom = translate(tmpzom,trtMsgS,trtSevS)                                   
+   shazom = overlay(tmpzom,shazom,1,length(shazom),' ')                         
+end                                                                             
+                                                                                
+if EHISBR /== '/' then signal CkView /* no Scroll Bar Required         */       
+/* scale the Bar line if needed... */                                           
+if datatype(ZLVLINE,W) = 1,         /* if we have a last visible line  */       
+ & ZLVLINE > 0 then                 /* and it's not zero trust it      */       
+   barmax = ZLVLINE                                                             
+else                                                                            
+   barmax = Dlines                                                              
+lentoc = length(strip(shatoc,'T','01'x))    /* get len of data bit     */       
+if lentoc <= barmax then do                                                     
+   barfac = 1                                                                   
+   barzom = translate(left(shatoc,lentoc),trtAtrv,trtMsgS)                      
+end                                                                             
+else do                                                                         
+   barfac = ((max(lentoc,lentgt)+1) / barmax )                                  
+   shasev = translate(shatoc,trtSevS||copies('0',255), ,                        
+                             trtMsgS||xrange('00'x,'FF'x))                      
+   shasev = overlay('8',shasev,(max(1,ZLINES+1)))                               
+   barzom = ''                                                                  
+   chunkmax = 0                                                                 
+   j = 0                                                                        
+   do i = 1 to lentoc                                                           
+      thisind = trunc(i/barfac)                                                 
+      if thisind <= j then                                                      
+         chunkmax = max(chunkmax,substr(shasev,i,1))                            
+      else do /* start a new chunk */                                           
+         barzom = barzom || chunkmax                                            
+         j = J + 1                                                              
+         chunkmax = substr(shasev,i,1)                                          
+      end                                                                       
+   end                                                                          
+   if lentgt > ehimax then                  /* did we exceed max?      */       
+      barzom = barzom || '0'                /* append '0' as last chunk*/       
+   else                                     /* otherwise just grab the */       
+      barzom = barzom || chunkmax           /* the last chunk */                
+   barzom = translate(barzom,trtAtRv,trtSevS)                                   
+end                                                                             
+sa= "BarZom:"Barzom"-Len("length(barzom)")"                                     
+do I = 1 to length(barzom)                                                      
+   shadow=overlay(substr(barzom,i,1),shadow,(i*zwidth),1)                       
+end                                                                             
+                                                                                
+if lentgt > ehimax then do                  /* did we exceed max?      */       
+   ZRXRC  = '8'                             /* ...Set error RC         */       
+   ZRXMSG = 'EHIL001I'                      /* ...Warn user bar not rel*/       
+   end                                                                          
+else do                                     /* otherwise....           */       
+   ZRXRC  = '8'                             /* ...Set error RC         */       
+   ZRXMSG = 'EHIL002I'                      /* We're still good to go  */       
+   end                                                                          
+/*                                                                              
+say "Shazom.:" shazom                                                           
+say "M:" right(barmax,2) "B:" barzom "X:" length(barzom)                        
+*/                                                                              
+CkView:                                                                         
+if CALLMODE = 'VIEW' then do                                                    
+   do i = 1 to length(zshadow)                                                  
+      if ((i-1) // zwidth) < LENNUM then iterate /* don't colour line nums   */ 
+      thisSha = substr(shadow,i,1)                                              
+      if thisSha == ' ' ,                     /* If no shadow, or            */ 
+       | thisSha == 'B' then iterate          /* if default shadow, don't use*/ 
+      thisZha = substr(zshadow,i,1)                                             
+      if ThisZha /== ' ',                     /* if there was no hilite,     */ 
+       & ThisZha /== 'D' then iterate         /* or default hilite, carry on */ 
+      if thisSha = 'G' then thisSha = 'B'     /* Blue is the new green!      */ 
+      ZSHADOW = overlay(ThisSha,Zshadow,i,1)  /* still here? Just do it!     */ 
+   end                                                                          
+end                                                                             
+GetOut:                                                                         
+call isprexpx 'T'   /* Send changes back to ispf */                             

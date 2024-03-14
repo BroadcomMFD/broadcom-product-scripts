@@ -1,0 +1,15 @@
+/* REXX - Sample routine to mark rows as selected                               
+          It may be sufficient to depend on the message status, but             
+          a more robust solution would accumulate entries in a file or table    
+          */                                                                    
+parse arg PassParm                                                              
+PassName = strip(PassParm,,"'")                                                 
+ADDRESS ISPEXEC "VGET ("PassName") SHARED"                                      
+interpret 'ALLVALS = 'PassName                                                  
+ADDRESS ISPEXEC "VGET ("ALLVALS") SHARED"                                       
+/*                                                                              
+  insert logic here to store the selected rows if needed                        
+*/                                                                              
+USERMSG = left('*Selected',48)                                                  
+ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                         
+EXIT 0                                                                          

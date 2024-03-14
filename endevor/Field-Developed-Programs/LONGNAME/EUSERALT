@@ -1,0 +1,35 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ ^ TYPE(INPUT) CAPS(OFF) JUST(ASIS) PAD(' ')                                    
+ _ TYPE(INPUT) CAPS(ON)  JUST(ASIS) PADC(USER)                                  
+ ` TYPE(TEXT) SKIP(ON)                                                          
+  { TYPE(PT)                /* Panel Title */                                   
+  } TYPE(NT)                /* Normal Text */                                   
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(65,15) CMD()                                                       
+}             {Alter Endevor Meta-Data}                         }               
+}                                                               }               
+}{Description.......^USERDESC                                `  }               
+}                                                               }               
+}{Last Action CCID..^USERLCCI    ` {Processor Group.._USERPGRP` }               
+}{   Generate CCID..^USERGCCI    ` {Signout Userid..._USERUSER` }               
+}{   Retrieve CCID..^USERRCCI    `                              }               
+}                                                               }               
+}{UserData..........^USERDAT1                                `  }               
+}                   ^USERDAT2                                }  }               
+}                                                               }               
+çSAREA38                                                        ç               
+)AREA SAREA38                                                                   
+}Use this panel to show/set the current element's               }               
+}Metadata.  Press Enter to make chances, or END to CANCEL.      }               
+}                                                               }               
+}Note: Change metadata with care, it may be difficult to undo   }               
+}so consider making a backup before making any changes.         }               
+)INIT                                                                           
+ .CURSOR = USERDESC                                                             
+ VGET (USERDAT1 USERDAT2 USERDESC) SHARED                                       
+ VGET (USERLCCI USERGCCI USERRCCI USERPGRP USERUSER) SHARED                     
+)PROC                                                                           
+ VPUT (USERDAT1 USERDAT2 USERDESC) SHARED                                       
+ VPUT (USERLCCI USERGCCI USERRCCI USERPGRP USERUSER) SHARED                     
+)END                                                                            

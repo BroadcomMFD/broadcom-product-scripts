@@ -1,0 +1,144 @@
+)CM *----------------------------------------------------------------*          
+)CM *                                                                *          
+)CM *  COPYRIGHT (C) 1986-2013 CA. ALL RIGHTS RESERVED.              *          
+)CM *                                                                *          
+)CM * NAME: ENDSE00L                                                 *          
+)CM *                                                                *          
+)CM * PURPOSE: THIS SKELETON IS USED BY THE LONG-NAME DIALOG TO      *          
+)CM *  GENERATE JCL TO GENERATE AN EDITED ELEMENT IN BATCH MODE.     *          
+)CM *                                                                *          
+)CM * ISPSLIB(SCMM@SYM) - IMBEDDED MBR TO SET STANDARD VARIABLES,    *          
+)CM *                     TAILORED BY THE HOST SITE.                 *          
+)CM * ISPSLIB(SCMM@LIB) - IMBEDDED STEPLIB/CONLIB CONCATENATIONS,    *          
+)CM *                     TAILORED BY THE HOST SITE.                 *          
+)CM *----------------------------------------------------------------*          
+)SEL &LNSJC1 NE &Z                                                              
+&LNSJC1                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC2 NE &Z                                                              
+&LNSJC2                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC3 NE &Z                                                              
+&LNSJC3                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC4 NE &Z                                                              
+&LNSJC4                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC5 NE &Z                                                              
+&LNSJC5                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC6 NE &Z                                                              
+&LNSJC6                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC7 NE &Z                                                              
+&LNSJC7                                                                         
+)ENDSEL                                                                         
+)SEL &LNSJC8 NE &Z                                                              
+&LNSJC8                                                                         
+)ENDSEL                                                                         
+)IM SCMM@SYM                                                                    
+//*-------------------------------------------------------------------*         
+//*    BATCH JCL STATEMENTS                                           *         
+//*-------------------------------------------------------------------*         
+//ENDES000 EXEC PGM=NDVRC1,                                                     
+//             DYNAMNBR=1500,                                                   
+//             REGION=4096K,                                                    
+//             PARM='C1BM3000'                                                  
+)IM SCMM@LIB                                                                    
+)SEL &VARSILEV = Y                                                              
+//*-------------------------------------------------------------------*         
+//*  PANVALET AND LIBRARIAN SUPPORT.                                  *         
+//*-------------------------------------------------------------------*         
+//C1TPDD01 DD  UNIT=&T@DISK,                                                    
+//             SPACE=(CYL,(1,1)),                                               
+//             DCB=(RECFM=VB,LRECL=260)                                         
+//C1TPDD02 DD  UNIT=&T@DISK,                                                    
+//             SPACE=(CYL,(1,1)),                                               
+//             DCB=(RECFM=VB,LRECL=260)                                         
+//C1TPLSIN DD  UNIT=&T@DISK,                                                    
+//             SPACE=(CYL,(1,1)),                                               
+//             DCB=(RECFM=FB,LRECL=80)                                          
+//C1TPLSOU DD  UNIT=&T@DISK,                                                    
+//             SPACE=(CYL,(1,1))                                                
+//C1PLMSGS DD  SYSOUT=*                                                         
+)ENDSEL                                                                         
+//*-------------------------------------------------------------------*         
+//*  OUTPUT DATA SETS                                                 *         
+//*-------------------------------------------------------------------*         
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSOUT   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*  CONTROL STATEMENTS                                               *         
+//*-------------------------------------------------------------------*         
+//BSTIPT01 DD *                                                                 
+)DOT EMULTTAB OPT                                                               
+&SCLLINE                                                                        
+)ENDDOT                                                                         
+//*-------------------------------------------------------------------*         
+//*  INCLUDED JCL                                                     *         
+//*-------------------------------------------------------------------*         
+)SEL &VNBDD01 NE &Z                                                             
+&VNBDD01                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD02 NE &Z                                                             
+&VNBDD02                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD03 NE &Z                                                             
+&VNBDD03                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD04 NE &Z                                                             
+&VNBDD04                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD05 NE &Z                                                             
+&VNBDD05                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD06 NE &Z                                                             
+&VNBDD06                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD07 NE &Z                                                             
+&VNBDD07                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD08 NE &Z                                                             
+&VNBDD08                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD09 NE &Z                                                             
+&VNBDD09                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD10 NE &Z                                                             
+&VNBDD10                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD11 NE &Z                                                             
+&VNBDD11                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD12 NE &Z                                                             
+&VNBDD12                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD13 NE &Z                                                             
+&VNBDD13                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD14 NE &Z                                                             
+&VNBDD14                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD15 NE &Z                                                             
+&VNBDD15                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD16 NE &Z                                                             
+&VNBDD16                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD17 NE &Z                                                             
+&VNBDD17                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD18 NE &Z                                                             
+&VNBDD18                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD19 NE &Z                                                             
+&VNBDD19                                                                        
+)ENDSEL                                                                         
+)SEL &VNBDD20 NE &Z                                                             
+&VNBDD20                                                                        
+)ENDSEL                                                                         
+//* ENDES00L GENERATED BY &ZUSER ON &ZDATE AT &ZTIME                            

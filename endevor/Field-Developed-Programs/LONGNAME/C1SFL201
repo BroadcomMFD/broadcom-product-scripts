@@ -1,0 +1,185 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+ ¶ TYPE(OUTPUT) COLOR(YELLOW) CAPS(OFF)                                         
+ º TYPE(OUTPUT) COLOR(TURQ)   CAPS(OFF)                                         
+ µ TYPE(OUTPUT) COLOR(RED)    CAPS(OFF)                                         
+ › TYPE(OUTPUT) COLOR(WHITE)  INTENS(HIGH) CAPS(OFF)                            
+ @ TYPE(OUTPUT) COLOR(BLUE)   INTENS(LOW) CAPS(OFF)                             
+ _ TYPE(INPUT)  COLOR(RED)    INTENS(HIGH) PAD(NULLS) CAPS(ON) JUST(LEFT)       
+ ^ TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                        
+ | TYPE(OUTPUT) INTENS(LOW)                                                     
+)BODY EXPAND(\\) WIDTH(&ZSCREENW)                                               
+›VNTACTXT%\-\  ELEMENT SELECTION LIST ---WS3(ALT)---\-\                         
+%COMMAND ===>_ZCMD                             \ \            %SCROLL ===>_AMT +
++                         ADDITIONAL LINE COMMANDS                              
++%XE+- Display full element name+        %RN+- Retrieve to newname              
+ TO &LIT1      ›VNT2DSNM                                        |VNTIND         
++                                              \ \                  ^VNTMORE2  +
+@ENWR1H1                                                                        
+@ENWR1H2                                                                        
+)MODEL CLEAR(&ENWR1CL)                                                          
+&ENWR1M1                                                                        
+&ENWR1M2                                                                        
+)INIT                                                                           
+/* Add Code for WideScreen Support - this is where the magic happens...  */     
+  .ZVARS = '(&ENWR1VR)'                  /* Set Zvars to match the model */     
+  &ZTDMARK= '&ENWR1ZM'                   /* and btm marker to match head */     
+  &VARPFX = 'ENWR'                       /* Set WideScreen prefix        */     
+  VPUT (VARPFX) SHARED                   /* and save it                  */     
+  VGET (ECOLREF) SHARED                  /* check did user change values */     
+  if (&ECOLREF = 'PENDING')              /* Pending, we're half way...   */     
+    &ECOLREF = ''                        /* reset the flag               */     
+    VPUT (ECOLREF) SHARED                /* ...and save it               */     
+    &ZCMD = left                         /* If we went left  to get here */     
+    .RESP = ENTER                        /* ...go right this time        */     
+    EXIT                                                                        
+  if (&ECOLREF = 'YES' )                 /* Yes, get new values, and     */     
+    &ECOLREF = 'PENDING'                 /* reset the flag to half-way   */     
+    VPUT (ECOLREF) SHARED                /* ...and save it               */     
+    &ZCMD = left                         /* Set scroll to right 1st time */     
+    /* First get the values the user has just changed                    */     
+    VGET (ENWR1H1 ENWR1H2 ENWR1M1 ENWR1M2 ENWR1VR ENWR1CL) profile              
+    VGET (ENWR0H1 ENWR0H2 ENWR0M1 ENWR0M2 ENWR0VR ENWR0CL) profile              
+    /* Then trim them if necessary to match the available screen width   */     
+    *REXX (ZSCREENW ESRCHWRP VARPFX                                             
+       ENWR0H1  ENWR0H2  ENWR0M1  ENWR0M2  ENWR0VR  ENWR0CL ENWR0ZM             
+       ENWR1H1  ENWR1H2  ENWR1M1  ENWR1M2  ENWR1VR  ENWR1CL ENWR1ZM, (ENDVWIDE))
+    /* Make sure variables are available to other commands - e.g. COPYELM*/     
+    VPUT (ENWR0H1 ENWR0H2 ENWR0M1 ENWR0M2 ENWR0VR ENWR0CL ENWR0ZM) SHARED       
+    VPUT (ENWR1H1 ENWR1H2 ENWR1M1 ENWR1M2 ENWR1VR ENWR1CL ENWR1ZM) SHARED       
+    .RESP = ENTER                        /* and simulate an Enter key    */     
+    EXIT                                 /* our works is done, scroll    */     
+/* Start code for ESORT */                                                      
+VGET (ZSCREEN)                                                                  
+  IF (&ZSCREEN = 1)                                                             
+    &PANELID1 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID1) PROFILE                                                     
+  IF (&ZSCREEN = 2)                                                             
+    &PANELID2 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID2) PROFILE                                                     
+  IF (&ZSCREEN = 3)                                                             
+    &PANELID3 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID3) PROFILE                                                     
+  IF (&ZSCREEN = 4)                                                             
+    &PANELID4 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID4) PROFILE                                                     
+  IF (&ZSCREEN = 5)                                                             
+    &PANELID5 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID5) PROFILE                                                     
+  IF (&ZSCREEN = 6)                                                             
+    &PANELID6 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID6) PROFILE                                                     
+  IF (&ZSCREEN = 7)                                                             
+    &PANELID7 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID7) PROFILE                                                     
+  IF (&ZSCREEN = 8)                                                             
+    &PANELID8 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID8) PROFILE                                                     
+  IF (&ZSCREEN = 9)                                                             
+    &PANELID9 = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELID9) PROFILE                                                     
+  IF (&ZSCREEN = A)                                                             
+    &PANELIDA = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDA) PROFILE                                                     
+  IF (&ZSCREEN = B)                                                             
+    &PANELIDB = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDB) PROFILE                                                     
+  IF (&ZSCREEN = C)                                                             
+    &PANELIDC = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDC) PROFILE                                                     
+  IF (&ZSCREEN = D)                                                             
+    &PANELIDD = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDD) PROFILE                                                     
+  IF (&ZSCREEN = E)                                                             
+    &PANELIDE = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDE) PROFILE                                                     
+  IF (&ZSCREEN = F)                                                             
+    &PANELIDF = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDF) PROFILE                                                     
+  IF (&ZSCREEN = G)                                                             
+    &PANELIDG = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDG) PROFILE                                                     
+  IF (&ZSCREEN = H)                                                             
+    &PANELIDH = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDH) PROFILE                                                     
+  IF (&ZSCREEN = I)                                                             
+    &PANELIDI = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDI) PROFILE                                                     
+  IF (&ZSCREEN = J)                                                             
+    &PANELIDJ = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDJ) PROFILE                                                     
+  IF (&ZSCREEN = K)                                                             
+    &PANELIDK = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDK) PROFILE                                                     
+  IF (&ZSCREEN = L)                                                             
+    &PANELIDL = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDL) PROFILE                                                     
+  IF (&ZSCREEN = M)                                                             
+    &PANELIDM = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDM) PROFILE                                                     
+  IF (&ZSCREEN = N)                                                             
+    &PANELIDN = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDN) PROFILE                                                     
+  IF (&ZSCREEN = O)                                                             
+    &PANELIDO = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDO) PROFILE                                                     
+  IF (&ZSCREEN = P)                                                             
+    &PANELIDP = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDP) PROFILE                                                     
+  IF (&ZSCREEN = Q)                                                             
+    &PANELIDQ = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDQ) PROFILE                                                     
+  IF (&ZSCREEN = R)                                                             
+    &PANELIDR = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDR) PROFILE                                                     
+  IF (&ZSCREEN = S)                                                             
+    &PANELIDS = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDS) PROFILE                                                     
+  IF (&ZSCREEN = T)                                                             
+    &PANELIDT = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDT) PROFILE                                                     
+  IF (&ZSCREEN = U)                                                             
+    &PANELIDU = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDU) PROFILE                                                     
+  IF (&ZSCREEN = V)                                                             
+    &PANELIDV = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDV) PROFILE                                                     
+  IF (&ZSCREEN = W)                                                             
+    &PANELIDW = '&ZSCREEN:C1SFL201'                                             
+    VPUT (PANELIDW) PROFILE                                                     
+/* End code for ESORT */                                                        
+  .HELP = CITESELA                                                              
+  &LIT1 = 'DATA SET:'                                                           
+  IF (&VNTDSTYP = 'U')                                                          
+     &LIT1 = 'PATH:    '                                                        
+  IF (&AMT = ' ')                                                               
+     &AMT = PAGE                                                                
+  &SWITCH = 'OFF '                                                              
+  IF (&VNT2DSL > 48)                                                            
+    &SWITCH = 'ON  '                                                            
+)PROC                                                                           
+  VPUT (AMT) PROFILE                                                            
+)FIELD                                                                          
+  FIELD(VNT2DSNM) IND(VNTIND) SCROLL(SWITCH)                                    
+  FIELD(SO      ) SCROLL(NO)  /* no scroll in sel field so PF10/11 work */      
+  FIELD(EMNAME  ) SCROLL(YES)                                                   
+  FIELD(ENTEN255) SCROLL(YES) LEN(255)                                          
+  FIELD(TOFRNAME) SCROLL(YES)                                                   
+  FIELD(EMTYPE  ) SCROLL(YES)                                                   
+  FIELD(ENSC    ) SCROLL(YES)                                                   
+  FIELD(EMENV   ) SCROLL(YES)                                                   
+  FIELD(EMSTGID ) SCROLL(YES)                                                   
+  FIELD(EMSYS   ) SCROLL(YES)                                                   
+  FIELD(EMSBS   ) SCROLL(YES)                                                   
+  FIELD(ECVL    ) SCROLL(YES)                                                   
+  FIELD(EMLDTE  ) SCROLL(YES)                                                   
+  FIELD(EMPD    ) SCROLL(YES)                                                   
+  FIELD(EPRGRP  ) SCROLL(YES)                                                   
+  FIELD(EMLUID  ) SCROLL(YES)                                                   
+  FIELD(ECTL#   ) SCROLL(YES)                                                   
+  FIELD(EPRC    ) SCROLL(YES)                                                   
+  FIELD(EMRC    ) SCROLL(YES)                                                   
+  FIELD(EOWNRID ) SCROLL(YES)                                                   
+)END                                                                            

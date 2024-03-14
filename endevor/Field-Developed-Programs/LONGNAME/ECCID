@@ -1,0 +1,27 @@
+/* REXX - This routine to allow user retrieve/set the current CCID*/            
+address ispexec                                                                 
+"ADDPOP"                                                                        
+"display panel(ECCIDCOM)"                                                       
+"REMPOP"                                                                        
+/* note - just updating the variables is NOT enough - might need to             
+   access to EWA to actually update the 'live variables'                        
+   or another option might be to use Exit2 to read an override CCID             
+   from wherever this program might stuff it - for example into a FILE'         
+                                                                                
+   Additional enhancements might be to allow this command to receive            
+   parameter input for example a CCID or Comment to be passed on the            
+   command line - and only show the prompt panel if nothing is passed           
+   (as it would be from the Action Bar).                                        
+*/                                                                              
+  "CONTROL NONDISPL ENTER" /* force a refresh of the panel */                   
+/*                                                                              
+  Lets try a quick n' dirty - save the CCID and Comment to a file               
+  and maybe check for that file in Exit 2                                       
+*/                                                                              
+Address tso                                                                     
+"ALLOC F(OVERCCID) LRECL(80) BLKSIZE(160) SPACE(1,1)",                          
+      "RECFM(F B) BLOCK(160) DSORG(PS)",                                        
+          "NEW UNCATALOG REUSE "                                                
+  QUEUE 'CCID...:'EEVCCID                                                       
+  QUEUE 'COMMENT:'EEVCOMM                                                       
+"EXECIO 2 DISKW OVERCCID ( FINIS"                                               

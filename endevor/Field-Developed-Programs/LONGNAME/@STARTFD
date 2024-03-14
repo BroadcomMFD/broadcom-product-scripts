@@ -1,0 +1,82 @@
+/* REXX -  Start-up REXX for Field Deveoloped Program (FDP) support of          
+   Endevor, QuickEdit, LongName, PDM etc.                                       
+   The member should be tailored by the @@START2 process                        
+                                                                                
+   It Assumes that your Authorized libraries (CSIQAUTU & CSIQAUTH) are          
+   either pre-allocated in the TSO Logon proc, or in the Linklist               
+   If this is not the case, you may need to uncomment/edit the section          
+   below to enable LSTEPLIB or STEPLIB support as appropriate                   
+*/                                                                              
+arg debug                                                                       
+if debug = 'DEBUG' then trace r                                                 
+                                                                                
+/* "steplib" -- Uncomment to RESET ANY STEPLIB */                               
+"ALTLIB ACT APPLICATION(CLIST) DATASET(",             /* Clist/Rexx  */         
+                                 "'&MyCLS2Library'",                            
+                                 "'&MyCLS0Library'",                            
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPPLIB DATASET stack ID(",           /* Panels      */         
+                                 "'&MyPEN2Library'",                            
+                                 "'&MyPENULibrary'",                            
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPMLIB DATASET stack ID(",           /* Messages    */         
+                                 "'&MyMEN2Library'",                            
+                                 "'&MyMENULibrary'",                            
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPSLIB DATASET stack ID(",           /* Skeletons   */         
+                                 "'&MySEN2Library'",                            
+                                 "'&MySENULibrary'",                            
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPTLIB DATASET stack ID(",           /* Cmd Table   */         
+                                 "'&MyTEN2Library'",                            
+                                 "'&MyTENULibrary'",                            
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPLLIB DATASET stack ID(",           /* Loadlibs    */         
+                                 "'&MyLOA2Library'",                            
+                                 "'&MyLOADLibrary'",                            
+                                 ")"                                            
+                                                                                
+/* Check if LSTEPLIB is available and if so use it, otherwise allocate          
+   conlib the assumption being that Endevor is in steplib and authorized        
+   */                                                                           
+  Y = TRAPMSG("ON")              /* Trap messages */                            
+  "lsteplib help nomsg"          /* Can LSTEPLIB tell us help? */               
+  if rc = 0 then do              /* Yes - go ahead and use LSTEPLIB */          
+     "lsteplib reset "           /* nomsg */                                    
+     "ALLOC   F(LSTEP) SHR REUSE DS(",                                          
+                                 "'&MyAUTULibrary'" ,                           
+                                 "'&MyAUTHLibrary'" ,                           
+                                 "'&MyLOADLibrary'" ,                           
+                                 ")"                                            
+     "lsteplib step(lstep) apf"  /* nomsg*/                                     
+  end                                                                           
+  else                           /* Otherwise allocate CONLIB */                
+     "ALLOC   F(CONLIB) SHR REUSE   DS(",                                       
+                                 "'&MyLOADLibrary'" ,                           
+                                 ")"                                            
+  Y = TRAPMSG(Y)               /* Restore Trap messages */                      
+                                                                                
+/* Pre-allocate SYSOUT to Jes to avoid messy screens when using sort */         
+"alloc f(sysout) sysout(&AltIDMsgClass) reu" /* Edit class as needed */         
+                                                                                
+/* Check if already active */                                                   
+"ispexec vget (zscreen)"                                                        
+FMNam = left('E Q=FDP-MENU IS ACTIVE IN SCREEN' ZSCREEN,34)                     
+ADDRESS LINKMVS 'CTLIENQ FMNam'                                                 
+if RC\= 0 then                         /* LongName Already Active */            
+   /* ENDI002E The dialog is already active in this ISPF logical..*/            
+   ADDRESS ISPEXEC "SETMSG MSG(ENDI002E)" ; /* Use Endevor msg    */            
+else                                                                            
+   /* invoke FDP Menu */                                                        
+   "ISPEXEC SELECT PANEL(FDPMENU) NEWAPPL(CTLI) SCRNAME(FDP) PASSLIB"           
+                                                                                
+/* Release Active in Screen Enq */                                              
+FMNam= 'D' || Substr(FMNam,2)   /* change to DeQueue request     */             
+ADDRESS LINKMVS 'CTLIENQ FMNam'                                                 
+/* clean up */                                                                  
+"ISPEXEC LIBDEF ISPPLIB"                                                        
+"ISPEXEC LIBDEF ISPMLIB"                                                        
+"ISPEXEC LIBDEF ISPSLIB"                                                        
+"ISPEXEC LIBDEF ISPTLIB"                                                        
+"ISPEXEC LIBDEF ISPLLIB"                                                        
+"ALTLIB DEACTIVATE APPLICATION(CLIST)"                                          

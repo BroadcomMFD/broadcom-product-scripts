@@ -1,0 +1,676 @@
+)INEXIT LOAD,ENDDYNPX                                                           
+)ATTR DEFAULT(%+_)                                                              
+/*-----------------------------------------------------------------------*/     
+/* Copyright (C) 1986-2024 CA. All Rights Reserved.                      */     
+/*                                                                       */     
+/* Note: The installation can force the Generate Processor Mode to       */     
+/* be BATCH by performing the following steps:                           */     
+/*  1) Change the underscore attribute character (_) on the              */     
+/*     'Generate Processor Mode' line to a horizontal bar (|)            */     
+/*  2) Uncomment the assignement statement in the )INIT section and      */     
+/*     set the EEVPRMOD variable to B for BATCH mode or F for fore-      */     
+/*     ground mode.                                                      */     
+/* These steps will make the variable an unmodifiable value.             */     
+/*                                                                       */     
+/*-----------------------------------------------------------------------*/     
+/* Following lines inserted for Endevor Action Bar/CUA support....       */     
+  0C TYPE(PT)                /* Panel Title */                                  
+  0A TYPE(NT)                /* normal text */                                  
+  0B TYPE(AB)                /* Action bar Item */                              
+  2D TYPE(ABSL) GE(ON)       /* action bar separator */                         
+  16 TYPE(VOI)               /* Var output info - Panel Title/navigation */     
+  27 AREA(SCRL) EXTEND(ON)   /* Scrollable area - support small screens */      
+  28 TYPE(FP)                /* Field Prompt - Use for command/scroll text*/    
+  14 TYPE(NEF) CAPS(ON) PADC(USER) /* Normal Entry Field - cmd, scroll etc*/    
+  0F TYPE(PS)                /* Point and shoot  */                             
+  1E TYPE(SC)                /* Scroll Information */                           
+  08 TYPE(CH)                /* Column heading */                               
+  10 TYPE(ET)                /* Emphasised text */                              
+  11 TYPE(SAC)               /* Select Action Choice */                         
+  12 TYPE(SUC)               /* Select Action unavailable */                    
+  13 TYPE(PIN)               /* Panel Instruction (e.g. act opt text) */        
+/* End Action Bar Support Attributes                                     */     
+   | TYPE(OUTPUT) INTENS(HIGH)                                                  
+   _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)                                  
+   ^ TYPE(INPUT) CAPS(&VARCACCI)  FORMAT(&VARFMCCI) PADC(_)                     
+/* ^ TYPE(NEF)    CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(USER) CUA */           
+   ` TYPE(INPUT) CAPS(&VARCACOM)  FORMAT(&VARFMCOM) PADC(_)                     
+/* ` TYPE(NEF)    CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(USER) CUA */           
+   @ TYPE(&VARQETY )  CAPS(OFF)   INTENS(&VARQEIN ) PADC(_)                     
+/* @ TYPE(&MYVQETY )  CAPS(OFF)                     PADC(USER) CUA */           
+/* � TYPE(SAC)        CAPS(ON)        Default PDM option on    CUA */           
+   � TYPE(TEXT)                   INTENS(&VARQEPIN)                             
+/* ! TYPE(&MYVQETY )  CAPS(ON)                      PADC(USER)*/                
+/* ! TYPE(&VARQETY )  CAPS(ON)    INTENS(&VARQEIN ) PADC(_)   */                
+   ! TYPE(&VARQETY )  CAPS(ON)    INTENS(&VARQEIN )    PADC(_)                  
+ ~ TYPE(TEXT)   INTENS(&VARQEQIN)                                               
+  1D TYPE(OUTPUT) COLOR(BLUE) CAPS(OFF) /* Help text heading     */             
+   { TYPE(PS)                           /* Point and shoot */                   
+   } TYPE(CH)                           /* Column heading */                    
+   $ AREA(SCRL) EXTEND(ON)                                                      
+<SELECT Action Bar Support>                                                     
+<WHEN &VNTUIABR=Y>                                                              
+/*-----------------------------------------------------------------------*/     
+/* Following lines inserted for Endevor Action Bar support...            */     
+/*-----------------------------------------------------------------------*/     
+)ABC DESC('Endevor') MNEM(1)                                                    
+PDC DESC('Messages...')      MNEM(1) ACTION RUN(ISRROUTE)                       
+ PARM('SELECT CMD(QMSGS)')                                                      
+PDC DESC('Endevor')          MNEM(1) ACTION RUN(ISRROUTE)                       
+ PARM('SELECT PGM(C1SM1000) NOCHECK NEWAPPL(CTLI) SCRNAME(NDAB) PASSLIB')       
+PDC DESC('Packages')         MNEM(1) UNAVAIL(ENABLST) ACTION RUN(>P)            
+PDC DESC('PDM')              MNEM(3) UNAVAIL(ENABLST) ACTION RUN(>PD)           
+PDC DESC('User Menu')        MNEM(1) UNAVAIL(ENABLST) ACTION RUN(>U)            
+PDC DESC('ACMQ...')          MNEM(4)                  ACTION RUN(ISRROUTE)      
+ PARM('SELECT CMD(ACMQ)')                                                       
+PDC DESC('ESrchfor...')      MNEM(2) UNAVAIL(ENABPRI) ACTION RUN(ISRROUTE)      
+ PARM('SELECT CMD(ESRCHFOR)')                                                   
+PDC DESC('Deploy To Test..') MNEM(1) UNAVAIL(ENABPRI) ACTION RUN(ISRROUTE)      
+ PARM('SELECT CMD(DT)')                                                         
+PDC DESC('PackageEles...')   MNEM(4) UNAVAIL(ENABPRI) ACTION RUN(ISRROUTE)      
+ PARM('SELECT CMD(PKGELES)')                                                    
+PDC DESC('Endevor Activity') MNEM(9)                  ACTION RUN(ISRROUTE)      
+ PARM('SELECT CMD(SnapMon)')                                                    
+PDC DESC('Exit') MNEM(2) PDSEP(ON) ACC(CTRL+X) ACTION RUN(EXIT)                 
+)ABCINIT                                                                        
+.ZVARS=ENABOPT                                                                  
+)ABC DESC('Project') MNEM(1)                                                    
+PDC DESC('&EPRN1. &EPRL1.                               ') MNEM(1)              
+PDC DESC('&EPRN2. &EPRL2.                               ') MNEM(1)              
+PDC DESC('&EPRN3. &EPRL3.                               ') MNEM(1)              
+PDC DESC('&EPRN4. &EPRL4.                               ') MNEM(1)              
+PDC DESC('&EPRN5. &EPRL5.                               ') MNEM(1)              
+PDC DESC('&EPRN6. &EPRL6.                               ') MNEM(1)              
+PDC DESC('&EPRN7. &EPRL7.                               ') MNEM(1)              
+PDC DESC('&EPRN8. &EPRL8.                               ') MNEM(1)              
+PDC DESC('Manage Projects...')                                                  
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(endvprj)')                               
+)ABCINIT                                                                        
+.ZVARS=ENABPRJ                                                                  
+&ENABPRJ = &Z                                                                   
+ VGET (EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8 +                        
+       EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8 +                        
+       EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8 ) PROFILE                
+)ABCPROC                                                                        
+ if ( ver (&ENABPRJ,RANGE,1,8))                                                 
+    *REXX (ENABPRJ P1 P2 P3 P4 P5 P6 P7 P8 P9 EPRL1 EPRL2                       
+            EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8, (ENDVPRJP))                    
+    &EABREFSH = 'QEPEVNME QEPSYS QEPSBS QEPTYP QEPELM'                          
+    &QEPEVNME = '&P1'                                                           
+    &QEPSYS   = TRUNC(TRUNC(&P2,','),' ')  /* QuickEdit can only handle one */  
+    &QEPSBS   = TRUNC(TRUNC(&P3,','),' ')                                       
+    &QEPTYP   = '&P4'                                                           
+    &QEPELM   = TRUNC(&P5,',')                                                  
+    if (&P6 NE '')                                                              
+       &EEVSRCHM = TRANS(&P6 1,N 2,N *,*)  /* QuickEdit doens't support 1/2 */  
+       &EABREFSH = '&EABREFSH. EEVSRCHM'                                        
+    if (&P7 NE '')                                                              
+       &EEVFFND  = '&P7'                                                        
+       &EABREFSH = '&EABREFSH. EEVFFND'                                         
+    if (&P8 NE '')                                                              
+       &EEVCCID  = '&P8'                                                        
+       &EABREFSH = '&EABREFSH. EEVCCID'                                         
+    if (&P9 NE '')                                                              
+       &EEVCOMM  = '&P9'                                                        
+       &EABREFSH = '&EABREFSH. EEVCOMM'                                         
+    if (&LNPRPROC = '2')                                                        
+       &EABENTR  = 'YES'                                                        
+    else                                                                        
+       &EABENTR  = 'NO'                                                         
+    VPUT(&EABREFSH EABREFSH EABENTR) PROFILE                                    
+)ABC DESC('Settings') MNEM(3)                                                   
+PDC DESC('CCID/Comment')     MNEM(1)             /* 1.Edit CCID/COmment      */ 
+   ACTION RUN(ISRROUTE) PARM('SELECT CMD(ECCID)')                               
+PDC DESC('&ENABOSIG.                  ') MNEM(1) /* 2.Toggle OverrideSignout */ 
+PDC DESC('&ENABELMD.                  ') MNEM(1) /* 3.Toggle Element save    */ 
+PDC DESC('&CCOLSV...')            MNEM(2) /* 4.Edit Column Settings   */        
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(&CCOLSP)')                               
+PDC DESC('Defaults...')       MNEM(1)  UNAVAIL(ENABLST) ACTION RUN(>D)          
+PDC DESC('Action Options...') MNEM(1)                   ACTION RUN(>AO)         
+)ABCINIT                                                                        
+.ZVARS=ENABSET                                                                  
+&ENABSET = &Z                                                                   
+ VGET (EEVOOSGN VNTCCOLS)  SHARED                                               
+ VGET (ENABELMP) PROFILE                                                        
+ if (&VNTCCOLS EQ 'E')                                                          
+   &CCOLSV = 'CCOLS'                                                            
+   &CCOLSP = 'ENDCCOLS'                                                         
+ else                                                                           
+   &CCOLSV = 'ECOLS'                                                            
+   &CCOLSP = 'ECOLS'                                                            
+ if (&EEVOOSGN EQ 'Y')                                                          
+   &ENABOSIG = 'Disable Override Signout'                                       
+ else                                                                           
+   &ENABOSIG = 'Enable Override Signout'                                        
+ if (&ENABELMP EQ 'Y')                                                          
+   &ENABELMD = 'Forget Element Name'                                            
+ else                                                                           
+   &ENABELMD = 'Save Element Name in profile'                                   
+)ABCPROC                                                                        
+ if (&ENABSET EQ '1')        /* CCID/Comment */                                 
+    &EABREFSH = 'EEVCCID EEVCOMM'                                               
+ if (&ENABSET EQ '2')        /* toggle OverRide Signout */                      
+   if (&EEVOOSGN EQ 'Y')                                                        
+     &EEVOOSGN = 'N'                                                            
+   else                                                                         
+     &EEVOOSGN = 'Y'                                                            
+   VPUT (EEVOOSGN) SHARED                                                       
+   &EABREFSH = 'EEVOOSGN'                                                       
+ if (&ENABSET EQ '3')        /* toggle element save */                          
+   if (&ENABELMP EQ 'Y')                                                        
+     &ENABELMP = 'N'                                                            
+     &QEPELM   = ''                                                             
+     VPUT (QEPELM) PROFILE                                                      
+   else                                                                         
+     &ENABELMP = 'Y'                                                            
+   VPUT (ENABELMP) PROFILE                                                      
+   &EABREFSH = 'ENABELMP'                                                       
+)ABC DESC('Sort') MNEM(1)                                                       
+PDC DESC('Element')          MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT)')                                 
+PDC DESC('Message(-)')       MNEM(2) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT -MES)')                            
+PDC DESC('System')           MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT SYS)')                             
+PDC DESC('SubSystem')        MNEM(3) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT SUB)')                             
+PDC DESC('Type')             MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT TYP)')                             
+PDC DESC('Environ')          MNEM(2) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT ENV)')                             
+PDC DESC('Stage')            MNEM(4) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT STA)')                             
+PDC DESC('VVLL(-)')          MNEM(2) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT -VVL)')                            
+PDC DESC('CCID')             MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT CCI)')                             
+PDC DESC('Userid')           MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT USE)')                             
+PDC DESC('Signout')          MNEM(2) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT SIG)')                             
+PDC DESC('Endevor RC(-)')    MNEM(9) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT -NDR)')                            
+PDC DESC('Processor RC(-)')  MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT -PRR)')                            
+PDC DESC('Processor Group') MNEM(11) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT PRO)')                             
+PDC DESC('NoSource(-)')      MNEM(1) UNAVAIL(ENABPRI)                           
+ ACTION RUN(ISRROUTE) PARM('SELECT CMD(ESORT -NS)')                             
+)ABCINIT                                                                        
+.ZVARS=ENABSET                                                                  
+)ABC DESC('Menu') MNEM(1)                                                       
+PDC DESC('Settings') UNAVAIL(ZPM1) MNEM(1) ACC(CTRL+S)                          
+ ACTION RUN(ISRROUTE) PARM('SET')                                               
+PDC DESC('View') UNAVAIL(ZPM2) MNEM(1) ACC(CTRL+V)                              
+ ACTION RUN(ISRROUTE) PARM('BR1')                                               
+PDC DESC('Edit') UNAVAIL(ZPM3) MNEM(1) ACC(CTRL+E)                              
+ ACTION RUN(ISRROUTE) PARM('ED1')                                               
+PDC DESC('ISPF Command Shell') UNAVAIL(ZPM4) MNEM(6) ACC(CTRL+C)                
+ ACTION RUN(ISRROUTE) PARM('C1')                                                
+PDC DESC('Dialog Test...') UNAVAIL(ZPM5) MNEM(8) ACC(CTRL+T)                    
+ ACTION RUN(ISRROUTE) PARM('DAL')                                               
+PDC DESC('Other IBM Products...') UNAVAIL(ZPM6) MNEM(1) ACC(CTRL+O)             
+ ACTION RUN(ISRROUTE) PARM('OIB')                                               
+PDC DESC('SCLM') UNAVAIL(ZPM7) MNEM(3) ACC(CTRL+L)                              
+ ACTION RUN(ISRROUTE) PARM('SCL')                                               
+PDC DESC('ISPF Workplace') UNAVAIL(ZPM8) MNEM(6) ACC(CTRL+W)                    
+ ACTION RUN(ISRROUTE) PARM('WRK')                                               
+PDC DESC('Status Area...') UNAVAIL(ZPMS) MNEM(8) ACC(CTRL+A)                    
+ ACTION RUN(ISRROUTE) PARM('SAM')                                               
+)ABCINIT                                                                        
+.ZVARS=ISR@OPT                                                                  
+)ABC DESC('Utilities') MNEM(1)                                                  
+PDC DESC('Library') UNAVAIL(ZUT1) MNEM(1) ACC(ALT+1)                            
+ ACTION RUN(ISRROUTE) PARM('U1')                                                
+PDC DESC('Data set') UNAVAIL(ZUT2) MNEM(1) ACC(ALT+2)                           
+ ACTION RUN(ISRROUTE) PARM('U2')                                                
+PDC DESC('Move/Copy') UNAVAIL(ZUT3) MNEM(1) ACC(ALT+3)                          
+ ACTION RUN(ISRROUTE) PARM('U3')                                                
+PDC DESC('Data Set List') UNAVAIL(ZUT4) MNEM(2) ACC(ALT+4)                      
+ ACTION RUN(ISRROUTE) PARM('U4')                                                
+PDC DESC('Reset Statistics') UNAVAIL(ZUT5) MNEM(5) ACC(ALT+5)                   
+ ACTION RUN(ISRROUTE) PARM('U5')                                                
+PDC DESC('Hardcopy') UNAVAIL(ZUT6) MNEM(1) ACC(ALT+6)                           
+ ACTION RUN(ISRROUTE) PARM('U6')                                                
+PDC DESC('Download...') UNAVAIL(ZUTDT) MNEM(2) ACC(ALT+7)                       
+ ACTION RUN(ISRROUTE) PARM('UDT')                                               
+PDC DESC('Outlist') UNAVAIL(ZUT7) MNEM(2) ACC(ALT+8)                            
+ ACTION RUN(ISRROUTE) PARM('U8')                                                
+PDC DESC('Commands...') UNAVAIL(ZUT8) MNEM(1) ACC(ALT+9)                        
+ ACTION RUN(ISRROUTE) PARM('U9')                                                
+PDC DESC('Reserved') UNAVAIL(ZUT9) MNEM(6) ACTION RUN(ISRROUTE) PARM('U10')     
+PDC DESC('Format') UNAVAIL(ZUT10) MNEM(1) ACC(ALT+F1)                           
+ ACTION RUN(ISRROUTE) PARM('U11')                                               
+PDC DESC('SuperC') UNAVAIL(ZUT11) MNEM(1) PDSEP(ON) ACC(CTRL+F2)                
+ ACTION RUN(ISRROUTE) PARM('U12')                                               
+PDC DESC('SuperCE') UNAVAIL(ZUT12) MNEM(3) ACC(CTRL+F3)                         
+ ACTION RUN(ISRROUTE) PARM('U13')                                               
+PDC DESC('Search-For') UNAVAIL(ZUT13) MNEM(2) ACC(CTRL+F4)                      
+ ACTION RUN(ISRROUTE) PARM('U14')                                               
+PDC DESC('Search-ForE') UNAVAIL(ZUT14) MNEM(4) ACC(CTRL+F5)                     
+ ACTION RUN(ISRROUTE) PARM('U15')                                               
+PDC DESC('Table Utility') UNAVAIL(ZUT15) MNEM(3) ACC(CTRL+F6)                   
+ ACTION RUN(ISRROUTE) PARM('U16')                                               
+PDC DESC('Directory List') UNAVAIL(ZUT16) MNEM(2) ACC(CTRL+F7)                  
+ ACTION RUN(ISRROUTE) PARM('U17')                                               
+)ABCINIT                                                                        
+.ZVARS=PDFUTIL                                                                  
+     &zut9 = '1'                                                                
+)ABC DESC('Help') MNEM(1)                                                       
+PDC DESC('QuickEdit') MNEM(1) ACTION RUN(TUTOR) PARM('ENDHE100')                
+PDC DESC('Commands & Options') MNEM(1) ACTION RUN(TUTOR) PARM('ENDHE110')       
+PDC DESC('Location Fields') MNEM(1) ACTION RUN(TUTOR) PARM('ENDHE120')          
+PDC DESC('List Options') MNEM(6) ACTION RUN(TUTOR) PARM('ENDHE130')             
+PDC DESC('Action Options') MNEM(1) ACTION RUN(TUTOR) PARM('ENDHE140')           
+PDC DESC('Element Selection') MNEM(1) ACTION RUN(TUTOR) PARM('ENDHE250')        
+PDC DESC('Settings, Defaults') MNEM(11) ACTION RUN(TUTOR) PARM('ENDHEO00')      
+PDC DESC('Settings, Action Options') MNEM(1) ACTION RUN(TUTOR) PARM('ENDHE150') 
+PDC DESC('Endevor') MNEM(2) ACTION RUN(TUTOR) PARM('CITM1000')                  
+PDC DESC('FDP Changes') MNEM(1) ACTION RUN(TUTOR) PARM('LNDHE1C0')              
+)ABCINIT                                                                        
+.ZVARS=MEMLHELP                                                                 
+)BODY EXPAND(\\) CMD(VARWKCMD)                                                  
+ Endevor Project Settings Sort Menu Utilities Help                     
+-------------------------------------------------\-\---------------------WS5-- 
+ \ \ CA Endevor SCM V&myincr Quick Edit  + \ \                                 
+Command ===>VARWKCMD                                        Scroll ===>AMT +
+<OTHERWISE>                                                                     
+)BODY EXPAND(\\) CMD(VARWKCMD)                                                  
+%------------------- &MyTitle --WS5-\-\                                         
+%Command ===>_VARWKCMD                                        %Scroll ===>_AMT +
+</SELECT>                                                                       
+$SAREA                                                                         $
+)AREA SAREA                                                                     
+<SELECT - Dynamic Help Options>                                                 
+<WHEN &VNTUIHID=Y>                                                              
+MyPrmpt             {U{SQ{AO{D{PD{P{Blank{B{CR{E{C{SI{G{#{M{O{S{H{LL{LC{LO{LI+
+<OTHERWISE>                                                                     
+MyPrmpt               U{User Menu        ~SQ{Sub Queue+&QUREQS                
+  AO{Action Options   D{Dialog Defaults  �PD{Parallel Dev     P{Packages   + 
+}Element Options:+                                                              
+  blank{Element list  B{Browse CR{Create E{Edit C{Changes SI{Signin     + 
+      G{Generate      #{Delete  M{Master O{Move S{Summary  H{History    + 
+     LL{List Listing LC{List Components  LO{List Outputs    LI{List Inputs+ 
+</SELECT>                                                                       
++                                                                               
+<SELECT Dynamic Element Location>                                               
+<WHEN &VNTUIELM=S>                                                              
++Location:                         List Options:                                
++  Environment .!QEPEVNME+           Apply List Filters . . . . ._Z+(Y/N)       
++  System. . . .!QEPSYS  +           Build Using Map. . . . . . ._Z+(Y/N)       
++  Subsystem . .!QEPSBS  +           Return First Found . . . . ._Z+(Y/N)       
++  Element . . .@QEPELM    |QEPIND+  Display Env/Sys/Subsys List._Z+(Y/N)       
++  Type. . . . .!QEPTYP  +                                                      
++                                                                               
++Action Options:                                                                
++  CCID. . . . . . .^EEVCCID     +                                              
++  Comment . . . . .`EEVCOMM                                 +                  
++  Processor Group ._EEVPRGRP+                                                  
++  Override Signout._Z+(Y/N)         Preserve VB Record Length. ._Z+(Y/N)       
+<OTHERWISE>                                                                     
++Element. .@QEPELM                                             |QEPIND          
++  Type . .!QEPTYP  +                                                           
++  CCID . .^EEVCCID     + Comment. .`EEVCOMM                                 +  
++                                                                               
++Location:                         List Options:                                
++  Environment.!QEPEVNME+            Build Using Map. . . . . . ._Z+(Y/N)       
++  System . . .!QEPSYS  +            Return First Found . . . . ._Z+(Y/N)       
++  Subsystem. .!QEPSBS  +            Apply List Filters . . . . ._Z+(Y/N)       
++                                    Display Env/Sys/Subsys List._Z+(Y/N)       
++                                    Case-sensitive Elm Name. . ._Z+(Y/N)       
++Action Options:                                                                
++  Override Signout ._Z+(Y/N)        Uppercase Elm Name . . . . ._Z+(Y/N)       
++  Processor Group. ._EEVPRGRP+      Preserve VB Record Length. ._Z+(Y/N)       
+</SELECT>                                                                       
+<SELECT Dynamic Endevor Learn More option>                                      
+<WHEN &VNTUIDLM=N>                                                              
++                                                                               
++            Copyright (C) 1986-2019 BROADCOM. All Rights Reserved.             
+<OTHERWISE>                                                                     
++                                                                               
++           Learn More at&VNTUIURL                                  +          
++            Copyright (C) 1986-2019 BROADCOM. All Rights Reserved.             
+</SELECT>                                                                       
+)INIT                                                                           
+&VNTUIURL              = 'https://www.broadcom.com/Endevor-Learn-More'          
+<SELECT Dynamic Element Location - Make ZVARs match the field positions>        
+<WHEN &VNTUIELM=S>                                                              
+  .ZVARS = '(EEVALF EEVSRCHM EEVFFND EEVDLIST +                                 
+                              EEVOOSGN EEVOOPRE)'                               
+  &EEVCASE  = 'Y'                              /* Force uppercase on         */ 
+  &EEVMIXEL = 'Y'                              /* Force Case sensitive on    */ 
+<OTHERWISE>                                                                     
+  .ZVARS = '(EEVSRCHM EEVFFND EEVALF EEVDLIST EEVCASE +                         
+             EEVOOSGN EEVMIXEL  EEVOOPRE)'                                      
+                                                                                
+/* Test - can I move functional varaibles to shared pool?                 */    
+/*VGET (VARCACCI VARFMCCI VARCACOM VARFMCOM) */                                 
+  VPUT (VARCACCI VARFMCCI VARCACOM VARFMCOM) SHARED                             
+/* For QE Batch Action Queue Feature show if the option is active and if  */    
+/* There are any pending requests                                         */    
+  VGET (EEVQUREQ) ASIS                      /* Fetch latest value         */    
+  IF (&EEVQUREQ = '')                       /* If request Queue is NotSet */    
+      &EEVQUREQ = '00000000'                /*   Q/E Queue Feat not ena   */    
+  IF (&EEVQUREQ = '00000000')               /* If request Queue is empty  */    
+      &VARQEQIN = 'LOW'                     /* . show it as unavailable   */    
+      &QUREQS   = ''                        /* . and blank out the REQs   */    
+  ELSE                                                                          
+      &VARQEQIN = 'HIGH'                    /* Otherwise HiGHLIGHT the opt*/    
+      *REXX( EEVQUREQ QUREQS)               /* and use REXX to format the */    
+       QUREQS = '(' || STRIP(EEVQUREQ,'L','0') || ')' /* REQS number by   */    
+       RETURN                               /* removing the leading zeros */    
+      *ENDREXX                                                                  
+                                                                                
+/*For some panels it makes sense to default the cursor position, maybe not   */ 
+/*though for the Q/E primary panel - the first key stroke should be the cmd  */ 
+/*&tcursor = .cursor                           -* Get cursor field           */ 
+/*if (.CURSOR = VARWKCMD AND .MSG = &Z)        -* if cursor is top and no msg*/ 
+/*    .CURSOR = 'QEPELM'                       -* If on top put cursor here  */ 
+</SELECT>                                                                       
+  &CTLITRML = 'E'                    /* We are using English panels*/           
+/* Following lines inserted for Endevor Action Bar/CUA support...        */     
+  &ENABFNC = 'QuickEdit'                     /* Show where we are */            
+  &ENABUNA = '1'                             /* UnAvailable Reserved */         
+  &ENABPRI = '1'                             /* UnAvailable On Primary menu */  
+  &ENABLST = '0'                             /* UnAvailable On list panel  */   
+  VPUT (CTLITRML) PROFILE                                                       
+  /* Construct title with version number                  */                    
+  &MYINCR = &VARINCRN                                                           
+  &Mytitle = 'CA Endevor SCM Quick Edit &myincr'                                
+                                                                                
+  VGET (ZSCREENW) ASIS                                                          
+  VPUT (ZSCREENW) PROFILE                                                       
+                                                                                
+  /* Adjust the Dialog Prompt text for hidden or expanded */                    
+  if (.MSG = FLOW000E)                      /* invalid option?     */           
+     if (&VARWKCMD = ZREDISPLAY)            /* and we wanted refsh */           
+         &VARWKCMD = &Z                     /* clear it            */           
+         .MSG = ENDE218W                    /* and show saved msg  */           
+  if (&VNTUIHID = 'Y')                                                          
+      &MyPrmpt = 'Dialog Commands: +'                                           
+  else                                                                          
+      &MyPrmpt = 'Dialog Commands: -'                                           
+      &VNTUIHID = 'N'                                                           
+  /*---------------------------------------------------------------*/           
+  /* Reserved for CUA support                                      */           
+  /* QuickEdit might want to make the inventory location output    */           
+  /* only (perhaps for QuickEdit Recovery, but code doesnt appear  */           
+  /* to be active - but just in case check and change the type     */           
+  /* Similar code is used to change the PDM option to unavail      */           
+  /*---------------------------------------------------------------*/           
+  /*if (&VARQETY = OUTPUT)          -* is the field output only      */         
+  /*    &MYVQETY = VOI              -* ...set as variable output     */         
+  /*    &MYVQETY = NEF              -* ...otherwise set as normal inp*/         
+  /* if (&VARQEPIN = LOW)           -* if PDM is not avail           */         
+  /*    .ATTRCHAR('�')='TYPE(SUC)'  -* ...mark option as not avail   */         
+  /*---------------------------------------------------------------*/           
+  /* The default value of the 'Generate Processor Mode' field can  */           
+  /* be set by uncommenting the following statement.               */           
+  /*---------------------------------------------------------------*/           
+  /* &EEVPRMOD = B        */                                                    
+  .HELP = ENDHE100                                                              
+  &LIST2 = 'Y N'                                                                
+  IF (&EEVALF = ' ')                                                            
+    &EEVALF = 'N'                                                               
+  VGET (AMT)                                                                    
+  IF (&AMT = ' ')                                                               
+    &AMT = 'PAGE'                                                               
+  IF (&QTMPCASE = ' ')                                                          
+    &EEVCASE = 'Y'                                                              
+    &QTMPCASE = 'Y'                                                             
+  IF (&EEVCASE = ' ')                                                           
+    &EEVCASE = 'N'                                                              
+  IF (&EEVMIXEL = ' ')                                                          
+    &EEVMIXEL = 'Y'                                                             
+/* Check the Split/Screen option and default if not set               */        
+  VGET (ESRCHWRP) PROFILE                                                       
+  IF (&ESRCHWRP EQ ' ' )                                                        
+    &ESRCHWRP = 'NO'                                                            
+/* ...TEMP SETUP SCROLlable fields for prototype   */                           
+  &VARPFX = 'ENSY'                                                              
+  VPUT (ECOLREF VARPFX) SHARED                                                  
+/* Start code for WideScreen - Primary View - SUMLEVLS */                       
+/* This code establishes a default view (before ECols) */                       
+  VGET (ENSY0H1 ENSY0H2 ENSY0M1 ENSY0VR ENSY0CL) profile                        
+  if (&ENSY0H1 = '')                                                            
+    &ENSY0H1 =  '   VVLL Message    User     LADate  LATim Statements'          
+    &ENSY0H2 =  '-- ---- ---------- -------- ------- ----- ----------'          
+    &ENSY0M1 = '_Z @Z   �Z         @Z       @Z      @Z    ^Z'                   
+    &ENSY0H1 = '&ENSY0H1. Inserts Deletes Sync'                                 
+    &ENSY0H2 = '&ENSY0H2. ------- ------- ----'                                 
+    &ENSY0M1 = '&ENSY0M1.         ^Z      ^Z      +@Z'                          
+    &ENSY0VR = 'EEVESSEL EEVESKVL EEVETDMS EEVESUSR EEVESLDT EEVESLTM EEVESSTM +
+                EEVESINS EEVESDEL EEVESSYN'                                     
+    &ENSY0CL = 'EEVESSEL'                                                       
+    &ENSY0M2 = 'OMIT'                                                           
+/* Show CCID and Comments on alternate screen */                                
+  VGET (ENSY1H1 ENSY1H2 ENSY1M1 ENSY1VR ENSY1CL) profile                        
+  if (&ENSY1H1 = '')                                                            
+    &ENSY1H1 =  '   VVLL Message    User     LADate  LATim'                     
+    &ENSY1H2 =  '-- ---- ---------- -------- ------- -----'                     
+    &ENSY1M1 = '_Z @Z   �Z         @Z       @Z      @Z'                         
+    &ENSY1H1 = '&ENSY1H1. CCID         Comment'                                 
+    &ENSY1H2 = '&ENSY1H2. ------------ ---------------------------------------' 
+    &ENSY1M1 = '&ENSY1M1.    @Z           @Z'                                   
+    &ENSY1VR = 'EEVESSEL EEVESKVL EEVETDMS EEVESUSR EEVESLDT EEVESLTM +         
+                EEVETCCI EEVLCOM'                                               
+    &ENSY1CL = 'EEVESSEL'                                                       
+    &ENSY1M2 = 'OMIT'                                                           
+/* Use Panel Rexx to do the heavy lifting to ensure that models and   */        
+/* their respective headings and ZVAR placeholders etc. are truncated */        
+/* or split over two lines as necessary depending on the screen size  */        
+/*                                                                    */        
+VGET (ZSCREENW) ASIS                                                            
+*REXX (ZSCREENW ESRCHWRP VARPFX                                                 
+       ENSY0H1 ENSY0H2 ENSY0M1 ENSY0M2 ENSY0VR ENSY0CL ENSY0ZM                  
+       ENSY1H1 ENSY1H2 ENSY1M1 ENSY1M2 ENSY1VR ENSY1CL ENSY1ZM, (ENDVWIDE))     
+ VPUT (ENSY0H1 ENSY0H2 ENSY0M1 ENSY0M2 ENSY0VR ENSY0CL ENSY0ZM) SHARED          
+ VPUT (ENSY1H1 ENSY1H2 ENSY1M1 ENSY1M2 ENSY1VR ENSY1CL ENSY1ZM) SHARED          
+/* ...END OF TEMP SECTION....................                             */    
+/* Reset Edit column flag and set VARPFX for Quick Edit mode  */                
+  &ECOLREF = ''                                                                 
+  &VARPFX = 'ENDQ'                                                              
+  VPUT (ECOLREF VARPFX) SHARED                                                  
+  VGET (ABARPACK) shared      /* Auto Navigate    */                            
+  IF (&ABARPACK = 'YES')      /* we want packages */                            
+     &VARWKCMD = 'P'          /* choose (P)ackage */                            
+     &ABARPACK = 'DONE'       /* Flag done for Rtn*/                            
+     .RESP = ENTER            /* simulate Enter   */                            
+  ELSE                                                                          
+     IF (&ABARPACK = 'DONE')  /* On the way back? */                            
+        &ABARPACK = ''        /* Reset Flag       */                            
+        .RESP = END           /* simulate End     */                            
+  VPUT (ABARPACK) shared      /* Update Flag      */                            
+  /* ActionBar Processing - Refresh on screen values if necessary */            
+  VGET (EABREFSH EABENTR) profile          /* Refresh values...   */            
+  IF (&EABREFSH NE &Z )                    /* anything to refresh */            
+     VGET (&EABREFSH) ASIS                 /* get those values    */            
+     if (&EABENTR = 'YES')                 /* user wants to jump? */            
+        &EABENTR = &Z                      /* reset Jump          */            
+        &EABREFSH= &Z                      /* reset the flag      */            
+        VPUT (EABREFSH EABENTR) profile    /* and save them       */            
+        .RESP = ENTER                      /* Press Enter         */            
+     else                                                                       
+        &savlmsg='&ZEDLMSG.'               /* save current value  */            
+        &zedsmsg='Init Settings changed'   /* Set a message       */            
+        &zedlmsg='Refreshed the following values:&EABREFSH.' /*opt*/            
+        .MSG = ISRZ001                     /* and show message    */            
+        &zedlmsg='&SAVLMSG.'               /* restore old value   */            
+        &EABENTR = &Z                      /* reset Jump          */            
+        &EABREFSH= &Z                      /* reset the flag      */            
+        VPUT (EABREFSH EABENTR) profile    /* and save them       */            
+        .CURSOR = VARWKCMD                 /* reposition cursor   */            
+        EXIT                               /* and return to user  */            
+)PROC                                                                           
+  /* ActionBar Processing - Refresh on screen values if necessary */            
+  IF (&EABREFSH NE &Z )                    /* anything to refresh */            
+     VGET (&EABREFSH) ASIS                 /* get those values    */            
+     if (&EABENTR = 'YES')                 /* user wants to jump? */            
+        &EABENTR = &Z                      /* reset Jump          */            
+        &EABREFSH= &Z                      /* reset the flag      */            
+        REFRESH(*)                         /* Refresh screen vars */            
+        VPUT (EABREFSH EABENTR) profile    /* and save them       */            
+        .RESP = ENTER                      /* Press Enter         */            
+     else                                                                       
+        &savlmsg='&ZEDLMSG.'               /* save current value  */            
+        &zedsmsg='Settings changed'        /* Set a message       */            
+        &zedlmsg='Refreshed the following values &EABREFSH.' /*opt*/            
+        .MSG = ISRZ001                     /* and show message    */            
+        &zedlmsg='&SAVLMSG.'               /* restore old value   */            
+        &EABENTR = &Z                      /* reset Jump          */            
+        &EABREFSH= &Z                      /* reset the flag      */            
+        REFRESH(*)                         /* Refresh screen vars */            
+        VPUT (EABREFSH EABENTR) profile    /* and save them       */            
+        .CURSOR = VARWKCMD                 /* reposition cursor   */            
+        EXIT                               /* and return to user  */            
+/* Save the CCID and comment for later...                             */        
+  VPUT (EEVCCID EEVCOMM EEVOOSGN) SHARED                                        
+  VGET (MYBYPASS) Shared /* Check current setting of bypass       */            
+  if (&MYBYPASS = 'Y')   /* was bypass set on prompt panel?       */            
+      &MYBYPASS = 'N'    /* Turn it off again because we're back  */            
+      VPUT (MYBYPASS) Shared /* and user might change their mind  */            
+                                                                                
+/* Start code for Sandbox creation.                    */                       
+/* ...if we are creating a sandbox with elename # call rexx ENDVSAND */         
+  IF (&VARWKCMD = 'CR')                                                         
+   IF (&QEPELM = '#')                                                           
+    If (&QEPTYP = 'SANDBOX')                                                    
+     *REXX(QEPELM QEPEVNME QEPSYS QEPSBS QEPELM QEPTYP, (ENDVSAND))             
+                                                                                
+/* Start code for WideScreen - Primary View - ENDIE250 */                       
+/* This code establishes a default view (before ECols) */                       
+  VGET (ENDQ0H1 ENDQ0H2 ENDQ0M1 ENDQ0VR ENDQ0CL) profile                        
+  if (&ENDQ0H1 = '')                                                            
+    &ENDQ0H1 =           '   Element    + Message    Type     NS'               
+    &ENDQ0H2 =           '-- ---------- - ---------- -------- --'               
+    &ENDQ0M1 =          '_Z @Z         @Z�Z         @Z       +@Z'               
+    &ENDQ0H1 = '&ENDQ0H1. Environ  Stage System   Subsys   VVLL'                
+    &ENDQ0H2 = '&ENDQ0H2. -------- ----- -------- -------- ----'                
+    &ENDQ0M1 = '&ENDQ0M1.@Z       + @Z+ @Z       @Z       @Z'                   
+    &ENDQ0H1 = '&ENDQ0H1. ProcGrp  UserID   CCID         PRRC'                  
+    &ENDQ0H2 = '&ENDQ0H2. -------- -------- ------------ ---- '                 
+    &ENDQ0M1 = '&ENDQ0M1.   @Z       @Z       @Z           @Z'                  
+    &ENDQ0H1 = '&ENDQ0H1. NDRC Signout'                                         
+    &ENDQ0H2 = '&ENDQ0H2. ---- --------'                                        
+    &ENDQ0M1 = '&ENDQ0M1.   @Z   @Z'                                            
+    &ENDQ0VR = 'EEVETSEL EEVETKEL EEVEIND  EEVETDMS EEVETKTY EEVETNS +          
+                EEVETKEN EEVETKSI EEVETKSY EEVETKSB EEVESKVL +                  
+                EEVETPGR EEVETUID EEVETCCI EEVETPRC +                           
+                EEVETNRC EEVETSO'                                               
+    &ENDQ0CL = ' '                                                              
+    &ENDQ0M2 = 'OMIT'                                                           
+/* These are the defaults for the Alternate View - ENDIE251 */                  
+  VGET (ENDQ1H1 ENDQ1H2 ENDQ1M1 ENDQ1VR ENDQ1CL) profile                        
+  if (&ENDQ1H1 = '')                                                            
+    &ENDQ1H1 =  '   Element    + Type     ProcGrp  UserID   CCID         PRRC'  
+    &ENDQ1H2 =  '-- ---------- - -------- -------- -------- ------------ ----'  
+    &ENDQ1M1 = '_Z @Z         @Z@Z       @Z       @Z       @Z           @Z'     
+    &ENDQ1H1 = '&ENDQ1H1. NDRC Signout  System   Subsys   VVLL Stage'           
+    &ENDQ1H2 = '&ENDQ1H2. ---- -------- -------- -------- ---- -----'           
+    &ENDQ1M1 = '&ENDQ1M1.   @Z   @Z       @Z       @Z       @Z     @Z'          
+    &ENDQ1H1 = '&ENDQ1H1. Environ  NS  Message'                                 
+    &ENDQ1H2 = '&ENDQ1H2. -------- --  ----------'                              
+    &ENDQ1M1 = '&ENDQ1M1.  @Z        @Z �Z'                                     
+    &ENDQ1VR = 'EEVETSEL EEVETKEL EEVEIND  EEVETKTY EEVETPGR EEVETUID EEVETCCI +
+                EEVETPRC EEVETNRC EEVETSO  EEVETKSY EEVETKSB EEVESKVL EEVETKSI +
+                EEVETKEN EEVETNS  EEVETDMS'                                     
+    &ENDQ1CL = ' '                                                              
+    &ENDQ1M2 = 'OMIT'                                                           
+/* Use Panel Rexx ho do the heavy lifting to ensure that models and   */        
+/* their respective headings and ZVAR placeholders etc. are truncated */        
+/* or split over two lines as necessary depending on the screen size  */        
+/*                                                                    */        
+VGET (ZSCREENW) ASIS                                                            
+*REXX (ZSCREENW ESRCHWRP VARPFX                                                 
+       ENDQ0H1  ENDQ0H2  ENDQ0M1  ENDQ0M2  ENDQ0VR  ENDQ0CL ENDQ0ZM             
+       ENDQ1H1  ENDQ1H2  ENDQ1M1  ENDQ1M2  ENDQ1VR  ENDQ1CL ENDQ1ZM, (ENDVWIDE))
+/* Make sure variables are available to other commands - e.g. COPYELM */        
+  VPUT (ENDQ0H1 ENDQ0H2 ENDQ0M1 ENDQ0M2 ENDQ0VR ENDQ0CL ENDQ0ZM) SHARED         
+  VPUT (ENDQ1H1 ENDQ1H2 ENDQ1M1 ENDQ1M2 ENDQ1VR ENDQ1CL ENDQ1ZM) SHARED         
+  VPUT (AMT) PROFILE                                                            
+  &EEVSELCH = TRUNC(&VARWKCMD,2)                                                
+  &ENABWAIE = TRANS(&QEPEVNME, '','*' *,*)                                      
+  &ENABWAIS = TRANS(&QEPSYS    '','*' *,*)                                      
+  &ENABWAIB = TRANS(&QEPSBS    '','*' *,*)                                      
+  &ENABWAIL = TRANS(&QEPELM    '','*' *,*)                                      
+  &ENABWAIT = TRANS(&QEPTYP    '','*' *,*)                                      
+  &ENABWAI = '&ENABWAIE/&ENABWAIS/&ENABWAIB/&ENABWAIL/&ENABWAIT'                
+  VPUT (ENABWAI) SHARED                                                         
+  VPUT (EEVOOSGN EEVCCID EEVCOMM AMT) PROFILE                                   
+  VER  (&EEVALF,NB,LISTV,&LIST2,MSG=CIFV005)                                    
+  VER  (&EEVCASE,NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER  (&EEVMIXEL,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VPUT (EEVOOSGN) PROFILE                                                       
+  VPUT (EEVCCID) PROFILE                                                        
+  VPUT (EEVCOMM) PROFILE                                                        
+  VGET (MYBYPASS) Shared /* Check current setting of bypass       */            
+  if (&MYBYPASS = 'Y')   /* was bypass set on prompt panel?       */            
+      &MYBYPASS = 'N'    /* Turn it off again because we're back  */            
+      VPUT (MYBYPASS) Shared /* and user might change their mind  */            
+                                                                                
+  if (.CURSOR = MYPRMPT) /* If cursor in Dialog Promt (help area) */            
+     if (&VNTUIHID = 'Y')                                                       
+         &MyPrmpt  = 'Dialog Commands: -'                                       
+         &VNTUIHID = 'N'                                                        
+     else                                                                       
+         &MyPrmpt  = 'Dialog Commands: +'                                       
+         &VNTUIHID = 'Y'                                                        
+     VPUT (VNTUIHID) PROFILE                                                    
+     &zedsmsg='Help Text Hide:&VNTUIHID'   /* Set a message       */            
+     &zedlmsg='Toggled the Endevor Help Text display'                           
+     &VARWKCMD = 'ZREDISPLAY'              /* jump to defaults    */            
+     .RESP = ENTER                         /* Press Enter         */            
+/* Save PARM to top level commands so that they are available     */            
+/* to the subsequently called routines, or through FLOWBLOCK      */            
+/* select program/command in the PGMPARM field                    */            
+  &TEMP = TRUNC(&VARWKCMD,' ')                                                  
+  &VARWKPRM = .TRAIL                                                            
+  VPUT(VARWKPRM) SHARED                                                         
+/* Now handle saving last project... */                                         
+VGET  (LNPRSRCH LNPRFFND LNPRCCID LNPRCOMM) Profile                             
+VGET  (EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8 +                        
+       EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8 +                        
+       EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8 ) PROFILE                
+&PushPrj = '&QEPEVNME.\&QEPSYS.\&QEPSBS.\&QEPTYP.\&QEPELM.'                     
+if (&LNPRSRCH = '/') &PushPrj = '&PushPrj.\&EEVSRCHM.'                          
+else &PushPrj = '&PushPrj.\'                                                    
+if (&LNPRFFND = '/') &PushPrj = '&PushPrj.\&EEVFFND.'                           
+else &PushPrj = '&PushPrj.\'                                                    
+if (&LNPRCCID = '/') &PushPrj = '&PushPrj.\&EEVCCID.'                           
+else &PushPrj = '&PushPrj.\'                                                    
+if (&LNPRCOMM = '/') &PushPrj = '&PushPrj.\&EEVCOMM.'                           
+else &PushPrj = '&PushPrj.\'                                                    
+*REXX (PushPrj                                                                  
+       EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8                          
+       EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8                          
+       EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8, (ENDVPRJS))             
+VPUT  (EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8 +                        
+       EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8 +                        
+       EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8 ) PROFILE                
+)FIELD                                                                          
+ FIELD(QEPELM) IND(QEPIND) SCROLL(ON)                                           
+ FIELD(VARWKCMD)           SCROLL(NO)  LEN(255)                                 
+)PNTS                                                                           
+ FIELD(ZPS01001) VAR(VARWKCMD) VAL(U)                                           
+ FIELD(ZPS01002) VAR(VARWKCMD) VAL(SQ)                                          
+ FIELD(ZPS01003) VAR(VARWKCMD) VAL(AO)                                          
+ FIELD(ZPS01004) VAR(VARWKCMD) VAL(D)                                           
+ FIELD(ZPS01005) VAR(VARWKCMD) VAL(PD)                                          
+ FIELD(ZPS01006) VAR(VARWKCMD) VAL(P)                                           
+ FIELD(ZPS01007) VAR(VARWKCMD) VAL(' ')                                         
+ FIELD(ZPS01008) VAR(VARWKCMD) VAL(B)                                           
+ FIELD(ZPS01009) VAR(VARWKCMD) VAL(CR)                                          
+ FIELD(ZPS01010) VAR(VARWKCMD) VAL(E)                                           
+ FIELD(ZPS01011) VAR(VARWKCMD) VAL(C)                                           
+ FIELD(ZPS01012) VAR(VARWKCMD) VAL(SI)                                          
+ FIELD(ZPS01013) VAR(VARWKCMD) VAL(G)                                           
+ FIELD(ZPS01014) VAR(VARWKCMD) VAL('#')                                         
+ FIELD(ZPS01015) VAR(VARWKCMD) VAL(M)                                           
+ FIELD(ZPS01016) VAR(VARWKCMD) VAL(O)                                           
+ FIELD(ZPS01017) VAR(VARWKCMD) VAL(S)                                           
+ FIELD(ZPS01018) VAR(VARWKCMD) VAL(H)                                           
+ FIELD(ZPS01019) VAR(VARWKCMD) VAL(LL)                                          
+ FIELD(ZPS01020) VAR(VARWKCMD) VAL(LC)                                          
+ FIELD(ZPS01021) VAR(VARWKCMD) VAL(LO)                                          
+ FIELD(ZPS01022) VAR(VARWKCMD) VAL(LI)                                          
+)END                                                                            

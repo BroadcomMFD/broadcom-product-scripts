@@ -1,0 +1,13 @@
+/* REXX - Sample routine to Clear rows message (clear the status)               
+          */                                                                    
+parse arg PassParm                                                              
+PassName = strip(PassParm,,"'")                                                 
+ADDRESS ISPEXEC "VGET ("PassName") SHARED"                                      
+interpret 'ALLVALS = 'PassName                                                  
+ADDRESS ISPEXEC "VGET ("ALLVALS") SHARED"                                       
+/*                                                                              
+  insert logic here to remove the selected rows if needed                       
+*/                                                                              
+USERMSG = ''                                                                    
+ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                         
+EXIT 0                                                                          

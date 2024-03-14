@@ -1,0 +1,206 @@
+/* Rexx - Name this member PANEXIT                                   */ 00010000
+/*                                                                   */ 00020000
+/* Sample panel exit to simulate HILITE of REXX in ISPF Browse.      */ 00030000
+/*                                                                   */ 00040000
+/* This will work in ISPF for OS/390 R10 or later.                   */ 00050000
+/*                                                                   */ 00060000
+/* Setup:                                                            */ 00070000
+/*                                                                   */ 00080000
+/*  Add the following lines to panel isrbroba:                       */ 00090000
+/*                                                                   */ 00100000
+/*  In the )attr section                                             */ 00110000
+/*       Y  TYPE(CHAR) COLOR(YELLOW)  /* SYMBOLS */                  */ 00120000
+/*       G  TYPE(CHAR) COLOR(GREEN)   /* DEFAULT */                  */ 00130000
+/*       R  TYPE(CHAR) COLOR(RED)     /* KEYWORDS*/                  */ 00140000
+/*       W  TYPE(CHAR) COLOR(WHITE)   /* QUOTED  */                  */ 00150000
+/*       B  TYPE(CHAR) COLOR(BLUE)    /* COMMENT */                  */ 00160000
+/*                                                                   */ 00170000
+/*  At the end of the )init section and the beginning of the )reinit:*/ 00180000
+/*                                                                   */ 00190000
+/*   &SHADOW=&ZDATA                                                  */ 00200000
+/*   PANEXIT((ZDATA,SHADOW,ZWIDTH,NHI,FDPDS),REXX,%SNAPMONH)         */ 00210000
+/*                                                                   */ 00220000
+/*  In the )BODY section add a shadow variable called SHADOW by      */ 00230000
+/*   adding ,SHADOW after the word ZDATA                             */ 00240000
+/*                                                                   */ 00250000
+/*  Usage:                                                           */ 00260000
+/*    Use Browse to browse this sample.  If you created your own     */ 00270000
+/*    browse panel, use the BROWSE service with the PANEL keyword.   */ 00280000
+/*                                                                   */ 00290000
+/*  Notes:                                                           */ 00300000
+/*    The only Rexx keywords highlighted are those found in this     */ 00310000
+/*    sample.  You can add more by adding to the variale named       */ 00320000
+/*    'keywords'                                                     */ 00330000
+/*                                                                   */ 00340000
+/*    Since this is only a 'screen scraper' it will not handle words */ 00350000
+/*    or comments that begin or end off of the visible screen.       */ 00360000
+/*                                                                   */ 00370000
+/* 5694-A01 (C) COPYRIGHT IBM CORP 2001                              */ 00380000
+/*********************************************************************/ 00390000
+call isprexpx 'I'   /* Set up variables passed in to the panel exit  */ 00400000
+if NHI /== "YES" then Exit /* If hilighting is turned off exit quick */ 00401000
+                                                                        00410000
+/* Specify keywords to hilight                                          00420000
+                                                                        00430000
+keywords='call overlay pos length do end while until words subword'     00440000
+keywords=keywords 'copies translate xrange if then by to substr'        00450000
+*/                                                                      00451000
+keywords='CTLIELEM EXCLU  WAIT' USERID() FDPDS                          00452000
+keycolor='Y        W      R     T        P    '                         00453000
+                                                                        00460000
+/* Set up translate table of valid keyword charaters */                 00470000
+                                                                        00480000
+trtable='ABCDEFGHIJKLMNOPQRSTUVWXYZ$#@0123456789_.-'                    00490000
+trtable=translate(xrange('00'x,'FF'x),,trtable,' ')                     00500000
+                                                                        00510000
+/* Make a copy of zdata with only alphanumerics.  This will be used */  00520000
+/* as the reference string for finding keywords.                    */  00530000
+                                                                        00540000
+zdatacopy=translate(zdata)                                              00550000
+zdatacopy=translate(zdatacopy,,trtable,' ') /* Remove non-Kwd chars */  00560000
+                                                                        00570000
+/* Look at the copy, finding keywords and update ZSHADOW accordingly */ 00580000
+                                                                        00590000
+keywords=translate(keywords)                                            00600000
+/* ZSHADOW=copies('G',length(ZSHADOW)) we have a starting point */      00610000
+do a = 1 to words(keywords)                                             00620000
+  keyword=subword(keywords,a,1)                                         00630000
+  keyhilt=subword(keycolor,a,1)                                         00631000
+  wordlen=length(keyword)                                               00640000
+  position=pos(keyword,zdatacopy)                                       00650000
+  do while position>0                                                   00660000
+    zdatacopy=overlay(' ',zdatacopy,position,wordlen)                   00670000
+    if substr(zdatacopy,position-1,1)=' ' & ,                           00680000
+       substr(zdatacopy,position+wordlen,1)=' ' & ,                     00690000
+       substr(ZSHADOW,position,wordlen)=' ' then do                     00691000
+      ZSHADOW =overlay(keyhilt,ZSHADOW,position,wordlen,keyhilt)        00700000
+      if keyword = "CTLIELEM" &,      /* was it keyword CTLIELEM?  */   00701000
+         substr(zdatacopy,position+9,1)='R' then    /* Remote Comp */   00701100
+            do b=position    to position+53 /* for length ENQ      */   00701200
+               if substr(ZSHADOW,b,1) = " " then /* if there is no */   00701300
+                  ZSHADOW =overlay('B',ZSHADOW,b,1) /* hilite.Blue */   00701400
+            end                                                         00701500
+      if keyword = "CTLIELEM" &,      /* was it keyword CTLIELEM?  */   00702000
+         substr(zdatacopy,position+9,1)='E' & , /* and Endevor ENQ */   00703000
+         substr(zdatacopy,position+19,5)/='QUICK' then                  00704000
+           if substr(zdatacopy,position+9,15)='ENDEVOR PACKAGE' then    00705000
+            do b=position+9  to position+24 /* for length End.Pack.*/   00706000
+               if substr(ZSHADOW,b,1) = " " then /* if there is no */   00707000
+                  ZSHADOW =overlay('R',ZSHADOW,b,1) /* hilite.RED  */   00708000
+            end                                                         00709000
+           else                                                         00709100
+            do b=position+11 to position+53 /* for length of locat */   00709200
+               if substr(ZSHADOW,b,1) = " " then /* if there is no */   00709300
+                  ZSHADOW =overlay('T',ZSHADOW,b,1) /* hilite.TURQ */   00709400
+            end                                                         00709500
+      end                                                               00709600
+    position=pos(keyword,zdatacopy)                                     00710000
+  end                                                                   00720000
+end                                                                     00730000
+                                                                        00740000
+/* Now highlight quoted strings and comments. Multilevel comments   */  00750000
+/* are supported, but this example assumes no continuation of       */  00760000
+/* strings or comments off of the screen.                           */  00770000
+/* we don't need this for NDVRSHAP                                      00780000
+squote=0                                                                00790000
+dquote=0                                                                00800000
+comment=0                                                               00810000
+do a = 1 to length(zdata)                                               00820000
+  if squote+dquote>0 then ZSHADOW=overlay('W',ZSHADOW,a,1)              00830000
+  else                                                                  00840000
+   do                                                                   00850000
+    if substr(zdata,a,2)='/*' then comment=comment+1                    00860000
+      if comment>0 & substr(zdata,a,2)='*/' then                        00870000
+        do                                                              00880000
+          ZSHADOW=overlay('BB',ZSHADOW,a,2)                             00890000
+          comment=max(0,comment-1)                                      00900000
+        end                                                             00910000
+    end                                                                 00920000
+  if comment>0 then ZSHADOW=overlay('B',ZSHADOW,a,1)                    00930000
+  if comment=0 then                                                     00940000
+    if dquote=0 & substr(zdata,a,1)= "'" then                           00950000
+      squote=1-squote                    /* Turn on or off squote    */ 00960000
+    else if squote=0 & substr(zdata,a,1)= '"' then                      00970000
+         dquote=1-dquote                 /* Turn on or off dquote    */ 00980000
+  if squote+dquote>0 then ZSHADOW=overlay('W',ZSHADOW,a,1)              00990000
+  if comment>0       then ZSHADOW=overlay('B',ZSHADOW,a,1)              01000000
+end                                                                     01010000
+*/                                                                      01011000
+                                                                        01020000
+/* Turn on highlighting for Heading lines - identified by 30 suffix */  01030000
+do a = 1 to length(zdata) by zwidth                                     01050000
+  if substr(zdata,a+5,2)='30' then /* Hilight Whole line as white   */  01060000
+    ZSHADOW=overlay('W',ZSHADOW,a+8,zwidth-8,'W')                       01070000
+end                                                                     01080000
+/* Turn on highlighting for SubHead lines - identified by 50 suffix */  01081000
+do a = 1 to length(zdata) by zwidth                                     01082000
+  if substr(zdata,a+5,2)='50' then /* Hilight Whole Line as Turq    */  01083000
+    ZSHADOW=overlay('T',ZSHADOW,a+8,zwidth-8,'T')                       01084000
+end                                                                     01085000
+                                                                        01090000
+/* Turn on Bar Graph Lines lines - identified by 70 suffix */           01090100
+do a = 1 to length(zdata) by zwidth                                     01090200
+  if substr(zdata,a+5,2)='70' then do/* Selectively Hilit paren cont*/  01090300
+    interior = 0                   /* start outside */                  01090400
+    do b = a+8 to a+Zwidth-1       /* for this line ...             */  01090500
+      this_chr = substr(zdata,b,1)                                      01090600
+      if this_chr = "|" then do                                         01090700
+        interior = 1                                                    01090800
+        iterate                                                         01090900
+      end                                                               01091000
+      else if this_chr = " " then interior = 0                          01091100
+      if interior & substr(zshadow,b,1) = " " then                      01091200
+      select                                                            01091300
+        when this_chr = '*' then ZSHADOW=overlay('E',ZSHADOW,b,1) /*R*/ 01091400
+        when this_chr = '+' then ZSHADOW=overlay('H',ZSHADOW,b,1) /*G*/ 01091500
+        when this_chr = '=' then ZSHADOW=overlay('N',ZSHADOW,b,1) /*T*/ 01091600
+        when this_chr = '.' then ZSHADOW=overlay('M',ZSHADOW,b,1) /*Y*/ 01091700
+        when this_chr = '-' then ZSHADOW=overlay('I',ZSHADOW,b,1) /*B*/ 01091800
+        when this_chr = '8' then ZSHADOW=overlay('Z',ZSHADOW,b,1) /*P*/ 01091900
+        when this_chr = '0' then ZSHADOW=overlay('J',ZSHADOW,b,1) /*W*/ 01092000
+        when this_chr = 'R' then ZSHADOW=overlay('B',ZSHADOW,b,1)       01092101
+      otherwise                                                         01092300
+      end /* select */                                                  01092400
+      else iterate                                                      01092500
+    end                                                                 01092600
+  end                                                                   01092900
+end                                                                     01093000
+                                                                        01093100
+/* Turn on highlighting for SubHead lines - identified by 90 suffix */  01093200
+do a = 1 to length(zdata) by zwidth                                     01093300
+  if substr(zdata,a+5,2)='90' then do/* Selectively Hilit paren cont*/  01093400
+    interior = 0                   /* start outside */                  01093500
+    do b = a+8 to a+Zwidth-1       /* for this line ...             */  01093600
+      this_chr = substr(zdata,b,1)                                      01093700
+      if this_chr = "(" then do                                         01093800
+        interior = 1                                                    01093900
+        iterate                                                         01094000
+      end                                                               01094100
+      else if this_chr = ")" then interior = 0                          01094200
+      if interior & substr(zshadow,b,1) = " " then                      01094300
+      select                                                            01094400
+        when this_chr = '*' then ZSHADOW=overlay('W',ZSHADOW,b,1)       01094500
+        when this_chr = 'L' then ZSHADOW=overlay('P',ZSHADOW,b,1)       01094600
+        when this_chr = 'f' then ZSHADOW=overlay('P',ZSHADOW,b,1)       01094700
+        when this_chr = '?' then ZSHADOW=overlay('R',ZSHADOW,b,1)       01094800
+        when this_chr = 'u' then ZSHADOW=overlay('R',ZSHADOW,b,1)       01094900
+        when this_chr = 'E' then ZSHADOW=overlay('Y',ZSHADOW,b,1)       01095000
+        when this_chr = 'P' then ZSHADOW=overlay('Y',ZSHADOW,b,1)       01095100
+        when this_chr = 'W' then ZSHADOW=overlay('B',ZSHADOW,b,1)       01095200
+        when this_chr = 'B' then ZSHADOW=overlay('T',ZSHADOW,b,1)       01095300
+      otherwise                                                         01095400
+      end /* select */                                                  01095500
+      else iterate                                                      01095600
+    end                                                                 01095700
+  end                                                                   01095800
+end                                                                     01095900
+                                                                        01096000
+/* Finally, turn the top of data and bottom of data to default color */ 01096100
+/* not needed for Edit/View                                             01096200
+do a = 1 to length(zdata) by zwidth                                     01096300
+  if substr(zdata,a,3)='***' then /* Assume this is top/Bot of data  */ 01096400
+    ZSHADOW=overlay(' ',ZSHADOW,a,zwidth,' ')                           01096500
+end                                                                     01096600
+*/                                                                      01097000
+                                                                        01098000
+call isprexpx 'T'   /* Send changes back to ispf */                     01100000

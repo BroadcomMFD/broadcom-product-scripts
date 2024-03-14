@@ -1,0 +1,314 @@
+/* REXX - Filter/un-Filter Element Selection Lists                              
+          This Rexx allows the user to filter the current displayed list/       
+          table using a search parameter.  When the list is filtered the        
+          previous table is saved, and can be restored by entering the          
+          command again without any parameters                                  
+                                                                                
+   Note:  One of the limitations today is that it searches ALL columns          
+          in the table and in the order that they were defined which may not    
+          match the displayed order of fields (and might even match on fields   
+          that are not displayed). This might be overcome by enhancing this     
+          routine to build the 'search line' using the fields in the order      
+          set by ECOLS and WIDESCREEN                                           
+          */                                                                    
+   TRACE o                                                                      
+start = Time('E') /* start the clock */                                         
+/*ADDRESS ISPEXEC "CONTROL ERRORS RETURN"*/                                     
+  ADDRESS ISPEXEC "VGET (ZSCREEN ZPANELID ZUSER ZPREFIX ZSYSID)"                
+  MaxRc = 0              /* default return code */                              
+  ZERRALRM = NO          /* default MSg Alarm Yes|No */                         
+  ZERRTP   = NOTIFY      /*             Type Notify|Warning|Action|Critical */  
+  ZERRWN   = LNORESP     /*             Window RESP|NORESP|LRESP|LNORESP */     
+  ZERRHM   = ENDHE100    /*    "     "  QuickEdit Help panel */                 
+  ADDRESS ISPEXEC "VPUT (ZERRALRM ZERRTP ZERRWN ZERRHM) shared"                 
+/*                                                                              
+   First thing to do is make sure we're on a valid panel and that               
+   the variables we need are available...                                       
+   We do this using the panel loop-up function ESORTLKP() which can             
+   be modified to support additional panels as needed.                          
+*/                                                                              
+                                                                                
+ELSELTBN = esortlkp(ZPANELID) /* lookup the current panel's table name */       
+If ELSELTBN == 'INVALID' then /* Check for not supported panel         */       
+  Signal BadPanel                                                               
+ELSELTMP = 'EN' || ZSCREEN || 'EFIND'                                           
+                                                                                
+/*                                                                              
+   Mainline logic starts here                                                   
+*/                                                                              
+MainLine:                                                                       
+                                                                                
+if ARG() = 0 then call Restore_request /* If no args, put table back */         
+else do                                /* Other wise we need to filter */       
+   SrchStr = translate(ARG(1))         /* get Uppercased search string */       
+   /* strip off any matched quotes/aposts used to preserve spaces */            
+   if left(SrchStr,1) = "'" & right(SrchStr,1) = "'" then                       
+      SrchStr = Substr(SrchStr,2,(length(SrchStr)-2))                           
+   else if left(SrchStr,1) = '"' & right(SrchStr,1) = '"' then                  
+      SrchStr = Substr(SrchStr,2,(length(SrchStr)-2))                           
+   call Filter_request                 /* and do the Filter request */          
+end                                                                             
+EXIT MaxRC                                                                      
+                                                                                
+/* Main Subroutines */                                                          
+                                                                                
+Filter_request:                                                                 
+                                                                                
+                                                                                
+  call FindTable   /* Check ISPF table is ready to use */                       
+  call BackupTbl   /* Make a temp copy of the table */                          
+  call FilterTbl   /* Filter the table to only rows that contain the text */    
+  /*                                                                            
+     Set messages and return to Endevor                                         
+  */                                                                            
+  if CNTFND > 0 then do                                                         
+     ZERRSM = strip(left(CNTFND "Matched '" || SrchStr || "'",24),t)            
+     ZERRLM = "Table Filtered in" trunc(Time('E'),2),                           
+               "seconds and matched string'" || SrchStr || "'" ,                
+               CNTFND "times in" CNTROW "rows"                                  
+     ADDRESS ISPEXEC "control nondispl" /* and force a refresh */               
+  end                                                                           
+  else do                                                                       
+     call RestoreTBL                   /* put the saved table back */           
+     ZERRSM = strip(left("No Match '" || SrchStr || "'",24),t)                  
+     ZERRLM = "Table scanned" CNTROW "rows in" trunc(Time('E'),2),              
+               "seconds but did not find any matches for '" || SrchStr || "'"   
+  end                                                                           
+  ADDRESS ISPEXEC "TBTOP" ELSELTBN                                              
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM) SHARED"                                 
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+                                                                                
+  return           /* return results to user */                                 
+                                                                                
+Restore_Request:                                                                
+                                                                                
+  call FindTable   /* Check ISPF table is ready to use */                       
+  ADDRESS ISPEXEC "TBSTATS" ELSELTMP "STATUS2(ELSELTM2)"                        
+  if ELSELTM2 = 4 then            /* Also save the Share mode of the table    */
+     TABOPT = 'SHARE'                                                           
+  ELSE                                                                          
+     TABOPT = ''                                                                
+  if ELSELTM2 = 2 ,               /* if table is open/available */              
+   | ELSELTM2 = 4 then do         /* (open in shared mode) */                   
+     /* check it matches the "shape" of the current table */                    
+     ADDRESS ISPEXEC "TBQUERY" ELSELTMP "KEYS(TMPKEYS) NAMES(TMPVARS)"          
+     if TABKEYS = TMPKEYS,                                                      
+      & TABVARS = TMPVARS then do /* good match? */                             
+        call RestoreTbl           /* restore it  */                             
+        ADDRESS ISPEXEC "control nondispl"  /* force a refresh */               
+        ZERRSM = "Table Restored"                                               
+        ZERRLM = "Previously backed up table("ELSELTMP"), containing" ,         
+                  CNTROW "rows, restored."                                      
+     end                                                                        
+     else do                                                                    
+        MaxRc   = max(MaxRc,8)                                                  
+        ZERRALRM = YES         /* ring the bell */                              
+        ZERRSM = "Unable to Restore"                                            
+        ZERRLM = "The table" ELSELTMP "does not have the same  keys("TMPKEYS")",
+               "or vars ("TMPVARS") as the source table" ELSELTMP " which has", 
+               "keys("TABKEYS") and vars("TABVARS"). "                          
+     end                                                                        
+  end                                                                           
+  else do /* currently we have no backup table, warn user and make a backup */  
+     call BackupTbl   /* Make a temp copy of the table */                       
+     MaxRc   = max(MaxRc,4)                                                     
+     ZERRSM = "Nothing to Restore"                                              
+     ZERRLM = "Enter EFind with a search string to search for, or without" ,    
+              "a search string to restore the prior selection list contents." , 
+              "In this case, no search string was provided, but we don't",      
+              "have anything to restore yet either.  The good news, is that" ,  
+              "the current status is now saved and can be restored from" ,      
+              ELSELTMP||"."                                                     
+  end                                                                           
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM ZERRALRM) SHARED"                        
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+                                                                                
+  return           /* return results to user */                                 
+                                                                                
+FindTable:                                                                      
+/*                                                                              
+   This routine will open/check the current and backup table                    
+   if the temp table is not open yet, it will create and open it                
+*/                                                                              
+/*                                                                              
+   Table should already be open, just go check it's stats...                    
+*/                                                                              
+  ADDRESS ISPEXEC "TBSTATS" ELSELTBN "STATUS2(ELSELTB2)"                        
+  if ELSELTB2 = 1 ,               /* if table not open in this logical screen */
+   | ELSELTB2 = 3 ,               /* or table is open in WRITE mode...        */
+   | ELSELTB2 = 5 then            /* or SHARED WRITE mode (not supported)     */
+     signal NotOpen               /* something bad has happened - get out     */
+/*                                                                              
+   otherwise... Save the table keys and varnames                                
+*/                                                                              
+  ADDRESS ISPEXEC "TBQUERY" ELSELTBN "KEYS(TABKEYS) NAMES(TABVARS)"             
+  if ELSELTB2 = 4 then            /* Also save the Share mode of the table    */
+     TABOPT = 'SHARE'                                                           
+  ELSE                                                                          
+     TABOPT = ''                                                                
+                                                                                
+return                                                                          
+                                                                                
+FilterTbl:                                                                      
+/*                                                                              
+   This Subroutine is used to filter the current table to find if               
+   thre are any matches on the required string                                  
+*/                                                                              
+CNTROW = 0                                /* initialise Row count */            
+CNTFND = 0                                /* initialise Fnd count */            
+ADDRESS ISPEXEC "TBTOP" ELSELTBN                                                
+/*                                                                              
+  Note the next statement establishes the order in which fields will be         
+  Interpreted before the search - an option might be to use the values set      
+  by WideScrn to search in the order that they appear on the users screen       
+  and/or to limit the search to variables that are visible (perhaps using       
+  a parameter "HIDDEN" to enable searching all columns, or ECols setting a      
+  'findable' attribute.  The final challange would be to work out whether       
+  to use the primary or alternate model values... the big one? both? etc.       
+  or get ECOLS to build a per-screen version of AllVars.                        
+*/                                                                              
+AllVars = strip(SubStr(TABKEYS,2),T,')') , /* concatenate keys and names */     
+          strip(SubStr(TABVARS,2),T,')')                                        
+sa= 'AllVars:"'AllVars'"'                                                       
+                                                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTBN                                            
+   if rc <> 0 THEN LEAVE                                                        
+   CNTROW = CNTROW + 1                                                          
+   ADDRESS ISPEXEC "TBGET" ELSELTBN                                             
+   ThisLine = ''                          /* initialise the substitute string */
+   do i = 1 to words(AllVars)             /* append uppercased values */        
+      ThisLine = strip(ThisLine,T) translate(value(word(AllVars,i)))            
+   end                                                                          
+   sa= ThisLine                                                                 
+   if Pos(SrchStr,ThisLine) > 0 then      /* did we find the string? */         
+      CNTFND = CNTFND + 1                                                       
+   else                                                                         
+      ADDRESS ISPEXEC "TBDELETE" ELSELTBN /* otherwise filter it */             
+END                                                                             
+                                                                                
+Return                                                                          
+                                                                                
+BackupTbl:                                                                      
+/*                                                                              
+   First Check the Temp table                                                   
+*/                                                                              
+  THISTABL = ELSELTMP                     /* Name of Table for Msgs     */      
+  ADDRESS ISPEXEC "TBSTATS" ELSELTMP "STATUS2(ELSELTM2)"                        
+  if ELSELTM2 = 2 ,                       /* if table is open/available */      
+   | ELSELTM2 = 4 then                    /* or open in shared mode     */      
+     ADDRESS ISPEXEC "TBCLOSE" ELSELTMP   /* close and Free it          */      
+/*                                                                              
+  Make a copy of current table                                                  
+*/                                                                              
+  IF TABKEYS = ""                                                               
+    THEN KEYTEXT = ""                                                           
+    ELSE KEYTEXT = "KEYS" || TABKEYS                                            
+  ADDRESS ISPEXEC 'TBCREATE' ELSELTMP ,          /* using the temp name */      
+                  KEYTEXT ,                      /* same keys and vars  */      
+                  'NAMES'TABVARS ,               /* AND options!        */      
+                  'NOWRITE' TABOPT               /* to store a copy     */      
+  If rc ^= 0 Then                                                               
+     Signal BadTemp                              /*  get out on error   */      
+                                                                                
+  ADDRESS ISPEXEC "TBTOP" ELSELTBN                                              
+  DO FOREVER                                                                    
+     ADDRESS ISPEXEC "TBSKIP" ELSELTBN "SAVENAME(SAVEVARS)" /* Get next */      
+     if rc <> 0 THEN LEAVE                       /* ...at end we're done*/      
+     ADDRESS ISPEXEC "TBADD" ELSELTMP  "SAVE(SAVEVARS)" /* add it to tmp*/      
+     if rc <> 0 THEN signal BadInsert            /* somethign wrong!    */      
+  END                                                                           
+                                                                                
+Return                                                                          
+                                                                                
+RestoreTbl:                                                                     
+/*                                                                              
+  Time to put old table back                                                    
+*/                                                                              
+  THISTABL = ELSELTMP                     /* name of Table for Msgs     */      
+  ADDRESS ISPEXEC "TBSTATS" ELSELTMP "STATUS2(ELSELTM2)"                        
+  if ELSELTM2 = 2 ,                       /* if table is open/available */      
+   | ELSELTM2 = 4 then NOP                /* or open in shared mode     */      
+  else                                                                          
+     signal BadTemp                       /* don't try to restore if bad*/      
+  CNTROW = 0                                      /* reset counter      */      
+  THISTABL = ELSELTBN                             /* name Table for Msgs*/      
+  ADDRESS ISPEXEC 'TBCLOSE'  ELSELTBN             /* close live one     */      
+  IF TABKEYS = ""                                                               
+    THEN KEYTEXT = ""                                                           
+    ELSE KEYTEXT = "KEYS" || TABKEYS                                            
+  ADDRESS ISPEXEC 'TBCREATE' ELSELTBN ,           /* create a new temp  */      
+                  KEYTEXT ,                       /* same keys          */      
+                  'NAMES'TABVARS' NOWRITE' TABOPT /* & vars & Share mode*/      
+  if rc ^= 0 Then                                                               
+     Signal BadTemp                               /*  get out on error  */      
+  ADDRESS ISPEXEC "TBTOP" ELSELTMP                                              
+  DO FOREVER                                                                    
+     ADDRESS ISPEXEC "TBSKIP" ELSELTMP "SAVENAME(SAVEVARS)" /* Get next */      
+     if rc <> 0 THEN LEAVE                        /* .at end we're done */      
+     ADDRESS ISPEXEC "TBADD" ELSELTBN  "SAVE(SAVEVARS)" /* add it bac   */      
+     if rc <> 0 THEN signal BadInsert             /* somethign wrong!   */      
+     CNTROW = CNTROW + 1                          /* othersise, count i */      
+  END                                                                           
+                                                                                
+  ADDRESS ISPEXEC 'TBCLOSE'  ELSELTMP     /* done with copy, close it   */      
+                                                                                
+Return                                                                          
+                                                                                
+NotOpen:    /* table is not open - we can't do anything here! */                
+  ZERRSM = "Table not Supported"                                                
+  ZERRLM = "The table" ELSELTBN "is either NOT open in this logical screen" ,   
+            "or is open in WRITE mode(unexpected) -" ,                          
+            "EFind is not available"                                            
+  ZERRALRM = YES         /* Ring the bell */                                    
+  ZERRTP   = Critical    /* Notify|Warning|Action|Critical */                   
+  ZERRWN   = RESP        /* RESP|NORESP|LRESP|LNORESP */                        
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM ZERRALRM ZERRTP ZERRWN) SHARED"          
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+  EXIT 99                                                                       
+                                                                                
+BadTable:   /* table doesn't match or not enough rows! */                       
+  ZERRSM = "Temp Table Stale"                                                   
+  ZERRLM = "The table" ELSELTMP "does not have the same keys("TMPKEYS")",       
+            "or vars ("TMPVARS") as the source table" ELSELTMP " which has",    
+            "keys("TABKEYS") and vars("TABVARS"). " ,                           
+            "Or the number of rows" TMPROWS " is not at least "TABROWS          
+  ZERRALRM = YES         /* Ring the bell */                                    
+  ZERRTP   = Action      /* Notify|Warning|Action|Critical */                   
+  ZERRWN   = RESP        /* RESP|NORESP|LRESP|LNORESP */                        
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM ZERRALRM ZERRTP ZERRWN) SHARED"          
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+  EXIT 98                                                                       
+                                                                                
+BadTemp:    /* Error creating temp table! */                                    
+  ZERRSM = "Table Create Error"                                                 
+  ZERRLM = "The table" THISTABL "coud not be created - return code:"rc          
+  ZERRALRM = YES         /* Ring the bell */                                    
+  ZERRTP   = Critical    /* Notify|Warning|Action|Critical */                   
+  ZERRWN   = RESP        /* RESP|NORESP|LRESP|LNORESP */                        
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM ZERRALRM ZERRTP ZERRWN) SHARED"          
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+  EXIT 97                                                                       
+                                                                                
+BadInsert:  /* Error inserting records! */                                      
+  ZERRSM = "Table Insert Error"                                                 
+  ZERRLM = "Could not add to the the table" THISTABL " - return code:"rc        
+  ZERRALRM = YES         /* Ring the bell */                                    
+  ZERRTP   = Critical    /* Notify|Warning|Action|Critical */                   
+  ZERRWN   = RESP        /* RESP|NORESP|LRESP|LNORESP */                        
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM ZERRALRM ZERRTP ZERRWN) SHARED"          
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+  EXIT 96                                                                       
+                                                                                
+BadPanel:   /* UnRecognized Panel - don't know what table to search */          
+  ZERRSM = "Panel Not Supported"                                                
+  ZERRLM = "This panel" ZPANELID "is not recognized as an Endevor",             
+            "panel that supports EFind.  If you would like to be" ,             
+            "able to perform filtering on this panel, please contact" ,         
+            "your Endevor Administrator, or CA Field Services."                 
+  ZERRALRM = YES         /* Ring the bell */                                    
+  ZERRTP   = Critical    /* Notify|Warning|Action|Critical */                   
+  ZERRWN   = RESP        /* RESP|NORESP|LRESP|LNORESP */                        
+  ADDRESS ISPEXEC "VPUT (ZERRSM ZERRLM ZERRALRM ZERRTP ZERRWN) SHARED"          
+  ADDRESS ISPEXEC "SETMSG MSG(ISRZ003)"                                         
+  EXIT 95                                                                       

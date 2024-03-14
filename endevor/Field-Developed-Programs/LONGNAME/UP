@@ -1,0 +1,9 @@
+/* rexx */                                                                      
+address ispexec                                                                 
+parse arg ndvselds                                                              
+ndvselnw = YES /* user has selected something */                                
+say "Endevor Update" ndvselds                                                   
+"vput (ndvselds) profile"                                                       
+"vput (ndvselnw) shared"                                                        
+/* "control nondispl end" - can't really just end, don't know how deep we are */
+/* but maybe we could if we controlled all the panels and checked for ndvselnw*/

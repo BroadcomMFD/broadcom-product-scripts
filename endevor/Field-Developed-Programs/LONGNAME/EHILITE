@@ -1,0 +1,31 @@
+/* Rexx - Allow user to change endevor hilite options                           
+   */                                                                           
+ADDRESS ISPEXEC                                                                 
+"VGET (EHILITEP EHIQEM) PROFILE"                                                
+IF EHILITEP = '' THEN                                                           
+   EHILITEP = '//// 05000'                                                      
+PARSE VAR EHILITEP  EHIMSG +1 EHIFBX +1 EHISBR +1 EHIVED +1 EHIGLB +1 EHIMAX    
+/*                                                                              
+  SAY  'EHILITEP...:' EHILITEP ,                                                
+       'EHIMSG.....:' EHIMSG  ,                                                 
+       'EHIFBX.....:' EHIFBX  ,                                                 
+       'EHISBR.....:' EHISBR  ,                                                 
+       'EHIVED ....:' EHIVED  ,                                                 
+       'EHIGLB.....:' EHIGLB  ,                                                 
+       'EHIMAX.....:' EHIMAX                                                    
+*/                                                                              
+"ADDPOP"                                                                        
+ZWINTTL = "Endevor HiLite"                                                      
+DO FOREVER                                                                      
+   "DISPLAY PANEL(EHILITEP)"                                                    
+   DISPRC = RC                                                                  
+   IF DISPRC = 8 THEN "VGET (ZVERB)"                                            
+   IF ZVERB == "CANCEL" THEN DO                                                 
+      "REMPOP"                                                                  
+      EXIT                                                                      
+   END                                                                          
+   IF DISPRC > 0 THEN LEAVE                                                     
+END                                                                             
+"REMPOP"                                                                        
+EHILITEP= EHIMSG || EHIFBX || EHISBR || EHIVED || EHIGLB || EHIMAX              
+"VPUT (EHILITEP EHIQEM) PROFILE"                                                

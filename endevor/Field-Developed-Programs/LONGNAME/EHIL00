@@ -1,0 +1,36 @@
+EHIL001I 'Max Scroll Bar size'      .HELP=EHILITET .TYPE=N NOKANA               
+'Endevor Hilite is turned on, but the file size exceeds the ' +                 
+'maximum size allowed for the scroll bar - highlighting is unreliable ' +       
+'beyond this limit (&EHIMAX).                                                   
+                                                                                
+EHIL002I 'Endevor Hilite Enabled'   .HELP=EHILITET .TYPE=N NOKANA               
+'Message TOC: &SHATOC'                                                          
+                                                                                
+EHIL003C 'EVEdit not available'     .HELP=EHILITET .TYPE=N NOKANA               
+'Unable to swap edit/browse mode for panel(&EHICALR) with ' +                   
+'&dsnopt &memopt &volopt.  LMINIT Rc: &RC'                                      
+                                                                                
+EHIL004C 'EVEdit not available'     .HELP=EHILITET .TYPE=N NOKANA               
+'Unable to invoke &modopt for panel(&EHICALR) with ' +                          
+'&dsnopt &memopt &volopt.  &modopt Rc: &RC'                                     
+                                                                                
+EHIL005C 'EVEdit not available'     .HELP=EHILITET .TYPE=N NOKANA               
+'No dataset name available for panel(&EHICALR) with ' +                         
+'&dsnvar(&dsnnam).  Please contact your Endevor administrator.'                 
+                                                                                
+EHIL006W 'Hilite disabled'          .HELP=EHILITET .TYPE=N NOKANA               
+'Endevor Hilite is disabled or the calling env is not ' +                       
+'Endevor and the Global option is not set. Use EHIlite command to enable.'      
+                                                                                
+EHIL006C 'No Data'                  .HELP=EHILITET .TYPE=W NOKANA               
+'Ths listing file appears to be empty, try again with' +                        
+'valid data'                                                                    
+                                                                                
+EHIL007I 'Report Scanned, MaxSev:&ScanMsgS' .HELP=EHILITET .TYPE=N NOKANA       
+'EndvHiSc processed &Scanlins lines in ' +                                      
+'&ScanElap secs and highlighted:&CntHiLn+&CntSpcl lines.  ' +                   
+'Highest Msg severity:&ScanMsgS in:&FndMsg..'                                   
+                                                                                
+EHIL007W 'Report Scanned, NoMsgs'           .HELP=EHILITET .TYPE=N NOKANA       
+'EndvHiSc processed &ScanLins lines in ' +                                      
+'&ScanElap secs but found no messages to highlight.'                            

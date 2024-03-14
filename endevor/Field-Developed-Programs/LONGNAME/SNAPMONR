@@ -1,0 +1,12 @@
+/* Rexx - SNAPMONR REfresh command                                      00010000
+                                                                        00020000
+          Because the "UI" is just displaying the contents of a         00030000
+          specially formatted dataset, to refresh we need to            00040000
+          exit and let the SNAPMON know we want new data.               00050000
+          */                                                            00060000
+address isredit                                                         00070000
+'MACRO (PARMS)'  /* don't expect any parms on Refresh but supported */  00080000
+"Cut SNAPMON"    /* Save last view (in case)                        */  00100000
+NDVRREFR = "YES" /* Request refresh                                 */  00110000
+address ispexec "VPUT (NDVRREFR) shared" /* and save it             */  00120000
+"Builtin Cancel" /* And cancel this session (no save)               */  00130000

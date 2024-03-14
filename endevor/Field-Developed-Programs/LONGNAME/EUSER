@@ -1,0 +1,22 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ ^ TYPE(INPUT) CAPS(OFF) JUST(ASIS) PADC(USER)                                  
+ ` TYPE(TEXT) SKIP(ON)                                                          
+  { TYPE(PT)                /* Panel Title */                                   
+  } TYPE(NT)                /* Normal Text */                                   
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(58,11) CMD()                                                       
+}             {Set Endevor User Data}                    }                      
+}                                                        }                      
+}{UserData....^USERDAT1                                ` }                      
+}             ^USERDAT2                                } }                      
+çSAREA38                                                 ç                      
+)AREA SAREA38                                                                   
+}Use this option to show/set the current element's       }                      
+}UserData                                                }                      
+)INIT                                                                           
+ .CURSOR = USERDAT1                                                             
+ VGET (VARCACCI VARCACOM USERDAT1 USERDAT2)                                     
+)PROC                                                                           
+ VPUT (USERDAT1 USERDAT2)                                                       
+)END                                                                            

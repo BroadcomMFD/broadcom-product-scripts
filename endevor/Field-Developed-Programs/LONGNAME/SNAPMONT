@@ -1,0 +1,101 @@
+)ATTR DEFAULT(^+~)                                                              
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY EXPAND (\\) CMD(ZCMD)                                                     
+^TUTORIAL \-\ SnapMon Help \-\ TUTORIAL                                         
+^Command ===>~ZCMD                                                             +
++                                                                               
++The^Endevor Snapshot Monitor (SNAPMON)+tool provides a simple way for          
++Administrators to check on Endevor activity.                                   
++the recent features include;                                                   
+çSAREA38                                                                       ç
+)AREA SAREA38                                                                   
+^*Summary Statistics                                                            
++   At the top of the SnapMon panel there is a heading area showing the         
++   running counts for each high level area, the number of active Endevor,      
++   QuickEdit or PDM users etc.                                                 
++                                                                               
+^*Job/User Summary                                                              
++   At the top of the Snapshot report there is a count of the unique job/       
++   user names found and then for each entry the name and a set of flags        
++   are shown where each character in the flag represents a feature that        
++   is active in that instance...                                               
++                                                                               
++   List of 'Flag' codes:                                                       
+^   E  +-   Endevor user             ^T  +-   TSO user                          
+^   Q  +-   QuickEdit user           ^J  +-   Batch Job                         
+^   P  +-   PDM user                 ^S  +-   Started Task (STC)                
+^   L  +-   LongName user            ^T  +-   Other (Ini, Atx, Otx,...)         
+^   B  +-   Batch Endevor                                                       
+^   r  +-   Remote Job or user (not on this LPAR - turn off XSYS to hide)       
+^   R  +-   Remote Job (e.g. compile) that this job is waiting on               
+^   *  +-   Power Users (more than one split screen active)                     
+^   C  +-   CMEW Started Task                                                   
+^   W  +-   WebServices Started Task                                            
+^   Sn +-   STC name (where 'n' is the number of instances seen)                
+^   s  +-   SnapMon users - who's looking at you?                               
+^   f  +-   FDP Users - See which users have the Field Developed                
++           program dataset (&FDPDS) allocated                                  
+^   ???+-   Unknown - If SnapMon can't identify the job or user type            
++           it will be flagged as unknown, these might be API users             
++           but if you see CTLIELEM Element enqueues for these tasks            
++           it might indicate a problem - have a closer look                    
++                                                                               
+^*Job/User Jump                                                                 
++   If you position the cursor on a job name and press^Enter+the report         
++   will scroll to find that user/job name in the detail section.               
++  ^Hint:+For some emulators double clicking will do this.                      
++                                                                               
+^*Totals and Statistics                                                         
++   Following the User Summary there is a section with counts and graphic       
++   Bar-Charts to show the relative workload breakdown.  This is divided        
++   into two sections - Dataset ENQUEUEs (like the Element Catalog,             
++   ACM Root, and Package datasets and User Enqueue activity.  Note the         
++   Bar-Charts will automatically scale to match the amount of activity,        
++   the actual COUNT is shown to the left.                                      
++                                                                               
+^*Optional Sections                                                             
++   There may be additional sections following the Job Summary if needed.       
++   For example a summary of active packages or Backup/Unload progress.         
++                                                                               
+^*Enqueue Details                                                               
++   In the detail section of the report there is a section for each user        
++   listing the active enqueues found.  Endevor element enqueues (where         
++   an element is locked for update) are highlighted in Turquoise. Any          
++   item that is in WAITing for exclusive access is highlighted in Red.         
++                                                                               
+^*Refresh Command                                                               
++   Normally SnapMon will show only an instant,"SnapShot" view, of current      
++   activity. To refresh the data enter the^Refresh+command to re-build         
++   the data.  The Refresh command can be shortened to^Ref+or just^R.+          
++   As a convenience if you move the cursor to the hilite field and press       
++  ^ENTER+a refresh will be performed.                                          
++                                                                               
+^*HiLite Option                                                                 
++   The actual SnapMon report is being displayed using the ISPF View command    
++   with special high-lighting added to make the data easier to read/digest.    
++   To turn off this option set the HiLite option to NO.                        
++                                                                               
++\ \ ^COMING SOON!!! \ \                                                        
++\ \ +(Ideas on the backlog) \ \                                                
++                                                                               
+^*Batch Mode                                                                    
++   Allow SnapMon to run in batch to collect statistics on a regular basis.     
++   Is the existing report enough or do we need a CSV/XML version?              
++                                                                               
+^*Notify Users                                                                  
++   Allow a suitably authorised user to send a message to all active Endevor/   
++   QuickEdit users - perhaps to notify them about a maintenance window.        
++                                                                               
+^*Kill/Cancel Users                                                             
++   Allow a suitably authorised user to force off users that are holding        
++   Endevor Resources when you have to perform maintenance NOW!                 
++                                                                               
+^*Disable/Enable Endevor Access                                                 
++   Provide a controlled way to temporarily suspend Endevor Access (Quiesce)    
++   or disable and "Force" off users.                                           
++                                                                               
++                                                                               
++                                                                               
++\ \ (^ENTER+to continue,^END+to return) \ \                                    
+)PROC                                                                           
+)END                                                                            

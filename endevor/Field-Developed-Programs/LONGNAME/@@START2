@@ -1,0 +1,272 @@
+/*  REXX   */                                                                   
+/* Variable settings for each site --->           */                            
+   WhereIam =  WHERE@M1()                                                       
+   Sa= "You are running on "MVSVAR(SYSNAME)                                     
+                                                                                
+   parse source v1 v2 v3 v4 ThisLib .                                           
+   /* Look in this same dataset for Site Control Rexx Member  */                
+   MySiteControlRexxMember = ThisLib"("WhereIam")"                              
+   DSNCHECK = SYSDSN("'"MySiteControlRexxMember"'") ;                           
+   If DSNCHECK /= 'OK' then,                                                    
+      Do                                                                        
+      Say ' Must run the @@START1 step before this one'                         
+      Exit(8)                                                                   
+      End                                                                       
+                                                                                
+   "ALTLIB ACTIVATE APPLICATION(CLIST)",                                        
+      "DATASET(",                                                               
+          "'"ThisLib"'",                                                        
+              " )"                                                              
+                                                                                
+/* Variable settings for each site --->           */                            
+   Call FetchBundleVariables ;                                                  
+                                                                                
+                                                                                
+/* <---- Variable settings for each site          */                            
+                                                                                
+   Call CreateUpdateBundleFiles;                                                
+                                                                                
+   "ALTLIB DEACTIVATE APPLICATION(CLIST)"                                       
+                                                                                
+   Exit                                                                         
+                                                                                
+FetchBundleVariables:                                                           
+                                                                                
+   interpret 'Call' WhereIam "'SHLQ'"                                           
+   SHLQ = Result                                                                
+                                                                                
+   interpret 'Call' WhereIam "'AltIDAcctCode'"                                  
+   AltIDAcctCode = Result                                                       
+   interpret 'Call' WhereIam "'AltIDJobClass'"                                  
+   AltIDJobClass = Result                                                       
+   interpret 'Call' WhereIam "'AltIDMsgClass'"                                  
+   AltIDMsgClass = Result                                                       
+                                                                                
+   interpret 'Call' WhereIam "'SchedulingPackageShipBundle'"                    
+   SchedulingPackageShipBundle = Result                                         
+   If SchedulingPackageShipBundle = 'Y' then,                                   
+      Do                                                                        
+      interpret 'Call' WhereIam "'TriggerFileName'"                             
+      TriggerFileName = Result                                                  
+      End                                                                       
+                                                                                
+   interpret 'Call' WhereIam "'MyAUTULibrary'"                                  
+   MyAUTULibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyAUTHLibrary'"                                  
+   MyAUTHLibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyLOADLibrary'"                                  
+   MyLOADLibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyLOA2Library'"                                  
+   MyLOA2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyUTILLibrary'"                                  
+   MyUTILLibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyCLS0Library'"                                  
+   MyCLS0Library = Result                                                       
+   interpret 'Call' WhereIam "'MySENULibrary'"                                  
+   MySENULibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyTENULibrary'"                                  
+   MyTENULibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyPENULibrary'"                                  
+   MyPENULibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyMENULibrary'"                                  
+   MyMENULibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyOPTNLibrary'"                                  
+   MyOPTNLibrary = Result                                                       
+   interpret 'Call' WhereIam "'MySRC2Library'"                                  
+   MySRC2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyCLS2Library'"                                  
+   MyCLS2Library = Result                                                       
+   interpret 'Call' WhereIam "'MySEN2Library'"                                  
+   MySEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyTEN2Library'"                                  
+   MyTEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyPEN2Library'"                                  
+   MyPEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyMEN2Library'"                                  
+   MyMEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyDATALibrary'"                                  
+   MyDATALibrary = Result                                                       
+   interpret 'Call' WhereIam "'MyJCLLibrary'"                                   
+   MyJCLLibrary = Result                                                        
+   interpret 'Call' WhereIam "'MyJCL2Library'"                                  
+   MyJCL2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyOPT2Library'"                                  
+   MyOPT2Library = Result                                                       
+   interpret 'Call' WhereIam "'ShipSchedulingMethod'"                           
+   ShipSchedulingMethod = Result                                                
+                                                                                
+   interpret 'Call' WhereIam "'SchedulingOption'"                               
+   SchedulingOption = Result                                                    
+   MyPackageEnviron = Word(SchedulingOption,3);                                 
+   MyPackageStgid   = Word(SchedulingOption,4);                                 
+                                                                                
+   Return                                                                       
+                                                                                
+CreateUpdateBundleFiles:                                                        
+                                                                                
+   queue "* DoOnce "                                                            
+   queue "  1      "                                                            
+   "ALLOC F(TABLE)   LRECL(80) BLKSIZE(0) SPACE(1,1) ",                         
+              " RECFM(F B) TRACKS ",                                            
+              " NEW UNCATALOG REUSE ";                                          
+   "EXECIO" QUEUED() "DISKW TABLE   (Finis "                                    
+                                                                                
+   "ALLOC F(OPTIONS) LRECL(80) BLKSIZE(0) SPACE(1,1) ",                         
+              " RECFM(F B) TRACKS ",                                            
+              " NEW UNCATALOG REUSE ";                                          
+                                                                                
+   queue "$nomessages = 'Y' "                                                   
+   queue "$delimiter  = 'µ' "                                                   
+   queue "Userid      = '"USERID()"'"                                           
+   queue "ThisLib='"ThisLib"'"                                                  
+   queue "WhereIam='"WhereIam"'"                                                
+   queue "SHLQ    ='"SHLQ"'"                                                    
+   queue "AltIDAcctCode='"AltIDAcctCode"'"                                      
+   queue "AltIDJobClass='"AltIDJobClass"'"                                      
+   queue "AltIDMsgClass='"AltIDMsgClass"'"                                      
+   queue "MyAUTHLibrary='"MyAUTHLibrary"'"                                      
+   queue "MyAUTULibrary='"MyAUTULibrary"'"                                      
+   queue "MyLOADLibrary='"MyLOADLibrary"'"                                      
+   queue "MyLOA2Library='"MyLOA2Library"'"                                      
+   queue "MyCLS0Library='"MyCLS0Library"'"                                      
+   queue "MyOPTNLibrary='"MyOPTNLibrary"'"                                      
+   queue "MyMENULibrary='"MyMENULibrary"'"                                      
+   queue "MyPENULibrary='"MyPENULibrary"'"                                      
+   queue "MySENULibrary='"MySENULibrary"'"                                      
+   queue "MyTENULibrary='"MyTENULibrary"'"                                      
+   queue "MyCLS2Library='"MyCLS2Library"'"                                      
+   queue "MyOPT2Library='"MyOPT2Library"'"                                      
+   queue "MyMEN2Library='"MyMEN2Library"'"                                      
+   queue "MyPEN2Library='"MyPEN2Library"'"                                      
+   queue "MySEN2Library='"MySEN2Library"'"                                      
+   queue "MyTEN2Library='"MyTEN2Library"'"                                      
+   queue "MyDAT2Library='"MyDAT2Library"'"                                      
+   queue "MyJCLLibrary='"MyJCLLibrary"'"                                        
+   queue "MyJCL2Library='"MyJCL2Library"'"                                      
+   queue "MySRC2Library='"MySRC2Library"'"                                      
+   queue "MyDATALibrary='"MyDATALibrary"'"                                      
+   queue "MyPackageEnviron='"MyPackageEnviron"'"                                
+   queue "MyPackageStgid='"MyPackageStgid"'"                                    
+                                                                                
+   queue "ShipSchedulingMethod='"ShipSchedulingMethod"'"                        
+   If SchedulingPackageShipBundle = 'Y' then,                                   
+      queue "TriggerFileName='"TriggerFileName"'"                               
+                                                                                
+   "EXECIO" QUEUED() "DISKW OPTIONS (Finis "                                    
+                                                                                
+   /* Update the ENDICLS1 CLIST */                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(ENDICLS1)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(ENDICLS1)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(ENDICLS1)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Update the ASSEMBLE JCL   */                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(ASSEMBLE)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(ASSEMBLE)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(ASSEMBLE)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Update the COMPILES JCL   */                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(COMPILES)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(COMPILES)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(COMPILES)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Update the C1UEXT07 source*/                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(C1UEXT07)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(C1UEXT07)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(C1UEXT07)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Update the SWEEPJOB Jcl   */                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(SWEEPJOB)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(SWEEPJOB)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(SWEEPJOB)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Update the Help Tutorial  */                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(LNDHE1C0)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(LNDHE1C0)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(LNDHE1C0)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Update the sample Proc    */                                              
+   DSNCHECK = SYSDSN("'"ThisLib"(EHISAMPR)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(EHISAMPR)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(EHISAMPR)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Create & tailor STARTFDP */                                               
+   DSNCHECK = SYSDSN("'"ThisLib"(@STARTFD)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(@STARTFD)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(STARTFDP)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Create & tailor @@Start5 Currently UntUsed wont exec*/                    
+   DSNCHECK = SYSDSN("'"ThisLib"(@FIXSORT)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(@FIXSORT)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(@@STARTF)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Create & tailor STARTFDP */                                               
+   DSNCHECK = SYSDSN("'"ThisLib"(@EXECFDP)'") ;                                 
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(MODEL) DA('"ThisLib"(@EXECFDP)') SHR REUSE "                     
+      "ALLOC F(TBLOUT) DA('"ThisLib"(@@START4)') SHR REUSE "                    
+      "TBL#TOOL A"                                                              
+      "EXECIO 0 DISKW TBLOUT (FINIS"                                            
+      End                                                                       
+                                                                                
+   /* Create @@START3 based on @INSTJOB  */                                     
+   "ALLOC F(MODEL) DA('"ThisLib"(@INSTJOB)') SHR REUSE "                        
+   "ALLOC F(TBLOUT) DA('"ThisLib"(@@START3)') SHR REUSE "                       
+   "TBL#TOOL A"                                                                 
+   "EXECIO 0 DISKW TBLOUT (FINIS"                                               
+                                                                                
+   /* Enter Edit on @@START3           */                                       
+   ADDRESS ISPEXEC,                                                             
+      "EDIT DATASET('"ThisLib"(@@START3)') MACRO(BNDLSITE)"                     
+                                                                                
+   "FREE F(OPTIONS) "                                                           
+   "FREE F(TBLOUT) "                                                            
+   "FREE F(MODEL)  "                                                            
+   "FREE F(TABLE)  "                                                            
+   Return                                                                       
+                                                                                

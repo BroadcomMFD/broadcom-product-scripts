@@ -1,0 +1,26 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(USER)                     
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(USER)                     
+  { TYPE(PT)                /* Panel Title */                                   
+  } TYPE(NT)                /* Normal Text */                                   
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(58,11) CMD()                                                       
+}            {Set Endevor CCID/COMMENT}                  }                      
+}                                                        }                      
+}{CCID........^EEVCCID     }                             }                      
+}{Comment.....`EEVCOMM                                 } }                      
+çSAREA38                                                 ç                      
+)AREA SAREA38                                                                   
+}Use this option to show/set the current active CCID and }                      
+}Comment that are in effect.  The CCID must be valid at} }                      
+}the point the action is executed.}                      }                      
+}Note: This panel may be customized to add}              }                      
+}validation checks; e.g. Non-Blank, or date format, etc. }                      
+)INIT                                                                           
+ VGET (VARCACCI VARCACOM EEVCCID EEVCOMM)                                       
+   if (&VARCACOM = &Z)       /* if Comment CAPs is not known,      */           
+     &VARCACOM = 'OFF'       /* Default to off, for mixed case     */           
+)PROC                                                                           
+ VPUT (EEVCCID EEVCOMM) SHARED                                                  
+)END                                                                            

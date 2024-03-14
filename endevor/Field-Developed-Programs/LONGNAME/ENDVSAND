@@ -1,0 +1,72 @@
+/* REXX - ENDVSAND - used when creating a new sandbox                           
+*/                                                                              
+     Sa=     QEPELM                                                             
+     ADDRESS TSO                                                                
+     "ALLOC F(SYSPRINT) DUMMY REUSE " ;                                         
+     "ALLOC F(SYSOUT) DUMMY REUSE " ;                                           
+     "ALLOC F(SYSIN) LRECL(80) BLKSIZE(0) SPACE(5,5)",                          
+            "RECFM(F B) TRACKS ",                                               
+            "NEW UNCATALOG REUSE "     ;                                        
+     "ALLOC F(MSGFILE) LRECL(133) BLKSIZE(13300) SPACE(5,5)",                   
+            "RECFM(F B) TRACKS ",                                               
+            "NEW UNCATALOG REUSE "     ;                                        
+     "ALLOC F(ELEMLIST) LRECL(2048) BLKSIZE(22800) SPACE(5,5)",                 
+            "RECFM(V B) TRACKS DSORG(PS) ",                                     
+            "DA('"USERID()".PDA.NOTIFY."ENVELM"')",                             
+            "MOD CATALOG REUSE "     ;                                          
+     "ALLOC F(APILIST) LRECL(1800) BLKSIZE(18000) SPACE(5,5)",                  
+            "RECFM(F B) TRACKS DSORG(PS)",                                      
+            "NEW UNCATALOG REUSE "     ;                                        
+     "ALLOC F(APIMSGS) LRECL(133) BLKSIZE(13300) SPACE(5,5)",                   
+            "RECFM(F B) TRACKS DSORG(PS)",                                      
+            "NEW UNCATALOG REUSE "     ;                                        
+     "ALLOC F(SYSIN) LRECL(080) BLKSIZE(08000) SPACE(1,1)",                     
+            "RECFM(F B) TRACKS DSORG(PS)",                                      
+            "NEW UNCATALOG REUSE "     ;                                        
+     QUEUE 'AACTL MSGFILE ELEMLIST'      /* Another search ... */               
+     TEMP= COPIES(" ",80);                                                      
+     TEMP= Overlay('ALELMLAR ',TEMP,1) ;                                        
+     TEMP= Overlay(QEPEVNME,TEMP,10) ;      /* from Env        */               
+     TEMP= Overlay('T',TEMP,18) ;       /* from stg id     */                   
+     TEMP= Overlay('SMPLPROD',TEMP,53) ;      /* thru ENV        */             
+     TEMP= Overlay('P',TEMP,61) ;       /* thru stg id     */                   
+     TEMP= Overlay(QEPSYS,TEMP,19) ;                                            
+     TEMP= Overlay(QEPSBS,TEMP,27) ;                                            
+     TEMP= Overlay('#* ',TEMP,35) ;                                             
+     TEMP= Overlay(QEPTYP,TEMP,45) ;                                            
+     SA= TEMP;                                                                  
+     QUEUE TEMP ;                                                               
+     QUEUE 'RUN' ;                                                              
+                                                                                
+     QUEUE 'AACTLY ' ;                                                          
+     QUEUE 'RUN' ;                                                              
+     QUEUE 'QUIT' ;                                                             
+                                                                                
+     ADDRESS TSO,                                                               
+     "EXECIO" QUEUED() "DISKW SYSIN (FINIS "                                    
+     RETURN_RC = 0  ;                                                           
+                                                                                
+     ADDRESS LINK 'ENTBJAPI'                                                    
+     RETURN_RC = RC ;                                                           
+     ADDRESS TSO,                                                               
+      "EXECIO * DISKR ELEMLIST (STEM LIST. FINIS" ;                             
+     DISKR_rc = RC                                                              
+                                                                                
+     Nop                                                                        
+     Nop                                                                        
+                                                                                
+     i = LIST.0                                                                 
+     /* Get the environment where this copy of the element lives */             
+     env = substr(list.i,15,8)                                                  
+                                                                                
+     /* Get the subsystem and stage */                                          
+     sub = substr(list.i,31,8)                                                  
+     stg = substr(list.i,65,1)                                                  
+     Element =substr(list.i,39,8)                                               
+     Element#=substr(list.i,40,7)                                               
+     if DATATYPE(Element#,'N') = 1 then                                         
+        Element#= Element# +  1                                                 
+     Else                                                                       
+        Element#= 1                                                             
+     Element#= Right(Element#,7,'0')                                            
+     QEPELM = '#' || Element# ;                                                 

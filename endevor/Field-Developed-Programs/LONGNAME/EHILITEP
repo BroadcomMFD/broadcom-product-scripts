@@ -1,0 +1,80 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ _ TYPE(INPUT) CAPS(ON)  JUST(ASIS) PADC(USER)                                  
+  { TYPE(GRPBOX)            /* Options Groupbox */                              
+  ^ TYPE(CEF) PADC(USER) CKBOX(ON) /* option field */                           
+  ` TYPE(NT) SKIP(ON)       /* field skip */                                    
+  µ TYPE(SAC)               /* Select Action Choice */                          
+  } TYPE(NT)                /* Normal Text */                                   
+  ! TYPE(ET)                /* Emphasised text */                               
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+   AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(65,20) CMD(ZCMD)                                                   
+}%Command ===>_ZCMD                           %Scroll ===>_ZCSR }               
+}                                                               }               
+}{GRPBOX1                                                       }               
+}^Z`µEnable Highlighting                                        }               
+}^Z`µHighlight Flower-Box                                       }               
+}^Z`µEnable Scroll Bar            %Max Scroll Bar....._Z    `   }               
+}^Z`µView/Edit Highlighting                                     }               
+}^Z`µGlobal Support                                             }               
+}^Z`µQuick Edit Compiler messages                               }               
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+!Highlighting:}Use this panel to control Endevor message output }               
+!BROWSE/VIEW}Highlighting.                                      }               
+}                                                               }               
+!Enable Highlighting:}allows the Browse messages view to apply  }               
+}colour highlight to message lines according to the message     }               
+}severity.  You can also enable highlight for!Flower-Boxes}     }               
+}(lines that begin with "** ").                                 }               
+}                                                               }               
+!Scroll bar support:}if enabled, turns on an overlay on the     }               
+}right side of the data display giving a summary (by colour)    }               
+}where messages have been!seen}in the file.  The Max Scroll Bar }               
+}option is used to set the maximum file size that is supported. }               
+}                                                               }               
+!Enabling the View/Edit:}option also allows highlighting in VIEW}               
+}and Edit mode (in addition to BROWSE mode).                    }               
+}                                                               }               
+!Enabling Global Support:}option enables highlight options      }               
+}outside Endevor, for example browsing Sysview or SDSF files.   }               
+!Note:}This may require additional support - contact your       }               
+}      Endevor Administrator for assistance.                    }               
+}                                                               }               
+!Enabling the Quick Edit Compiler messages:}option allows the   }               
+}Quick Edit initial macro (ENDIEIM1) to merge compiler messages }               
+}as!=NOTE=}and!==MSG>}lines so you can see the message inline   }               
+}with the source, and use the!LOCATE SPECIAL}primary command to }               
+}jump to the next instance.                                                     
+!Note:}This feature requires additional support - contact       }               
+}      your Endevor Administrator for assistance to implement   }               
+}      the ENDIEIM1, IEDITERR and PROCESSOR changes.            }               
+}                                                               }               
+)INIT                                                                           
+ .ZVARS = '(EHIMSG EHIFBX EHISBR EHIMAX EHIVED EHIGLB EHIQEM)'                  
+ .HELP = EHILITET  /* DEFAULT TUTORIAL NAME */                                  
+ if (&ZCSR = '')                                                                
+     &ZCSR = 'CSR'                                                              
+ &ZCSR = TRANS(TRUNC(&ZCSR,1) C,CSR P,PAGE H,HALF, *,&ZCSR)                     
+ .CURSOR = EHIMSG                                                               
+ &GRPBOX1 = 'HiLite Options'                                                    
+ .ATTR(GRPBOX1) = 'WIDTH(32) DEPTH(9)'                                          
+ &EHIMSG = TRANS (&EHIMSG &Z,' ' ' ',' ' *,/)                                   
+ &EHIFBX = TRANS (&EHIFBX &Z,' ' ' ',' ' *,/)                                   
+ &EHISBR = TRANS (&EHISBR &Z,' ' ' ',' ' *,/)                                   
+ &EHIVED = TRANS (&EHIVED &Z,' ' ' ',' ' *,/)                                   
+ &EHIGLB = TRANS (&EHIGLB &Z,' ' ' ',' ' *,/)                                   
+ &EHIQEM = TRANS (&EHIQEM &Z,' ' ' ',' ' *,/)                                   
+ if (&EHIMAX = '')                                                              
+     *rexx (EHIMAX ZSCRMAXD)                                                    
+      EHIMAX = (ZSCRMAXD-4) ** 2                                                
+     *endrexx                                                                   
+)PROC                                                                           
+ &EHIMSG = TRANS (&EHIMSG &Z,' ' ' ',' ' *,/)                                   
+ &EHIFBX = TRANS (&EHIFBX &Z,' ' ' ',' ' *,/)                                   
+ &EHISBR = TRANS (&EHISBR &Z,' ' ' ',' ' *,/)                                   
+ &EHIVED = TRANS (&EHIVED &Z,' ' ' ',' ' *,/)                                   
+ &EHIGLB = TRANS (&EHIGLB &Z,' ' ' ',' ' *,/)                                   
+ &EHIQEM = TRANS (&EHIQEM &Z,' ' ' ',' ' *,/)                                   
+ VER (&EHIMAX RANGE 1,32767)                                                    
+)END                                                                            

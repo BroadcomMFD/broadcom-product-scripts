@@ -1,0 +1,44 @@
+/*     REXX   */                                                                
+/*                                                                    */        
+   "ISREDIT MACRO" ;                                                            
+   /* WRITTEN BY DAN WALTHER */                                                 
+   /* Format C1MSGS1 output for Bundle Installations  */                        
+   TRACE Off ;                                                                  
+     ADDRESS ISREDIT;                                                           
+     " EXCLUDE ALL  " ;                                                         
+     " CURSOR = 1 1 " ;                                                         
+                                                                                
+     ADDRESS ISREDIT  "(MAXCOL) = DATA_WIDTH"                                   
+     "BNDS  1  "MAXCOL                                                          
+                                                                                
+   /* HEADING */                                                                
+     "FIND 'ENVIRONMENT' FIRST   "                                              
+     "SHIFT ( .ZCSR 19 "                                                        
+     "CHANGE P'=' '*' 1 FIRST NX "                                              
+     "CHANGE 'ELEMENT  ' 'ELEMENT-'  FIRST NX"                                  
+     "CHANGE ' RC '      '    '      FIRST NX"                                  
+     "CHANGE ' RC '      '-RC-'      FIRST NX"                                  
+     "CHANGE 'SYSTEM  '  'SYSTEM--'  FIRST NX"                                  
+     "CHANGE 'TYPE    '  'TYPE----'  FIRST NX"                                  
+                                                                                
+     "FIND 'RETRIEVE' WORD ALL   "                                              
+     ADDRESS ISREDIT  "DELETE ALL X"                                            
+                                                                                
+     " CURSOR = 1 1 " ;                                                         
+     DO FOREVER                                                                 
+         "FIND 'RETRIEVE' WORD NEXT  "                                          
+         if rc >0 then leave;                                                   
+         "SHIFT ( .ZCSR 19 "                                                    
+     End                                                                        
+                                                                                
+     "CHANGE P'=' ' ' 72" MAXCOL " ALL "                                        
+     " CURSOR = 1 1 " ;                                                         
+                                                                                
+   /* SAVE & EXIT */                                                            
+   IF SYSVAR(SYSENV) = BACK THEN ,                                              
+      DO                                                                        
+      ADDRESS ISREDIT " SAVE "                                                  
+      ADDRESS ISREDIT " CANCEL"                                                 
+      END                                                                       
+   EXIT                                                                         
+                                                                                

@@ -1,0 +1,150 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+ ¶ TYPE(OUTPUT) COLOR(YELLOW) CAPS(OFF)                                         
+ º TYPE(OUTPUT) COLOR(TURQ)   CAPS(OFF)                                         
+ µ TYPE(OUTPUT) COLOR(RED)    CAPS(OFF)                                         
+ › TYPE(OUTPUT) COLOR(WHITE)  INTENS(HIGH) CAPS(OFF)                            
+ @ TYPE(OUTPUT) COLOR(BLUE)   INTENS(LOW) CAPS(OFF)                             
+ _ TYPE(INPUT)  COLOR(RED)    INTENS(HIGH) PAD(NULLS) CAPS(ON) JUST(LEFT)       
+)BODY EXPAND(\\) WIDTH(&ZSCREENW)                                               
+%RETRIEVE \-\  ELEMENT SELECTION LIST ---WS2--------\-\                         
+%COMMAND ===>_ZCMD                                        \ \ %SCROLL ===>_AMT +
++                                                                               
++TO   Data set:   ›RTRDSN                                                       
++                                                                               
+@ENWR0H1                                                                        
+@ENWR0H2                                                                        
+)MODEL CLEAR(&ENWR0CL)                                                          
+&ENWR0M1                                                                        
+&ENWR0M2                                                                        
+)INIT                                                                           
+/* Start code for ESORT */                                                      
+VGET (ZSCREEN)                                                                  
+  IF (&ZSCREEN = 1)                                                             
+    &PANELID1 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID1) PROFILE                                                     
+  IF (&ZSCREEN = 2)                                                             
+    &PANELID2 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID2) PROFILE                                                     
+  IF (&ZSCREEN = 3)                                                             
+    &PANELID3 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID3) PROFILE                                                     
+  IF (&ZSCREEN = 4)                                                             
+    &PANELID4 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID4) PROFILE                                                     
+  IF (&ZSCREEN = 5)                                                             
+    &PANELID5 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID5) PROFILE                                                     
+  IF (&ZSCREEN = 6)                                                             
+    &PANELID6 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID6) PROFILE                                                     
+  IF (&ZSCREEN = 7)                                                             
+    &PANELID7 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID7) PROFILE                                                     
+  IF (&ZSCREEN = 8)                                                             
+    &PANELID8 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID8) PROFILE                                                     
+  IF (&ZSCREEN = 9)                                                             
+    &PANELID9 = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELID9) PROFILE                                                     
+  IF (&ZSCREEN = A)                                                             
+    &PANELIDA = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDA) PROFILE                                                     
+  IF (&ZSCREEN = B)                                                             
+    &PANELIDB = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDB) PROFILE                                                     
+  IF (&ZSCREEN = C)                                                             
+    &PANELIDC = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDC) PROFILE                                                     
+  IF (&ZSCREEN = D)                                                             
+    &PANELIDD = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDD) PROFILE                                                     
+  IF (&ZSCREEN = E)                                                             
+    &PANELIDE = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDE) PROFILE                                                     
+  IF (&ZSCREEN = F)                                                             
+    &PANELIDF = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDF) PROFILE                                                     
+  IF (&ZSCREEN = G)                                                             
+    &PANELIDG = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDG) PROFILE                                                     
+  IF (&ZSCREEN = H)                                                             
+    &PANELIDH = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDH) PROFILE                                                     
+  IF (&ZSCREEN = I)                                                             
+    &PANELIDI = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDI) PROFILE                                                     
+  IF (&ZSCREEN = J)                                                             
+    &PANELIDJ = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDJ) PROFILE                                                     
+  IF (&ZSCREEN = K)                                                             
+    &PANELIDK = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDK) PROFILE                                                     
+  IF (&ZSCREEN = L)                                                             
+    &PANELIDL = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDL) PROFILE                                                     
+  IF (&ZSCREEN = M)                                                             
+    &PANELIDM = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDM) PROFILE                                                     
+  IF (&ZSCREEN = N)                                                             
+    &PANELIDN = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDN) PROFILE                                                     
+  IF (&ZSCREEN = O)                                                             
+    &PANELIDO = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDO) PROFILE                                                     
+  IF (&ZSCREEN = P)                                                             
+    &PANELIDP = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDP) PROFILE                                                     
+  IF (&ZSCREEN = Q)                                                             
+    &PANELIDQ = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDQ) PROFILE                                                     
+  IF (&ZSCREEN = R)                                                             
+    &PANELIDR = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDR) PROFILE                                                     
+  IF (&ZSCREEN = S)                                                             
+    &PANELIDS = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDS) PROFILE                                                     
+  IF (&ZSCREEN = T)                                                             
+    &PANELIDT = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDT) PROFILE                                                     
+  IF (&ZSCREEN = U)                                                             
+    &PANELIDU = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDU) PROFILE                                                     
+  IF (&ZSCREEN = V)                                                             
+    &PANELIDV = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDV) PROFILE                                                     
+  IF (&ZSCREEN = W)                                                             
+    &PANELIDW = '&ZSCREEN:C1SF2120'                                             
+    VPUT (PANELIDW) PROFILE                                                     
+/* End code for ESORT */                                                        
+/* Add Code for WideScreen Support                                    */        
+  .ZVARS = '(&ENWR0VR)'                                                         
+  &ZTDMARK ='&ENWR0ZM'                                                          
+/*.ZVARS = '(SO EMNAME TOFRNAME EMTYPE ENSC EMENV EMSTGID EMSYS EMSBS    + */   
+/*           ECVL EMRC)'                                                   */   
+  .HELP = CITESEL0                                                              
+  IF (&AMT = ' ')                                                               
+     &AMT = PAGE                                                                
+)PROC                                                                           
+  VPUT (AMT) PROFILE                                                            
+/* did user change the column headings?                               */        
+  VGET (ECOLREF) SHARED                                                         
+  if (&ECOLREF = 'YES' )                                                        
+    &ECOLREF = 'PENDING'                                                        
+    VPUT (ECOLREF) SHARED                                                       
+    .RESP = END                                                                 
+)FIELD                                                                          
+  FIELD(SO      ) SCROLL(NO)  /* no scroll in sel field so PF10/11 work */      
+  FIELD(EMNAME  ) SCROLL(YES)                                                   
+  FIELD(TOFRNAME) SCROLL(YES)                                                   
+  FIELD(EMTYPE  ) SCROLL(YES)                                                   
+  FIELD(ENSC    ) SCROLL(YES)                                                   
+  FIELD(EMENV   ) SCROLL(YES)                                                   
+  FIELD(EMSTGID ) SCROLL(YES)                                                   
+  FIELD(EMSYS   ) SCROLL(YES)                                                   
+  FIELD(EMSBS   ) SCROLL(YES)                                                   
+  FIELD(ECVL    ) SCROLL(YES)                                                   
+  FIELD(EMRC    ) SCROLL(YES)                                                   
+)END                                                                            

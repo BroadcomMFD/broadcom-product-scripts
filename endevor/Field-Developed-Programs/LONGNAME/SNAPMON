@@ -1,0 +1,635 @@
+/* Rexx - Endevor Activity Tool using (only) Enqueue data            */         
+Address ISPEXEC                /* default to ISPEXEC"                */         
+"VGET (ZSCREEN ZUSER ZSCREENW ZSCRMAXW ZSYSID)"   /* Get system Vars */         
+/* Check if already active */                                                   
+FMNam = left('E Q=FDP-SNAP IS ACTIVE IN SCREEN' ZSCREEN,34)                     
+ADDRESS LINKMVS 'CTLIENQ FMNam'                                                 
+if RC\= 0 then do                      /* LongName Already Active */            
+   /* ENDI002E The dialog is already active in this ISPF logical..*/            
+   ADDRESS ISPEXEC "SETMSG MSG(ENDI002E)" ; /* Use Endevor msg    */            
+   exit                                                                         
+end                                                                             
+Refresh_stats:                                                                  
+start = time('R')              /* Start the Clock How fast are we?   */         
+"CONTROL ERRORS return"        /* I want to see RCodes               */         
+FDPDS = "CAIPRODD.NDVR.V170FDP.CSIQCLS0" /* Default in FDPDSN not fnd*/         
+                                                                                
+/* now use defaults from profile or site... */                                  
+                                                                                
+defaults:                                                                       
+  address ispexec "vget (SNAPMOND) profile"     /* Anything set?     */         
+  if rc /= 0 then do                            /* not fnd?...       */         
+     address ispexec "select cmd(snapmons)"     /* call settins util */         
+     address ispexec "vget (SNAPMOND) profile"  /* and try again...  */         
+     if rc /= 0 then do                         /* not fnd?...       */         
+        say "Error - No Defaults set unable to proceed"                         
+        exit 20                                                                 
+        end                                                                     
+     end                                                                        
+/* Un-pack Queue Name Values */                                                 
+  Max_Row = 0                                                                   
+  q. = ''                                                                       
+  do i = 1 to 9*6 by 6                                                          
+     Max_Row=Max_Row + 1                                                        
+     x=value('QYN'Max_Row,cword(snapmond,i+0))                                  
+     x=value('QXS'Max_Row,cword(snapmond,i+1))                                  
+     x=value('QLM'Max_Row,cword(snapmond,i+2))                                  
+     x=value('QRS'Max_Row,cword(snapmond,i+3))                                  
+     x=value('QQN'Max_Row,cword(snapmond,i+4))                                  
+     x=value('QRN'Max_Row,cword(snapmond,i+5))                                  
+  end                                                                           
+/* Display Queue Name Values */                                                 
+/*                                                                              
+  do i = 1 to Max_Row                                                           
+  say "Row:"i "Y/N:"value('QYN'i) ,                                             
+             "Xsys:"value('QXS'i) ,                                             
+            "Limit:"value('QLM'i) ,                                             
+              "Res:"value('QRS'i) ,                                             
+             "Qnam:"left(value('QQN'i),8),                                      
+             "Rnam:"left(value('QRN'i),44)                                      
+  end                                                                           
+*/                                                                              
+/*                                                                   */         
+/*                   Init Vars and counters                          */         
+/*                                                                   */         
+Cnt_Tab = 0                    /* Total Records collected (input)    */         
+Cnt_Sav = 0                    /* Total Records saved (table size)   */         
+Cnt_Lin = 0                    /* Line Counter                       */         
+Cnt_RET = 0                    /* total Enqueues                     */         
+Cnt_CAT = 0                    /* total Element Catalog              */         
+Cnt_ACM = 0                    /* total ACMROOT entries              */         
+Cnt_Pkg = 0                    /* total Package Entries              */         
+Cnt_Act = 0                    /* total Active System Enqueues       */         
+Cnt_END = 0                    /* total Endevor Users                */         
+Cnt_PDM = 0                    /* total PDM users                    */         
+Cnt_QED = 0                    /* total QuickEdit Users              */         
+Cnt_LNM = 0                    /* total LongName Users TODO          */         
+Cnt_FDP = 0                    /* total Field Developed Users (DS)   */         
+Cnt_FDM = 0                    /* total Field Developed Menu/Selectn */         
+Cnt_FDS = 0                    /* total Field Developed SnapMon      */         
+Hwm_Spl = 0                    /* High Water Mark split screens      */         
+Cnt_Spl = 0                    /* Count of split screens (per user)  */         
+Cnt_Pwr = 0                    /* Count of Power Users (>=2 split)   */         
+Cnt_Bat = 0                    /* Count of Batch users-No Screen Act */         
+Cnt_Web = 0                    /* Count of Web/CMEW tasks            */         
+Cnt_RMT = 0                    /* Count of Remote jobs waiting       */         
+Bat_Flg = "Y"                  /* Flag for Batch/ISPF user, assume B */         
+Lst_Usr = ""                   /* Flag seen this user?               */         
+Lst_RNm = ""                   /* Flag seen this RName?              */         
+Cnt_Job = 0                    /* total Users/jobs identified        */         
+Cnt_ISP = 0                    /* total ISPF users                   */         
+All_Usr.= ""                   /* list of users                      */         
+All_Usr.0 = 0                  /* Size of Array                      */         
+Flg_Usr.= ""                   /* Type Of user                       */         
+Lok_Pkg = 0                    /* total Package Lock Entries         */         
+All_Pkg.= ""                   /* list of packages                   */         
+All_Pkg.0 = 0                  /* Size of Array                      */         
+Lok_UNR = 0                    /* total Package Lock Entries         */         
+All_UNR.= ""                   /* list of Unload Systems             */         
+All_UNR.0 = 0                  /* Size of Array                      */         
+Cnt_STC = 0                    /* Count of duplicate job/rname (STCs)*/         
+All_STC.= ""                   /* Count of STCs Seen for this JobName*/         
+All_STC.0 = 0                  /* Size of Array                      */         
+Cnt_Typ. = 0                   /* Count of Job Types (per type)      */         
+ZSCRNAME = "SnapMon"           /* Set  Screen Name (Override Edit)   */         
+"VPUT (ZSCRNAME) SHARED"       /* Set ScreenName                     */         
+DDNAME = 'SNAPOUT' || ZSCREEN               /* use screen in DDName  */         
+address TSO "ALLOC DD("DDNAME") SP(10,5) ", /* Allocate temp file    */         
+   "TR NEW RELEASE LRECL(172) BLKSIZE(0)",                                      
+     "DSORG(PS)",                                                               
+     "RECFM(V,B) NEW REU UNCATALOG"                                             
+/* Work out Report dimensions so it can match users screen choice               
+   Note: There may be differences between the max screen width and              
+   the available screen width if the user is running in STD or SPLIT-V          
+   mode... and TODO maybe if we wanted to allow running in batch                
+   Use the current available width so that where possible fields will           
+   fit, but the detail lines are quite long anyway 80 won't cut it!             
+*/                                                                              
+Rpt_Margin = 8  /* reserved for numbers/line cmd or ommited batch?  */          
+Rpt_Width  = ZSCREENW - Rpt_Margin                                              
+Rpt_Indent = 4                                                                  
+Rpt_MaxJob = (Rpt_Width - Rpt_Indent) % 18 /* how many Job columns  */          
+Rpt_MaxPkg = (Rpt_Width - Rpt_Indent) % 20 /* how many Pkg columns  */          
+Rpt_MaxUnl = (Rpt_Width - Rpt_Indent) % 20 /* how many Unl columns  */          
+                                                                                
+wrtHd("Endevor Activity Snapshot" || , /* Write a heading           */          
+      right(date(),Rpt_Width-25))      /* Append the date and pad   */          
+wrtHd(right(time(),RPT_Width))         /* ...and the time           */          
+VarNames = "ZENQNAME ZENRNAME ZENJOB ZENDISP ZENHOLD ZENSCOPE" ,                
+           "ZENSTEP ZENGLOBL ZENSYST ZENRESV SRC"                               
+"TBEND STABLE"||ZSCREEN        /* Insure table does not exist        */         
+"TBCREATE STABLE"||ZSCREEN "NAMES("VarNames") NOWRITE SHARE"                    
+  If rc ^= 0 Then               /* Return codes                      */         
+    Do                          /*  4 - Duplicate table exists but   */         
+      say "TBCreate failed with RC:" rc                                         
+      exit rc                                                                   
+    End                         /*      "replace" specified          */         
+  Else                          /*  8 - Table already exists;        */         
+                                /*      "replace" not specified      */         
+                                /* 12 - Table in use; enq failed     */         
+                                /* 16 - Table input library not      */         
+                                /*      allocated with "write"       */         
+                                /* 20 - Severe error                 */         
+do i = 1 to Max_Row            /* Use StrtAt to skip some searches   */         
+   if 'Y' \= value('QYN'i) then iterate /* are we using this one?    */         
+   if 'XSYS' = value('QXS'i) then                                               
+       XSYS = 'XSYS'           /* If XSYS specified?  Then use if    */         
+   else                        /* otherwise...                       */         
+       XSYS = ''               /* Set Parm to null (we don't need it */         
+   LM = value('QLM'i)          /* To avoid to much data if needed    */         
+   RS = value('QRS'i)          /* Use Resource names to limit search */         
+   QN = value('QQN'i)          /* For this QName: CTLIELEM, ENDEVOR, */         
+   RN = value('QRN'i)          /* Use patter provided                */         
+   if QN == 'FDPDSN' then do   /* special D/S search?                */         
+      FDPDS = RN               /* If so - save the special name      */         
+      QN = SYSDSN              /* replace FDPDSN with SYSDSN         */         
+   end                         /* thats all the values...            */         
+"TBEND ETABLE"||ZSCREEN        /* Insure table does not exist        */         
+"QUERYENQ TABLE(ETABLE"ZSCREEN")", /* Invoke queryenq servic         */         
+    "QNAME(QN)",               /* Specify major name                 */         
+    "RNAME(RN)",               /* Specify minor name                 */         
+    "REQ("RS")",               /* Requestors(jobNam) pattern %%* etc.*/         
+    "LIMIT("LM")",             /* Only show 1st nn enqs              */         
+    XSYS                       /*    Do cross-system query (slow!)      */      
+sa= "RETURN CODE WAS "RC "for QN:" QN "RN:" RN                                  
+If RC < 5 Then                 /* If any data was returned           */         
+  Do                                                                            
+    SRC = i                    /* save the source                    */         
+    "TBTOP ETABLE"||ZSCREEN    /* Position table at top              */         
+    Do forever                 /* Loop through table                 */         
+      "TBSKIP ETABLE"||ZSCREEN                                                  
+      if rc <> 0 then leave                                                     
+      Cnt_Tab = Cnt_Tab + 1    /* And count the records              */         
+      if ZENQNAME = "SYSDSN" then Do                                            
+         Cnt_ret = Cnt_ret + 1    /* increment total returned        */         
+         Right_Bit = right(strip(ZENRNAME,'T'),7)                               
+         if 'ACMROOT' = Right_Bit then do                                       
+           Cnt_acm = Cnt_acm + 1  /* increment total returned        */         
+           src = "A"                                                            
+         end                                                                    
+         else if 'ELMCATL' = Right_Bit then do                                  
+           Cnt_cat = Cnt_cat + 1  /* increment total returned        */         
+           src = "C"                                                            
+         end                                                                    
+         else if 'PACKAGE'  = Right_Bit then do                                 
+           Cnt_Pkg = Cnt_Pkg + 1  /* increment total returned        */         
+           src = "P"                                                            
+         end                                                                    
+         else if 'CSIQPLD'  = Right_Bit then do                                 
+           src = "W"                                                            
+           if Pos("W",Flg_Usr.ZENJOB) = 0 then do /*  we seen this? */          
+              Flg_Usr.ZENJOB = Flg_Usr.ZENJOB||"W" /* save it       */          
+              Cnt_Web = Cnt_Web + 1  /* increment total Web         */          
+           end                                                                  
+         end                                                                    
+         else if Left(ZENRNAME,length(FDPDS)) = FDPDS then do                   
+           Cnt_FDP = Cnt_FDP + 1  /* User/job has FDP Lib alloc  */             
+           if Pos("f",Flg_Usr.ZENJOB) = 0 then /* have we seen this? */         
+              Flg_Usr.ZENJOB = Flg_Usr.ZENJOB||"f" /* save it       */          
+           end                                                                  
+         else iterate          /* Otherwise a SYSDSN we dont care abt*/         
+      End                                                                       
+      "TBADD  STABLE"||ZSCREEN /* save this row in summary table     */         
+      Cnt_Sav = Cnt_Sav + 1    /* And count saved records            */         
+    End                                                                         
+  "TBEND ETABLE"||ZSCREEN      /* Finished with this table           */         
+  End                                                                           
+Else                           /* If QueryEnq service failed         */         
+  Do                           /* Say error message to screen        */         
+    Sa= strip(ZERRSM) "-" strip(ZERRLM)                                         
+    Sa= strip(ZERRLM)                                                           
+  End                                                                           
+end                                                                             
+Tim_Qry = time('E')            /* how long for Query?                */         
+Analyze:                                                                        
+"TBSORT STABLE"||ZSCREEN "FIELDS(ZENJOB,B,A,ZENQNAME,B,A,ZENRNAME,B,A)"         
+"TBTOP  STABLE"||ZSCREEN   /* Position Table at top           */                
+Do forever                 /* Loop through table and Analyze     */             
+  "TBSKIP STABLE"||ZSCREEN                                                      
+  skip_rc = rc                                                                  
+  if skip_rc /= 0 then leave                                                    
+  If ZENJOB /= Lst_Usr then do /* new user?                     */              
+     Lst_Usr = ZENJOB                                                           
+     Lst_RNm = " "        /* reset RName flag                   */              
+     Cnt_Job = Cnt_Job +1                                                       
+     All_Usr.Cnt_Job = ZENJOB                                                   
+     All_Usr.0 = Cnt_Job  /* save size of array                 */              
+     Cnt_Spl = 0          /* reset Split Screen Count           */              
+     Bat_Flg = 'Y'        /* Assume Batch user                  */              
+     Job_Type = JobTyp(ZENJOB)  /* find out Tso/Job/STC...    */                
+     if Pos(Job_Type,Flg_Usr.ZENJOB) = 0 then /* seen this?   */                
+        Flg_Usr.ZENJOB = Job_type||Flg_Usr.ZENJOB /* save it  */                
+  end                                                                           
+  /* Ckeck SysID - if it's not us, must be remote             */                
+  if ZENSYST \= ZSYSID  then             /* not This System?  */                
+     if Pos("r",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "r"||Flg_Usr.ZENJOB /* save it       */                
+  /* It's hard to Find STC's but if the job,qname&rname are   */                
+  /* all the same then it must be a duplicate job name which  */                
+  /* implies an STC - unless it's the CTLIELEM S records which*/                
+  /* can legitematly have duplicates in one TSO session       */                
+  if ZENQNAME=='CTLIELEM' & LEFT(ZENRNAME,1) = S then nop                       
+  else if Lst_RNm == ZENQNAME||ZENRNAME then do /* Duplicate? */                
+     Cnt_STC = Cnt_Stc +1 /* increment count of STCs          */                
+     if All_STC.ZENJOB = "" Then All_STC.ZENJOB=1 /*CountPrior*/                
+     All_STC.ZENJOB = All_STC.ZENJOB + 1 /* count this one    */                
+     All_STC.0 = Cnt_Stc         /* save size of array        */                
+     if Pos("S",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = Flg_Usr.ZENJOB||"S" /* save it       */                
+     end                                                                        
+  else                                                                          
+     Lst_RNm = ZENQNAME||ZENRNAME        /* Update FLAG       */                
+  /* Ckeck for ISPF User ENQs next                            */                
+  if Left(ZENRNAME,20) = 'IS ACTIVE IN SCREEN ' then do                         
+     Cnt_Spl = Cnt_Spl + 1     /* Another screen active       */                
+     Bat_Flg = 'N'        /* This is an ISPF user             */                
+     if Cnt_Spl = 2 then do    /* A Power User (2 screens)    */                
+        Cnt_Pwr = Cnt_Pwr + 1                                                   
+        if Pos("*",Flg_Usr.ZENJOB) = 0 then /*  we seen this? */                
+           Flg_Usr.ZENJOB = Flg_Usr.ZENJOB||"*" /* save it    */                
+     end                                                                        
+     if Cnt_Spl > Hwm_Spl then /* new High Water Mark?        */                
+        Hwm_Spl = Cnt_Spl                                                       
+  end                                                                           
+  if Left(ZENRNAME,15) = 'ENDEVOR PACKAGE'      then do                         
+     Cnt_Web = Cnt_Web + 1     /* Another CMEW STC - Ent PKG  */                
+     Bat_Flg = 'N'        /* This is an STC                   */                
+     if Pos("C",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = Flg_Usr.ZENJOB||"C" /* save it       */                
+  end                                                                           
+  if ZENQNAME = "ENDEVOR" then do                                               
+     Cnt_END = Cnt_END + 1   /* Endevor User                  */                
+     Bat_Flg = 'N'           /* Not a Batch user              */                
+     if Pos("E",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "E"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  if ZENQNAME = "END-PDM" then do                                               
+     Cnt_PDM = Cnt_PDM + 1   /* PDM user                      */                
+     Bat_Flg = 'N'           /* Not a Batch user              */                
+     if Pos("P",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "P"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  if ZENQNAME = "EDIT-ELM" then do                                              
+     Cnt_QED = Cnt_QED + 1   /* QuickEdit user                */                
+     Bat_Flg = 'N'           /* Not a Batch user              */                
+     if Pos("Q",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "Q"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  if ZENQNAME = "FDP-LONG" then do                                              
+     Cnt_LNM = Cnt_LNM + 1   /* LongName User                 */                
+     Bat_Flg = 'N'           /* Not a Batch user              */                
+     if Pos("L",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "L"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  if ZENQNAME = "FDP-MENU" then do                                              
+     Cnt_FDM = Cnt_FDM + 1   /* FDP Menu User                 */                
+     Bat_Flg = 'N'           /* Not a Batch user              */                
+     if Pos("M",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "M"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  if ZENQNAME = "FDP-SNAP" then do                                              
+     Cnt_FDS = Cnt_FDS + 1   /* SnapMon User                  */                
+     if Pos("s",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "s"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  if (ZENQNAME = "SYSDSN",   /* If we got to datasets,        */                
+     |ZENQNAME = "LSERVDSN"),/* Or LSERVDSNs...               */                
+   & Bat_Flg = 'Y' then do   /* and didn't find ISPF user     */                
+     Cnt_Bat = Cnt_bat + 1   /* Count him and                 */                
+     Bat_Flg = 'N'           /* Stop counting till next user  */                
+     if Pos("B",Flg_Usr.ZENJOB) = 0 then /* have we seen this?*/                
+        Flg_Usr.ZENJOB = "B"||Flg_Usr.ZENJOB /* save it       */                
+  end                                                                           
+  /* CTLIELEM - P0**PKG** EOINS LIVEPACKAG */                                   
+  if ZENQNAME = "CTLIELEM" then Do                                              
+     Cnt_Act = Cnt_Act + 1    /* increment total active tasks    */             
+     if left(ZENRNAME,1) = "P" ,                                                
+      & substr(ZENRNAME,3,7) = "**PKG**" then do                                
+       Lok_Pkg = Lok_Pkg + 1  /* increment Active Pacakges       */             
+       All_Pkg.Lok_Pkg = substr(ZENRNAME,11,18)                                 
+       All_Pkg.0 = Lok_Pkg                                                      
+       if Pos("k",Flg_Usr.ZENJOB) = 0 then /* have we seen this? */             
+          Flg_Usr.ZENJOB = "k"||Flg_Usr.ZENJOB /* save it       */              
+     end                                                                        
+  /* CTLIELEM - Rs<env>... Remote Compile  */                                   
+     IF left(ZENRNAME,1) = "R" then do                                          
+       Cnt_RMT = Cnt_Rmt + 1  /* increment Remote Jobs           */             
+       if Pos("R",Flg_Usr.ZENJOB) = 0 then /* have we seen this? */             
+          Flg_Usr.ZENJOB = "R"||Flg_Usr.ZENJOB /* save it       */              
+     end                                                                        
+  /* CTLIELEM - S0PRD     **LOAD**                              */              
+     if left(ZENRNAME,1) = "S" ,                                                
+      & substr(ZENRNAME,11,8) = "**LOAD**" then do                              
+       Lok_UNR = Lok_UNR + 1  /* Unload/Reload in progress       */             
+       All_UNR.Lok_UNR = substr(ZENRNAME,3,8)  /* save Env       */             
+       All_UNR.0 = Lok_UNR                                                      
+       if Pos("u",Flg_Usr.ZENJOB) = 0 then /* have we seen this? */             
+          Flg_Usr.ZENJOB = "u"||Flg_Usr.ZENJOB /* save it       */              
+     end                                                                        
+  /* CTLIELEM - E0AMPAD01 QUICK   EDIT    (QERCVY12)RECOVERY     */             
+     if left(ZENRNAME,1) = "E" ,                                                
+      & substr(ZENRNAME,11,21) = "QUICK   EDIT    (QERC" then do                
+       Cnt_Act = Cnt_Act - 1  /* Don't double count - just id    */             
+       if Pos("Q",Flg_Usr.ZENJOB) = 0 then /* have we seen this? */             
+          Flg_Usr.ZENJOB = "Q"||Flg_Usr.ZENJOB /* save it       */              
+     end                                                                        
+  end                                                                           
+                                                                                
+End                                                                             
+wrtSh("Job/User Summary....."Cnt_Job)                                           
+do i = 1 to All_Usr.0 by Rpt_MaxJob              /* For each user in list */    
+   line_out = copies(' ',Rpt_Indent)             /* Init Line Out         */    
+   do j = i to min(i+Rpt_MaxJob-1, All_Usr.0)    /* Print max n Wide      */    
+      this_usr = All_Usr.j                       /* get Current user      */    
+      this_flg = Flg_Usr.this_usr                /* get Current user      */    
+      if this_flg = "" then This_Flg = "???"     /* flag strangeness      */    
+   /* have new logic for STC count using Status                                 
+      Pos_S = pos('S',this_Flg)                  /* is it an STC but NOT  */    
+      if pos_S > 0 then do                       /* Did we have an STC?   */    
+         Pos_ISPF = pos('E',this_Flg) + ,        /* Endevor, or...        */    
+                    pos('Q',this_Flg) + ,        /*  QuickEdit or...      */    
+                    pos('L',this_Flg) + ,        /*   LongName or...      */    
+                    pos('P',this_Flg) + ,        /*    PDM or...          */    
+                    pos('M',this_Flg) + ,        /*     FDPMenu or...     */    
+                    pos('s',this_Flg)            /*      SnapMon or...    */    
+         if Pos_ISPF = 0 then                    /* ...and it's not ISPF  */    
+            this_flg=left(this_flg,Pos_S) || ,   /* Take the left bit,    */    
+                          All_Stc.this_usr|| ,   /* ...insert the count   */    
+                   Substr(this_flg,Pos_S+1)      /* ...and add the rt bit */    
+         else                                    /* Else (can't be stc)   */    
+            this_flg=left(this_flg,(pos_S-1))||, /* So strip off the      */    
+                   Substr(this_flg,(pos_S+1))    /* falst Positive S      */    
+      end                                                                       
+   */                                                                           
+      line_out = Line_out || left(All_Usr.j,8),  /* Add this user to line */    
+      || Left("("||this_flg||")",10)             /* append their flags    */    
+   end                                                                          
+   wrtJs(line_out)                               /* write out the line    */    
+end                                                                             
+if Lok_Pkg > 0 then do                                                          
+   wrtln(" ")                                                                   
+   wrtSh("Package Summary......."Lok_Pkg)                                       
+   do i = 1 to All_Pkg.0 by Rpt_MaxPkg           /* For each Pkg  in list */    
+      line_out = copies(' ',Rpt_Indent)          /* Init Line Out         */    
+      do j = i to min(i+Rpt_MaxPkg-1, All_Pkg.0) /* Print max n wide      */    
+         line_out = Line_out || left(All_Pkg.j,20)/* Add this Pkg to line */    
+      end                                                                       
+      wrtJs(line_out)                            /* write out the line    */    
+   end                                                                          
+end                                                                             
+if Lok_UNR > 0 then do                                                          
+   wrtln(" ")                                                                   
+   wrtSh("Unload/Reload in Progress..."Lok_UNR)                                 
+   do i = 1 to All_UNR.0 by Rpt_MaxUnl           /* For each UNR  in list */    
+      line_out = copies(' ',Rpt_Indent)          /* Init Line Out         */    
+      do j = i to min(i+Rpt_MaxUnl-1, All_UNR.0) /* Print max n wide      */    
+         line_out = Line_out || left(All_UNR.j,20)/* Add this UNR to line */    
+      end                                                                       
+      wrtJs(line_out)                            /* write out the line    */    
+   end                                                                          
+end                                                                             
+                                                                                
+Cnt_ISP = Cnt_END+Cnt_PDM+Cnt_QED+Cnt_LNM+Cnt_FDM+CNT_FDS /* all ISPF Cnts*/    
+                                          /* todo count unique ISPF users */    
+Rng_ISP = max(Cnt_END,Cnt_PDM,Cnt_QED,Cnt_LNM,05) /* set range for UserBar*/    
+Cnt_ENQ = Cnt_CAT+Cnt_ACM+Cnt_Pkg+Cnt_FDP        /* todo count unique ISPF*/    
+Rng_EnQ = max(Cnt_CAT,Cnt_ACM,Cnt_Pkg,Cnt_FDP,05)/* Range for ENQUEUEs    */    
+cnt_typ.O = cnt_typ.O+cnt_typ.A+cnt_typ.I        /* Total of other types  */    
+Rng_Typ = max(cnt_typ.T,cnt_typ.J,cnt_typ.S,cnt_typ.O)/*Range for JobTypes*/    
+                                                                                
+/* Format display variables */                                                  
+UE = right(Cnt_END,3,'.')                                                       
+UQ = right(Cnt_QED,3,'.')                                                       
+UP = right(Cnt_PDM,3,'.')                                                       
+UL = right(Cnt_LNM,3,'.')                                                       
+UM = right(Cnt_FDM,3,'.')                                                       
+UN = right(Cnt_FDS,3,'.')                                                       
+UB = right(Cnt_BAT,3,'.')                                                       
+UW = right(Cnt_Web,3,'.')                                                       
+UZ = right(Cnt_PWR,3,'.')                                                       
+UF = right(Cnt_FDP,3,'.')                                                       
+US = right(Hwm_Spl,3,'.')                                                       
+UR = right(Cnt_RMT,3,'.')                                                       
+DC = right(Cnt_CAT,3,'.')                                                       
+DA = right(Cnt_ACM,3,'.')                                                       
+DP = right(Cnt_Pkg,3,'.')                                                       
+DT = right(Cnt_RET,3,'.')                                                       
+                                                                                
+DT = right(Cnt_typ.T,3,'.')                                                     
+DJ = right(Cnt_typ.J,3,'.')                                                     
+DX = right(Cnt_typ.S,3,'.')                                                     
+DO = right(Cnt_typ.O,3,'.')                                                     
+                                                                                
+/* Format display variables */                                                  
+BE = BarSt(Cnt_END,Rng_ISP,25,'-')          /* * Red    */                      
+BP = BarSt(Cnt_PDM,Rng_ISP,25,'-')          /* + Green  */                      
+BQ = BarSt(Cnt_QED,Rng_ISP,25,'=')          /* = Turq   */                      
+BL = BarSt(Cnt_LNM,Rng_ISP,25,'-')          /* . Yellow */                      
+BM = BarSt(Cnt_FDM,Rng_ISP,25,'-')          /* . Yellow */                      
+BN = BarSt(Cnt_FDS,Rng_ISP,25,'-')          /* . Yellow */                      
+BW = BarSt(Cnt_Web,Rng_ISP,25,'+')          /* 8 Pink   */                      
+BZ = BarSt(Cnt_Pwr,Rng_ISP,25,'.')          /* 0 White  */                      
+BB = BarSt(Cnt_Bat,Rng_ISP,25,'=')          /* - Blue   */                      
+BR = BarSt(Cnt_RMT,Rng_ISP,25,'=')          /* - Blue   */                      
+BS = BarSt(Hwm_Spl,Rng_ISP,25,'-')                                              
+                                                                                
+BC = BarSt(Cnt_Cat,Rng_EnQ,25,'-')                                              
+BA = BarSt(Cnt_ACM,Rng_EnQ,25,'=')                                              
+BK = BarSt(Cnt_Pkg,Rng_EnQ,25,'-')                                              
+BF = BarSt(Cnt_FDP,Rng_EnQ,25,'-')                                              
+                                                                                
+BT = BarSt(Cnt_typ.T,Rng_Typ,15,'+')                                            
+BJ = BarSt(Cnt_typ.J,Rng_Typ,15,'-')                                            
+BX = BarSt(Cnt_typ.S,Rng_Typ,15,'.')                                            
+BO = BarSt(Cnt_typ.O,Rng_Typ,15,'*')                                            
+                                                                                
+wrtln(" ")                                       /* line space            */    
+wrtSh("Totals and Statistics")                                                  
+wrtSh("Total Endevor DS Enqs."DT copies(' ',26) "Job Type breakdown")           
+wrtBr("  Elememnt Catlg Enqs."DC BC copies(' ',1) "TSO..."DT BT)                
+wrtBr("  ACM Root Enqueus...."DA BA copies(' ',1) "JOB..."DJ BJ)                
+wrtBr("  Package Enqueus....."DP BK copies(' ',1) "STC..."DX BX)                
+wrtBr("  FDP Enqueus........."UF BF copies(' ',1) "Other."DO BO)                
+wrtSh("Total Sessions Found.."Cnt_ISP+Cnt_Bat)                                  
+wrtBr("  Total Endevor......."UE BE)                                            
+wrtBr("  Total PDM..........."UP BP)                                            
+wrtBr("  Total Q/E..........."UQ BQ)                                            
+if CNT_LNM > 0 then                                                             
+wrtBr("  Total LongName......"UL BL)                                            
+if CNT_FDM > 0 then                                                             
+wrtBr("  Total FDP Menu......"UM BM)                                            
+if CNT_FDS > 0 then                                                             
+wrtBr("  Total FDP SnapMon..."UN BN)                                            
+wrtBr("  Total Batch Users..."UB BB)                                            
+if CNT_RMT > 0 then                                                             
+wrtBr("  Total Wait Remote..."UR BR)                                            
+wrtBr("  Total WebSvc/CMEW..."UW BW)                                            
+wrtBr("  Total Power Users..."UZ BZ  "(Power Users are those with...)")         
+wrtBr("Max Split Screens....."US BS  "(multiple Split-Screens active)")         
+                                                                                
+EnqDetails:                                                                     
+wrtln(" ")                                       /* line space            */    
+wrtHd("JobName  QName    RName" copies(' ',38) ,                                
+    "DISP  HOLD SCOPE  STEP GLOBL SYST RESV SRC")                               
+"TBTOP STABLE"||ZSCREEN    /* re-Position table at top           */             
+Lst_Usr = ""               /* Init Last User so we print 1st time*/             
+Do forever                 /* Loop through table and Print       */             
+  "TBSKIP STABLE"||ZSCREEN                                                      
+  skip_rc = rc                                                                  
+  if skip_rc /= 0 then leave                                                    
+  /* QnD Control Break on JobName... consider moving it into Shadow logic */    
+  /*     ToDo consider if sort order changed.. control should be on that c*/    
+  If ZENJOB /= Lst_Usr then /* Is this a new user?               */             
+     Lst_Usr = ZENJOB       /* Save it                           */             
+  else                      /* Otherwise...                      */             
+     ZENJOB  = " "          /* control break on Name             */             
+  wrtln(left(ZENJOB,8) left(ZENQNAME,8) Left(ZENRNAME,44) ,                     
+     left(ZENDISP,5) left(ZENHOLD,4) left(ZENSCOPE,6) ,                         
+     left(ZENSTEP,4) left(ZENGLOBL,5) ,                                         
+     left(ZENSYST,4) left(ZENRESV,4) left(SRC,1))                               
+End                                                                             
+/* wrtln(copies('-',105) Time())*/                /* write a trailer       */   
+queue ""                                          /* Null line to terminate */  
+NTITLE = "Endevor Activity -" time() Date()                                     
+"TBEND STABLE"||ZSCREEN    /* we're finished with table          */             
+address TSO "EXECIO * DISKW "DDNAME" (FINIS"      /* Write queued lines       */
+Tim_Tot = time('R')                     /* Total Time, now count waitg        */
+ZERRALRM = "NO"                         /* Don't sound alarm by default       */
+ZERRHM   = "*"                          /* Default help panel for messages    */
+ZERRTP   = "NOTIFY"                     /* Default to NOTIFY mode             */
+ZERRSM  = Cnt_Job 'Q:'Tim_Qry 'T:'Tim_Tot         /* Set a user message       */
+ZERRLM  = Cnt_Bat 'Batch jobs and' Cnt_Pkg 'Packages in flight,',               
+          Cnt_Job 'Sessions active.' Cnt_Sav 'of',/* sessions count           */
+          Cnt_Tab 'Enq Recs' Cnt_Lin 'Written'    /* ENQ and Recs             */
+"SETMSG MSG(ISRZ003)"                                                           
+"LMINIT DATAID(DDID) DDNAME("DDNAME")"                                          
+"VIEW DATAID(&DDID) PANEL(SNAPMONP)",             /* Invoke View           */   
+                   "MACRO(SNAPMONI)"              /* With IMacro           */   
+/* if the users requested refresh - do it all again...TODO                      
+   But possible performance optimization would be to leave file allocated       
+   and just etmpty it before re-building info                                   
+   */                                                                           
+"VGET (NDVRREFR) shared"                          /* user want to refresh? */   
+"Verase (NDVRREFR)"                               /* Clean up refresh flag */   
+"LMFREE DATAID(&DDID)"                                                          
+address TSO "FREE FILE("DDNAME")"                 /* Free the file we're done */
+if NDVRREFR = 'YES' then signal Refresh_stats                                   
+/* Release Active in Screen Enq */                                              
+FMNam= 'D' || Substr(FMNam,2)   /* change to DeQueue request     */             
+ADDRESS LINKMVS 'CTLIENQ FMNam'                                                 
+exit                                                                            
+/*                                                                              
+ZENJOB                                                                          
+ZENQNAME                                                                        
+ZENRNAME                                                                        
+ZENDISP                                                                         
+ZENHOLD                                                                         
+ZENSCOPE                                                                        
+ZENSTEP                                                                         
+ZENGLOBL                                                                        
+ZENSYST                                                                         
+ZENRESV                                                                         
+0    Table returned or data set written, but XSYS parameter was not             
+     specified and the system is running in STAR mode. The data returned        
+     may not reflect all ENQs on all systems.                                   
+2    Table returned or data set written.                                        
+4    Table returned but truncated due to limit.                                 
+8    No ENQs satisfy the request.                                               
+10   No ENQs satisfy the request, but XSYS parameter was not specified a        
+     the system is running in STAR mode. The data returned may not refle        
+*/                                                                              
+WrtLn: Procedure expose Cnt_Lin               /* Regular Line      */           
+  parse arg inword                                                              
+  Cnt_Lin = Cnt_Lin + 1                                                         
+  queue right(Cnt_lin,6,'0') || '00' || inword                                  
+return 0                                                                        
+WrtHd: Procedure expose Cnt_Lin               /* Heading Line      */           
+  parse arg inword                                                              
+  Cnt_Lin = Cnt_Lin + 1                                                         
+  queue right(Cnt_lin,6,'0') || '30' || inword                                  
+return 0                                                                        
+WrtSh: Procedure expose Cnt_Lin               /* Sub-head Line     */           
+  parse arg inword                                                              
+  Cnt_Lin = Cnt_Lin + 1                                                         
+  queue right(Cnt_lin,6,'0') || '50' || inword                                  
+return 0                                                                        
+WrtBr: Procedure expose Cnt_Lin               /* Bar Graph Line    */           
+  parse arg inword                                                              
+  Cnt_Lin = Cnt_Lin + 1                                                         
+  queue right(Cnt_lin,6,'0') || '70' || inword                                  
+return 0                                                                        
+WrtJs: Procedure expose Cnt_Lin               /* Job Summary Line  */           
+  parse arg inword                                                              
+  Cnt_Lin = Cnt_Lin + 1                                                         
+  queue right(Cnt_lin,6,'0') || '90' || inword                                  
+return 0                                                                        
+/* return a string with length indicated as percentage of the max */            
+BarSt:procedure                                                                 
+   parse arg InVal,MxVal,MxRng,InStr,PadChr                                     
+   if MxVal  = '' then MxVal  = 100                                             
+   if MxRng  = '' then MxRng  = 100                                             
+   if InStr  = '' then InStr  = '*'                                             
+   if PadChr = '' then PadChr = ' '                                             
+   if InVal  > MxVal then InVal = MxVal                                         
+   if MxVal  = 0  then MxVal  = 100                                             
+   if MxRng  = 0  then MxRng  = 100                                             
+   barLen = trunc(InVal*MxRng/MxVal)                                            
+   FilLen = MxRng-Barlen                                                        
+   outword = "|" || right(copies(InStr,BarLen),BarLen) ,                        
+                       || copies(PadChr,FilLen)                                 
+   return Outword                                                               
+/*                                                                              
+  Common Procedures CWORD and CWORDS                                            
+*/                                                                              
+CWords:procedure                                                                
+   parse arg inword                                                             
+   if length(inword) = 0 then return 0                                          
+   count = 1                                                                    
+   do i = 1 by 1 to length(inword)                                              
+     if substr(inword,i,1) == ',' then                                          
+        count = count + 1                                                       
+   end                                                                          
+   return count                                                                 
+                                                                                
+CWord:procedure                                                                 
+   parse arg inword, incount                                                    
+   sa= "inword:'" || inword || "' and count:" incount                           
+   outword = ''                                                                 
+   if incount = 0,                                                              
+    | incount > cwords(inword) then return outword                              
+   count = 1                                                                    
+   do i = 1 by 1 while count < incount                                          
+     if substr(inword,i,1) == ',' then                                          
+        count = count + 1                                                       
+   end                                                                          
+   do j = I by 1 until j >= length(inword)                                      
+     thisChr = substr(inword,j,1)                                               
+     if thisChr == ',' then leave                                               
+     outword = Outword||thischr                                                 
+   end                                                                          
+   return strip(outword)                                                        
+                                                                                
+/* Use status command to figure out what jobe a particular job is   */          
+JobTyp:procedure expose cnt_typ.   /* share the results with caller */          
+  cnt_exec = 0        /* init count of executing jobs               */          
+  job_type = 'U'      /* default to job type unknown                */          
+  parse arg jobnam                                                              
+  CALL OUTTRAP "out."                                                           
+  Address TSO "STATUS" JOBNAM                                                   
+  CALL OUTTRAP "OFF"                                                            
+  do i = 1 to out.0                                                             
+  parse UPPER var out.i "JOB "JOBNAM"("JOBNUM") "STATUS                         
+  status = strip(status)                                                        
+  /* count executing jobs */                                                    
+  if status == 'EXECUTING' then do                                              
+     Cnt_Exec = Cnt_Exec +1                                                     
+     job_type = left(jobnum,1)                                                  
+     cnt_typ.job_type = cnt_typ.job_type + 1                                    
+     end                                                                        
+  end                                                                           
+  if Job_type = 'U',           /* no longer executing? */                       
+   & JOBNAM > "" then          /* and we have at least one jobnam */            
+     job_type = left(jobnum,1) /* guess that */                                 
+  if Cnt_Exec > 1 then         /* more than one executing? */                   
+     job_type = job_type || cnt_exec /* yes - add it to return */               
+  return job_type              /* send result to caller */                      

@@ -1,0 +1,82 @@
+)ATTR DEFAULT(%+_)                                                              
+/*----------------------------------------------------------------------        
+/* Copyright (C) 2007 CA. All Rights Reserved.                                  
+/*                                                                              
+/* Note: The installation can force the Generate Processor Mode to              
+/* be BATCH by performing the following steps:                                  
+/*  1) Change the underscore attribute character (_) on the                     
+/*     'Generate Processor Mode' line to a horizontal bar (|)                   
+/*  2) Uncomment the assignment statement in the )INIT section and              
+/*     set the EEVPRMOD variable to B for BATCH mode or F for fore-             
+/*     ground mode.                                                             
+/* These steps will make the variable an unmodifiable value.                    
+/*                                                                              
+/*----------------------------------------------------------------------        
+ › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                        
+ | TYPE(OUTPUT) INTENS(LOW)                                                     
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)                                    
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)                        
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)                        
+ ! TYPE(&VARQETY )  CAPS(ON) INTENS(&VARQEIN ) PADC(_)                          
+ @ TYPE(&VARQETY )  CAPS(OFF) INTENS(&VARQEIN ) PADC(_)                         
+)BODY EXPAND(\\)                                                                
+%\-\ CA Endevor SCM Long-Name Support Option \-\                                
+%Command ===>_VARWKCMD                                                          
++                                                                               
++Element Options:                                                               
++ %blank+ Element list                                                          
++                                                                               
++Location:                         List Options:                                
++  ENVIRONMENT..!QEPEVNME+           BUILD USING MAP....._Z+(Y/N)               
++  SYSTEM.......!QEPSYS  +           RETURN FIRST FOUND.._Z+(Y/N)               
++  SUBSYSTEM....!QEPSBS  +                                                      
++  TYPE.........!QEPTYP  +                                                      
++  ELEMENT: (Case sensitive)                                                    
+%>@QEPELML                                                                     +
++                                                                               
++Action Options:                                                                
++  CCID..............^EEVCCID     +                                             
++  Comment...........`EEVCOMM                                 +                 
++  Processor Group..._EEVPRGRP+                                                 
++  Override Signout.._Z+(Y/N)                                                   
++  Gen in Place......_Z+(Y/N)                                                   
++  Move Sync........._Z+(Y/N)  With History.._Z+(Y/N)  Del From Elem.._Z+(Y/N)  
++                                                                               
+)INIT                                                                           
+  .ZVARS = '(EEVSRCHM EEVFFND EEVOOSGN EEVOCPBK EEVSYNC EEVMOVWH EEVF9NOD)'     
+  /*---------------------------------------------------------------*/           
+  /* The default value of the 'Generate Processor Mode' field can  */           
+  /* be set by uncommenting the following statement.               */           
+  /*---------------------------------------------------------------*/           
+  /* &EEVPRMOD = B        */                                                    
+  .HELP = LNDHE100                                                              
+  VGET (QEPEVNME QEPSYS QEPSBS QEPTYP QEPELML) PROFILE                          
+  VGET (EEVSRCHM EEVFFND) PROFILE                                               
+  VGET (EEVOCPBK EEVMOVWH) PROFILE                                              
+  &LIST2 = 'Y N'                                                                
+  &VARWKCMD = ' '                                                               
+  IF (&EEVSRCHM = ' ')                                                          
+    &EEVSRCHM = 'N'                                                             
+  IF (&EEVOOSGN = ' ')                                                          
+    &EEVOOSGN = 'N'                                                             
+  IF (&EEVOCPBK = ' ')                                                          
+    &EEVOCPBK = 'Y'                                                             
+  IF (&EEVSYNC  = ' ')                                                          
+    &EEVSYNC  = 'N'                                                             
+  IF (&EEVMOVWH = ' ')                                                          
+    &EEVMOVWH = 'N'                                                             
+  IF (&EEVF9NOD = ' ')                                                          
+    &EEVF9NOD = 'N'                                                             
+)PROC                                                                           
+  VER  (&EEVSRCHM,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VER  (&EEVOOSGN,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VER  (&EEVOCPBK,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VER  (&EEVSYNC,NB,LISTV,&LIST2,MSG=CIFV005)                                   
+  VER  (&EEVMOVWH,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VER  (&EEVF9NOD,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VPUT (EEVSRCHM EEVFFND) PROFILE                                               
+  VPUT (EEVCCID EEVCOMM) PROFILE                                                
+  VPUT (QEPELML) PROFILE                                                        
+  VPUT (QEPEVNME QEPSYS QEPSBS QEPTYP QEPELML) PROFILE                          
+  VPUT (EEVOCPBK EEVMOVWH) PROFILE                                              
+)END                                                                            

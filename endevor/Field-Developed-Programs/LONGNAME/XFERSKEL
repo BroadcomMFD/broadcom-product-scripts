@@ -1,0 +1,26 @@
+TRANSFER ELEMENT                                                                
+'&EEVETKEL'                                                                     
+    FROM ENVIRONMENT &EEVETKEN STAGE &EEVETKSI                                  
+          SYSTEM &EEVETKSY SUBSYSTEM &EEVETKSB TYPE &EEVETKTY                   
+    TO   ENVIRONMENT &EEVETKEN STAGE &EEVETKSI                                  
+          SYSTEM &EEVETKSY SUBSYSTEM &TOSUBSYS TYPE &EEVETKTY                   
+)SEL &EEVCOMM NE &Z                                                             
+    OPTIONS COMMENT "&EEVCOMM"                                                  
+)ENDSEL &EEVCOMM NE &Z                                                          
+)SEL &EEVCOMM EQ &Z                                                             
+    OPTIONS COMMENT "TRANSFER TO PROTECTED LIBRARY"                             
+)ENDSEL &EEVCOMM EQ &Z                                                          
+)SEL &EEVCCID NE &Z                                                             
+            CCID "&EEVCCID"                                                     
+)ENDSEL &EEVCCID NE &Z                                                          
+            WITH HISTORY BYPASS ELEMENT DELETE SYN                              
+)SEL &SIGNOUT2 NE &Z                                                            
+            SIGNOUT TO &SIGNOUT2                                                
+)ENDSEL &SIGNOUT2 NE &Z                                                         
+)SEL &SIGNOUT2 EQ &Z                                                            
+            SIGNOUT TO &ZUSER                                                   
+)ENDSEL &SIGNOUT2 EQ &Z                                                         
+)SEL &EEVOOSGN EQ Y                                                             
+            OVERRIDE SIGNOUT                                                    
+)ENDSEL &EEVOOSGN EQ Y                                                          
+    .                                                                           

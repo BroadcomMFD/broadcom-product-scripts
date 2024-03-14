@@ -1,0 +1,99 @@
+ /* REXX   */                                                                   
+/* THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+   "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+   FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+   ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+   CORRECTED.                                                                   
+*/                                                                              
+   /* WRITTEN BY DAN WALTHER */                                         00257000
+  TRACE  O                                                                      
+                                                                                
+  ADDRESS ISPEXEC                                                               
+     "VGET (ZSCREEN) SHARED"                                                    
+  ADDRESS ISPEXEC                                                               
+     "TBSTATS EN"ZSCREEN"IE250 STATUS1(STATUS1) STATUS2(STATUS2)"               
+                                                                                
+/* for table status...                                             */           
+/*  1 = table exists in the table input library chain              */           
+/*  2 = table does not exist in the table input library chain      */           
+/*  3 = table input library is not allocated.                      */           
+/*                                                                 */           
+/*  1 = table is not open in this logical screen                   */           
+/*  2 = table is open in NOWRITE mode in this logical screen       */           
+/*  3 = table is open in WRITE mode in this logical screen         */           
+/*  4 = table is open in SHARED NOWRITE mode in this logical screen*/           
+/*  5 = table is open in SHARED WRITE mode in this logical screen. */           
+/*                                                                 */           
+     IF STATUS2 /= 3 THEN,                                                      
+        do                                                                      
+        say "Must invoke ARCHIVES from an",                                     
+            "Element list Screen (ENDLONG)" ;                                   
+        exit ;                                                                  
+        end;                                                                    
+                                                                                
+  "TBQUERY EN"ZSCREEN"IE250 KEYS(KEYLIST) NAMES(VARLIST) ROWNUM(ROWNUM)"        
+  IF RC > 0 THEN EXIT                                                           
+                                                                                
+  VARWKCMD =  "" ;                                                              
+  "VGET (VNBF9NOD C1SISOFR) PROFILE "                                           
+                                                                                
+  "DISPLAY  PANEL(C1SFB00L) "                                                   
+  Panel_RC = RC;                                                                
+  "VPUT (VNBF9NOD C1SISOFR) PROFILE "                                           
+  if Panel_Rc > 0 then exit                                                     
+  ARCHNAME  = "????????" ;                                                      
+  IF LENGTH(TOFILE1) > 2 THEN,                                                  
+     ARCHNAME = WORD(SUBSTR(TOFILE1,3),1);                                      
+                                                                                
+  Call Show_JobCard ;                                                           
+                                                                                
+  "TBTOP   EN"ZSCREEN"IE250 "                                                   
+  "VGET (EEVCCID EEVCOMM) PROFILE "                                             
+  "FTOPEN TEMP"                                                                 
+  "FTINCL ENDEVORB"                                                             
+                                                                                
+  Do row = 1 to rownum                                                          
+     "TBSKIP EN"ZSCREEN"IE250 "                                                 
+     IF LENGTH(EEVETKSB) < LENGTH(QEPSBS) &,                                    
+        EEVOCPBK = "N"  THEN,                                                   
+           DO                                                                   
+           EEVETKSB = OVERLAY(EEVETKSB,"######") ;                              
+           EEVETKSB = OVERLAY(EEVETKSB,QEPSBS)                                  
+           END                                                                  
+     "FTINCL ARCHSKEL"                                                          
+     IF BUMPJOB = 'Y' THEN,                                                     
+        DO                                                                      
+        ADDRESS ISPEXEC "SELECT CMD(%XLSLBUMP C1BJC1 PROFILE)"                  
+        "VGET (C1BJC1) PROFILE "                                                
+        END                                                                     
+  end; /* do row = 1 to rownum */                                               
+                                                                                
+  "FTINCL ARCHDDNM"                                                             
+                                                                                
+  "FTCLOSE "                                                                    
+  "VGET (ZUSER ZTEMPF ZTEMPN) ASIS" ;                                           
+   DEBUG = 'NAW' ;                                                              
+   DEBUG = 'YES' ;                                                              
+   X = OUTTRAP("OFF")                                                           
+   IF DEBUG = 'YES' THEN,                                                       
+      DO                                                                        
+      ADDRESS ISPEXEC "LMINIT DATAID(DDID) DDNAME(&ZTEMPN)"                     
+      ADDRESS ISPEXEC "EDIT DATAID(&DDID)"                                      
+      ADDRESS ISPEXEC "LMFREE DATAID(&DDID)"                                    
+      END;                                                                      
+   ELSE,                                                                        
+      DO                                                                        
+      ADDRESS TSO "SUBMIT '"ZTEMPF"'" ;                                         
+      END;                                                                      
+                                                                                
+  exit                                                                          
+                                                                                
+Show_JobCard:                                                                   
+                                                                                
+   ADDRESS ISPEXEC "VGET (C1BJC1 C1BJC2 C1BJC3 C1BJC4) PROFILE "                
+   ADDRESS ISPEXEC "DISPLAY PANEL(ENDIE700) "                                   
+   JobCard_RC = RC                                                              
+   ADDRESS ISPEXEC "VPUT (C1BJC1 C1BJC2 C1BJC3 C1BJC4) PROFILE "                
+                                                                                
+   RETURN ;                                                                     
+                                                                                

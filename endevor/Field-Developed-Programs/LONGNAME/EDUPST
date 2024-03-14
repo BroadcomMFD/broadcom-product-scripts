@@ -1,0 +1,83 @@
+)ATTR DEFAULT(^`~)                                                              
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY EXPAND (\\) CMD(ZCMD)                                                     
+^TUTORIAL \-\ Endevor Duplicates (EDUPs) \-\ TUTORIAL                           
+^Command ===>~ZCMD                                                             `
+`                                                                               
+`The^Endevor Duplicates filter^(EDups)`works like the^EOnly`and^EFind`          
+`utilities filtering the selection list according to the options you            
+`specify.                                                                       
+çSAREA38                                                                       ç
+)AREA SAREA38                                                                   
+^*Find All Duplicates - Option "="                                              
+`   Each element that has a duplicate element name that is NOT just the         
+`   same elment further up the map is listed                                    
+`                                                                               
+^*Find All Duplicates (Including up the map) - Option "+"                       
+`   Each element that has a duplicate element name that even if it is           
+`   found further up the map is listed                                          
+`                                                                               
+^*Find All Unique - Option "-"                                                  
+`   Only elements that have NO duplicates will be listed.                       
+`   Note: More elements than expected may be returned if Search Map is          
+`         not used, or First Found is set to Yes.                               
+`                                                                               
+`                                                                               
+^*Restore Selection List <blank>                                                
+`   Enter the EDUPs command with NO ARGUMENTS to restore the previous           
+`   selection screen to the state is was before filtering using EDUP.           
+`                                                                               
+`                                                                               
+^*Info message Sample and Key                                                   
+`   For either of the Duplicate options ('-' or '+') the elelment message       
+`   will indicate the group of elements found and a status as in the            
+`   example snipit below:                                                       
+`                                                                               
+`  ^Element    Message    Type     ProcGrp  Environ  S System   Subsys          
+`   ---------- ---------- -------- -------- -------- - -------- --------        
+`   ENDIE11L  ^-+ SBTGE# `PANELS   LIVE     SMPLPROD E CATSNDVR LONGNAME        
+`   ENDIE11L  ^ + ===p=# `PANELS   *NOPROC* SMPLPROD P CATSNDVR LONGNAME        
+`   ENDIE110  ^-+ SBTGE# `PANELS   *NOPROC* SMPLPROD E CATSNDVR ESRCHFOR        
+`   ENDIE110  ^ | =b=p== `PANELS   LIVE     SMPLPROD E CATSNDVR LONGNAME        
+`   ENDIE110  ^ | =b==== `PANELS   *NOPROC* SMPLPROD E CATSNDVR WIDESCRN        
+`   ENDIE110  ^ | =b===# `PANELS   *NOPROC* SMPLPROD P CATSNDVR ENDEVOR         
+`   ENDIE110  ^ | =b===# `PANELS   *NOPROC* SMPLPROD P CATSNDVR NOTUSED         
+`   ENDIE110  ^ + =b===# `PANELS   *NOPROC* SMPLPROD P CATSNDVR SANDBOX         
+`   ENDIE250  ^-+ SBTGE# `PANELS   *NOPROC* SMPLPROD E CATSNDVR ESRCHFOR        
+`   ENDIE250  ^ | =b==== `PANELS   *NOPROC* SMPLPROD E CATSNDVR NOTUSED         
+`   ENDIE250  ^ | =b==== `PANELS   *NOPROC* SMPLPROD E CATSNDVR WIDESCRN        
+`   ENDIE250  ^ + =b===# `PANELS   *NOPROC* SMPLPROD P CATSNDVR NOTUSED         
+`                                                                               
+`   In this sample, the start of each GROUP of related elements is indicated    
+`   by a Header^-+ SBTGE#` with continued rows of that group marked with^|`     
+`   and the last member marked with a^+` prefix - so we see here the first      
+`   group has two elements, followed by a group of 6 elements and so on.        
+`                                                                               
+`   Following the prefix, on the continued rows there is a set of flags         
+`   indicating which (if any) fields are different from the first entry or      
+`   an^=`if it's the same as follows:                                           
+`                                                                               
+`    ^s  `If the System name is different                                       
+`    ^b  `If the Sub-System name is different                                   
+`    ^t  `If the Type name is different                                         
+`    ^p  `If the Processor Group is different                                   
+`    ^e  `If the Environment is different (only seen when using option ^+`).    
+`    ^#  `If the Stage number is different         (ditto).                     
+`    ^=  `If the corresponding field type is the same                           
+`                                                                               
+^Sample Use Cases                                                               
+`   You might use^EDUPs -`in a case where you expect that for every program     
+`   element there is a DB2BIND or LINKINC element of the same name.  If there   
+`   any "unpaired" elements they will appear as 'unique'.                       
+`                                                                               
+`   Or if you expect that while multiple elements may have the same name/type   
+`   only one can use a Processor Group of "LIVE".  In this case use^EDUP +`     
+`   and either visually inspect that only one element per group has PG:LIVE or  
+`   use EFind or EOnly to filter by Processor Group and compare the counts...   
+`                                                                               
+`   You can also use^EDUPs =`to get a quick picture of parallel development     
+`   activity when using Sandboxes.                                              
+`                                                                               
+`\ \ (^ENTER`to continue,^END`to return) \ \                                    
+)PROC                                                                           
+)END                                                                            

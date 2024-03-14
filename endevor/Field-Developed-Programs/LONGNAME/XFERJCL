@@ -1,0 +1,301 @@
+)DEFAULT )&?!\|^                                                                
+)SEL &C1BJC1 NE &Z                                                              
+&C1BJC1                                                                         
+)ENDSEL                                                                         
+)SEL &C1BJC2 NE &Z                                                              
+&C1BJC2                                                                         
+)ENDSEL                                                                         
+)SEL &C1BJC3 NE &Z                                                              
+&C1BJC3                                                                         
+)ENDSEL                                                                         
+)SEL &C1BJC4 NE &Z                                                              
+&C1BJC4                                                                         
+)ENDSEL                                                                         
+//*--------------------------------------------------------------------*        
+//*  XFER to &TOSUBSYS from &FROMSUBS                                           
+//*--------------------------------------------------------------------*        
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to locate inventory                         
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                      XFERJCL              
+//         PARM='CONCALL,DDN:CONLIB,BC1PCSV0'                                   
+)IM SCMM@LIB                                                                    
+//SYSEXEC  DD  DISP=SHR,DSN=&HSYSEXEC                                           
+)SEL &ACTION EQ CLEANUP                                                         
+//BSTIPT01 DD DISP=SHR,                                                         
+//         DSN=&ELMTABLE                                                        
+)ENDSEL &ACTION EQ CLEANUP                                                      
+)SEL &ACTION NE CLEANUP                                                         
+//BSTIPT01 DD DISP=(OLD,DELETE),                                                
+//         DSN=&ELMTABLE                                                        
+)ENDSEL &ACTION NE CLEANUP                                                      
+//CSVOUTPT DD DSN=&&&&CSVFILE,                                                  
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+)SEL &ACTION NE CLEANUP                                                         
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the API call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K,COND=(4,EQ,STEP1) XFERJCL              
+//SYSPRINT DD SYSOUT=*                           MESSAGES                       
+//SYSUT1   DD  DSN=&&&&CSVFILE,DISP=(OLD,PASS)                                  
+//SYSUT2   DD SYSOUT=*                           OUTPUT FILE                    
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+)ENDSEL &ACTION NE CLEANUP                                                      
+//*--------------------------------------------------------------------*        
+//*   SCANTARG - Scan the API data, create Endevor SCL                          
+//*--------------------------------------------------------------------         
+//SCANTARG EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST',       XFERJCL              
+//          COND=(4,EQ,STEP1)                                                   
+//TABLE    DD  DSN=&&&&CSVFILE,DISP=(OLD,DELETE)                                
+)SEL &ACTION EQ CLEANUP                                                         
+//DELETES  DD DISP=OLD,                                                         
+//         DSN=&ELMTABLE                                                        
+//PARMLIST DD *                                                                 
+ HEADING  FINDINGS OPTIONSR 1                                                   
+ REPORT   FINDINGS OPTIONSR A                                                   
+ DELEMODL DELETES  OPTIONSD A                                                   
+//DELEMODL DD *                                                                 
+  DELETE ELEMENT                                                                
+'&&FULL_ELM_NAME'                                                               
+     FROM ENVIRONMENT &&ENV_NAME                                                
+          STAGE       &&STG_ID                                                  
+          SYSTEM      &&SYS_NAME                                                
+          SUBSYSTEM   &&SBS_NAME                                                
+          TYPE        &&TYPE_NAME                                               
+     OPTIONS                                                                    
+          CCID  'CLEANUP' COMMENT 'XFER CLEANUP'                                
+                OVERRIDE SIGNOUT                                                
+     .                                                                          
+//OPTIONSD DD *                                                                 
+  IF $row# < 1 then $SkipRow = 'Y'                                              
+  If FULL_ELM_NAME = 'FULL ELM NAME' then $SkipRow = 'Y'                        
+  if SBS_NAME_@F@ /= '&FROMSUBS' then $SkipRow = 'Y'                            
+  $my_rc = 1                                                                    
+//*                                                                             
+)ENDSEL &ACTION EQ CLEANUP                                                      
+)SEL &ACTION NE CLEANUP                                                         
+//PARMLIST DD *                                                                 
+ HEADING  FINDINGS OPTIONSR 1                                                   
+ REPORT   FINDINGS OPTIONSR A                                                   
+ COLIMODL COLISION OPTIONSC A                                                   
+//OPTIONSC DD *                                                                 
+  IF $row# < 1 then $SkipRow = 'Y'                                              
+  if SBS_NAME    /= '&TOSUBSYS' then $SkipRow = 'Y'                             
+  if Substr(SBS_NAME_@F@,1,1) = ' ' then $SkipRow = 'Y'                         
+  if SBS_NAME_@F@ = '&FROMSUBS' then $SkipRow = 'Y'                             
+  $my_rc = 8                                                                    
+//COLIMODL DD *                                                                 
+Finding &&FULL_ELM_NAME at &TOSUBSYS sent from another location :               
+-> Sent from ---- &&SBS_NAME_@F@ - &FROMSUBS is your sending location           
+   Userid  ------ &&LAST_ACT_USRID                                              
+   Environment--- &&ENV_NAME_@F@                                                
+   System-------- &&SYS_NAME_@F@                                                
+   Type---------- &&TYPE_NAME_@F@                                               
+//COLISION DD SYSOUT=*                                                          
+)ENDSEL &ACTION NE CLEANUP                                                      
+//HEADING  DD *                                                                 
+                                                                                
+Finding these additional locations for your selected elements:                  
+* Element name                                                                  
+*   Type-Nme Environ- Stg Subsystem FromSub                                     
+//ELMBREAK DD *                                                                 
+  --------   --------  -  --------  --------                                    
+//REPORT   DD *                                                                 
+  &&FULL_ELM_NAME                                                               
+    &&TYPE_NAME &&ENV_NAME  &&STG_ID  &&SBS_NAME  &&SBS_FROM                    
+//OPTIONSR DD *                                                                 
+  $my_rc = 4                                                                    
+  IF $row# < 1 then $SkipRow = 'Y'                                              
+  If FULL_ELM_NAME = 'FULL ELM NAME' then x = BuildFromMODEL(ELMBREAK)          
+  If FULL_ELM_NAME = 'FULL ELM NAME' then $SkipRow = 'Y'                        
+  FULL_ELM_NAME = strip(FULL_ELM_NAME) ; /* EOC don't truncate */               
+  TYPE_NAME  = Left(TYPE_NAME,8) ;                                              
+  ENV_NAME   = Left(ENV_NAME,8) ;                                               
+  STG_ID     = Left(STG_ID,1) ;                                                 
+  SBS_NAME   = Left(SBS_NAME,8) ;                                               
+  SBS_FROM   = Left(SBS_NAME_@F@,8);                                            
+  $my_rc = 0                                                                    
+//FINDINGS DD SYSOUT=*                                                          
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSEXEC  DD  DISP=SHR,DSN=&HSYSEXEC                                           
+)SEL &ACTION EQ CLEANUP                                                         
+//*--------------------------------------------------------------------*        
+//*- Cleanup former XFER TRANSFERs     --------------------------------*        
+//*--------------------------------------------------------------------*        
+//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,REGION=64M,       XFERJCL              
+//  PARM='C1BM3000',COND=((1,NE,SCANTARG),(4,LT))                               
+)IM SCMM@LIB                                                                    
+//SYSEXEC  DD  DISP=SHR,DSN=&HSYSEXEC                                           
+//SORTWK01 DD UNIT=,SPACE=(CYL,(1,2))                                           
+//SORTWK02 DD UNIT=,SPACE=(CYL,(1,2))                                           
+//SORTWK03 DD UNIT=,SPACE=(CYL,(1,2))                                           
+//C1TPDD01 DD UNIT=,SPACE=(CYL,5),                                              
+//            DCB=(RECFM=VB,LRECL=260)                                          
+//C1TPDD02 DD UNIT=,SPACE=(CYL,5),                                              
+//            DCB=(RECFM=VB,LRECL=260)                                          
+//SYSEXEC  DD  DISP=SHR,DSN=&HSYSEXEC                                           
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//C1PRINT  DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=133)                                
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSOUT   DD SYSOUT=*                                                          
+//BSTIPT01 DD DISP=(OLD,DELETE),                                                
+//         DSN=&ELMTABLE                                                        
+)SEL &PDVINCJC = Y                                                              
+//*-------------------------------------------------------------------*         
+//* ADDITIONAL INCLUDED JCL                                           *         
+//*-------------------------------------------------------------------*         
+)SEL &PDVDD01 NE &Z                                                             
+&PDVDD01                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD02 NE &Z                                                             
+&PDVDD02                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD03 NE &Z                                                             
+&PDVDD03                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD04 NE &Z                                                             
+&PDVDD04                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD05 NE &Z                                                             
+&PDVDD05                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD06 NE &Z                                                             
+&PDVDD06                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD07 NE &Z                                                             
+&PDVDD07                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD08 NE &Z                                                             
+&PDVDD08                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD09 NE &Z                                                             
+&PDVDD09                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD10 NE &Z                                                             
+&PDVDD10                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD11 NE &Z                                                             
+&PDVDD11                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD12 NE &Z                                                             
+&PDVDD12                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD13 NE &Z                                                             
+&PDVDD13                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD14 NE &Z                                                             
+&PDVDD14                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD15 NE &Z                                                             
+&PDVDD15                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD16 NE &Z                                                             
+&PDVDD16                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD17 NE &Z                                                             
+&PDVDD17                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD18 NE &Z                                                             
+&PDVDD18                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD19 NE &Z                                                             
+&PDVDD19                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD20 NE &Z                                                             
+&PDVDD20                                                                        
+)ENDSEL                                                                         
+)ENDSEL &PDVINCJC = Y                                                           
+)ENDSEL &ACTION EQ CLEANUP                                                      
+//*--------------------------------------------------------------------*        
+)SEL &ACTION EQ TRANSFER                                                        
+//*--------------------------------------------------------------------*        
+//*- Cast and Execute the XFER package---------------------------------*        
+//*--------------------------------------------------------------------*        
+//ENBP1000 EXEC PGM=NDVRC1,COND=(4,LT),                    XFERJCL              
+//             PARM=ENBP1000,                                                   
+//             DYNAMNBR=1500,                                                   
+//             REGION=4096K                                                     
+)IM SCMM@LIB                                                                    
+//SYSEXEC  DD DISP=SHR,DSN=&HSYSEXEC                                            
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//C1MSGS1  DD SYSOUT=*                                                          
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//ENPSCLIN DD DISP=SHR,DSN=&PDVSCLDS                                            
+)SEL &PDVINCJC = Y                                                              
+//*-------------------------------------------------------------------*         
+//* ADDITIONAL INCLUDED JCL                                           *         
+//*-------------------------------------------------------------------*         
+)SEL &PDVDD01 NE &Z                                                             
+&PDVDD01                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD02 NE &Z                                                             
+&PDVDD02                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD03 NE &Z                                                             
+&PDVDD03                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD04 NE &Z                                                             
+&PDVDD04                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD05 NE &Z                                                             
+&PDVDD05                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD06 NE &Z                                                             
+&PDVDD06                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD07 NE &Z                                                             
+&PDVDD07                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD08 NE &Z                                                             
+&PDVDD08                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD09 NE &Z                                                             
+&PDVDD09                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD10 NE &Z                                                             
+&PDVDD10                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD11 NE &Z                                                             
+&PDVDD11                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD12 NE &Z                                                             
+&PDVDD12                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD13 NE &Z                                                             
+&PDVDD13                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD14 NE &Z                                                             
+&PDVDD14                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD15 NE &Z                                                             
+&PDVDD15                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD16 NE &Z                                                             
+&PDVDD16                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD17 NE &Z                                                             
+&PDVDD17                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD18 NE &Z                                                             
+&PDVDD18                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD19 NE &Z                                                             
+&PDVDD19                                                                        
+)ENDSEL                                                                         
+)SEL &PDVDD20 NE &Z                                                             
+&PDVDD20                                                                        
+)ENDSEL                                                                         
+)ENDSEL                                                                         
+)ENDSEL &ACTION NE REPORT                                                       
+//* XFERJCL  WAS GENERATED BY &ZUSER ON &ZDATE AT &ZTIME                        

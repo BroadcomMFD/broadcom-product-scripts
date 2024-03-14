@@ -1,0 +1,237 @@
+)PANEL KEYLIST(ISRSPBC,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)            /* ISRBROBA - ENGLISH - 7.1 */        
+ 29 TYPE(AB)                                                                    
+ 04 TYPE(ABSL) GE(ON)                                                           
+ 05 TYPE(PT)                                                                    
+ 08 TYPE(PS)                                                                    
+ 09 TYPE(FP)                                                                    
+ 0A TYPE(NT)                                                                    
+ 13 TYPE(NEF) PADC(USER)                                                        
+ 16 TYPE(VOI) PADC(USER)                                                        
+ 26 AREA(DYNAMIC) EXTEND(ON) SCROLL(ON)                                         
+ 01 TYPE(DATAOUT) INTENS(LOW)                                                   
+ 02 TYPE(DATAOUT)                                                               
+ 0B TYPE(DATAOUT) FORMAT(DBCS) OUTLINE(L)                                       
+ 0C TYPE(DATAOUT) FORMAT(EBCDIC) OUTLINE(L)                                     
+ 0D TYPE(DATAOUT) FORMAT(&MIXED) OUTLINE(L)                                     
+ 10 TYPE(DATAOUT) INTENS(LOW) FORMAT(DBCS) OUTLINE(L)                           
+ 11 TYPE(DATAOUT) INTENS(LOW) FORMAT(EBCDIC) OUTLINE(L)                         
+ 12 TYPE(DATAOUT) INTENS(LOW) FORMAT(&MIXED) OUTLINE(L)                         
+/* Merged Dynamic Attribute Character codes for EndvHigh & Edit HiLite */       
+ U  TYPE(CHAR)               HILITE(USCORE)                                     
+/* The following lines only needed for Edit panels */                           
+/*C TYPE(CHAR) COLOR(&ZCC)   HILITE(&ZHC)*/                                     
+/*D TYPE(CHAR) COLOR(&ZCD)   HILITE(&ZHD)*/                                     
+/*F TYPE(CHAR) COLOR(&ZCF)   HILITE(&ZHF)*/                                     
+/*K TYPE(CHAR) COLOR(&ZCK)   HILITE(&ZHK)*/                                     
+/*O TYPE(CHAR) COLOR(&ZCO)   HILITE(&ZHO)*/                                     
+/*Q TYPE(CHAR) COLOR(&ZCQ)   HILITE(&ZHQ)*/                                     
+/*S TYPE(CHAR) COLOR(&ZCS)   HILITE(&ZHS)*/                                     
+/*V TYPE(CHAR) COLOR(&ZCV)   HILITE(&ZHV)*/                                     
+ B  TYPE(CHAR) COLOR(BLUE)                                                      
+ A  TYPE(CHAR) COLOR(BLUE)   HILITE(REVERSE)                                    
+ ?  TYPE(CHAR) COLOR(BLUE)   HILITE(USCORE)                                     
+ G  TYPE(CHAR) COLOR(GREEN)                                                     
+ H  TYPE(CHAR) COLOR(GREEN)  HILITE(REVERSE)                                    
+ P  TYPE(CHAR) COLOR(PINK)                                                      
+ Z  TYPE(CHAR) COLOR(PINK)   HILITE(REVERSE)                                    
+ L  TYPE(CHAR) COLOR(RED)                                                       
+ R  TYPE(CHAR) COLOR(RED)                                                       
+ E  TYPE(CHAR) COLOR(RED)    HILITE(REVERSE)                                    
+ T  TYPE(CHAR) COLOR(TURQ)                                                      
+ N  TYPE(CHAR) COLOR(TURQ)   HILITE(REVERSE)                                    
+ W  TYPE(CHAR) COLOR(WHITE)                                                     
+ X  TYPE(CHAR) COLOR(WHITE)  HILITE(REVERSE)                                    
+ Y  TYPE(CHAR) COLOR(YELLOW)                                                    
+ M  TYPE(CHAR) COLOR(YELLOW) HILITE(REVERSE)                                    
+ ð  TYPE(NEF)  CAPS(ON) PADC(USER)                                              
+)ABC DESC('Menu') MNEM(1)                                                       
+PDC DESC('Settings') UNAVAIL(ZPM1) MNEM(1) ACC(CTRL+S)                          
+ ACTION RUN(ISRROUTE) PARM('SET')                                               
+PDC DESC('View') UNAVAIL(ZPM2) MNEM(1) ACC(CTRL+V)                              
+ ACTION RUN(ISRROUTE) PARM('BR1')                                               
+PDC DESC('Edit') UNAVAIL(ZPM3) MNEM(1) ACC(CTRL+E)                              
+ ACTION RUN(ISRROUTE) PARM('ED1')                                               
+PDC DESC('ISPF Command Shell') UNAVAIL(ZPM4) MNEM(6) ACC(CTRL+C)                
+ ACTION RUN(ISRROUTE) PARM('C1')                                                
+PDC DESC('Dialog Test...') UNAVAIL(ZPM5) MNEM(8) ACC(CTRL+T)                    
+ ACTION RUN(ISRROUTE) PARM('DAL')                                               
+PDC DESC('Other IBM Products...') UNAVAIL(ZPM6) MNEM(1) ACC(CTRL+O)             
+ ACTION RUN(ISRROUTE) PARM('OIB')                                               
+PDC DESC('SCLM') UNAVAIL(ZPM7) MNEM(3) ACC(CTRL+L)                              
+ ACTION RUN(ISRROUTE) PARM('SCL')                                               
+PDC DESC('ISPF Workplace') UNAVAIL(ZPM8) MNEM(6) ACC(CTRL+W)                    
+ ACTION RUN(ISRROUTE) PARM('WRK')                                               
+PDC DESC('Status Area...') UNAVAIL(ZPMS) MNEM(8) ACC(CTRL+A)                    
+ ACTION RUN(ISRROUTE) PARM('SAM')                                               
+PDC DESC('Exit') MNEM(2) PDSEP(ON) ACC(CTRL+X) ACTION RUN(EXIT)                 
+)ABCINIT                                                                        
+.ZVARS=ISR@OPT                                                                  
+)ABC DESC('Utilities') MNEM(1)                                                  
+PDC DESC('Library') UNAVAIL(ZUT1) MNEM(1) ACC(ALT+1)                            
+ ACTION RUN(ISRROUTE) PARM('U1')                                                
+PDC DESC('Data set') UNAVAIL(ZUT2) MNEM(1) ACC(ALT+2)                           
+ ACTION RUN(ISRROUTE) PARM('U2')                                                
+PDC DESC('Move/Copy') UNAVAIL(ZUT3) MNEM(1) ACC(ALT+3)                          
+ ACTION RUN(ISRROUTE) PARM('U3')                                                
+PDC DESC('Data Set List') UNAVAIL(ZUT4) MNEM(2) ACC(ALT+4)                      
+ ACTION RUN(ISRROUTE) PARM('U4')                                                
+PDC DESC('Reset Statistics') UNAVAIL(ZUT5) MNEM(5) ACC(ALT+5)                   
+ ACTION RUN(ISRROUTE) PARM('U5')                                                
+PDC DESC('Hardcopy') UNAVAIL(ZUT6) MNEM(1) ACC(ALT+6)                           
+ ACTION RUN(ISRROUTE) PARM('U6')                                                
+PDC DESC('Download...') UNAVAIL(ZUTDT) MNEM(2) ACC(ALT+7)                       
+ ACTION RUN(ISRROUTE) PARM('UDT')                                               
+PDC DESC('Outlist') UNAVAIL(ZUT7) MNEM(2) ACC(ALT+8)                            
+ ACTION RUN(ISRROUTE) PARM('U8')                                                
+PDC DESC('Commands...') UNAVAIL(ZUT8) MNEM(1) ACC(ALT+9)                        
+ ACTION RUN(ISRROUTE) PARM('U9')                                                
+PDC DESC('Reserved') UNAVAIL(ZUT9) MNEM(6) ACTION RUN(ISRROUTE) PARM('U10')     
+PDC DESC('Format') UNAVAIL(ZUT10) MNEM(1) ACC(ALT+F1)                           
+ ACTION RUN(ISRROUTE) PARM('U11')                                               
+PDC DESC('SuperC') UNAVAIL(ZUT11) MNEM(1) PDSEP(ON) ACC(CTRL+F2)                
+ ACTION RUN(ISRROUTE) PARM('U12')                                               
+PDC DESC('SuperCE') UNAVAIL(ZUT12) MNEM(3) ACC(CTRL+F3)                         
+ ACTION RUN(ISRROUTE) PARM('U13')                                               
+PDC DESC('Search-For') UNAVAIL(ZUT13) MNEM(2) ACC(CTRL+F4)                      
+ ACTION RUN(ISRROUTE) PARM('U14')                                               
+PDC DESC('Search-ForE') UNAVAIL(ZUT14) MNEM(4) ACC(CTRL+F5)                     
+ ACTION RUN(ISRROUTE) PARM('U15')                                               
+PDC DESC('Table Utility') UNAVAIL(ZUT15) MNEM(3) ACC(CTRL+F6)                   
+ ACTION RUN(ISRROUTE) PARM('U16')                                               
+PDC DESC('Directory List') UNAVAIL(ZUT16) MNEM(2) ACC(CTRL+F7)                  
+ ACTION RUN(ISRROUTE) PARM('U17')                                               
+)ABCINIT                                                                        
+.ZVARS=PDFUTIL                                                                  
+     &zut9 = '1'                                                                
+)ABC DESC('Compilers') MNEM(1)                                                  
+PDC DESC('Foreground Compilers') MNEM(1) ACTION RUN(ISRROUTE) PARM('FGD')       
+PDC DESC('Background Compilers') MNEM(1) ACTION RUN(ISRROUTE) PARM('BKG')       
+PDC DESC('ISPPREP Panel Utility...') MNEM(1) ACTION RUN(ISPPREP)                
+PDC DESC('DTL Compiler...') MNEM(1) ACTION RUN(ISPDTLC)                         
+)ABCINIT                                                                        
+.ZVARS=ISRLANG                                                                  
+)ABC DESC('Help') MNEM(1)                                                       
+PDC DESC('General introduction') MNEM(1) ACTION RUN(TUTOR) PARM('ISR1B001')     
+PDC DESC('Display screen format') MNEM(1) ACTION RUN(TUTOR) PARM('ISR14000')    
+PDC DESC('Scrolling data') MNEM(1) ACTION RUN(TUTOR) PARM('ISR15000')           
+PDC DESC('Assigning labels') MNEM(1) ACTION RUN(TUTOR) PARM('ISR16000')         
+PDC DESC('Browse commands') MNEM(1) ACTION RUN(TUTOR) PARM('ISR17000')          
+PDC DESC('Terminating Browse') MNEM(1) ACTION RUN(TUTOR) PARM('ISR18000')       
+PDC DESC('Appendices') MNEM(2) ACTION RUN(TUTOR) PARM('ISR00004')               
+PDC DESC('Index') MNEM(1) ACTION RUN(TUTOR) PARM('ISR91000')                    
+)ABCINIT                                                                        
+.ZVARS=BROHELP                                                                  
+)BODY  EXPAND(//) WIDTH(&ZWIDTH)  CMD(ZCMD)                                     
+ Menu Utilities Compilers Help                                            
+--/-/------------------------------------------------------------------------- 
+Z      Z                            / /          LineZ         ColZ      
+Command ===>Z/ /                                            Scroll ===>Z   
+Description: &VPHCOMM / /                                  Find Msg<<<>>>
+ZDATA,SHADOW/ /                                                               
+/ /                                                                           
+/ /                                                                           
+)INIT                                                                           
+/* ARS = '(ZTITLB ZLINEX ZCOLUMS ZCMD ZSCBR)' */                                
+.ZVARS = '(VARPNLID MYTITLE ZLINES ZCOLUMS ZCMD ZSCBR)'                         
+&MYTITLE = '- Package ID:&VPHOPKID'                                             
+.HELP = ISR1B000                                                                
+&ZCMD = ' '                                                                     
+VGET (ZSCBR) PROFILE     /* Fill Scroll Vars if       */                        
+IF (&ZSCBR = ' ')  &ZSCBR  = 'PAGE'  /* Blank with Page */                      
+IF (&ZMEMB ^= ' ') &ZTITLB = '&ZDSNT(&ZMEMB)&ZLEVEL ' /* OZ91708 */             
+IF (&ZMEMB = ' ')  &ZTITLB = '&ZDSNT&ZLEVEL '                                   
+&MIXED = MIX                                                                    
+IF (&ZPDMIX = N) &MIXED = EBCDIC                                                
+*REXX(ZSCR,ZTITLB)                                                              
+if length(ztitlb) > 51-9-2                                                      
+then zscr = 'ON'                                                                
+else zscr = 'OFF'                                                               
+*ENDREXX                                                                        
+/* save current d/s & caller so we can edit if required e.g. VIT or other */    
+&EHICALR = &ZPANELID                                                            
+vput (ZDSNT ZMEMB ZDSVOL EHICALR VARPNLID VPHOPKID VPHCOMM) shared              
+VGET (EHILITEP) PROFILE     /* Get HiLite Options        */                     
+if (&EHILITEP  = '' )       /* nothing set?              */                     
+  if (&ZAPPLID  = 'CTLI')   /* Are we in Endevor?        */                     
+    &EHILITEP  = '// / 05000'                                                   
+  else                      /* default global otherwise  */                     
+    &EHILITEP  = '// //05000'                                                   
+*REXX(EHILITEP EHIMSG EHIFBX EHISBR EHIVED EHIGLB EHIMAX)                       
+parse var EHILITEP  EHIMSG +1 EHIFBX +1 EHISBR +1 EHIVED +1 EHIGLB +1 EHIMAX    
+*ENDREXX                                                                        
+if (&MsgWords = &Z)         /* check for custom messages */                     
+   VGET (MsgWords MsgSever) shared /* are they shared?   */                     
+   if (&MsgWords = &Z)      /* still nothing?            */                     
+      &MsgWords=' '         /* default to space */                              
+      &MsgSever=' '                                                             
+      *REXX(MsgWords MsgSever)                                                  
+         result = ENDVHIMS(MsgWords "(" MsgSever)                               
+         parse value result with MsgWords " ( " MsgSever                        
+      *ENDREXX                                                                  
+   VPUT (MsgWords MsgSever) shared /* Save values        */                     
+/* init panexit values to max lengths */                                        
+*REXX(ZDATA,SHADOW,SHATOC,SHAZOM,SHAFAC,ZSCRMAXW,ZSCRMAXD,EHIMAX)               
+if length(shadow) < (ZSCRMAXW * ZSCRMAXD) then                                  
+   shadow = copies('01'x,(ZSCRMAXW * ZSCRMAXD))                                 
+if length(SHAZOM) < ZSCRMAXW then do                                            
+   SHAZOM = copies('01'x,ZSCRMAXW)                                              
+   SHAFAC = 1                                                                   
+end                                                                             
+if length(SHATOC) < EHIMAX then                                                 
+   SHATOC = OVERLAY('01'x,SHATOC,EHIMAX,1,'01'x) /* max toc length */           
+*ENDREXX                                                                        
+PANEXIT((ZDATA,ZSHADOW,SHADOW,SHATOC,SHAZOM,SHAFAC,BARFAC,ZWIDTH,ZUSER,         
+         ZAPPLID,ZLINES,ZLVLINE,EHILITEP,ZRXRC,ZRXMSG,MsgWords,MsgSever,        
+        ),REXX,%ENDVHIGH)                                                       
+if (.MSG= &Z AND &ZRXRC = 8)                                                    
+   if (&ZRXMSG NE &LASTMSG)                                                     
+      .CURSOR = ZCMD                                                            
+      .MSG = &ZRXMSG                                                            
+      &LASTMSG = &ZRXMSG                                                        
+)REINIT                                                                         
+VGET (EHILITEP) PROFILE     /* Get HiLite Options        */                     
+*REXX(EHILITEP EHIMSG EHIFBX EHISBR EHIVED EHIGLB EHIMAX)                       
+parse var EHILITEP  EHIMSG +1 EHIFBX +1 EHISBR +1 EHIVED +1 EHIGLB +1 EHIMAX    
+*ENDREXX                                                                        
+PANEXIT((ZDATA,ZSHADOW,SHADOW,SHATOC,SHAZOM,SHAFAC,BARFAC,ZWIDTH,ZUSER,         
+         ZAPPLID,ZLINES,ZLVLINE,EHILITEP,ZRXRC,ZRXMSG,MsgWords,MsgSever,        
+        ),REXX,%ENDVHIGH)                                                       
+if (.MSG= &Z AND &ZRXRC = 8)                                                    
+   if (&ZRXMSG NE &LASTMSG)                                                     
+      .CURSOR = ZCMD                                                            
+      .MSG = &ZRXMSG                                                            
+      &LASTMSG = &ZRXMSG                                                        
+REFRESH(*)                                                                      
+/* REFRESH(ZCMD,ZSCBR,ZDATA,ZLINEX,ZCOLUMS,ZTITLB) */                           
+)PROC                                                                           
+if (.resp = END)                                                                
+    &SHATOC = ''                                                                
+    &SHAZOM = ''                                                                
+    &SHAFAC = ''                                                                
+&ZCURSOR = .CURSOR                                                              
+&ZCSROFF = .CSRPOS                                                              
+VPUT (ZSCBR) PROFILE     /*                           */                        
+&ZLVLINE = LVLINE(ZDATA)                                                        
+                                                                                
+/* Browse Point-n-shoot section                                 */              
+if (&CMD = '' AND &ZCURSOR = ZDATA AND &EHISBR = '/')                           
+   *REXX(ZCMD,ZCSROFF,BARFAC,ZWIDTH)                                            
+   signal on syntax                                                             
+   if ZCSROFF // ZWIDTH /= 0 then return /* (not in left margin) */             
+   Locate2 = trunc(((ZCSROFF % ZWIDTH)-1) * BARFAC)                             
+   ZCMD = 'Locate' locate2                                                      
+   syntax: nop                                                                  
+   *ENDREXX                                                                     
+/* End of Point-n-shoot section                                 */              
+)FIELD                                                                          
+FIELD(ZTITLB) SCROLL(ZSCR)                                                      
+)PNTS                                                                           
+ FIELD(ZPS00001) VAR(ZCMD) VAL('f p">^>^###>" word first')                      
+ FIELD(ZPS00002) VAR(ZCMD) VAL('f p">^>^###>" word prev')                       
+ FIELD(ZPS00003) VAR(ZCMD) VAL('f p">^>^###>" word next')                       
+ FIELD(ZPS00004) VAR(ZCMD) VAL('f p">^>^###>" word last')                       
+)END                                                                            
+                                                                                
+/*  DYNAMIC AREA SCREEN WIDTH FROM PQUERY. (80,132,160)                         
+/*  DYNAMIC AREA SCREEN DEPTH FROM PQUERY. (24,32,43,27,60)                     

@@ -1,0 +1,129 @@
+/*  REXX   */                                                                   
+/* SnapMon - default settings                                         */        
+/*           called by snapmon (or directly) to set or modify snapmon */        
+/*           default settings                                         */        
+/*                                                                    */        
+/*   Written by: Eoin O'Cleirigh                                      */        
+/*                                                                    */        
+defaults:                                                                       
+  WhereIam =  WHERE@M1()               /* if FDP not active will crash*/        
+  address ispexec "vget (SNAPMOND) profile"       /* Anything set?    */        
+  if rc /= 0 then do                   /* Set some defaults*/                   
+     interpret 'Call' WhereIam "'SNAPMOND'"                                     
+     SNAPMOND = Result                                                          
+     If SNAPMOND = "Not-valid" then do                                          
+        Say "Warning - Site Defaults for SnapMon not found in:" WhereIam        
+        Say "-----------------------------------------------------------"       
+        Say "Hard coded defaults have been assigned but may result in"          
+        Say "poor performance. Use the Settings command on the File menu"       
+        Say "or command SNAPMONS, to update your QueueName settings"            
+        Say "and then update/merge the" WhereIam "member to include a"          
+        Say "SNAPMOND Section."                                                 
+        Say "See your Endevor Administrator for more info."                     
+        Say "-----------------------------------------------------------"       
+        SNAPMOND = "Y,,0,*,*,IS ACTIVE IN SCREEN*,"  || ,                       
+               "Y,XSYS,0,*,CTLIELEM,*,"              || ,                       
+                   "Y,,0,*,LSERVDSN,*,"              || ,                       
+                   "Y,,0,*,SYSDSN,UPRFX.UQUAL.*,"    || ,                       
+                   "Y,,0,*,SYSDSN,IPRFX.IQUAL.CSIQPLD*," || ,                   
+                   "N,,0,*,SYSDSN,SYS7.ENDEVOR.*,"                              
+     end                                                                        
+     address ispexec "vput (SNAPMOND) profile"  /* Save defaults      */        
+     ZERRALRM = "YES"                  /* Don't sound alarm by deflt  */        
+     ZERRHM   = "*"                    /* Default help panel for msgs */        
+     ZERRTP   = "ACTION"               /* Default to NOTIFY mode      */        
+     ZERRWN   = "LRESP"                /* Show long msg in pop-up     */        
+     ZERRSM   = ""                     /* Tell user what happened     */        
+     ZERRLM   = "Initial defaults have been loaded.  Please" ,                  
+                "review and press END to Exit and Save."                        
+     address ispexec "SETMSG MSG(ISRZ003)" /* set message for display */        
+  end                                                                           
+  sa= "SnapMon Defaults:" SNAPMOND                                              
+  sa= "Tot"cwords(snapmond) "Lines"cwords(snapmond)/6 "remain"cwords(snapmond)%6
+/* Un-pack Queue Name Values */                                                 
+  j = 0                                                                         
+  q. = ''                                                                       
+  do i = 1 to 9*6 by 6                                                          
+     j=j + 1                                                                    
+     x=value('QYN'j,cword(snapmond,i+0))                                        
+     x=value('QXS'j,cword(snapmond,i+1))                                        
+     x=value('QLM'j,cword(snapmond,i+2))                                        
+     x=value('QRS'j,cword(snapmond,i+3))                                        
+     x=value('QQN'j,cword(snapmond,i+4))                                        
+     x=value('QRN'j,cword(snapmond,i+5))                                        
+  end                                                                           
+  q.0 = j                                                                       
+/* Display Queue Name Values */                                                 
+/*                                                                              
+  do j = 1 to q.0                                                               
+  say "Row:"j "Y/N:"value('QYN'j) ,                                             
+             "Xsys:"value('QXS'j) ,                                             
+            "Limit:"value('QLM'j) ,                                             
+              "Res:"value('QRS'j) ,                                             
+             "Qnam:"left(value('QQN'j),8),                                      
+             "Rnam:"left(value('QRN'j),40)                                      
+  end                                                                           
+*/                                                                              
+/* Display Panel to allow edit/review */                                        
+  DP_RC = 0                                                                     
+  ZCMD = ''                                                                     
+  do until DP_RC >= 8                                                           
+     address ispexec "display panel(SNAPMONQ) CURSOR(ZCMD)"                     
+     DP_RC = RC                                                                 
+  end                                                                           
+  /* Check what user wants to do, just press enter to continue otherwise, */    
+  ZCMD = translate(strip(zcmd))             /* upper case the command */        
+  IF ZCMD  == 'DEFAULTS' Then do                                                
+     address ispexec "verase (SNAPMOND) profile" /* clear defaults   */         
+     signal Defaults                       /* and start from scratch   */       
+     end                                                                        
+  address ispexec "vget (zverb)"           /* Cancel, End or Return?      */    
+  IF ZVERB == 'CANCEL' THEN do             /* or entered cancel command?  */    
+     ADDRESS ISPEXEC "SETMSG MSG(ENDE046I)"/* Request cancelled           */    
+     exit                                  /* leave whatever value existed*/    
+  end                                                                           
+/* Re-pack Queue Name Values converting comma in values to dots */              
+  snapmond = ''                                                                 
+  do j = 1 to 9                                                                 
+     snapmond = snapmond || ,                                                   
+        translate(value('QYN'j),'.',',') || ',' ||,                             
+        translate(value('QXS'j),'.',',') || ',' ||,                             
+        translate(value('QLM'j),'.',',') || ',' ||,                             
+        translate(value('QRS'j),'.',',') || ',' ||,                             
+        translate(value('QQN'j),'.',',') || ',' ||,                             
+        translate(value('QRN'j),'.',',') || ','                                 
+  end                                                                           
+  address ispexec "vput (SNAPMOND) profile"/* Save defaults               */    
+  ADDRESS ISPEXEC "SETMSG MSG(ENDE075I)"   /* Request cancelled           */    
+                                                                                
+exit                                                                            
+/*                                                                              
+  Common Procedures CWORD and CWORDS                                            
+*/                                                                              
+CWords:procedure                                                                
+   parse arg inword                                                             
+   if length(inword) = 0 then return 0                                          
+   count = 1                                                                    
+   do i = 1 by 1 to length(inword)                                              
+     if substr(inword,i,1) == ',' then                                          
+        count = count + 1                                                       
+   end                                                                          
+   return count                                                                 
+                                                                                
+CWord:procedure                                                                 
+   parse arg inword, incount                                                    
+   sa= "inword:'" || inword || "' and count:" incount                           
+   outword = ''                                                                 
+   if incount = 0,                                                              
+    | incount > cwords(inword) then return outword                              
+   count = 1                                                                    
+   do i = 1 by 1 while count < incount                                          
+     if substr(inword,i,1) == ',' then                                          
+        count = count + 1                                                       
+   end                                                                          
+   do j = I by 1 until j >= length(inword)                                      
+     thisChr = substr(inword,j,1)                                               
+     if thisChr == ',' then leave                                               
+     outword = Outword||thischr                                                 
+   end                                                                          
+   return strip(outword)                                                        

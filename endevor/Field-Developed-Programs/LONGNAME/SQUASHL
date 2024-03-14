@@ -1,0 +1,33 @@
+/*     REXX   */                                                                
+   "ISREDIT MACRO" ;                                                            
+   /* WRITTEN BY DAN WALTHER */                                                 
+   TRACE  O  ;                                                                  
+   ADDRESS ISREDIT;                                                             
+   " CURSOR = 1 1 " ;                                                           
+   "FIND P'=' 1 NEXT"                                                           
+   if RC > 0 then Exit                                                          
+                                                                                
+   /* Sort    */                                                                
+   " Sort  .ZCSR .ZL"                                                           
+                                                                                
+   /* SQUASH  */                                                                
+   RC = 0;                                                                      
+   LASTLINE = '' ;                                                              
+    "FIND P'=' 1 FIRST "                                                        
+   DO UNTIL RC > 0                                                              
+     "(LP CP)=CURSOR"                                                           
+     "(DATALINE)=LINE" LP                                                       
+      LEN = Length(DATALINE)                                                    
+     IF SUBSTR(LASTLINE,1,LEN) =,                                               
+        SUBSTR(DATALINE,1,LEN) THEN,                                            
+        "EXCLUDE P'=' "                                                         
+    LASTLINE = DATALINE ;                                                       
+    "FIND P'=' 1 NX NEXT"                                                       
+     END;                                                                       
+   "DELETE ALL X"                                                               
+                                                                                
+   /* SAVE & EXIT */                                                            
+   ADDRESS ISREDIT " SAVE "                                                     
+   ADDRESS ISREDIT " CANCEL"                                                    
+                                                                                
+   EXIT                                                                         

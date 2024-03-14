@@ -1,0 +1,66 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   @ TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)                              
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)      /* UNIQUE ATTRIBUTES FOR   */          
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  /* DASHES AND NULL PADDING */          
+   › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                      
+   | TYPE(OUTPUT) INTENS(LOW)                                                   
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI)                                
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM)                                
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES)                                
+)BODY                                                                           
+%-----------------------------  TRANSFER ELEMENTS  -----------------------------
+%OPTION  ===>_ZCMD                                                             +
++                                                                               
++CCID%===>^EEVCCID     +  COMMENT%===>^EEVCOMM                                 +
++                                                                               
++FROM LOCATION:                         ACTION OPTIONS:                         
++  ENVIRONMENT%===>_ENVIRON +             DELETE 'FROM' ELM%===>_Z+(Y/N)        
++  SYSTEM     %===>_SYSTEM  +             GENERATE ELEMENT %===>_Z+(Y/N)        
++  SUBSYSTEM  %===>_SUBSYS  +             OVERRIDE SIGNOUT %===>_Z+(Y/N)        
++  ELEMENT: (Case sensitive)              PROCESSOR GROUP  %===>_VARFPGRP+      
+%>@ELEMENT                                                                     +
++  TYPE       %===>_TYPE    +             SYNC             %===>_Z+(Y/N)        
++  STAGE      %===>_Z+                    WITH HISTORY     %===>_Z+(Y/N)        
++                                         RETAIN SIGNOUT   %===>_Z+(Y/N)        
++TO LOCATION:                             SIGNOUT TO       %===>_VARSETSO+      
++  ENVIRONMENT%===>_VNBF9ENV+                                                   
++  SYSTEM     %===>_VNBF9SYS+                                                   
++  SUBSYSTEM  %===>_VNBF9SBS+                                                   
++  ELEMENT: (Case sensitive)                                                    
+%>@ELEMENTT                                                                    +
++  TYPE       %===>_VNBF9TYP+                                                   
++  STAGE      %===>_Z+                                                          
++                                                                               
+)INIT                                                                           
+  .HELP = CITF9000                                                              
+  .ZVARS = '(VNBF9NOD VNBF9NOG +                                                
+             C1SISOFR VARSYNC STAGE VNBF9HIS VARRTNSO +                         
+             VNBF9STG)'                                                         
+  &LIST2 = 'Y N'                                                                
+  &VNBF9SYS = &SYSTEM                                                           
+  &VNBF9SBS = &SUBSYS                                                           
+  &VNBF9TYP = &TYPE                                                             
+  &ELEMENTT = &ELEMENT                                                          
+  IF (&VARWHPNL = ' ')                                                          
+    &VARWHPNL = 'N'                                                             
+  IF (&VNBF9NOD = ' ')                                                          
+    &VNBF9NOD = 'N'                                                             
+  IF (&VNBF9NOG = ' ')                                                          
+    &VNBF9NOG = 'Y'                                                             
+  IF (&C1SISOFR = ' ')                                                          
+    &C1SISOFR = 'N'                                                             
+  IF (&VNBF9HIS = ' ')                                                          
+    &VNBF9HIS = 'N'                                                             
+  IF (&VARRTNSO = ' ')                                                          
+    &VARRTNSO = 'N'                                                             
+  IF (&VARSYNC  = ' ')                                                          
+    &VARSYNC  = 'N'                                                             
+)PROC                                                                           
+  VER  (&VARWHPNL,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+  VPUT (VNBF9NOD VNBF9NOG) PROFILE                                              
+  VPUT (C1SISOFR VARSYNC STAGE VNBF9HIS VARRTNSO VNBF9STG) PROFILE              
+  VPUT (VNBF9SYS VNBF9SBS VNBF9TYP ELEMENTT VNBF9ENV VNBF9STG) PROFILE          
+)END                                                                            

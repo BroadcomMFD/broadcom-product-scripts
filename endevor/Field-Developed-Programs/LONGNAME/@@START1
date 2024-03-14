@@ -1,0 +1,265 @@
+/*  REXX   */                                                                   
+/* Variable settings for each site --->           */                            
+   trace o                                                                      
+   parse source v1 v2 v3 v4 ThisLib .                                           
+                                                                                
+   "ALTLIB ACTIVATE APPLICATION(CLIST)",                                        
+      "DATASET(",                                                               
+          "'"ThisLib"'",                                                        
+              " )"                                                              
+                                                                                
+   WhereIam =  WHERE@M1()                                                       
+   Say "You are running on "MVSVAR(SYSNAME)                                     
+   Say "Creating a REXX member named "WhereIam                                  
+                                                                                
+   /* Look in this same dataset for Site Control Rexx Member  */                
+   MySiteControlRexxMember = ThisLib"("WhereIam")"                              
+   DSNCHECK = SYSDSN("'"MySiteControlRexxMember"'") ;                           
+   IF DSNCHECK = 'OK' then AlreadyHaveControlMember = 'Y'                       
+                                                                                
+   IF DSNCHECK /= 'OK' then,                                                    
+   /* Site Control Rexx Member not found in This library  */                    
+   /* Look in allocated SYSPROC and SYSEXEC libraries                           
+      for Site Control Rexx Member  */                                          
+      Do                                                                        
+      Call Use_LISTALC_toSeeWhatsThere ;                                        
+      Sa= 'Dataset.SYSPROC= ' Dataset.SYSPROC                                   
+      Sa= 'Dataset.SYSEXEC= ' Dataset.SYSEXEC                                   
+      Sa= 'Dataset.OTHER  = ' Dataset.OTHER                                     
+      LibList = Dataset.SYSPROC Dataset.SYSEXEC                                 
+      Call FindMySiteControlRexxMember ;                                        
+      DSNCHECK = SYSDSN("'"MySiteControlRexxMember"'") ;                        
+      End                                                                       
+                                                                                
+   NewSiteControlRexxMember = ThisLib"("WhereIam")"                             
+                                                                                
+   "ALLOC F(BNDLOUT) DA('"NewSiteControlRexxMember"') MOD REUSE"                
+                                                                                
+   /* If found a former Site Control Rexx Member  */                            
+   /*    ... copy it into a new member of this library  */                      
+   IF AlreadyHaveControlMember  = 'Y' then,                                     
+      Say 'Found an existing control member in this library '                   
+   Else,                                                                        
+   If ControlRexxMemeberFound   = 'Y' then,                                     
+      Do                                                                        
+      Say 'Found a control member in' MySiteControlRexxMember                   
+      Say 'Copying it to            ' NewSiteControlRexxMember                  
+      End                                                                       
+   Else,                                                                        
+      Do                                                                        
+      Say 'Creating new control mbr-' NewSiteControlRexxMember                  
+      End                                                                       
+                                                                                
+   IF AlreadyHaveControlMember /= 'Y' then,                                     
+      Call CreateNewSiteControlRexxMemeber ;                                    
+                                                                                
+   Call ClearQueue ;                                                            
+                                                                                
+   Queue 'CURSOR = 1 1 '                                                        
+   Queue 'WHERE LINE_BEFORE'                                                    
+   Queue 'HILITE REXX '                                                         
+   Queue 'MSGTYPE NOTELINE '                                                    
+   Queue "FIND 'PARSE' FIRST WORD"                                              
+   Queue "    INSERT"                                                           
+   Queue "****** Tailor the contents of this member to contain"                 
+   Queue "******        Site-Specific settings..."                              
+   Queue "******"                                                               
+   Queue "******    Use 'Locate Special' to find",                              
+         "required changes (if any)."                                           
+   Queue "******    Or  'COMP X (@SITE)' to find",                              
+         "merge changes from default."                                          
+   Queue "******"                                                               
+   Queue "END-INSERT"                                                           
+   Queue 'RESET FIND  '                                                         
+                                                                                
+   interpret 'Call' WhereIam "'MySysviewPref'"                                  
+   MySysviewPref  = Result                                                      
+                                                                                
+   If Substr(MySysviewPref,1,09) = "Not-valid" then,                            
+      Do                                                                        
+      Queue 'CURSOR = 1 1 '                                                     
+      Queue 'WHERE LINE_BEFORE'                                                 
+      Queue 'MSGTYPE DATALINE '                                                 
+      Queue "FIND 'Required' FIRST"                                             
+      Queue "    INSERT   "                                                     
+      Queue "/*"|| copies('*',62) || "*/ "                                      
+      Queue "/*"|| ,                                                            
+       left("Required for Endevor HILite Sysview support",62),                  
+         || "*/ "                                                               
+      Queue "/*"|| ,                                                            
+       left("Specify the High Level qualifiers for sysview (.CMN4BLOD)",62) ,   
+         || "*/ "                                                               
+      Queue "   MySysviewPref = 'CAPRD.SYSVW.R141S0'"                           
+      Queue "END-INSERT   "                                                     
+      Queue 'MSGTYPE NOTELINE '                                                 
+      Queue "    INSERT   "                                                     
+      Queue "                     \ Enter the Sysview Prefix for your site"     
+      Queue "                       The part before .CMN4BLOD for example."     
+      Queue "END-INSERT   "                                                     
+      Queue 'MSGTYPE DATALINE '                                                 
+      Queue "    INSERT   "                                                     
+      Queue "/*"|| copies('*',62) || "*/ "                                      
+      Queue "END-INSERT   "                                                     
+      End                                                                       
+                                                                                
+   Queue 'LOCATE 1 '              /* reposition to Top */                       
+   Queue "FIND 'Required'"        /* HiLite Required   */                       
+   Queue 'CURSOR = 1 1 '                                                        
+                                                                                
+   Say 'Please edit the control member contents '                               
+   ADDRESS ISPEXEC,                                                             
+      "EDIT DATASET('"NewSiteControlRexxMember"')",                             
+              "MACRO(WITHMSGS)"                                                 
+                                                                                
+/*                                                                              
+   Call BuildAddSCLforBundle;                                                   
+*/                                                                              
+                                                                                
+   "FREE F(BNDLOUT)"                                                            
+   "ALTLIB DEACTIVATE APPLICATION(CLIST)"                                       
+                                                                                
+   Exit                                                                         
+                                                                                
+Use_LISTALC_toSeeWhatsThere :                                                   
+                                                                                
+    sa= 'Use_LISTALC_toSeeWhatsThere'                                           
+    Dataset. = ' '         /* Default library concatenations empty */           
+                                                                                
+    X = OUTTRAP(LINE.);                                                         
+    ADDRESS TSO "LISTALC STATUS HISTORY"                                        
+    LastLine = LINE.0                                                           
+    Sa= LINE.LastLine                                                           
+    PrevLine = LINE.0 - 1                                                       
+    Sa= LINE.PrevLine                                                           
+    MyDataset = Word(LINE.PrevLine,1)                                           
+    temp = Translate(MyDataset,' ','.') ;                                       
+    lastnode = Words(temp)                                                      
+    place = Wordindex(temp,lastnode) -1 ;                                       
+                                                                                
+    DO I = 1 TO LINE.0                                                          
+       NEWLINE = LINE.I ;                                                       
+       IF WORDS(NEWLINE) = 1 THEN,                                              
+          DO                                                                    
+          DATASET = WORD(NEWLINE,1) ;                                           
+          ITERATE;                                                              
+          END                                                                   
+       TMDDNM = SUBSTR(NEWLINE,44,8)                                            
+       IF TMDDNM  = '        ' THEN,                                            
+          DO                                                                    
+          Call Save_LISTALC_Info                                                
+          ITERATE;                                                              
+          END                                                                   
+       DDNAME = STRIP(TMDDNM) ;                                                 
+       Call Save_LISTALC_Info                                                   
+       END;                                                                     
+                                                                                
+    RETURN                                                                      
+                                                                                
+ Save_LISTALC_Info :                                                            
+                                                                                
+     Sa= 'Save_LISTALC_Info '                                                   
+     len = Length(DATASET)                                                      
+     if len > 44 then return                                                    
+     if Substr(DATASET,len,1) = '?' then Return                                 
+                                                                                
+     if DDNAME /= 'SYSEXEC' & DDNAME /= 'SYSPROC' then,                         
+        DDNAME = 'OTHER'                                                        
+                                                                                
+     Dataset.DDNAME = Dataset.DDNAME DATASET ;                                  
+                                                                                
+     Return                                                                     
+                                                                                
+FindMySiteControlRexxMember:                                                    
+    sa= 'FindMySiteControlRexxMember'                                           
+   Do wd# = 1 to Words(LibList)                                                 
+      MyLib = Word(LibList,wd#) ;                                               
+      MySiteControlRexxMember = MyLib"("WhereIam")"                             
+      sa=  MySiteControlRexxMember                                              
+      DSNCHECK = SYSDSN("'"MySiteControlRexxMember"'") ;                        
+      IF DSNCHECK = 'OK' then,                                                  
+         Do                                                                     
+         ControlRexxMemeberFound = 'Y' ;                                        
+         Return ;                                                               
+         End                                                                    
+   End; /* Do wd# = 1 to Words(LibList) */                                      
+   ControlRexxMemeberFound = 'N' ;                                              
+                                                                                
+   Return                                                                       
+                                                                                
+CreateNewSiteControlRexxMemeber:                                                
+                                                                                
+   sa= 'CreateNewSiteControlRexxMemeber'                                        
+   If DSNCHECK = 'OK' then,                                                     
+      Do                                                                        
+      "ALLOC F(BNDLINP) DA('"MySiteControlRexxMember"') SHR REUSE"              
+      MySiteControlRexxMember = MyLib"("WhereIam")"                             
+      Say 'Found an existing member in' MySiteControlRexxMember                 
+      End                                                                       
+   Else,                                                                        
+      Do                                                                        
+      My@SITEMember = ThisLib"(@SITE)"                                          
+      DSNCHECK = SYSDSN("'"My@SITEMember"'") ;                                  
+        IF DSNCHECK /= 'OK' then,                                               
+           Do                                                                   
+           sa= 'What?'                                                          
+           Exit(8)                                                              
+           End; /* IF DSNCHECK /= 'OK' */                                       
+      "ALLOC F(BNDLINP) DA('"My@SITEMember"') SHR REUSE"                        
+      End                                                                       
+                                                                                
+   "Execio * DISKR BNDLINP (Stem Inp. Finis"                                    
+   "Execio * DISKW BNDLOUT (Stem Inp. Finis"                                    
+   "Free F(BNDLINP) "                                                           
+   "Free F(BNDLOUT) "                                                           
+                                                                                
+   Return                                                                       
+                                                                                
+BuildAddSCLforBundle:                                                           
+                                                                                
+   "ALLOC F(TABLE) DA('"ThisLib"(@C1MSGS2)') SHR REUSE "                        
+   "ALLOC F(MODEL) DA('"ThisLib"(@ADDSCL)') SHR REUSE "                         
+                                                                                
+   "ALLOC F(TBLOUT) LRECL(80) BLKSIZE(0) SPACE(1,1) ",                          
+              " RECFM(F B) TRACKS ",                                            
+              " NEW UNCATALOG REUSE ";                                          
+   QUEUE "SET FROM DSN '"ThisLib"'  ."                                          
+   QUEUE "SET TO ENVIRONMENT 'Environ'"                                         
+   QUEUE "           SYSTEM  'System '"                                         
+   QUEUE "           SUBSYS  'Subsys '. "                                       
+   QUEUE "SET OPTIONS CCID 'addtoEndev'"                                        
+   QUEUE "    COMMENT 'Adding Bundle to Endevor'"                               
+   QUEUE "    UPDATE IF PRESENT. "                                              
+   QUEUE "ADD ELEMENT '"WhereIam"'  TO TYPE REXX ."                             
+   "EXECIO" QUEUED() "DISKW TBLOUT"                                             
+                                                                                
+   "ALLOC F(OPTIONS) LRECL(80) BLKSIZE(0) SPACE(1,1) ",                         
+              " RECFM(F B) TRACKS ",                                            
+              " NEW UNCATALOG REUSE ";                                          
+   QUEUE "  $StripData = 'N' "                                                  
+   QUEUE "  $nomessages = 'Y' "                                                 
+   "EXECIO" QUEUED() "DISKW OPTIONS (Finis "                                    
+                                                                                
+   "TBL#TOOL A"                                                                 
+   "EXECIO 0 DISKW TBLOUT (FINIS"                                               
+                                                                                
+                                                                                
+   ADDRESS ISPEXEC " LMINIT DATAID(FROMDSET) DDNAME(TBLOUT) " ;                 
+   ADDRESS ISPEXEC "EDIT DATAID("FROMDSET") MACRO(BNDL@SCL) "                   
+                                                                                
+   "FREE F(OPTIONS) "                                                           
+   "FREE F(TBLOUT) "                                                            
+   "FREE F(MODEL)  "                                                            
+   "FREE F(TABLE)  "                                                            
+   Return                                                                       
+                                                                                
+ClearQueue:                                                                     
+                                                                                
+  qtotal = QUEUED()                                                             
+  If qtotal = 0 then return;                                                    
+  Do q# = 1 to qtotal                                                           
+     Pull nuthin;                                                               
+  End;                                                                          
+                                                                                
+  Return                                                                        
+                                                                                
+                                                                                

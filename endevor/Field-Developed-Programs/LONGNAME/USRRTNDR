@@ -1,0 +1,49 @@
+/* REXX - Display DIfferences - reset message routine                           
+          */                                                                    
+parse arg DiffNum NewStatus /* Expect up to 2 parms; the DiffSet to Reset */    
+DiffNum = strip(DiffNum,,"'")                 /* remove any quotes        */    
+if NewStatus == '' then                       /* do we have a new status? */    
+   NewStatus = '*Reset'                       /* set status to *Reset     */    
+else                                          /* Otherwise...             */    
+   NewStatus = strip(NewStatus,,"'")          /* remove any quotes        */    
+if DiffNum = 1 | DiffNum = 2 then NOP         /* OK we have a valid value */    
+else Exit 12                               /* something wrong investigate */    
+                                                                                
+/*                                                                              
+ADDRESS ISPEXEC "Control Errors Return"       /* ignore tb status msgs    */    
+*/                                                                              
+sa= value('DiffSet'DiffNum,'Reset')           /* Reset this status  and...*/    
+interpret 'ADDRESS ISPEXEC "VPUT (DiffSet'DiffNum') profile"' /* save it  */    
+DIffVars = 'DiffTbl'DiffNum,                  /* set the var names we need*/    
+           'DiffRow'DiffNum,                                                    
+           'DiffEle'DiffNum,                                                    
+           'DiffEnv'DiffNum,                                                    
+           'DiffStg'DiffNum,                                                    
+           'DiffSys'DiffNum,                                                    
+           'DiffSbs'DiffNum,                                                    
+           'DiffTyp'DiffNum,                                                    
+           'DiffKen'DiffNum,                                                    
+           'DiffVvl'DiffNum                                                     
+ADDRESS ISPEXEC "VGET ("DiffVars") profile"   /* ...and get them          */    
+interpret 'ADDRESS ISPEXEC "TBOPEN" DiffTbl'DiffNum  "NOWRITE SHARE"            
+TBOPENRC = RC                                                                   
+If TBOPENRC > 0 then Exit 0                   /* no table to update, exit */    
+interpret 'ADDRESS ISPEXEC "TBVCLEAR" DiffTbl'DiffNum                           
+TBCLERRC = RC                                                                   
+EEVETKEL = value('DiffEle'DiffNum)            /* set the table keys       */    
+EEVETKEN = value('DiffEnv'DiffNum)                                              
+EEVETKSI = value('DiffStg'DiffNum)                                              
+EEVETKSY = value('DiffSys'DiffNum)                                              
+EEVETKSB = value('DiffSbs'DiffNum)                                              
+EEVETKTY = value('DiffTyp'DiffNum)                                              
+EEVETDVL = value('DiffVvl'DiffNum)            /* and try to get that row  */    
+interpret 'ADDRESS ISPEXEC "TBGET" DiffTbl'DiffNum                              
+TBGETRC = RC                                  /* if we got it...          */    
+if TBGETRC = 0 Then do                        /* reset the row and save it*/    
+   EEVETDMS = NewStatus                       /* new status */                  
+   interpret 'ADDRESS ISPEXEC "TBPUT" DiffTbl'DiffNum                           
+end                                                                             
+if TBOPENRC = 0 then                                                            
+  interpret 'ADDRESS ISPEXEC "TBEND" DiffTbl'DiffNum                            
+ADDRESS ISPEXEC "Control Errors Cancel"       /* reset error ttrap        */    
+exit                                                                            

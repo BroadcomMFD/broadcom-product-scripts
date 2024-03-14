@@ -1,0 +1,54 @@
+/* Rexx - This routine is used to provide a custom list of messages             
+          codes and corresponding message severity override values              
+          so that sites can tailor the hilighting for specific                  
+          messages as appropriate.                                              
+                                                                                
+    Note: These overrides are in ADDITION to the standard                       
+          message parsing where Error, Caution messages etc.                    
+          are recognized by their suffix. But it can also be used               
+          to Lower the hilite severity if required.                             
+                                                                                
+   THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+   "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+   FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+   ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+   CORRECTED.                                                                   
+                                                                                
+   Copyright (C) 1986-2017 CA. All Rights Reserved.                             
+   */                                                                           
+parse arg MsgWords " ( " MsgSever     /* Start with any values passed        */ 
+                                                                                
+/* Parser Errors                                                             */ 
+MsgWords=MsgWords 'BSTPPARS'          /* Always flag Parse errors            */ 
+MsgSever=MsgSever 'E       '                                                    
+MsgWords=MsgWords 'C1BM4100'          /* Ditto for Package SCL errors        */ 
+MsgSever=MsgSever 'E       '                                                    
+                                                                                
+/* Processor Messages                                                        */ 
+MsgWords=MsgWords 'C1G0144I'          /* Hilite Endevor Max RC               */ 
+MsgSever=MsgSever 'N       '                                                    
+MsgWords=MsgWords 'C1G0275I'          /* Hilite Override signout in effect   */ 
+MsgSever=MsgSever 'N       '                                                    
+MsgWords=MsgWords 'C1G0277I'          /* Processor terminated due to prev er */ 
+MsgSever=MsgSever 'C       '                                                    
+MsgWords=MsgWords 'C1G0011I'          /* Start of Symbol Substitution        */ 
+MsgSever=MsgSever 'N       '                                                    
+MsgWords=MsgWords 'C1X0010I C1X0014I' /* Proc Step RC code & step bypassed   */ 
+MsgSever=MsgSever 'N        C       '                                           
+                                                                                
+/* Package Messages                                                          */ 
+MsgWords=MsgWords 'PKMR401I PKMR402I' /* End Act Valid & Approvers Found msg */ 
+MsgSever=MsgSever 'N        N       '                                           
+MsgWords=MsgWords 'PKMR799I ENMP303I' /* component & pkg validation completed*/ 
+MsgSever=MsgSever 'N        N       '                                           
+                                                                                
+/* Not Really Errors...                                                      */ 
+MsgWords=MsgWords 'ASMA047C'          /* At end of Assembly, not an error    */ 
+MsgSever=MsgSever 'I       '                                                    
+                                                                                
+/* Capture Assembler messages                                                */ 
+MsgWords=MsgWords 'ASMA435I ASMA254I' /* Show the statement number with err  */ 
+MsgSever=MsgSever 'W        C       ' /* and Macro warnings                  */ 
+                                                                                
+/* Return the Mesage ID's and Severity codes, Separated by "("               */ 
+return strip(MsgWords,"L") "(" strip(MsgSever,"L")                              

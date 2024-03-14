@@ -1,0 +1,229 @@
+/*     REXX - Routine to scan the current file and assuming it's an             
+              Endevor listing, report etc. and set hilight flags for each       
+              for each line to optimise highlighting and build a                
+              message summary at the bottom                                     
+                                                                                
+       Use:   Designed to be called as an IMARCRO when invoking view mode       
+              on an endevor report, could also be invoked as a command.         
+              Better still - whenever Endevor/QuickEdit invokes VIEW...         
+                                                                                
+              By Eoin O'Cleirigh                                                
+                                                                                
+   THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+   "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+   FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+   ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+   CORRECTED.                                                                   
+                                                                                
+   Copyright (C) 1986-2017 CA. All Rights Reserved.                             
+   */                                                                           
+address isredit                                                                 
+"MACRO (PARMS)"                                                                 
+trace o                                                                         
+dummy = time(r) /* start a clock */                                             
+"(SAVE) = USER_STATE"                                                           
+/* Init vars for stats */                                                       
+MaxRc = 0                                                                       
+/* Is data changed, request refresh */                                          
+"(ChgFlag) = DATA_CHANGED"                                                      
+"(NUMLINES) = LINENUM .ZLAST"                                                   
+                                                                                
+If NUMLINES = 0 then do     /* nothing to work with */                          
+   address ispexec "SETMSG MSG(EHIL006C)" /* listing is empty */                
+   return 4                                                                     
+end                                                                             
+                                                                                
+/* Initialise the Shadow Table of Contents */                                   
+if (Numlines + 2) < 32767 then                                                  
+   SHATOC = copies('-',NumLines+2) /* max toc length fileSize+top */            
+else                                                                            
+   SHATOC = copies('-',32767)      /* Set absolute max size       */            
+                                                                                
+/* Parse Endevor Hi-Lite options                                                
+   */                                                                           
+address  ISPEXEC "VGET (EHILITEP ZAPPLID) PROFILE"                              
+PARSE VAR EHILITEP  EHIMSG +1 EHIFBX +1 EHISBR +1 EHIVED +1 EHIGLB +1 EHIMAX    
+if datatype(EHIMAX,W) = 0,              /* catch invalid EHIMAX      */         
+ | EHIMAX = 0 then EHIMAX = 5000        /* set a reasonable default  */         
+CALLMODE = 'VIEW'                       /* Default call mode         */         
+LENNUM   = 8                            /* how wide is line# + ATTRs */         
+                                                                                
+/* do I need to test for options, or just assume if called, go ahead?           
+*/                                                                              
+if EHIVED /== '/',                                                              
+ | EHIGLB /== '/' & ZAPPLID /== 'CTLI' then do                                  
+   address ispexec "SETMSG MSG(EHIL006W)" /* Hilite disabled */                 
+   return 4                                                                     
+   end                                                                          
+                                                                                
+/* Specify keywords to hilight                                                  
+                                                                                
+   Endvhisc will automatically hilight warning, caution Error and               
+   Severe messages, but there are some info messages that you may               
+   wish to hilight, and some error messages (e.g. BSTPPARS) that                
+   don't follow the usual rules.  You can add them here, or better,             
+   in a user tailorable Rexx (ENDVHIMS) that just extends the MsgWords          
+   and severity codes which will be loaded once by the panel or here if         
+   not already set.                                                             
+   */                                                                           
+/* Get a list of special message codes and severities                     */    
+address  ISPEXEC "VGET (MsgWords MsgSever) shared"                              
+if MsgWords = '' then do                                                        
+   result = ENDVHIMS(MsgWords "(" MsgSever)                                     
+   parse value result with MsgWords " ( " MsgSever                              
+   address  ISPEXEC "VPUT (MsgWords MsgSever) shared"                           
+end                                                                             
+                                                                                
+/* Set up translate table of valid keyword charaters */                         
+trtable='ABCDEFGHIJKLMNOPQRSTUVWXYZ$#@0123456789_.-'                            
+trtable=translate(xrange('00'x,'FF'x),,trtable,' ')                             
+                                                                                
+                                                                                
+/* Set up translate table for MSG severity values - should match ENDVHIGH */    
+                                                                                
+trtMsgS='~-INFWCES' /* info, flower, warning, Caution, Error, Severe */         
+trtDspS='iiINiWCES' /* Use these mappings for Display purposes... */            
+trtSevS='012345678' /* numeric code for compare */                              
+trtAttr='BBBGTYPRW' /* Equivalent Attribute / colour code */                    
+trtAtRv='?AAHNMZEX' /* Equivalent Reverse Vide code +1    */                    
+                                                                                
+/* Initialise counts and summary data                               */          
+   CntHiLn = 0      /* Hilighted lines */                                       
+   CntSpcl = 0      /* Special Lines */                                         
+   MaxSev  = 0      /* Highest Sev   */                                         
+   FndMsg  = ''     /* Messages found */                                        
+   MaxMCL  = 8      /* Default Max Message Code Length */                       
+   smpMsg. = ''     /* Sample Message */                                        
+   linMsg. = ''     /* Line(s) of msg */                                        
+                                                                                
+/* Now process each line in the file                                */          
+                                                                                
+do i = 1 to NumLines                                                            
+   "(ThisLine)=LINE" i                                                          
+                                                                                
+   zdatacopy=translate(ThisLine)            /* Uppercase first      */          
+   zdatacopy=translate(zdatacopy,,trtable,' ') /* Remove special chr*/          
+   zdatacopy=strip(zdatacopy,'T')           /* remove trailing spcs */          
+                                                                                
+   RelLine =  i + 1   /* relative line number must allow for top/bot*/          
+   if RelLine < 32767 then                  /* Check Max size!      */          
+      LineSev =  substr(shatoc,RelLine,1)   /* line number & current*/          
+   else                                     /* Check Max size!      */          
+      LineSev =  '~'                        /* Default to unknown   */          
+   if LineSev \== '-',                      /* Severity if set...   */          
+    & LineSev \== '~' then iterate          /*   skip to next line  */          
+   /* Note:that the use of translate in the options below could be              
+      optimized for performance by hard coding the values 4 & 1                 
+      however looking them up in the translate table makes it safer             
+      if additional codes are added later or highlighting changed   */          
+   if EHIFBX == '/',                        /* FlowerBox req'd      */          
+    & left(strip(thisline,"L"),3) == "** " then /* left bit...      */          
+      linerc=translate('F',trtSevS,trtMsgS) /* Flag FlowerBox       */          
+   else                                                                         
+      linerc=translate('-',trtSevS,trtMsgS) /* default line sev     */          
+   do j = 1 to max(5,words(zdatacopy))      /* and scan each word   */          
+      /* note to limit scanning consider adding a max here          */          
+      thisword = word(zdatacopy,j)           /* consider this word   */         
+      /* deal with the special cases first  - is it in the lookup?  */          
+      if wordpos(thisword,MsgWords) > 0 then do                                 
+         linerc = translate(left(word(MsgSever,                                 
+                 ,wordpos(thisword,MsgWords)),1),                               
+                 ,trtSevS,trtMsgS) /* convert msg suffix to number  */          
+         CntSpcl = CntSpcl +1      /* Count Special Lines           */          
+         if linerc > 3 then call SaveMsg     /* was line hilighted? */          
+         leave                     /* special found, ignore rest    */          
+         end                                                                    
+      else do                                                                   
+      /* Next check if it's a valid message format...               */          
+      /* Length 8 characters, ending in I, W, C, E or S,            */          
+      /* ...starting with uppercase letter, at least two digit msg  */          
+      /* number and the whole thing alphaNumeric?                   */          
+         thissuff = right(thisword,1)       /* grab the message sev */          
+         if length(thisword) \= 8 ,                                             
+          | pos(thissuff,'IWCES')               = 0 ,                           
+          | datatype(substr(thisword,1,1),'U') \= 1 ,                           
+          | datatype(substr(thisword,6,2),'W') \= 1 ,                           
+          | datatype(thisword,            'A') \= 1 then                        
+         /* before we give up, check if it's a cobol message... */              
+         if length(thisword) \= 11 ,        /* Cobol? IGYPS2072-S */            
+          | left(thisword,3) \== 'IGY',                                         
+          | datatype(substr(thisword,6,4),'W') \= 1 ,                           
+          | pos(thissuff,'IWCES') = 0 then iterate                              
+         else nop                                                               
+         /* still here?  Must be a valid message! */                            
+         linerc = max(linerc, translate(thissuff,trtSevS,trtMsgS))              
+         if linerc > 2 then call SaveMsg    /* was line hilighted? */           
+      end                                                                       
+   end                                                                          
+   /* convert the line severity to a character code */                          
+   linesev = translate(linerc,trtMsgS,trtSevS)                                  
+   if RelLine < 32767 then                 /* check for max size */             
+      shatoc=overlay(linesev,shatoc,RelLine)                                    
+   /* Count HilIted lines */                                                    
+   if LineRc > 2 then                                                           
+      CntHiLn = CntHiLn + 1                                                     
+end                                                                             
+                                                                                
+   ScanElap = trunc(time(e),3)                                                  
+   ScanLins = strip(NumLines,"L","0")                                           
+   ScanMsgF = words(FndMsg)                                                     
+   ScanMsgS = translate(MaxSev,trtDspS,trtSevS)                                 
+                                                                                
+   address ispexec "VPUT (SHATOC SCANMSGF) SHARED" /* update TOC & Find vars */ 
+                                                                                
+   if CntHiLn > 0 then do     /* any lines to hilite? */                        
+      address ispexec "SETMSG MSG(EHIL007I)"                                    
+      address ispexec "control errors return" /* catch hilight */               
+      "hilite off"            /* turn off built-in hilite */                    
+      address ispexec "control errors cancel" /* resume default */              
+      "caps off"              /* turn off caps to allow mixed case */           
+      "reset special"         /* hide any msg or note lines */                  
+      if ScanMsgF = 0 then do /* no Sev 2 or higher messages */                 
+         "line_after .zlast = INFOLINE ' (No Warning or Higher messages found)'"
+         "line_after .zlast = INFOLINE ' '"                                     
+      end                                                                       
+      else                                                                      
+      do i = ScanMsgF to 1 by -1                                                
+         thismsg = word(FndMsg,i)                                               
+         trnkmsg = copies(" ",(MaxMCL+2)) ,                                     
+                   strip(left(strip(smpmsg.thismsg,"L"),133),"T")               
+         "line_after .zlast = INFOLINE (trnkmsg)"                               
+         if length(linmsg.thismsg) <= 133 then                                  
+            trnkmsg = " "left(thismsg,MaxMCL) "("linmsg.thismsg")"              
+         else                                                                   
+            trnkmsg = " "left(thismsg,MaxMCL) "("Left(linmsg.thismsg,133)" ...)"
+         "line_after .zlast = INFOLINE (trnkmsg)"                               
+      end                                                                       
+      "line_after .zlast = INFOLINE 'Message Summary'"                          
+      "line_after .zlast = INFOLINE ' '"                                        
+   end                                                                          
+   else do                                                                      
+      address ispexec "SETMSG MSG(EHIL007W) COND"                               
+      "USER_STATE = (SAVE)"   /* otherwise restore save state */                
+   end                                                                          
+                                                                                
+/* If invoked in batch then print msgs and exit, otherwise just exit */         
+IF SYSVAR(SYSENV) = "BACK" THEN do                                              
+   say 'Report Scanned, MaxSev:'ScanMsgS                                        
+   say 'EndvHiSc processed' Scanlins 'lines in',                                
+        ScanElap 'secs and hilighted:' ||,                                      
+        CntHiLn'+'CntSpcl 'lines.' ,                                            
+       'Highest Msg severity:'ScanMsgS                                          
+   say 'in:'FndMsg'.'                                                           
+   say "Max Rc" MaxRc                                                           
+   "cancel"                                                                     
+end                                                                             
+                                                                                
+return MaxRc                                                                    
+                                                                                
+SaveMsg:                                                                        
+   if pos(thisword,FndMsg) = 0 then do /* new message?                     */   
+      FndMsg = FndMsg thisword         /* append the new message code      */   
+      linMsg.thisword = i              /* save the line number             */   
+      smpMsg.thisword = ThisLine       /* and save a sample line           */   
+      MaxMCL = max(MaxMCL,length(thisword)) /* keep track of largest msg   */   
+   end                                                                          
+   else                                /* otherwise append the line number */   
+      linMsg.thisword = linmsg.thisword i                                       
+   MaxSev = max(MaxSev,LineRc)         /* and keep track of the highest sev*/   
+   return                                                                       

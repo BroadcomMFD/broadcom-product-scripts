@@ -1,0 +1,18 @@
+)PANEL KEYLIST(ISRHLP2,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ 05 TYPE(PT)                                                                    
+ 0A TYPE(NT)                                                                    
+ 26 AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(50,10) CMD()                                                       
+       	ESRchfor Ignore JCL Comments                                         
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+Select this option to ignore JCL comment lines                               
+when searching the source.  The actual effect                                
+is to insert a "DPLINE '//*,'1:3" card in the                                
+search request syntax.  You could also code                                  
+your own DPLINE or .* (comment) cards.                                       
+)INIT                                                                           
+&ZWINTTL = ' '                                                                  
+.HHELP = ISP00006                                                               
+)END                                                                            

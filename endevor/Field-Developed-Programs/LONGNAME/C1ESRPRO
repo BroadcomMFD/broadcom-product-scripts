@@ -1,0 +1,94 @@
+)PANEL KEYLIST(ISRSAB,ISR)                                                      
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ 05 TYPE(PT)                                                                    
+ 06 TYPE(PIN)                                                                   
+ 09 TYPE(FP)                                                                    
+ 0A TYPE(NT)                                                                    
+ 0C TYPE(NT) SKIP(ON)                                                           
+ 11 TYPE(SAC)                                                                   
+ 12 TYPE(CEF) PADC(USER)                                                        
+ 13 TYPE(NEF) PADC(USER)                                                        
+ 22 TYPE(WASL) SKIP(ON) GE(ON)                                                  
+ 10 TYPE(ET)                                                                    
+ 26 TYPE(NEF) CAPS(ON) PADC(USER)                                               
+ 27 AREA(SCRL) EXTEND(ON)                                                       
+ 28 TYPE(CEF) PADC(USER) CKBOX(ON)                                              
+ 29 TYPE(SAC) CSRGRP(99) RADIO(ON)                                              
+ 30 TYPE(SAC) CSRGRP(98) RADIO(ON)                                              
+)BODY  CMD(ZCMD)                                                                
+                                    	                                        
+Command ===>Z                                                                
+                                                                               
+You are about tosearchthe Endevor elements in the current selection list.    
+Specify search string(s) and options and pressENTERto run the search.        
+Enter theENDor theCANCELcommand to cancel the search.                      
+SAREA39                                                                       
+)AREA SAREA39                                                                   
+==>Z                                                                       
+==>Z                                                                       
+==>Z                                                                       
+==>Z                                                                       
+==>Z                                                                       
+==>Z                                                                       
+                                                                             
+Listing DSN:Z                                                                
+                                                                             
+Select Process Options   Search Type                  Resume Mode            
+ZMixed Mode           Z1.Source   5.Master    Z1.Auto            
+ZAny case                2.History  6.Summary     2.Refresh         
+ZIgnore JCL comments     3.Changes  7.Component   3.ReUse           
+ZUse ECAP if possible    4.Listing  8.Comment                          
+                                      9.CCID                             
+)INIT                                                                           
+.ZVARS = '(ZCMD ZMSFS1 ZMSFS2 ZMSFS3 ZMSFS4 ZMSFS5 ZMSFS6 ESRCHREP +            
+           ZMSFMIXV ESRRDOPT ESRRMOPT +                                         
+           ZMSFANYC +                                                           
+           ESRNIGNC +                                                           
+           ESRNECAP )'                                                          
+&ZWINTTL = 'Endevor Srchfor Options'                                            
+.HELP = C1ESRHLP                                                                
+&ZCMD = ' '                                                                     
+.ATTR(ESRRDOPT)='CSRGRP(99) RADIO(ON)'                                          
+.ATTR(ESRRMOPT)='CSRGRP(98) RADIO(ON)'                                          
+)REINIT                                                                         
+REFRESH(ZMSFMIXV ZMSFANYC ESRRDOPT ESRRMOPT ESRNECAP )                          
+)PROC                                                                           
+&ZMSFMIXV = TRANS(&ZMSFMIXV, ' ',' ' *,'/')                                     
+&ZMSFANYC = TRANS(&ZMSFANYC, ' ',' ' *,'/')                                     
+&ESRNIGNC = TRANS(&ESRNIGNC, ' ',' ' *,'/')                                     
+&ESRNECAP = TRANS(&ESRNECAP, ' ',' ' *,'/')                                     
+IF (&ZMSFS6 = &Z)              /* they can't all be blank */                    
+  IF (&ZMSFS5 = &Z)                                                             
+    IF (&ZMSFS4 = &Z)                                                           
+      IF (&ZMSFS3 = &Z)                                                         
+        IF (&ZMSFS2 = &Z)                                                       
+          VER (&ZMSFS1,NONBLANK)                                                
+IF (&ESRRDOPT NE ' ')                                                           
+  VER (&ESRRDOPT,LIST,1,2,3,4,5,6,7,8,9)                                        
+ELSE                                                                            
+  &ESRRDOPT = '1'                                                               
+IF (&ESRRMOPT NE ' ')                                                           
+  VER (&ESRRMOPT,LIST,1,2,3)                                                    
+ELSE                                                                            
+  &ESRRMOPT = '1'                                                               
+&ESRNDOPT = TRANS(&ESRRDOPT 1,SOURCE 2,HISTORY 3,CHANGES 4,LISTING              
+                5,MASTER 6,SUMMARY, 7,COMPONENT, 9,CCID ' ',SOURCE )            
+&ESRNROPT = TRANS(&ESRRMOPT 1,AUTO 2,REFRESH 3,REUSE ' ',AUTO )                 
+VPUT (ESRNDOPT ESRRDOPT ESRNROPT ESRRMOPT ESRRMOPT) PROFILE                     
+VPUT (ESRNECAP ESRNIGNC) SHARED                                                 
+VPUT (ZMSFS1 ZMSFS2 ZMSFS3 ZMSFS4 ZMSFS5 ZMSFS6) PROFILE                        
+VPUT (ZMSFMIXV ZMSFANYC) PROFILE                                                
+)HELP                                                                           
+FIELD(ZMSFS1) PANEL(ISP0Y043)                                                   
+FIELD(ZMSFS2) PANEL(ISP0Y043)                                                   
+FIELD(ZMSFS3) PANEL(ISP0Y043)                                                   
+FIELD(ZMSFS4) PANEL(ISP0Y043)                                                   
+FIELD(ZMSFS5) PANEL(ISP0Y043)                                                   
+FIELD(ZMSFS6) PANEL(ISP0Y043)                                                   
+FIELD(ZMSFMIXV) PANEL(ISP0Y032)                                                 
+FIELD(ZMSFANYC) PANEL(ISP0Y033)                                                 
+FIELD(ESRRDOPT) PANEL(C1ESRPRT)                                                 
+FIELD(ESRRMOPT) PANEL(C1ESRPRF)                                                 
+FIELD(ESRNIGNC) PANEL(C1ESRPRI)                                                 
+FIELD(ESRNECAP) PANEL(C1ESRPRE)                                                 
+)END                                                                            

@@ -1,0 +1,92 @@
+)ATTR DEFAULT(^+~)                                                              
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY EXPAND (\\) CMD(ZCMD)                                                     
+^TUTORIAL \-\ SnapMon Help - Settings \-\ TUTORIAL                              
+^Command ===>~ZCMD                                                             +
++                                                                               
++The^Endevor Snapshot Monitor+(SNAPMON) tool provides a simple way for          
++Administrators to check on Endevor activity.  Since this involves              
++searching for ENQueue names that may be different for each site or user,       
++SNAPMON provides a way to tailor the Enqueus that are searched as follows:     
+çSAREA38                                                                       ç
+)AREA SAREA38                                                                   
+^*Up to 9 Enqueues...                                                           
++   Each row in the Enqueues table represents one potential call to the         
++   QueryEnq service - the more entries the more potential search results.      
++                                                                               
+^*Y/N Flag                                                                      
++   For each row, the first entry specifies whether this search is active       
++   or not.  Setting a row to 'N' basically ignores this entry without          
++   deleting it so you can quickly toggle on/off searches as desired.           
++                                                                               
+^*XSYS                                                                          
++   Optionaly specify^'XSYS'+to request that the search is cross-system in      
++   a GRS/MIM environment.  While this may return results from remote LPARs     
++   it can add a significant overhead - use with caution.                       
++   Leave the field blank (default) to disable XSys for this row.               
++                                                                               
+^*Limit                                                                         
++   To limit the number of results that may be returned set a non-zero value    
++   for limit.  Typically you will only need this on very active systems        
++   or for QNames that may return very large amounts of data (e.g. SYSDSN or    
++   LSERVDSN) when these queries are not masked with a RName.  Ideally rather   
++   than use the limit, try to find an RName mask that returns just the data    
++   you need.                                                                   
++                                                                               
+^*Owner                                                                         
++   Normally left to '*' for all - you can use this filter to limit the         
++   results to just specific Job/User name patterns - for example if all        
++   Development staff have a TSO username DEVnnn you could use DEV* to          
++   Ignore other users; DBA*, TSG* etc. The Owner pattern also supports         
++   the placeholder^(%)+in the pattern to match a single character.             
++                                                                               
+^*QName                                                                         
++   The Queue name is the main breakdown for ENQueues and certain QNames        
++   have specific meaning at a system level. ^SYSDSN+for example is used        
++   for ALL dataset enqueues. ^LSERVDSN+is used by the L-Serv facility          
++   to indicate which datasets are under^L-Serv+control.  Endevor tasks         
++   will also use this ENQ to to ensure that its VSAM datasets are              
++   accessed correctly.  If however you see lots of non-Endevor related         
++   datasets being flagged, consider adding an RName mask. Endevor also         
++   makes use of step level enqueus to control which products or features       
++   are active under each ISPF split screen;^Endevor, END-PDM, Edit-Elm,        
++   etc.  The Field Developed Programs^(FDPs)+also use this method and          
++   you will see^FDP-xxxx+entries with RNames like "IS ACTIVE IN SCREEN n"      
++   There is a special QName that you can specify,^FDPDSN,+that is used         
++   by SNAPMON to signify the FDP Clist dataset name.  When you specify         
++   FDPDSN, the RName must match this name exactly (i.e. fully qualified        
++   and with no wild-cards).  The QName supports wildcard^(*)+to define         
++   a prefix to search but again use with caution, or with explicit RNames.     
++                                                                               
+^*RName                                                                         
++   The Resource Name is the final part of the ENQuename and most of the        
++   time these will appear as regular dataset names, but the actual format      
++   of this segment is defined by the calling service.  SYSDSN's could be       
++   dataset or USS Path names.  Endevor uses the special string:                
++  ^"IS ACTIVE IN SCREEN n"+for each split screen(n) that is active and so      
++   this is a handy way to find all ISPF users and what they are doing.         
++   Like QName it supports Wildcard to specify a prefix to match, but           
++   if too much data is returned making the name more explicit will help.       
++   Note: This field (like QName) is case sensitive so if you're mask isn't     
++   working the way you expect check that it's not the wrong case.              
++                                                                               
+^*Save/Cancel/Defaults                                                          
++   To^Save+your changes just hit PF3 (so long as no errors are detected)       
++   If instead, you decide that you don't want to save your changes, you        
++   can enter the^CAN+or^CANCEL+commad.                                         
++   To reset all values to your sites defaults, use the^Defaults+command.       
++                                                                               
+^   Hint:+The Save, Cancel and Defaults commands are also available on the      
++   Action Bar,^File,+drop down menu.                                           
++                                                                               
+^*Site-Wide Defaults                                                            
++   During the install of the SNAPMON tool, the site defaults are customized    
++   if a special clist member (&WhereIam.).  Your administrator may choose to   
++   tailor this to add or remove default ENQueues to search, however, once you  
++   save your defautls these will be used until you choose the^Defaults+        
++   command.                                                                    
++                                                                               
++                                                                               
++\ \ (^ENTER+to continue,^END+to return) \ \                                    
+)PROC                                                                           
+)END                                                                            

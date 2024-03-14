@@ -1,0 +1,845 @@
+/* REXX */                                                                      
+/*                                                                              
+  There are a couple of problems with this version (demo) of the code           
+The most annoying visual one is that the 'non-display' search notice only       
+works the first time in!  Never got to the bottom of that, but it does seem     
+to be a problem in QuickEdit only.  I created a short clist that just displays  
+three messages at 1 second intervals to demonstrate that.                       
+See 'bst.qa.suppndvr.source(contlock)' for sample code.                         
+However, I found that if I displayed a pane from my clist inside an addpop/     
+rempop section - that it worked again.  Handily there was a good excuse to do   
+this - we can now prompt the user to enter/confirm jobcards (or PF3 to exit).   
+                                                                                
+Another problem is that if you do anything in QuickEdit it will reset           
+the table extension variables - the fix would be to update Q/E to               
+also update table variables if they exist or make these variables non-extension 
+so that esrchfor didn't have to tack them on...                                 
+NOTE: I found that if I copy/replace the table with a new table with those      
+bits added, then they stay.  The problem then is how to detect reentry/dirty    
+status...                                                                       
+                                                                                
+The other thing that'd be nice would be if this clist were able to dynamically  
+update the model line variables (ENDQxMy) then the found bits would just appear 
+when needed, The compromise (is to allow the user to change his dispaly options 
+(in the dialog defaults) and this then dynamically builds the element selection 
+list panels model lines when QuickEdit starts.  With the happy side effect that 
+we can now also exploit wide screen mode if available.                          
+                                                                                
+TO DO items...                                                                  
+ - Add support for sort option - DONE! need updated ESORTTBL, ESORT EONLY etc.  
+ - Add support for EPRINT option - It dies because variable FOUND is too big    
+ - Looks like there's a bug in EONLY too when searching FOUND variable...       
+ - Add support for Resume option - DONE! Three options auto/refresh/reuse       
+ - When searching for CCID add a sontinuation line to ONLY hit on ccid lines    
+ - Automatic resume could end up checking MANY MANY entries only to decide it   
+   still has to rebuild the tables, currently I check member by member but I    
+   could improve this maying using LMINIT or creating a 'special' member with   
+   either a list of elements, or the current Endevor inventory filter... If the 
+   list of elements match or the filter hasn't changed (or is more restrictive) 
+   then re-use the existing file - probably over-kill for a temp solution.      
+ - Handle Attention better - looks like Clists could do it?                     
+ - JOB JCL while prompted does not appear to saved across sessions              
+                                                                                
+Production-ize opportunities                                                    
+ - Change Q/E (and other Endevor table build options) to always include a       
+   Found flag and message (so it's not necessary to rewite the table)           
+ - ESort can return 'INVALID SELECTION' if table is not extended                
+ - Some VDEFINES are shorter than optimal - e.g. ZTDMARK                        
+ - Q/E should set ZHIDEX=Yes to support HIDE X                                  
+ - ESort can return 'INVALID SELECTION' if table is not extended                
+*/                                                                              
+/* TRACE r */                                                                   
+start = Time('E') /* start the clock */                                         
+/*ADDRESS ISPEXEC "CONTROL ERRORS RETURN"*/                                     
+  ADDRESS ISPEXEC "VGET (ZSCREEN ZPANELID ZUSER ZPREFIX ZSYSID)"                
+  VARNAME = PANELID || ZSCREEN                                                  
+  INTERPRET 'ADDRESS ISPEXEC "VGET ('VARNAME')"'                                
+  INTERPRET 'VALUEIS = ' VARNAME                                                
+/*                                                                              
+   First thing to do is make sure we're on a valid panel and that               
+   the variables we need are available                                          
+   In the production version we'd lost the ESRTTBL to check this but            
+   for now we have just hard coded the supported table names                    
+*/                                                                              
+TABLSUFF = SUBSTR(ZPANELID,4,4,'$')           /* ENDIExxy */                    
+IF TABLSUFF = 'IE25' | TABLSUFF = 'IE91',     /* QuickEdit main/copyelm */      
+ | left(ZPANELID,7) == 'LONGLIS' THEN NOP     /* or LongName Utility */         
+ELSE                                                                            
+/* IF VALUEIS <> ZSCREEN ||":" || ZPANELID THEN */                              
+DO                                                                              
+  ADDRESS ISPEXEC "SETMSG msg(ENES001E)" /* invalid panel */                    
+  exit 12                                                                       
+END                                                                             
+                                                                                
+                                                                                
+Parse ARG  . 'TOP(' ZTDTOP ')' SrchStr /* get string*/                          
+                                                                                
+/*                                                                              
+   We will also use this table name to build a temporary dataset                
+   name prefix for use by this clist and skeletons -this will be                
+   in the format;                                                               
+                                                                                
+   [ZPREFIXŸ.ZUSER.E<SYSID>.<TableName>...[LIST|SYSIN|REPORT]                   
+*/                                                                              
+ELSELTBN = 'EN' || ZSCREEN || TABLSUFF || '0' /* ENzIE250 or ENzIE910 */        
+/* Currentlyly LongName uses the same name as QuickEdit - this should change */ 
+if left(ZPANELID,7) == 'LONGLIS' THEN ELSELTBN = 'LN'||ZSCREEN||'IE250'         
+ELSELTMP = 'EN' || ZSCREEN || 'TEMPT'                                           
+                                                                                
+IF ZPREFIX = "" | ZPREFIX = ZUSER THEN                                          
+  ESRCHPFX =    ZUSER||"."||STRIP(LEFT("E"||ZSYSID,8))||"."||ELSELTBN           
+ELSE                                                                            
+  ESRCHPFX = ZPREFIX||"."ZUSER||"."||STRIP(LEFT("E"||ZSYSID,8))||"."||ELSELTBN  
+/*                                                                              
+   Set some default values (first time in)                                      
+*/                                                                              
+ESRNECAP = '/'    /* Default to use Sparky    */                                
+ESRRMOPT = '1'    /* always reset refresh flag */                               
+ESRNIGNC = ''     /* always reset Ignore JCL comment */                         
+OPTANYC  = 'ANYC' /* default search is AnyCase */                               
+OPTMIXD  = ''     /* default DBCS mixed to off */                               
+ADDRESS ISPEXEC "VPUT (ELSELTBN ESRCHPFX ESRNECAP ESRRMOPT ESRNIGNC) SHARED"    
+                                                                                
+/*                                                                              
+   Mainline logic starts here                                                   
+*/                                                                              
+                                                                                
+MainLine:                                                                       
+  call ParseArgs   /* go examine the input args */                              
+  call FindTable   /* Check ISPF table is ready to use */                       
+  call CheckStat   /* Check if we already have a valid lst/print file */        
+  If EsrchDun = 'NO' then                                                       
+  do                                                                            
+    call BuildJob    /* Build job to batch retrieve/print and first search */   
+    /*                                                                          
+       suppress submitted message & display in progress msg                     
+       wait for job to complete                                                 
+    */                                                                          
+    call ezsubwat "DS '"ZTEMPF"' "                                              
+    subwatrc = result  /* save the Return code , Expect 3 = Good */             
+    /* remove PopUP so that we can continue */                                  
+    ADDRESS ISPEXEC "REMPOP" /* try removing the pop AFTER message */           
+    call IncrJobN    /* Increment the job name so each job is different*/       
+    call ParseRep    /* Parse the report from Srchfor and update table */       
+  end                                                                           
+  else                                                                          
+  do                                                                            
+    call ResetTbl        /* reset found flags */                                
+    call CallSrch        /* invoke Search utility in foreground */              
+    if SearchRC = 1 then /* we have some results to display  */                 
+      call ParseRep      /* Parse the report from Srchfor and update table */   
+    else                                                                        
+      CNTFND = 0                                                                
+  end                                                                           
+                                                                                
+  /*                                                                            
+     Put things back the way we found them                                      
+  */                                                                            
+  ADDRESS ISPEXEC "TBTOP" ELSELTBN                                              
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  IF ZTDTOP > 0 THEN                                                            
+  DO                                                                            
+    ADDRESS ISPEXEC "TBSKIP" ELSELTBN "NUMBER(+"ZTDTOP")"                       
+    if rc <> 0 THEN SAY ZERRSM ZERRLM                                           
+  END                                                                           
+  /*                                                                            
+     Set messages and return to Endevor                                         
+  */                                                                            
+  ZEDLMSG = "Your Search took" trunc(Time('E')),                                
+            "seconds and found" CNTFND "hits in" ,                              
+            CNTELE "Elements, Using the search command" SrchCmd                 
+  ADDRESS ISPEXEC "VPUT (ZEDLMSG) SHARED"                                       
+  if CNTFND > 0 then                                                            
+    ADDRESS ISPEXEC "SETMSG msg(ENES002I)"                                      
+  Else                                                                          
+    ADDRESS ISPEXEC "SETMSG msg(ENES003E)"                                      
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  ADDRESS ISPEXEC "control nondispl"                                            
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  EXIT 0                                                                        
+                                                                                
+                                                                                
+/* Main Subroutines */                                                          
+                                                                                
+                                                                                
+ParseArgs:                                                                      
+/* Parsing replaces Quotes with Apost or inserts Apost as needed &              
+   converts WORD PREFIX or SUFFIX to ,[W|P|S]                                   
+   if From col found insert ,FF                                                 
+   if to col found, insert :TT                                                  
+   Check the rest for keywords etc.                                             
+*/                                                                              
+ZTDTOP = Strip(ZTDTOP)                                                          
+IF ZTDTOP = "" THEN ZTDTOP = "1"                                                
+                                                                                
+SrchStr = Strip(srchstr) /* remove leading/trailing blanks */                   
+if SrchStr = "" then                                                            
+do                                                                              
+  /* instead of just showing a message when the srch srting is blank            
+     pop up a dialog, just like srchfor, to get the other details.              
+     Note: we may need to store some info for later use                         
+  */                                                                            
+  ESRCHREP = "'" || ESRCHPFX || ".ESRCHREP'"                                    
+  ESRCHTOP = ZTDTOP                                                             
+  ESRCHPAN = ZPANELID                                                           
+  ADDRESS ISPEXEC "VPUT (ESRCHREP ESRCHTOP ESRCHPAN) SHARED"                    
+  ADDRESS ISPEXEC "ADDPOP"                                                      
+/*ADDRESS ISPEXEC "DISPLAY PANEL(C1ESRPRO) msg(ENES004I)" show syntax hint */   
+  ADDRESS ISPEXEC "DISPLAY PANEL(C1ESRPRO)"                                     
+  DisplRC = rc                                                                  
+  ADDRESS ISPEXEC "REMPOP"                                                      
+  if DisplRC >= 8 Then                                                          
+    exit 28                                                                     
+  ADDRESS ISPEXEC "VGET (ESRNECAP ESRNIGNC) SHARED"                             
+  ADDRESS ISPEXEC "VGET (ESRNDOPT ESRRDOPT ESRNROPT ESRRMOPT" ,                 
+                        "ESRRNOPT ZMSFMIXV ZMSFANYC ZMSFS1" ,                   
+                        "ZMSFS2 ZMSFS3 ZMSFS4 ZMSFS5 ZMSFS6) PROFILE"           
+/*                                                                              
+  Say "Read Opt:" ESRNDOPT ESRRDOPT                                             
+  Say "ResumeOp:" ESRNROPT ESRRMOPT                                             
+  Say "Mix/AnyC:" ZMSFMIXV ZMSFANYC                                             
+  Say "Use ECAP:" ESRNECAP                                                      
+  Say "Refresh: " ESRNDREF                                                      
+*/                                                                              
+  SrchCmds. = ''                                                                
+  J = 0                                                                         
+  Do I = 1 to 6                                                                 
+    ThisCmd = ' '                                                               
+    ThisOpt = ' '                                                               
+  /*Say "Srch "I":" Value('ZMSFS'I) "-" */                                      
+    ThisLine = value('ZMSFS'I)                                                  
+    if ThisLine = '' then iterate                                               
+    J = J + 1   /* otherwise we have some content to save... */                 
+    if left(ThisLine,7)  = 'SRCHFOR' ,                                          
+     | left(ThisLine,6)  = 'DPLINE',                                            
+      | left(ThisLine,2) = '.*' then                                            
+      DO                                                                        
+        SrchCmds.J = ThisLine /* assume power user knows what they're doing */  
+        iterate                                                                 
+      END                                                                       
+    /* If there is a trailing C - then it's a continuation line */              
+    if translate(right(ThisLine,2)) = ' C' Then                                 
+      Do                                                                        
+        ThisCmd ='SRCHFORC '                                                    
+        ThisLine = strip(left(ThisLine,(length(thisLine) - 1)))                 
+      End                                                                       
+    else                                                                        
+      ThisCmd ='SRCHFOR  '                                                      
+    /* Note - I only allow Word or Prefix or Suffix maybe there is more */      
+    if translate(right(ThisLine,5)) = ' WORD' Then                              
+      Do                                                                        
+        ThisOpt =',W'                                                           
+        ThisLine = strip(left(ThisLine,(length(thisLine) - 4)))                 
+      End                                                                       
+    Else                                                                        
+      if translate(right(ThisLine,7)) = ' PREFIX' Then                          
+        Do                                                                      
+          ThisOpt =',P'                                                         
+          ThisLine = strip(left(ThisLine,(length(thisLine) - 6)))               
+        End                                                                     
+      Else                                                                      
+        if translate(right(ThisLine,7)) = ' SUFFIX' Then                        
+          Do                                                                    
+            ThisOpt =',S'                                                       
+            ThisLine = strip(left(ThisLine,(length(thisLine) - 6)))             
+          End                                                                   
+    /* ToDo Do I need to detect missing/mismatched quotes? */                   
+    If Left(ThisLine,1) ^= "'" ,                                                
+     & Left(ThisLine,1) ^= '"' then                                             
+       ThisLine = "'"||ThisLine                                                 
+    If right(ThisLine,1) ^= "'" ,                                               
+     & right(ThisLine,1) ^= '"' then                                            
+       ThisLine =  ThisLine || "'"                                              
+    /* String the command, string, and options together */                      
+    SrchCmds.J = ThisCmd || ThisLine || ThisOpt                                 
+  END                                                                           
+  /* Save the options for later and continue parsing */                         
+  If ZMSFANYC = '/' then                                                        
+    OPTANYC = 'ANYC'                                                            
+  ELSE                                                                          
+    OPTANYC = ''                                                                
+  If ZMSFMIXV = '/' then                                                        
+    OPTMIXD = 'MIXED'                                                           
+  ELSE                                                                          
+    OPTMIXD = ''                                                                
+  SrchStr = "'Extended-Search-Query'" ESRNDOPT                                  
+  SrchCMD1 = SrchCmds.1                                                         
+  SrchCMD2 = SrchCmds.2                                                         
+  SrchCMD3 = SrchCmds.3                                                         
+  SrchCMD4 = SrchCmds.4                                                         
+  SrchCMD5 = SrchCmds.5                                                         
+  SrchCMD6 = SrchCmds.6                                                         
+end                                                                             
+                                                                                
+if Left(SrchStr,1) = '"' then /* Flip Quote to Apost */                         
+do                            /* and Double quotes   */                         
+  TrnsStr = ""                                                                  
+  Do i = 1 to Length(SrchStr)                                                   
+    if Substr(SrchStr,i,1) =  '"' Then TrnsStr = TrnsStr || "'"                 
+    else                                                                        
+      if Substr(SrchStr,i,1) =  "'" Then TrnsStr = TrnsStr || "''"              
+      else                                                                      
+        TrnsStr = TrnsStr || Substr(SrchStr,i,1)                                
+  end                                                                           
+  Srchstr = TrnsStr                                                             
+end                                                                             
+                                                                                
+if Left(SrchStr,1) = "'" then /* find ending quote */                           
+do                                                                              
+  Do i = Length(SrchStr) by -1 to 1                                             
+    if Substr(SrchStr,i,1) =  "'" Then leave                                    
+  end                                                                           
+  rest = Strip(Substr(Srchstr,(i+1)))                                           
+  SrchStr = left(Srchstr,(i))                                                   
+end                                                                             
+else                                                                            
+do                            /* Assume Quotes if missing*/                     
+  TrnsStr = "'"                                                                 
+  Do i = 1 to Length(SrchStr)                                                   
+    if Substr(SrchStr,i,1) <>  ' ' Then                                         
+      TrnsStr = TrnsStr || Substr(SrchStr,i,1)                                  
+    else                                                                        
+      leave                                                                     
+  end                                                                           
+  rest = Strip(substr(Srchstr,i)) /* keep the rest...    */                     
+  Srchstr = TrnsStr || "'"        /* add the ending quote */                    
+end                                                                             
+                                                                                
+upper rest        /* make the rest all upper case just in case */               
+ColFrom  = ""     /* initialise parse results */                                
+ColTo    = ""     /* Compare to column */                                       
+Opt      = ""                                                                   
+PrntOpt  = ""     /* print control optioin */                                   
+SummOpt  = ""     /* Summary option (CCID or COMMENT for special handling) */   
+ColOfst  = 0      /* Override offset from where to display string */            
+ESRCHSFX = "ESRC.SRC"                                                           
+                                                                                
+Do i = 1 to Length(rest)                                                        
+                                                                                
+  if substr(rest,i,1) = " " | ,                                                 
+     substr(rest,i,1) = "," then iterate                                        
+  if substr(rest,i,4) = "WORD" then                                             
+    Opt = ",W"                                                                  
+  if substr(rest,i,6) = "PREFIX" then                                           
+    Opt = ",P"                                                                  
+  if substr(rest,i,6) = "SUFFIX" then                                           
+    Opt = ",S"                                                                  
+  if substr(rest,i,5) = "REUSE" THEN DO                                         
+      ESRRMOPT        = '3'                                                     
+      ESRRNOPT        = 'REUSE'                                                 
+      ADDRESS ISPEXEC "VPUT (ESRRMOPT ESRRNOPT) SHARED"                         
+    end                                                                         
+  if substr(rest,i,7) = "REFRESH" ,                                             
+  | substr(rest,i,4)  = "REF " ,                                                
+  | ESRRMOPT          = '2' THEN DO                                             
+      CALL OUTTRAP "out."                                                       
+      ADDRESS TSO "DELETE '"ESRCHPFX"."ESRCHSFX"'"                              
+      CALL OUTTRAP "OFF"                                                        
+    end                                                                         
+  if substr(rest,i,7) = "HISTORY" ,                                             
+   | substr(rest,i,5) = "HIST " THEN DO                                         
+    ESRCHSFX= ESRC.HST                                                          
+    PrntOpt = HISTORY                                                           
+    ColOfst = 1     /* or use 13 to show the source */                          
+    end                                                                         
+  if substr(rest,i,7) = "CHANGES" ,                                             
+  | substr(rest,i,4) = "CHA " THEN DO                                           
+    ESRCHSFX= ESRC.CHG                                                          
+    PrntOpt = CHANGES                                                           
+    ColOfst = 1     /* or use 13 to show the source */                          
+    end                                                                         
+  if substr(rest,i,6) = "MASTER" ,                                              
+  | substr(rest,i,5) = "MAST " THEN DO                                          
+    ESRCHSFX= ESRC.MST                                                          
+    PrntOpt = MASTER                                                            
+    ColOfst = 1                                                                 
+    end                                                                         
+  if substr(rest,i,7) = "SUMMARY" ,                                             
+  | substr(rest,i,4) = "SUM " THEN DO                                           
+    ESRCHSFX= ESRC.SUM                                                          
+    PrntOpt = SUMMARY                                                           
+    ColOfst = 1                                                                 
+    end                                                                         
+  if substr(rest,i,4) = "CCID" ,                                                
+  | substr(rest,i,4) = "CCI " THEN DO                                           
+    ESRCHSFX= ESRC.SUM                                                          
+    PrntOpt = SUMMARY                                                           
+    ColOfst = 1                                                                 
+    SummOpt = CCID                                                              
+    end                                                                         
+  if substr(rest,i,7) = "COMMENT" ,                                             
+  | substr(rest,i,4) = "COM " THEN DO                                           
+    ESRCHSFX= ESRC.SUM                                                          
+    PrntOpt = SUMMARY                                                           
+    ColOfst = 1                                                                 
+    SummOpt = COMMENT                                                           
+    end                                                                         
+  if substr(rest,i,7) = "LISTING" ,                                             
+  | substr(rest,i,5) = "LIST " THEN DO                                          
+    ESRCHSFX= ESRC.LST                                                          
+    PrntOpt = LISTING                                                           
+    ColOfst = 1                                                                 
+    end                                                                         
+  if substr(rest,i,9) = "COMPONENT" ,                                           
+  | substr(rest,i,5) = "COMP " THEN DO                                          
+    ESRCHSFX= ESRC.CMP                                                          
+    PrntOpt = COMPONENT BROWSE                                                  
+    ColOfst = 1                                                                 
+    end                                                                         
+  if Datatype(substr(rest,i,1),n) then                                          
+    do                                                                          
+      savedigits = substr(rest,i,1)                                             
+      do forever                                                                
+        if Datatype(substr(rest,(i+1),1),n) then                                
+        do                                                                      
+          savedigits = savedigits || substr(rest,(i+1),1)                       
+          i = i + 1                                                             
+          iterate                                                               
+        end                                                                     
+        else                                                                    
+          if ColFrom = ""    then ColFrom = ',' || savedigits                   
+          else if ColTo = "" then ColTo   = ':' || savedigits                   
+        leave                                                                   
+      end                                                                       
+    end                                                                         
+end                                                                             
+                                                                                
+/*                                                                              
+   If user specified CCID or COMMENT set default column ranges...               
+   TODO - could also add a SRCHFORC or DPLINE lines to confirm we are           
+   only looking at CCIDs... for example looking for : in 33 (HH:MM) lines       
+*/                                                                              
+if SUMMOPT = "CCID" & ColFrom = "" Then                                         
+do                                                                              
+    ColFrom = ',46'                                                             
+    ColTo   = ':58'                                                             
+end                                                                             
+                                                                                
+if SUMMOPT = "COMMENT" & ColFrom = "" Then                                      
+do                                                                              
+    ColFrom = ',59'                                                             
+    ColTo   = ':98'                                                             
+end                                                                             
+                                                                                
+LookFor = substr(SrchStr,2,(length(Srchstr)-2))                                 
+SrchCmd = SrchStr || Opt || ColFrom || ColTo                                    
+                                                                                
+Return        /* args all set go back to mainline */                            
+                                                                                
+Findtable:                                                                      
+/*                                                                              
+   Normally at this point we'd look up esorttbl to find the values              
+   for the table name, and all the variables etc. but for demo                  
+   we'll just assume them as they would be for quickedit                        
+*/                                                                              
+/*                                                                              
+   Table should already be open, just go check it's stats...                    
+*/                                                                              
+  ADDRESS ISPEXEC "TBQUERY" ELSELTBN "KEYS(TABKEYS) NAMES(TABVARS)" ,           
+    "POSITION(TABPOSI) SORTFLDS(TABSORT)"                                       
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+/*                                                                              
+   If table doesn't have our vars, extend it...                                 
+*/                                                                              
+  ExtVar = index(TABVARS,'ESRTGTEL') /* look for our vars) */                   
+  if ExtVar = 0 then     /* no sign of our vars...*/                            
+    call ExtendTbl   /* Extend table with search results vars */                
+                                                                                
+return                                                                          
+                                                                                
+CheckStat:                                                                      
+/*                                                                              
+   This Subroutine determines where we are with regard to our                   
+   retrieve or print file.                                                      
+*/                                                                              
+  EsrchDun = 'YES'     /* start with an optimistic point of view */             
+  if sysdsn("'"ESRCHPFX"."ESRCHSFX"'") = OK then /* file exists? */             
+    call ChkMems            /* is the file stale? */                            
+  else                                                                          
+    EsrchDun = 'NO'                                                             
+                                                                                
+  if  EsrchDun = 'NO' then  /* We need a new file  */                           
+  do                                                                            
+      ADDRESS TSO "ALLOC DD(NEWDD) DA('"ESRCHPFX"."ESRCHSFX"') ",               
+        "LRECL(32756) BLKSIZE(32760) SP(10,20) DIR(45) RECFM(V,B) ",            
+        /*"MGMTCLAS(MCWRKD)"  */ ,                                              
+        "CYL NEW REU CAT DSNTYPE(LIBRARY)"                                      
+      ADDRESS TSO "FREE DD(NEWDD)"                                              
+   end                                                                          
+return                                                                          
+                                                                                
+ChkMems:                                                                        
+/*                                                                              
+   This Subroutine is check that the print file has all expected output         
+   TODO - At the moment I'm just using SYSDSN to check all members OK           
+          it might be faster to use LMINIT and LMFIND or store some             
+          special member with a checksum of what the file contains              
+*/                                                                              
+IF ESRRMOPT ^= '1' THEN RETURN /* only check if using auto resume mode*/        
+ADDRESS ISPEXEC "TBTOP" ELSELTBN                                                
+if rc <> 0 THEN SAY ZERRSM ZERRLM                                               
+                                                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTBN                                            
+   if rc <> 0 THEN LEAVE                           /* end of table? */          
+   ADDRESS ISPEXEC "TBGET" ELSELTBN                /* get a record */           
+   LookFor = ESRCHPFX"."ESRCHSFX"("ESRTGTEL")"     /* what we want */           
+   MemStat = sysdsn("'"lookFor"'")                                              
+   if MemStat  ^= 'OK' then                                                     
+   do                        /* Mem not OK? */                                  
+      EsrchDun = 'NO'       /* Force Re-Allocate...          */                 
+      CALL OUTTRAP "out."   /* unless maybe (todo) we are resuming? */          
+      ADDRESS TSO "DELETE '"ESRCHPFX"."ESRCHSFX"'"                              
+      CALL OUTTRAP "OFF"                                                        
+      leave                                                                     
+   end                                                                          
+END                                                                             
+                                                                                
+Return                                                                          
+                                                                                
+ExtendTbl:                                                                      
+/*                                                                              
+   This Subroutine is used to initialize extend the element                     
+   selection table to add the extra variables required to track                 
+   the 'encrypted' member name and return result strings                        
+*/                                                                              
+CNTELE = 0                             /* initialise Ele count */               
+MEMBERS. = 0                           /* initi member name stem */             
+TABVARS = Left(TABVARS,(length(TABVARS)-1)) || ' ESRTGTEL ESRFOUND)'            
+IF TABKEYS = ""                                                                 
+  THEN KEYTEXT = ""                                                             
+  ELSE KEYTEXT = "KEYS" || TABKEYS                                              
+ADDRESS ISPEXEC 'TBCREATE' ELSELTMP ,                                           
+                KEYTEXT ,                       /* same keys, but... */         
+                'NAMES'TABVARS' NOWRITE'        /* with our extra vars */       
+If rc ^= 0 Then               /* Return codes                      */           
+  Do                          /*  4 - Duplicate table exists but   */           
+    say 'Bad RC ('rc') from TBcreate for Temp Table'                            
+  End                         /*      "replace" specified          */           
+                              /*  8 - Table already exists;        */           
+                              /*      "replace" not specified      */           
+                              /* 12 - Table in use; enq failed     */           
+                              /* 16 - Table input library not      */           
+                              /*      allocated with "write"       */           
+                              /* 20 - Severe error                 */           
+ADDRESS ISPEXEC "TBTOP" ELSELTBN                                                
+if rc <> 0 THEN SAY ZERRSM ZERRLM                                               
+                                                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTBN                                            
+   if rc <> 0 THEN LEAVE                                                        
+   ADDRESS ISPEXEC "TBGET" ELSELTBN                                             
+   /*                                                                           
+   SAY EEVETDMS EEVETKEL EEVETKTY EEVETKEN EEVETKST EEVETKSY EEVETKSB           
+   */                                                                           
+   CNTELE = CNTELE + 1                                                          
+   ESRTGTEL = UniqMem(EEVETKEL)                                                 
+   ESRFOUND = ""                                                                
+   if LEFT(EEVETDMS,6) = "*Found" then  /* Reset Found flag if set */           
+     Do                                                                         
+       EEVETDMS = ""                                                            
+       ESRFOUND = ""                                                            
+     end                                                                        
+   ADDRESS ISPEXEC "TBADD" ELSELTMP   /* save extra fields in new table */      
+END                                                                             
+/*                                                                              
+  Now we've got a copy of the table, delete the live one and copy back          
+*/                                                                              
+ADDRESS ISPEXEC 'TBCLOSE'  ELSELTBN             /* close live one */            
+ADDRESS ISPEXEC 'TBCREATE' ELSELTBN ,           /* create a new version */      
+                KEYTEXT ,                       /* same keys, but... */         
+                'NAMES'TABVARS' NOWRITE'        /* with our extra vars */       
+ADDRESS ISPEXEC "TBTOP" ELSELTMP                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTMP            /* Get next */                  
+   if rc <> 0 THEN LEAVE                        /* ...at end we're done */      
+   ADDRESS ISPEXEC "TBGET" ELSELTMP             /* get temp record */           
+   ADDRESS ISPEXEC "TBADD" ELSELTBN             /* Add it to new table */       
+END                                                                             
+  ADDRESS ISPEXEC 'TBCLOSE'  ELSELTMP           /* done with copy, close it */  
+                                                                                
+Return                                                                          
+                                                                                
+ResetTbl:                                                                       
+CNTELE = 0                             /* initialise Ele count */               
+/*                                                                              
+   This Subroutine is used to reset find status for all elements                
+*/                                                                              
+ADDRESS ISPEXEC "TBTOP" ELSELTBN                                                
+if rc <> 0 THEN SAY ZERRSM ZERRLM                                               
+                                                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTBN                                            
+   if rc <> 0 THEN LEAVE                                                        
+   CNTELE = CNTELE + 1                                                          
+   ADDRESS ISPEXEC "TBGET" ELSELTBN                                             
+   if LEFT(EEVETDMS,6)  = "*Found" | ,       /* Reset Found flag if set */      
+      LEFT(EEVETDMS,10) = "*Invld opt" then  /* (or invalid opt)        */      
+        EEVETDMS = ""                                                           
+   ESRFOUND = ""                                                                
+   ADDRESS ISPEXEC "TBPUT" ELSELTBN                                             
+END                                                                             
+                                                                                
+Return                                                                          
+                                                                                
+                                                                                
+BuildJob:                                                                       
+                                                                                
+/*                                                                              
+   Retrieve copy of source to search in OR use the appropriate print option     
+                                                                                
+   First off though, use sensible numbers of parallel processors...             
+*/                                                                              
+if CNTELE < 5 | ESRNECAP = ' ' then CNTDYN = '00' /* did user turn off? */      
+  else if CNTELE >= 25 then CNTDYN = '25'                                       
+    else CNTDYN = right(CNTELE,2,'0')                                           
+/*                                                                              
+  Display a prompt to confirm it's OK to submit a job...                        
+*/                                                                              
+  ADDRESS ISPEXEC "ADDPOP"                                                      
+  ADDRESS ISPEXEC "DISPLAY PANEL(C1ESRCNF)"                                     
+  DisplRC = rc                                                                  
+  if DisplRC >= 8 Then                                                          
+    do                                                                          
+      ADDRESS ISPEXEC "REMPOP"                                                  
+      ADDRESS ISPEXEC "SETMSG msg(ENES007I)" /* User abort */                   
+      ADDRESS ISPEXEC "TBTOP" ELSELTBN                                          
+      IF ZTDTOP > 0 THEN                                                        
+        ADDRESS ISPEXEC "TBSKIP" ELSELTBN "NUMBER(+"ZTDTOP")"                   
+      ADDRESS ISPEXEC "control nondispl" /* press enter to process */           
+      exit 0 /* user decided to quit... */                                      
+    end                                                                         
+/*                                                                              
+  now insert the skeleton                                                       
+*/                                                                              
+  ADDRESS ISPEXEC "FTOPEN TEMP"                                                 
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  ADDRESS ISPEXEC "FTINCL ENDESESR" /* new skeleton */                          
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  ADDRESS ISPEXEC "FTCLOSE"                                                     
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  ADDRESS ISPEXEC "VGET (ZTEMPF ZTEMPN)"                                        
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  /*ADDDRESS ISPEXEC "EDIT DATASET('" || ZTEMPF || "')" */                      
+                                                                                
+Return                                                                          
+                                                                                
+ParseRep:                                                                       
+CNTFND = 0                          /*  Initialise Find count */                
+/*                                                                              
+   Read Report file that was created by Search                                  
+*/                                                                              
+ADDRESS TSO "ALLOC DD(OUTDD) SHR REU DA('"ESRCHPFX".ESRCHREP')"                 
+IF RC ^= 0 THEN                                                                 
+Do                                                                              
+  ZEDLMSG = "Allocate request for '"ESRCHPFX".ESRCHREP'",                       
+            "Failed with RC:" RC "EZsubWat RC:" subwatrc                        
+  ADDRESS ISPEXEC "VPUT (ZEDLMSG) SHARED"                                       
+  ADDRESS ISPEXEC "SETMSG msg(ENES005E)" /* Allocate Error */                   
+  exit 16                                                                       
+end                                                                             
+                                                                                
+"EXECIO * DISKR OUTDD(STEM DATA. FINIS"                                         
+IF RC ^= 0 THEN                                                                 
+Do                                                                              
+  ZEDLMSG = "Read request for file OUTDD",                                      
+            "D/S '"ESRCHPFX".ESRCHREP'",                                        
+            "Failed with RC:" RC                                                
+  ADDRESS ISPEXEC "VPUT (ZEDLMSG) SHARED"                                       
+  ADDRESS ISPEXEC "SETMSG msg(ENES006E)" /* Read I/O Error */                   
+  ADDRESS TSO "FREE DD(OUTDD) "          /* free just in case */                
+  exit 16                                                                       
+end                                                                             
+ADDRESS TSO "FREE DD(OUTDD) "            /* we're done with this file */        
+                                                                                
+/* Set Appropriate Column Heading (Non-widescreen) */                           
+   if SUMMOPT <> "" Then /* We are going to show Summary Info */                
+     esrchhed = 'Date     CCID         Comment'                                 
+   Else                  /* A Text display optionally with a column offset */   
+     esrchhed = 'Found String'                                                  
+  ADDRESS ISPEXEC "VPUT (ESRCHHED) SHARED"                                      
+                                                                                
+/* Main loop to search/replace the table  */                                    
+                                                                                
+do i = 1 to DATA.0                                                              
+   if LEFT(data.i,2) <> "  " then                                               
+     if left(data.i,8) <> " MEMBER " then                                       
+     Do                                                                         
+       ADDRESS ISPEXEC "TBTOP"    ELSELTBN                                      
+       ADDRESS ISPEXEC "TBVCLEAR" ELSELTBN                                      
+       ESRTGTEL = strip(left(data.i,8))                                         
+       ADDRESS ISPEXEC "TBSCAN"   ELSELTBN,                                     
+                       "ARGLIST(ESRTGTEL)" ,                                    
+                       "NEXT",                                                  
+                       "POSITION(CRPSCAN)",                                     
+                       "CONDLIST(EQ)"                                           
+       if rc = 0 THEN                                                           
+       do                                                                       
+         CNTFND = CNTFND + 1                                                    
+         if SUMMOPT <> "" Then/* a CCID or COMMENT request (append date) */     
+           ESRFOUND =  SUBSTR(data.i,41,7) || "  " || SUBSTR(data.i,64,54)      
+         Else                 /* A normal display request - start at 19 */      
+         do                                                                     
+           ESRFOUND = SUBSTR(data.i,(ColOfst+19))                               
+           ColFound = index(ESRFOUND,LookFor)                                   
+           if colfound > 38 then                                                
+             ESRFOUND = "..." || SUBSTR(ESRFOUND,(ColFound-10))                 
+         end                                                                    
+         EEVETDMS = LEFT("*Found",10) /* || LEFT(ESRFOUND,80)    - too big!) */ 
+         ADDRESS ISPEXEC "TBPUT" ELSELTBN                                       
+         if rc <> 0 THEN SAY ZERRSM ZERRLM                                      
+         ESRFOUND = "" /* keep this var clean for re-display*/                  
+       end                                                                      
+     end                                                                        
+end                                                                             
+                                                                                
+return                                                                          
+                                                                                
+CallSrch:                                                                       
+/*  This routine performs a search using the previously determined              
+    search string, and the previously built src or ptint file                   
+*/                                                                              
+ADDRESS TSO                                                                     
+  CALL MSG "ON"                                                                 
+  CALL OUTTRAP "out."                                                           
+  "DELETE '"ESRCHPFX".ESRCHREP'"                                                
+  "DELETE '"ESRCHPFX".ESRCHINP'"                                                
+  CALL OUTTRAP "OFF"                                                            
+  "ALLOC DD(NEWDD) SHR REUS DA('"ESRCHPFX"."ESRCHSFX"')"                        
+  "ALLOC DD(OUTDD) DA('"ESRCHPFX".ESRCHREP') SP(10,20) TR NEW CAT RELEASE REU", 
+    /* "MGMTCLAS(MCWRKD)"  */ ,                                                 
+    "LRECL(202) BLKSIZE(27876) RECFM(F,B) "                                     
+  "ALLOC DD(SYSIN) DA('"ESRCHPFX".ESRCHINP') SP(1,0) TR NEW CAT RELEASE REU",   
+    /* "MGMTCLAS(MCWRKD)"  */ ,                                                 
+     "LRECL(80) BLKSIZE(27920) RECFM(F,B) REU "                                 
+                                                                                
+ADDRESS MVS                                                                     
+Queue "NTITLE   'ENDEVOR RE-SEARCHFOR'"                                         
+Queue "SLIST    OFF"                                                            
+if Left(SrchCmd,23) = "'Extended-Search-Query'" THEN                            
+  DO J = 1 to 6                                                                 
+    If SrchCmds.J ^= '' then                                                    
+      Queue SrchCmds.J                                                          
+  END                                                                           
+Else                                                                            
+  Queue "SRCHFOR  "  SrchCmd                                                    
+if ESRNIGNC = '/' THEN                                                          
+  QUEUE "DPLINE '//*',1:3 * IGNORE JCL COMMENT LINES"                           
+Queue ""                                                                        
+"EXECIO * DISKW SYSIN (FINIS"                                                   
+                                                                                
+ADDRESS ISPEXEC "SELECT PGM(ISRSUPC)" ,                                         
+  "PARM(SRCHCMP,"OPTANYC OPTMIXD" FMSTOP LONGLN NOPRTCC NOSUMS IDPFX)"          
+  SearchRC = RC                                                                 
+                                                                                
+ADDRESS TSO                                                                     
+  "FREE DD(OUTDD) "                                                             
+  "FREE DD(NEWDD) "                                                             
+  "FREE DD(SYSIN) "                                                             
+                                                                                
+return                                                                          
+                                                                                
+IncrJobN:                                                                       
+/*  This checks the job card and increments the job name in using the           
+    same logic as C1SR1000                                                      
+*/                                                                              
+  ADDRESS ISPEXEC "VGET (ZUSER)"                                                
+  ADDRESS ISPEXEC "VGET (C1ESJ1 C1ESJ2 C1ESJ3 C1ESJ4) PROFILE"                  
+  C1LN = LENGTH(C1ESJ1)                                                         
+  C1SPACE = INDEX(C1ESJ1," ")                                                   
+  /*-----------------------------------------------------------------*/         
+  /* C1SPACE CONTAINS THE INDEX OF THE FIRST SPACE.  IF THE VALUE IS*/          
+  /* IN THE RANGE 4-11 THEN THE JCL STATEMENT IS ASSUMED TO CONTAIN  */         
+  /* A VALID JOBCARD.  THE FIRST THREE CHARACTERS OF THE JCL STATE-  */         
+  /* MENT ARE ASSUMED TO BE // AND THE FIRST CHARACTER OF THE JOB    */         
+  /* NAME.                                                           */         
+  /*-----------------------------------------------------------------*/         
+  IF (C1SPACE > 3) & (C1SPACE < 12) THEN                                        
+    DO                                                                          
+      C1LASTCH = SUBSTR(C1ESJ1,(C1SPACE - 1),1)                                 
+      C1UID    = SUBSTR(C1ESJ1,3,(C1SPACE - 4))                                 
+      IF  (C1UID = ZUSER) THEN                                                  
+        DO                                                                      
+          C1CURCH = INDEX("ABCDEFGHIJKLMNOPQRSTUVWXYZA01234567890",C1LASTCH)    
+        IF C1CURCH > 0  THEN                                                    
+          DO                                                                    
+            C1NEXTCH = SUBSTR("ABCDEFGHIJKLMNOPQRSTUVWXYZA01234567890" ,        
+                        ,(C1CURCH+1),1)                                         
+            C1JCV1 = SUBSTR(C1ESJ1,1,(C1SPACE - 2))                             
+            C1JCV2 = SUBSTR(C1ESJ1,C1SPACE)                                     
+            C1ESJ1 = C1JCV1 || C1NEXTCH || C1JCV2                               
+          END                                                                   
+        END                                                                     
+    END                                                                         
+  ADDRESS ISPEXEC "VPUT (C1ESJ1 C1ESJ2 C1ESJ3 C1ESJ4) PROFILE"                  
+  ADDRESS ISPEXEC "VPUT (C1ESJ1 C1ESJ2 C1ESJ3 C1ESJ4) SHARED"                   
+return                                                                          
+                                                                                
+/* Procedures and functions follow */                                           
+                                                                                
+                                                                                
+UniqMem : procedure  expose MEMBERS. /* Return a valid, unique member           
+                           name. The goal is to use the element name if         
+                           possible and failing that to attach a suffix         
+                           of as many characters as required                    
+                        */                                                      
+  elenam = ARG(1)                                                               
+  elenam = translate(elenam) /* start By UpperCasing the element */             
+  /* Next check for an invalid 1st character in the PDS member name */          
+  if pos(left(elenam,1),'ABCDEFGHIJKLMNOPQRSTUVWXYZ$@#') = 0 then               
+     elenam = '#' || substr(elenam,2) /* translate to # if not valid*/          
+  /* Then translate any invalid chrs to $ - ($#% are allowed) */                
+  elenam = translate(elenam,'$','!"∂%µ&*()_-+=çŸ{};:@~<>,./?\|^`∫','$')         
+  elelen = length(elenam)                                                       
+  elesuf = ''                                                                   
+  If elelen > 8 then    /* Endevor element names can be long...                 
+                           start with 8                                         
+                                                                                
+                        */                                                      
+    do                                                                          
+      elepfx= left(elenam,8)                                                    
+    end                                                                         
+  else                                                                          
+    do                                                                          
+      elepfx= elenam                                                            
+    end                                                                         
+  do i = 0 to 101                                                               
+    elesuf = validSuf(i)                                                        
+    if (length(elepfx) + length(elesuf)) > 8 then                               
+       elepfx = left(elepfx,(8-(length(elesuf))))                               
+    toelenam = elepfx || elesuf                                                 
+    if MEMBERS.toelenam then                                                    
+      do                                                                        
+        /* say elenam "/" toelenam "is not a unique name" */                    
+        iterate                                                                 
+      end                                                                       
+    else                                                                        
+      do                                                                        
+        MEMBERS.toelenam = 1                                                    
+        leave                                                                   
+      end                                                                       
+  end                                                                           
+  say = 'Encrypted name:' toelenam                                              
+return toelenam                                                                 
+                                                                                
+ValidSuf: procedure /* This procedure returns a string respresentation          
+                       of the arg(1)  where the allowed characters are          
+                       set using a static variable (validchr) so that in        
+                       effect the argument is converted to a base n             
+                       string where n is the number of characters seeded        
+                       in validchr if you set it to 0123456789ABCDEF -          
+                       it would return hex i.e. base 16, but we can use         
+                       more letters and...  a few national characters!          
+                    */                                                          
+/*  validchr = '$#@'*/                                                          
+/*  validchr = '$#@0123456789'*/                                                
+    validchr = '$#@0123456789ABCDEFGHIJKLMNOPQURSTUVWXYZ'                       
+if ARG(1) = 0 then return ''                                                    
+if ARG(1) <= length(validchr) then                                              
+  return substr(validchr,(arg(1)),1)                                            
+if ARG(1) <= (length(validchr) + (length(validchr) ** 2)) then                  
+  return SUBSTR(validchr,(trunc((arg(1)-1) /length(validchr))),1) || ,          
+         SUBSTR(validchr,(((arg(1)-1) // length(validchr))+1),1)                
+/* still here - we didn't expect that error out*/                               
+Say "Need to calculate longer suffix - contact support"                         
+exit 999                                                                        

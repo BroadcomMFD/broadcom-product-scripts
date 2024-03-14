@@ -1,0 +1,41 @@
+/* Rexx - Invoke IBM SDSF with Endevor HiLite enabled overrides */              
+parse arg parms               /* get any parms */                               
+/* Setup */                                                                     
+/* Variable settings for each site --->           */                            
+   WhereIam =  WHERE@M1()                                                       
+   interpret 'Call' WhereIam "'MyCLS2Library'"                                  
+   MyCLS2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyPEN2Library'"                                  
+   MyPEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MyMEN2Library'"                                  
+   MyMEN2Library = Result                                                       
+   interpret 'Call' WhereIam "'MySysviewPref'"                                  
+   MySysviewPref = Result                                                       
+/* Tailor the following LIBDEFs as needed to include Endevor HiLite support */  
+/* and Sysview ollowing LIBDEFs as needed to include Endevor HiLite support */  
+"ALTLIB ACT APPLICATION(CLIST) DATASET(",             /* Clist/Rexx  */         
+                                 "'"MyCLS2Library"'",                           
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPPLIB DATASET stack ID(",           /* Panels      */         
+                                 "'"MyPEN2Library"'",                           
+                                 "'"MySysviewPref".CNM4BISP'",                  
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPMLIB DATASET stack ID(",           /* Messages    */         
+                                 "'"MyMen2Library"'",                           
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPTLIB DATASET stack ID(",           /* Tables      */         
+                                 "'"MySysviewPref".CNM4BISP'",                  
+                                 ")"                                            
+"ISPEXEC LIBDEF ISPLLIB DATASET stack ID(",           /* Tables      */         
+                                 "'"MySysviewPref".CNM4BLOD'",                  
+                                 ")"                                            
+/* now call Sysview as appropriate for your installation                        
+*/                                                                              
+address ispexec "select CMD(GSVXSPF "parms")",                                  
+                "NOCHECK NEWAPPL(GSVX) SCRNAME(SYSV) MODE(FSCR) PASSLIB"        
+/* clean up */                                                                  
+"ISPEXEC LIBDEF ISPPLIB"                                                        
+"ISPEXEC LIBDEF ISPMLIB"                                                        
+"ISPEXEC LIBDEF ISPTLIB"                                                        
+"ISPEXEC LIBDEF ISPLLIB"                                                        
+"ALTLIB DEACTIVATE APPLICATION(CLIST)"                                          

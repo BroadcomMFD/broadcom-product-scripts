@@ -1,0 +1,49 @@
+/* Rexx - Sort by named column */                                               
+address isredit                                                                 
+"MACRO (PARMS)"                                                                 
+"ISREDIT (SAVE) = USER_STATE"                                                   
+if PARMS = '' then PARMS = 'Pri' /* by default assume Pri */                    
+"SEEK '* Heading' 1 FIRST"                                                      
+if RC > 0 then signal MissHeading                                               
+"(LP CP)=CURSOR"                                                                
+"(DATALINE)=LINE" LP                                                            
+PrmStrt = pos(TRANSLATE(PARMS),TRANSLATE(DATALINE))                             
+if PrmStrt = 0 then signal MissParm                                             
+WrdEnd = 'FALSE'                                                                
+do I = (PrmStrt + LENGTH(PARMS)) by 1 to 81                                     
+  ThisChr = SubStr(DATALINE,I,1," ")                                            
+  if WrdEnd == 'FALSE' then                                                     
+    if  ThisChr == ' ' then WrdEnd = 'TRUE'                                     
+    else iterate /* haven't found end word yet */                               
+  else                                                                          
+    if  ThisChr \== ' ' then                                                    
+      leave     /* leave - we're done */                                        
+end                                                                             
+PrmEnd = I - 2 /* back up two chrs - the gap and the first chr of the next */   
+/*    This is the bit that does the work of sorting by the correct locations  */
+SortEm:                                                                         
+"BUILTIN RESET X"                                                               
+"EXCLUDE ' ' ALL 1"                                                             
+"BUILTIN SORT X " PrmStrt PrmEnd                                                
+"BUILTIN RESET X"                                                               
+/* now that everything is sorted OK, if it was for PRI or ALT, do a re-num too*/
+if (TRANSLATE(PARMS)) == PRI | (TRANSLATE(PARMS)) == ALT then ECOLNUM PARMS     
+"ISREDIT USER_STATE = (SAVE)"                                                   
+Message:                                                                        
+zedsmsg = 'Columns sorted'                                                      
+zedlmsg = 'Lines have been sorted acording to the "'PARMS'" column field'       
+xrc = 0                                                                         
+signal fini                                                                     
+MissHeading:                                                                    
+zedsmsg = 'Missing Heading'                                                     
+zedlmsg = 'Looks like you don''t have a "* Heading" record, try RESET'          
+xrc = 12                                                                        
+signal fini                                                                     
+MissParm:                                                                       
+zedsmsg = 'Missing Parm'                                                        
+zedlmsg = 'Can''t find the heading ('PARMS') to sort on - check heading line'   
+xrc = 12                                                                        
+signal fini                                                                     
+fini:                                                                           
+address ISPEXEC "SETMSG MSG(ISRZ000)"                                           
+return(xrc)                                                                     

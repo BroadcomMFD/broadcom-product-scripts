@@ -1,0 +1,26 @@
+)BODY EXPAND (\\)                                                               
+%TUTORIAL \-\ Long-Name Help \-\ TUTORIAL                                       
+%SELECTION ===>_ZCMD                                                          + 
++                                                                               
++  CUName:&DFCUNAME                                                             
++  SiteID:&DFSITEID \ \ +ENUXSITE RC:&ExRC \ \ +Version: Bundle 69 +            
++                                                                               
++The LongName FDP Utility uses REXX, standard ISPF/PDF services and the         
++Endevor API to allow the user to perform a subset of Endevor actions           
++against long name elements using a prototype IDE for evaluation purposes.      
++                                                                               
++  Select one of the options below for more information:                        
++   %1+- Commands and Options                                                   
++   %2+- Location fields                                                        
++   %3+- List Options                                                           
++   %4+- Action Options                                                         
++                                                                               
++   %C+- Change History                                                         
++                                                                               
+%NOTE+ Starting with version 50 of the LongName FDP Endevor 18.0.7 is now       
++      required.  Use FDP version v49 for older levels of Endevor.              
++                                                                               
++ \ \ (%END+to return) \ \                                                      
+)PROC                                                                           
+   &ZSEL = TRANS(&ZCMD 1,LNDHE110 2,LNDHE120 3,LNDHE130 4,LNDHE140 C,LNDHE1C0)  
+)END                                                                            

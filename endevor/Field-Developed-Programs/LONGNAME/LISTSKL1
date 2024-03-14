@@ -1,0 +1,6 @@
+SET OPTIONS CCID '&EEVCCID'                                                     
+         COMMENT '&EEVCOMM'                                                     
+)SEL &EEVOOSGN EQ Y                                                             
+         OVERRIDE SIGNOUT                                                       
+)ENDSEL EEVOOSGN EQ Y                                                           
+    .                                                                           

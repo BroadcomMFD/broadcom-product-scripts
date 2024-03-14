@@ -1,0 +1,300 @@
+)PANEL KEYLIST(ISRSPEC,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)            /* ISREDDE2 - ENGLISH - 7.1 */        
+ 18 TYPE(AB)                                                                    
+ 2A TYPE(ABSL) GE(ON)                                                           
+ 2B TYPE(PT)                                                                    
+ 2C TYPE(RP)                              /* Reference Phrase (White) */        
+ 2F TYPE(FP)                              /* Field Prompt */                    
+ 21 TYPE(CH)                              /* Column Heading */                  
+ 14 TYPE(NT)                                                                    
+ 1B TYPE(NEF) PADC(USER)                  /* Normal Input Field */              
+ 1C TYPE(VOI) PADC(USER)                  /* Variable Output */                 
+ ð  TYPE(NEF) CAPS(ON) PADC(USER)                                               
+)ABC DESC('File') MNEM(1)                                                       
+PDC DESC('Save') UNAVAIL(ZEDF) MNEM(1) ACTION RUN(END)                          
+PDC DESC('Cancel') MNEM(1) ACTION RUN(CANCEL)                                   
+PDC DESC('Defaults') MNEM(1)                                                    
+PDC DESC('Exit') MNEM(1) ACTION RUN(END)                                        
+)ABCINIT                                                                        
+.ZVARS=EDITFILE                                                                 
+   IF (&ZVMODET = 'VIEW') &zedf = 1                                             
+   ELSE                   &zedf = 0                                             
+)ABCPROC                                                                        
+ if (&EDITFILE EQ '3')        /* Defaults */                                    
+    &ABARDFLT = 'YES'         /* set auto navigate */                           
+    VPUT (ABARDFLT) shared    /* and Save it */                                 
+)ABC DESC('Edit') MNEM(1)                                                       
+PDC DESC('Undo') MNEM(1) ACTION RUN(>UNDO)                                      
+PDC DESC('Hilite') UNAVAIL(ZEDE) MNEM(1) ACTION RUN(>HI)                        
+PDC DESC('Cut') MNEM(1) ACTION RUN(>CUT)                                        
+PDC DESC('Paste') MNEM(1) ACTION RUN(>PASTE)                                    
+)ABCINIT                                                                        
+.ZVARS=EDITEDIT                                                                 
+   IF (&ZEDHI ^= 'YES')  &zede = 1                                              
+   ELSE &zede = 0                                                               
+)ABC DESC('Edit_Settings') MNEM(2)                                              
+PDC DESC('Edit settings') MNEM(1) ACTION RUN(>EDSET)                            
+)ABCINIT                                                                        
+.ZVARS=PDFCFM                                                                   
+)ABC DESC('Menu') MNEM(1)                                                       
+PDC DESC('Settings') UNAVAIL(ZPM1) MNEM(1) ACC(CTRL+S)                          
+ ACTION RUN(ISRROUTE) PARM('SET')                                               
+PDC DESC('View') UNAVAIL(ZPM2) MNEM(1) ACC(CTRL+V)                              
+ ACTION RUN(ISRROUTE) PARM('BR1')                                               
+PDC DESC('Edit') UNAVAIL(ZPM3) MNEM(1) ACC(CTRL+E)                              
+ ACTION RUN(ISRROUTE) PARM('ED1')                                               
+PDC DESC('ISPF Command Shell') UNAVAIL(ZPM4) MNEM(6) ACC(CTRL+C)                
+ ACTION RUN(ISRROUTE) PARM('C1')                                                
+PDC DESC('Dialog Test...') UNAVAIL(ZPM5) MNEM(8) ACC(CTRL+T)                    
+ ACTION RUN(ISRROUTE) PARM('DAL')                                               
+PDC DESC('Other IBM Products...') UNAVAIL(ZPM6) MNEM(1) ACC(CTRL+O)             
+ ACTION RUN(ISRROUTE) PARM('OIB')                                               
+PDC DESC('SCLM') UNAVAIL(ZPM7) MNEM(3) ACC(CTRL+L)                              
+ ACTION RUN(ISRROUTE) PARM('SCL')                                               
+PDC DESC('ISPF Workplace') UNAVAIL(ZPM8) MNEM(6) ACC(CTRL+W)                    
+ ACTION RUN(ISRROUTE) PARM('WRK')                                               
+PDC DESC('Status Area...') UNAVAIL(ZPMS) MNEM(8) ACC(CTRL+A)                    
+ ACTION RUN(ISRROUTE) PARM('SAM')                                               
+PDC DESC('Exit') MNEM(2) PDSEP(ON) ACC(CTRL+X) ACTION RUN(EXIT)                 
+)ABCINIT                                                                        
+.ZVARS=ISR@OPT                                                                  
+)ABC DESC('Utilities') MNEM(1)                                                  
+PDC DESC('Library') UNAVAIL(ZUT1) MNEM(1) ACC(ALT+1)                            
+ ACTION RUN(ISRROUTE) PARM('U1')                                                
+PDC DESC('Data set') UNAVAIL(ZUT2) MNEM(1) ACC(ALT+2)                           
+ ACTION RUN(ISRROUTE) PARM('U2')                                                
+PDC DESC('Move/Copy') UNAVAIL(ZUT3) MNEM(1) ACC(ALT+3)                          
+ ACTION RUN(ISRROUTE) PARM('U3')                                                
+PDC DESC('Data Set List') UNAVAIL(ZUT4) MNEM(2) ACC(ALT+4)                      
+ ACTION RUN(ISRROUTE) PARM('U4')                                                
+PDC DESC('Reset Statistics') UNAVAIL(ZUT5) MNEM(5) ACC(ALT+5)                   
+ ACTION RUN(ISRROUTE) PARM('U5')                                                
+PDC DESC('Hardcopy') UNAVAIL(ZUT6) MNEM(1) ACC(ALT+6)                           
+ ACTION RUN(ISRROUTE) PARM('U6')                                                
+PDC DESC('Download...') UNAVAIL(ZUTDT) MNEM(2) ACC(ALT+7)                       
+ ACTION RUN(ISRROUTE) PARM('UDT')                                               
+PDC DESC('Outlist') UNAVAIL(ZUT7) MNEM(2) ACC(ALT+8)                            
+ ACTION RUN(ISRROUTE) PARM('U8')                                                
+PDC DESC('Commands...') UNAVAIL(ZUT8) MNEM(1) ACC(ALT+9)                        
+ ACTION RUN(ISRROUTE) PARM('U9')                                                
+PDC DESC('Reserved') UNAVAIL(ZUT9) MNEM(6) ACTION RUN(ISRROUTE) PARM('U10')     
+PDC DESC('Format') UNAVAIL(ZUT10) MNEM(1) ACC(ALT+F1)                           
+ ACTION RUN(ISRROUTE) PARM('U11')                                               
+PDC DESC('SuperC') UNAVAIL(ZUT11) MNEM(1) PDSEP(ON) ACC(CTRL+F2)                
+ ACTION RUN(ISRROUTE) PARM('U12')                                               
+PDC DESC('SuperCE') UNAVAIL(ZUT12) MNEM(3) ACC(CTRL+F3)                         
+ ACTION RUN(ISRROUTE) PARM('U13')                                               
+PDC DESC('Search-For') UNAVAIL(ZUT13) MNEM(2) ACC(CTRL+F4)                      
+ ACTION RUN(ISRROUTE) PARM('U14')                                               
+PDC DESC('Search-ForE') UNAVAIL(ZUT14) MNEM(4) ACC(CTRL+F5)                     
+ ACTION RUN(ISRROUTE) PARM('U15')                                               
+PDC DESC('Table Utility') UNAVAIL(ZUT15) MNEM(3) ACC(CTRL+F6)                   
+ ACTION RUN(ISRROUTE) PARM('U16')                                               
+PDC DESC('Directory List') UNAVAIL(ZUT16) MNEM(2) ACC(CTRL+F7)                  
+ ACTION RUN(ISRROUTE) PARM('U17')                                               
+)ABCINIT                                                                        
+.ZVARS=PDFUTIL                                                                  
+     &zut9 = '1'                                                                
+)ABC DESC('Compilers') MNEM(1)                                                  
+PDC DESC('Foreground Compilers') MNEM(1) ACTION RUN(ISRROUTE) PARM('FGD')       
+PDC DESC('Background Compilers') MNEM(1) ACTION RUN(ISRROUTE) PARM('BKG')       
+PDC DESC('ISPPREP Panel Utility...') MNEM(1) ACTION RUN(ISPPREP)                
+PDC DESC('DTL Compiler...') MNEM(1) ACTION RUN(ISPDTLC)                         
+)ABCINIT                                                                        
+.ZVARS=ISRLANG                                                                  
+)ABC DESC('Test') MNEM(1)                                                       
+PDC DESC('Functions...') UNAVAIL(ZPM5) MNEM(1) ACTION RUN(ISRROUTE) PARM('DL1') 
+PDC DESC('Panels...') UNAVAIL(ZPM5) MNEM(1) ACTION RUN(ISRROUTE) PARM('DL2')    
+PDC DESC('Variables...') UNAVAIL(ZPM5) MNEM(1) ACTION RUN(ISRROUTE) PARM('DL3') 
+PDC DESC('Tables...') UNAVAIL(ZPM5) MNEM(1) ACTION RUN(ISRROUTE) PARM('DL4')    
+PDC DESC('Log') UNAVAIL(ZPM5) MNEM(1) ACTION RUN(ISRROUTE) PARM('DL5')          
+PDC DESC('Services...') UNAVAIL(ZPM5) MNEM(1) ACTION RUN(ISRROUTE) PARM('DL6')  
+PDC DESC('Traces...') UNAVAIL(ZPM5) MNEM(2) ACTION RUN(ISRROUTE) PARM('DL7')    
+PDC DESC('Break Points...') UNAVAIL(ZPM5) MNEM(1)                               
+ ACTION RUN(ISRROUTE) PARM('DL8')                                               
+PDC DESC('Dialog Test...') UNAVAIL(ZPM5) MNEM(1)                                
+ ACTION RUN(ISRROUTE) PARM('DAL')                                               
+PDC DESC('Dialog Test appl ID...') MNEM(2) ACTION RUN(ISRROUTE) PARM('DAP')     
+)ABCINIT                                                                        
+.ZVARS=DIATEST                                                                  
+)ABC DESC('Help') MNEM(1)                                                       
+PDC DESC('General') MNEM(1) ACTION RUN(TUTOR) PARM('ISR2A000')                  
+PDC DESC('Display screen format') MNEM(1) ACTION RUN(TUTOR) PARM('ISR2E000')    
+PDC DESC('Scrolling data') MNEM(1) ACTION RUN(TUTOR) PARM('ISR2F000')           
+PDC DESC('Sequence numbering') MNEM(2) ACTION RUN(TUTOR) PARM('ISR2G000')       
+PDC DESC('Display modes') MNEM(2) ACTION RUN(TUTOR) PARM('ISR2H000')            
+PDC DESC('Tabbing') MNEM(1) ACTION RUN(TUTOR) PARM('ISR2I000')                  
+PDC DESC('Automatic recovery') MNEM(1) ACTION RUN(TUTOR) PARM('ISR2J000')       
+PDC DESC('Edit profiles') MNEM(6) ACTION RUN(TUTOR) PARM('ISR2K000')            
+PDC DESC('Edit line commands') MNEM(6) ACTION RUN(TUTOR) PARM('ISR2L000')       
+PDC DESC('Edit primary commands') MNEM(7) ACTION RUN(TUTOR) PARM('ISR2M000')    
+PDC DESC('Labels and line ranges') MNEM(3) ACTION RUN(TUTOR) PARM('ISR2Q000')   
+PDC DESC('Ending an edit session') MNEM(2) ACTION RUN(TUTOR) PARM('ISR2N000')   
+PDC DESC('Appendices') MNEM(8) ACTION RUN(TUTOR) PARM('ISR00004')               
+PDC DESC('Index') MNEM(5) ACTION RUN(TUTOR) PARM('ISR91000')                    
+)ABCINIT                                                                        
+.ZVARS=EDMHELP                                                                  
+)BODY  EXPAND(~~) WIDTH(&ZSCREENW)  CMD(ZCMD)                                   
+ File Edit Edit_Settings Menu Utilities Compilers Test Help           
+--~-~------------------------------------------------------------------------- 
+Z         Z~ ~                                                                
+Command ===>Z~ ~                                            Scroll ===>ðZ   
+              ~ ~                                             System:... &Where
+SnapMon ENQueues to Search                                                     
+                                                                               
+(Y/N) XSYS Limit Owner    QName    RName                                       
+  ðZ ðQXS1QLM1 ðQRS1    QQN1    QRN1                                   ~ ~ 
+  ðZ ðQXS2QLM2 ðQRS2    QQN2    QRN2                                   ~ ~ 
+  ðZ ðQXS3QLM3 ðQRS3    QQN3    QRN3                                   ~ ~ 
+  ðZ ðQXS4QLM4 ðQRS4    QQN4    QRN4                                   ~ ~ 
+  ðZ ðQXS5QLM5 ðQRS5    QQN5    QRN5                                   ~ ~ 
+  ðZ ðQXS6QLM6 ðQRS6    QQN6    QRN6                                   ~ ~ 
+  ðZ ðQXS7QLM7 ðQRS7    QQN7    QRN7                                   ~ ~ 
+  ðZ ðQXS8QLM8 ðQRS8    QQN8    QRN8                                   ~ ~ 
+  ðZ ðQXS9QLM9 ðQRS9    QQN9    QRN9                                   ~ ~ 
+                                                                               
+                                                                               
+Press END to save or CANCEL to exit without saving                             
+Or enter command 'Defaults' to reset to site defaults                          
+                                                                               
+)INIT                                                                           
+.ZVARS = '(NVMODET NTITLE ZCMD ZSCED QYN1 QYN2 QYN3 QYN4 QYN5 +                 
+           QYN6 QYN7 QYN8 QYN9)'                                                
+.HELP = SNAPMONU                         /* OverRide for SnapMon  */            
+&Where = '&WhereIam'                                                            
+&NVMODET = 'SETTINGS -'                  /* We're in Settings mode*/            
+&NTITLE = 'Endevor Activity'                                                    
+)REINIT                                                                         
+REFRESH(*)                                                                      
+)PROC                                                                           
+ if(&ABARDFLT = 'YES')                                                          
+    &ABARDFLT = ''                                                              
+    VPUT (ABARDFLT) shared    /* and Save it */                                 
+    &ZCMD = 'DEFAULTS'                                                          
+ &uppcmd = UPPER(ZCMD)                                                          
+ if (&UPPCMD = 'DEFAULTS')                                                      
+     .resp = 'END'                                                              
+     exit                                                                       
+ &AllOpts = '&QXS1&QLM1&QRS1&QQN1&QRN1'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN1,NB,LIST,Y,N)                                                      
+ if (&QYN1,EQ,'Y')                                                              
+    if (&QLM1,EQ,&ZNULL) &QLM1 = '0'                                            
+    if (&QRS1,EQ,&ZNULL) &QRS1 = '*'                                            
+    if (&QQN1,EQ,&ZNULL) &QQN1 = '*'                                            
+    if (&QRN1,EQ,&ZNULL) &QRN1 = '*'                                            
+    VER(&QXS1,LIST,XSYS)                                                        
+    VER(&QLM1,RANGE,0,99999)                                                    
+    VER(&QRS1,NAMEF)                                                            
+    VER(&QQN1,NB)                                                               
+    VER(&QRN1,NB)                                                               
+    if (&QQN1 = 'FDPDSN')                                                       
+        VER(&QRN1,DSNAME)                                                       
+ &AllOpts = '&QXS2&QLM2&QRS2&QQN2&QRN2'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN2,NB,LIST,Y,N)                                                      
+ if (&QYN2,EQ,'Y')                                                              
+    if (&QLM2,EQ,&ZNULL) &QLM2 = '0'                                            
+    if (&QRS2,EQ,&ZNULL) &QRS2 = '*'                                            
+    if (&QQN2,EQ,&ZNULL) &QQN2 = '*'                                            
+    if (&QRN2,EQ,&ZNULL) &QRN2 = '*'                                            
+    VER(&QXS2,LIST,XSYS)                                                        
+    VER(&QLM2,RANGE,0,99999)                                                    
+    VER(&QRS2,NAMEF)                                                            
+    VER(&QQN2,NB)                                                               
+    VER(&QRN2,NB)                                                               
+ &AllOpts = '&QXS3&QLM3&QRS3&QQN3&QRN3'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN3,NB,LIST,Y,N)                                                      
+ if (&QYN3,EQ,'Y')                                                              
+    if (&QLM3,EQ,&ZNULL) &QLM3 = '0'                                            
+    if (&QRS3,EQ,&ZNULL) &QRS3 = '*'                                            
+    if (&QQN3,EQ,&ZNULL) &QQN3 = '*'                                            
+    if (&QRN3,EQ,&ZNULL) &QRN3 = '*'                                            
+    VER(&QXS3,LIST,XSYS)                                                        
+    VER(&QLM3,RANGE,0,99999)                                                    
+    VER(&QRS3,NAMEF)                                                            
+    VER(&QQN3,NB)                                                               
+    VER(&QRN3,NB)                                                               
+ &AllOpts = '&QXS4&QLM4&QRS4&QQN4&QRN4'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN4,NB,LIST,Y,N)                                                      
+ if (&QYN4,EQ,'Y')                                                              
+    if (&QLM4,EQ,&ZNULL) &QLM4 = '0'                                            
+    if (&QRS4,EQ,&ZNULL) &QRS4 = '*'                                            
+    if (&QQN4,EQ,&ZNULL) &QQN4 = '*'                                            
+    if (&QRN4,EQ,&ZNULL) &QRN4 = '*'                                            
+    VER(&QXS4,LIST,XSYS)                                                        
+    VER(&QLM4,RANGE,0,99999)                                                    
+    VER(&QRS4,NAMEF)                                                            
+    VER(&QQN4,NB)                                                               
+    VER(&QRN4,NB)                                                               
+ &AllOpts = '&QXS5&QLM5&QRS5&QQN5&QRN5'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN5,NB,LIST,Y,N)                                                      
+ if (&QYN5,EQ,'Y')                                                              
+    if (&QLM5,EQ,&ZNULL) &QLM5 = '0'                                            
+    if (&QRS5,EQ,&ZNULL) &QRS5 = '*'                                            
+    if (&QQN5,EQ,&ZNULL) &QQN5 = '*'                                            
+    if (&QRN5,EQ,&ZNULL) &QRN5 = '*'                                            
+    VER(&QXS5,LIST,XSYS)                                                        
+    VER(&QLM5,RANGE,0,99999)                                                    
+    VER(&QRS5,NAMEF)                                                            
+    VER(&QQN5,NB)                                                               
+    VER(&QRN5,NB)                                                               
+ &AllOpts = '&QXS6&QLM6&QRS6&QQN6&QRN6'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN6,NB,LIST,Y,N)                                                      
+ if (&QYN6,EQ,'Y')                                                              
+    if (&QLM6,EQ,&ZNULL) &QLM6 = '0'                                            
+    if (&QRS6,EQ,&ZNULL) &QRS6 = '*'                                            
+    if (&QQN6,EQ,&ZNULL) &QQN6 = '*'                                            
+    if (&QRN6,EQ,&ZNULL) &QRN6 = '*'                                            
+    VER(&QXS6,LIST,XSYS)                                                        
+    VER(&QLM6,RANGE,0,99999)                                                    
+    VER(&QRS6,NAMEF)                                                            
+    VER(&QQN6,NB)                                                               
+    VER(&QRN6,NB)                                                               
+ &AllOpts = '&QXS7&QLM7&QRS7&QQN7&QRN7'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN7,NB,LIST,Y,N)                                                      
+ if (&QYN7,EQ,'Y')                                                              
+    if (&QLM7,EQ,&ZNULL) &QLM7 = '0'                                            
+    if (&QRS7,EQ,&ZNULL) &QRS7 = '*'                                            
+    if (&QQN7,EQ,&ZNULL) &QQN7 = '*'                                            
+    if (&QRN7,EQ,&ZNULL) &QRN7 = '*'                                            
+    VER(&QXS7,LIST,XSYS)                                                        
+    VER(&QLM7,RANGE,0,99999)                                                    
+    VER(&QRS7,NAMEF)                                                            
+    VER(&QQN7,NB)                                                               
+    VER(&QRN7,NB)                                                               
+ &AllOpts = '&QXS8&QLM8&QRS8&QQN8&QRN8'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN8,NB,LIST,Y,N)                                                      
+ if (&QYN8,EQ,'Y')                                                              
+    if (&QLM8,EQ,&ZNULL) &QLM8 = '0'                                            
+    if (&QRS8,EQ,&ZNULL) &QRS8 = '*'                                            
+    if (&QQN8,EQ,&ZNULL) &QQN8 = '*'                                            
+    if (&QRN8,EQ,&ZNULL) &QRN8 = '*'                                            
+    VER(&QXS8,LIST,XSYS)                                                        
+    VER(&QLM8,RANGE,0,99999)                                                    
+    VER(&QRS8,NAMEF)                                                            
+    VER(&QQN8,NB)                                                               
+    VER(&QRN8,NB)                                                               
+ &AllOpts = '&QXS9&QLM9&QRS9&QQN9&QRN9'                                         
+ if (&AllOpts,NE,&ZNULL)                                                        
+    VER(&QYN9,NB,LIST,Y,N)                                                      
+ if (&QYN9,EQ,'Y')                                                              
+    if (&QLM9,EQ,&ZNULL) &QLM9 = '0'                                            
+    if (&QRS9,EQ,&ZNULL) &QRS9 = '*'                                            
+    if (&QQN9,EQ,&ZNULL) &QQN9 = '*'                                            
+    if (&QRN9,EQ,&ZNULL) &QRN9 = '*'                                            
+    VER(&QXS9,LIST,XSYS)                                                        
+    VER(&QLM9,RANGE,0,99999)                                                    
+    VER(&QRS9,NAMEF)                                                            
+    VER(&QQN9,NB)                                                               
+    VER(&QRN9,NB)                                                               
+ if (.RESP = 'END')                                                             
+    if (.MSG ^= '')                                                             
+       .RESP = ENTER                                                            
+)END                                                                            

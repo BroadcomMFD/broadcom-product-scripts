@@ -1,0 +1,179 @@
+/* REXX - generate Sample User data to demonstrate/test display options*/       
+/*                                                                              
+*/                                                                              
+   TRACE o                                                                      
+start = Time('E') /* start the clock */                                         
+/*ADDRESS ISPEXEC "CONTROL ERRORS RETURN"*/                                     
+  ADDRESS ISPEXEC "VGET (ZSCREEN ZPANELID ZUSER ZPREFIX ZSYSID)"                
+  VARNAME = PANELID || ZSCREEN                                                  
+  INTERPRET 'ADDRESS ISPEXEC "VGET ('VARNAME')"'                                
+  INTERPRET 'VALUEIS = ' VARNAME                                                
+/*                                                                              
+   First thing to do is make sure we're on a valid panel and that               
+   the variables we need are available                                          
+   In the production version we'd lost the ESRTTBL to check this but            
+   for now we have just hard coded the supported table names                    
+*/                                                                              
+TABLSUFF = SUBSTR(ZPANELID,4,4,'$')           /* ENDIExxy */                    
+IF TABLSUFF = 'IE25' | TABLSUFF = 'IE91' THEN NOP                               
+ELSE                                                                            
+/* IF VALUEIS <> ZSCREEN ||":" || ZPANELID THEN */                              
+DO                                                                              
+  /* no msg                                                                     
+  ADDRESS ISPEXEC "SETMSG msg(ENES001E)" /* invalid panel */                    
+  */                                                                            
+  Say "Invalid Panel"                                                           
+  exit 12                                                                       
+END                                                                             
+                                                                                
+                                                                                
+Parse ARG  . 'TOP(' ZTDTOP ')' SrchStr /* get string*/                          
+ReportFnd = 'NO'                       /* set entry condition */                
+                                                                                
+/*                                                                              
+   We will also use this table name to build a temporary dataset                
+   name prefix for use by this clist and skeletons -this will be                
+   in the format;                                                               
+                                                                                
+   [ZPREFIXÙ.zUSER.E<SYSID>.<TableName>...[LIST|SYSIN|REPORT]                   
+*/                                                                              
+ELSELTBN = 'EN' || ZSCREEN || TABLSUFF || '0' /* ENzIE250 or ENzIE910 */        
+ELSELTMP = 'EN' || ZSCREEN || 'TEMPT'                                           
+                                                                                
+IF ZPREFIX = "" | ZPREFIX = ZUSER THEN                                          
+  ESRCHPFX =    ZUSER||"."||STRIP(LEFT("E"||ZSYSID,8))||"."||ELSELTBN           
+ELSE                                                                            
+  ESRCHPFX = ZPREFIX||"."ZUSER||"."||STRIP(LEFT("E"||ZSYSID,8))||"."||ELSELTBN  
+/*                                                                              
+   Set some default values (first time in)                                      
+*/                                                                              
+                                                                                
+/*                                                                              
+   Mainline logic starts here                                                   
+*/                                                                              
+                                                                                
+MainLine:                                                                       
+  call FindTable   /* Check ISPF table is ready to use */                       
+  call ExtendTbl       /* Create USERDATA col and populate */                   
+                                                                                
+  /*                                                                            
+     Put things back the way we found them                                      
+  */                                                                            
+  ADDRESS ISPEXEC "TBTOP" ELSELTBN                                              
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  IF ZTDTOP > 0 THEN                                                            
+  DO                                                                            
+    ADDRESS ISPEXEC "TBSKIP" ELSELTBN "NUMBER(+"ZTDTOP")"                       
+    if rc <> 0 THEN SAY ZERRSM ZERRLM                                           
+  END                                                                           
+  /*                                                                            
+     Set messages and return to Endevor                                         
+  */                                                                            
+  ZEDLMSG = "User Data created in" trunc(Time('E')),                            
+            "seconds in" ,                                                      
+            CNTELE "Elements"                                                   
+  ADDRESS ISPEXEC "VPUT (ZEDLMSG) SHARED"                                       
+/*  ADDRESS ISPEXEC "SETMSG msg(ENES002I)" */                                   
+  ADDRESS ISPEXEC "control nondispl"                                            
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+  EXIT 0                                                                        
+                                                                                
+                                                                                
+/* Main Subroutines */                                                          
+                                                                                
+                                                                                
+Findtable:                                                                      
+/*                                                                              
+   Normally at this point we'd look up esorttbl to find the values              
+   for the table name, and all the variables etc. but for demo                  
+   we'll just assume them as they would be for quickedit                        
+*/                                                                              
+/*                                                                              
+   Table should already be open, just go check it's stats...                    
+*/                                                                              
+  ADDRESS ISPEXEC "TBQUERY" ELSELTBN "KEYS(TABKEYS) NAMES(TABVARS)" ,           
+    "POSITION(TABPOSI) SORTFLDS(TABSORT)"                                       
+  sa= "Keys:" TABKEYS                                                           
+  sa= "Name:" TABVARS                                                           
+  sa= "Posi:" TABPOSI                                                           
+  sa= "Sort:" TABSORT                                                           
+  if rc <> 0 THEN SAY ZERRSM ZERRLM                                             
+                                                                                
+return                                                                          
+                                                                                
+ExtendTbl:                                                                      
+/*                                                                              
+   This Subroutine is used to initialize extend the element                     
+   selection table to add the extra variables required to track                 
+   the 'encrypted' member name and return result strings                        
+*/                                                                              
+CNTELE = 0                             /* initialise Ele count */               
+CNTFND = 0                             /* initialise Fnd count */               
+MEMBERS. = 0                           /* initi member name stem */             
+if wordpos('USERDATA',TABVARS) = 0 then /* if UserData col doesn't exist*/      
+  TABVARS = Left(TABVARS,(length(TABVARS)-1)) || ' USERDATA)'                   
+IF TABKEYS = ""                                                                 
+  THEN KEYTEXT = ""                                                             
+  ELSE KEYTEXT = "KEYS" || TABKEYS                                              
+ADDRESS ISPEXEC 'TBCREATE' ELSELTMP ,                                           
+                KEYTEXT ,                        /* same keys, but... */        
+                'NAMES'TABVARS' NOWRITE REPLACE' /* with our extra vars */      
+If rc ^= 0 Then               /* Return codes                      */           
+  Do                          /*  4 - Duplicate table exists but   */           
+    say 'Bad RC ('rc') from TBcreate for Temp Table'                            
+  End                         /*      "replace" specified          */           
+                              /*  8 - Table already exists;        */           
+                              /*      "replace" not specified      */           
+                              /* 12 - Table in use; enq failed     */           
+                              /* 16 - Table input library not      */           
+                              /*      allocated with "write"       */           
+                              /* 20 - Severe error                 */           
+ADDRESS ISPEXEC "TBTOP" ELSELTBN                                                
+if rc <> 0 THEN SAY ZERRSM ZERRLM                                               
+/*                                                                              
+  Sample 1 - Text seed data                                                     
+*/                                                                              
+CurrOffSet = 1                                                                  
+SeedData = "-* Sample UserData generated by EUSRDATA in order to demonstrate" , 
+           "what a user data display might look like in real life." ,           
+           "Note this data may extend left or right of the current" ,           
+           "displayable area, that doesn't matter - so long as you" ,           
+           "can scroll left and right. *- "                                     
+LenSeed = length(SeedData)      /* how much have we got? */                     
+SeedData = SeedData || SeedData /* make it bigger! */                           
+                                                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTBN                                            
+   if rc <> 0 THEN LEAVE                                                        
+   ADDRESS ISPEXEC "TBGET" ELSELTBN                                             
+   /* */                                                                        
+   SA= "KEYS" EEVETKEL EEVETKEN EEVETKSY EEVETKSB EEVETKTY EEVETKST EEVETKSI ,  
+              EEVETKSN EEVETKSX                                                 
+   SA= "VARS" EVETSEL EEVETDVL EEVETDMS EEVETDSL EEVETOEN EEVETOST EEVETOSX  ,  
+              EEVETOSN EEVETOSY EEVETOSB EEVETOTY EEVETNS EEVETPGR EEVETUID ,   
+              EEVETCCI EEVETPRC EEVETNRC                                        
+   /* */                                                                        
+   CNTELE = CNTELE + 1                                                          
+   USERDATA = SUBSTR(SeedData,CurrOffset,80,'$')                                
+   if CurrOffset < LenSeed then CurrOffset = CurrOffset + 8                     
+   Else CurrOffset = 1                                                          
+   ADDRESS ISPEXEC "TBADD" ELSELTMP   /* save extra fields in new table */      
+END                                                                             
+/*                                                                              
+  Now we've got a copy of the table, delete the live one and copy back          
+*/                                                                              
+ADDRESS ISPEXEC 'TBCLOSE'  ELSELTBN             /* close live one */            
+ADDRESS ISPEXEC 'TBCREATE' ELSELTBN ,           /* create a new version */      
+                KEYTEXT ,                       /* same keys, but... */         
+                'NAMES'TABVARS' NOWRITE'        /* with out extra vars */       
+ADDRESS ISPEXEC "TBTOP" ELSELTMP                                                
+DO FOREVER                                                                      
+   ADDRESS ISPEXEC "TBSKIP" ELSELTMP            /* Get next */                  
+   if rc <> 0 THEN LEAVE                        /* ...at end we're done */      
+   ADDRESS ISPEXEC "TBGET" ELSELTMP             /* get temp record */           
+   ADDRESS ISPEXEC "TBADD" ELSELTBN             /* Add it to new table */       
+END                                                                             
+  ADDRESS ISPEXEC 'TBCLOSE'  ELSELTMP           /* done with copy, close it */  
+                                                                                
+Return                                                                          
+                                                                                

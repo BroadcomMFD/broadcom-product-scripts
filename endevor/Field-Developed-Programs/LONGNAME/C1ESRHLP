@@ -1,0 +1,51 @@
+)PANEL KEYLIST(ISRHELP,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ 0F TYPE(PS)                                                                    
+ 05 TYPE(PT)                                                                    
+ 09 TYPE(FP)                                                                    
+ 0A TYPE(NT)                                                                    
+ 11 TYPE(SAC)                                                                   
+ 22 TYPE(WASL) SKIP(ON) GE(ON)                                                  
+ 10 TYPE(ET)                                                                    
+ 26 TYPE(NEF) CAPS(ON) PADC(USER)                                               
+ 27 AREA(SCRL) EXTEND(ON)                                                       
+)BODY  EXPAND() CMD(ZCMD)                                                     
+	Tutorial	-  Endevor ESRchfor Command   -	Tutorial	                         
+Option ===>Z                                                                 
+SAREA39                                                                       
+)AREA SAREA39                                                                   
+To find a data string within elements in Endevor, you can enter a ESRchfor   
+command on the command line of an Endevor element list. Endevor searches     
+through all the elements of a displayed element list for the specified data  
+string starting from the first element of the element list. A message will   
+indicate if the string(s) have been found. Press PF1 for extra details.      
+Elements containing the string are indicated with a*Foundindicator in the  
+Message column. For the purpose of consolidating the results the ESort -mes   
+command can be issued to reverse sort the message column.                     
+                                                                               
+When the options panel is displayed up to 6 strings can be searched at one   
+time andWORD SUFFIXandPREFIXare accepted as operands. You can use theC  
+(continuation) operand to specify that both the current and previous strings 
+must be found on the same line to constitute a match. Otherwise lines with   
+either string will be treated as matching. If neither of the process options 
+is selected the strings are matched exactly as entered.                      
+                                                                               
+For more complex syntax, you can bypass ESRchfor's parsing and enter SRCHFOR 
+commands directly starting with SRCHFOR, SRCHFORC, DPLINE as these lines are 
+passed without modification to the search utility.  Optionally you can mark  
+a line as commented by prefixing it with ".*".  For more information on the   
+SRCHFOR utility refer to IBM documentation.                                    
+                                                                               
+The following information will be presented only if selected by number:      
+                                                                            
+ 1 - Search String Examples                                               
+)INIT                                                                           
+.ZVARS = '(ZCMD)'                                                               
+&ZCMD = ' '                                                                     
+)PROC                                                                           
+&ZSEL = TRANS(&ZCMD,                                                            
+  1,*ISR01181                                                                   
+   *,'?')                                                                       
+)PNTS                                                                           
+FIELD(ZPS01001) VAR(ZCMD) VAL(1)                                                
+)END                                                                            

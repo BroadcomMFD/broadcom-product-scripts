@@ -1,0 +1,41 @@
+)ATTR DEFAULT(^+~)                                                              
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY EXPAND (\\) CMD(ZCMD)                                                     
+^TUTORIAL \-\ Long-Name Help \-\ TUTORIAL                                       
+^Command ===>~ZCMD                                                             +
++                                                                               
++The^List Options+fields allow you to limit the elements presented              
++in the Long-Name element selection list. Selection filters include;            
+çSAREA38                                                                       ç
+)AREA SAREA38                                                                   
++                                                                               
+^Apply List Filters+- Allows you to specify further list filters on             
++  CCID, Userid or Processor Group fields if set to^Y.+                         
++                                                                               
+^Build Using Map+- Indicates whether the environment map should                 
++  be searched building the element selection list.                             
+^  Y+- Search the map. ^N+- (Default) Do not search the map.                    
++                                                                               
+^Return First Found+- Indicates whether the search should stop                  
++  after finding the first occurrence of an element.                            
++   ^Y+- (Default) Return the first matching element found.                     
++   ^N+- Search for all occurrences and return a list.                          
++                                                                               
+^Element Backout Status+- Indicates whether the search should be                
++  limited to elemens that are backedout out or not.                            
+^  Y+- Only show backed-out elements. ^N+- (Default) Show all elements.         
++                                                                               
+^Element Locked Status+- Indicates whether the search should be                 
++  limited to elemens that are Locked or not.                                   
+^  Y+- Only show Locked elements. ^N+- (Default) Show all elements.             
++                                                                               
+^Inventory Location+- Allows you to provide a list of Stage-IDs that            
++  are shown (elements at other stages are filtered).  You can specify one      
++  or more stages (separated by space or comma) or leave this field blank       
++  to show all.  This option works in conjunction with the Build Using Map      
++  option so you can filter stages as desired.                                  
++                                                                               
++                                                                               
++ \ \ (^END+to return) \ \                                                      
+)PROC                                                                           
+)END                                                                            

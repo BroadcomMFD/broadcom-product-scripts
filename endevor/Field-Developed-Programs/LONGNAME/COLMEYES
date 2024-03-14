@@ -1,0 +1,157 @@
+/*     REXX - Routine to scan the current member and assuming it's CSV          
+              format, figure out the delimiter, and then find the max           
+              width required for each column, then reformat the member          
+              so that all columns line up nicely                                
+                                                                                
+              By Eoin O'Cleirigh                                                
+                                                                                
+              */                                                                
+address isredit                                                                 
+"MACRO (PARMS)"                                                                 
+trace o                                                                         
+"(SAVE) = USER_STATE"                                                           
+/* Init vars for stats */                                                       
+MaxRc = 0                                                                       
+MaxLenIn = 0                                                                    
+MaxLenOut = 0                                                                   
+MaxColWid = 0                                                                   
+CntRecPrc = 0                                                                   
+MinCol = 999999                                                                 
+/* Is data changed, request refresh */                                          
+"(ChgFlag) = DATA_CHANGED"                                                      
+"(NUMLINES) = LINENUM .ZLAST"                                                   
+If NUMLINES = 0 then do     /* nothing to work with */                          
+   zedsmsg = 'No Data'                                                          
+   zedlmsg = 'The file appears to be empty - try again with valid',             
+             'CSV data'                                                         
+   address ispexec "SETMSG MSG(ISRZ001)"                                        
+   return 4                                                                     
+end                                                                             
+                                                                                
+/* Check the first line appears to have quotes and delimiters */                
+"(HEADLINE)=LINE" 1                                                             
+if pos('05'x,headline) > 0 then do /* we're working with Tab delimiters*/       
+   Delimitr = '05'x                                                             
+   NextQuot = pos(Delimtr,headline)                                             
+   ThisQuot = ''                                                                
+   DeliLen  = 1                    /* Delimiter length - just a tab */          
+end                                                                             
+else do                                                                         
+   ThisQuot = left(headline,1)                                                  
+   if ThisQuot = "'",                                                           
+    | ThisQuot = '"' then nop /* we're ok we've got quotes! */                  
+   else do                                                                      
+      zedsmsg = 'Not CSV or TSV'                                                
+      zedlmsg = 'Columize works best with Endevor formated CSV data',           
+                'where each column data element is bounded by quotes',          
+                "and, separated by a delimiter, or tab chr (x'05')",            
+                '- this data is missing the delimiters.'                        
+      address ispexec "SETMSG MSG(ISRZ001)"                                     
+      return 4                                                                  
+   end                                                                          
+   NextQuot = pos(thisQuot,headline,2)                                          
+   Delimitr = Substr(headline,NextQuot+1,1)                                     
+   DeliLen  = 3                    /* Delimiter length - quote, comma, quote */ 
+end                                                                             
+sa= "Numlines:" Numlines "FirstChr:" ThisQuot "Delimiter:" Delimitr             
+                                                                                
+                                                                                
+MaxW. = 0                                                                       
+                                                                                
+do i = 1 to NumLines                                                            
+   "(ThisLine)=LINE" i                                                          
+   ThisLine = Strip(ThisLine)                                                   
+   MaxLenIn = max(MaxLenIn,length(ThisLine))                                    
+   if Delilen = 1 then start = 1 /* Adjust start pos based on length */         
+   else start = 2                                                               
+   n = 0                                                                        
+   do forever                                                                   
+      n = N + 1                                                                 
+      NextDelm = Pos(ThisQuot||Delimitr||ThisQuot,ThisLine,Start)               
+      if nextDelm = 0 then do    /* no delimiter at end */                      
+      /* width = Length(ThisLine) - Start */                                    
+         width = length(strip(substr(ThisLine,start)))                          
+         if delilen = 3 then width=width-1 /* ignore closing quote */           
+         end                                                                    
+      else                                                                      
+      /* width = NextDelm - start */                                            
+         width = length(strip(substr(ThisLine,start,(NextDelm - start))))       
+      MaxW.n = max(MaxW.n, width) /* Widdest col n.  */                         
+      MaxColWid = max(MaxColWid, MaxW.n) /* widdest col */                      
+      if nextDelm = 0 then do     /* end of line */                             
+         MaxW.0 = Max(MaxW.0, n)  /* highest no. cols */                        
+         MinCol = Min(MinCol, n)  /* highest no. cols */                        
+         leave                    /* get next line... */                        
+      end                                                                       
+                                                                                
+      start = nextDelm + delilen  /* allow for quotes or tab */                 
+   end                                                                          
+end                                                                             
+                                                                                
+/* Debug Max Col Widths                                                         
+   Say "Delimiter Length:" DeliLen "Delimiter:'" Delimitr"'"                    
+   do n = 1 to MaxW.0               /* for Each Column */                       
+      Say "Col:" n "Width:" MaxW.n  /* report max width */                      
+   end                                                                          
+*/                                                                              
+                                                                                
+/* Now Rebuild the line - adding leading and trailing bars                      
+   but stripping off the Quotes and original delimiter(s)                       
+   so we see just the data                                                      
+   (Optionaly consider centering the data in the column)                        
+*/                                                                              
+do i = 1 to NumLines                                                            
+   "(ThisLine)=LINE" i                                                          
+   ThisLine = Strip(ThisLine)                                                   
+   if Delilen = 1 then start = 1                                                
+   else start = 2                                                               
+   n = 0                                                                        
+   ReplLine = '|'                                                               
+   do forever                                                                   
+      n = N + 1                                                                 
+      NextDelm = Pos(ThisQuot||Delimitr||ThisQuot,ThisLine,Start)               
+      if nextDelm = 0 then do     /* no delimiter at end */                     
+         width = Length(ThisLine) - Start + 1                                   
+         if delilen = 3 then width=width-1 /* ignore closing quote */           
+         end                                                                    
+      else                                                                      
+         width = NextDelm - start                                               
+         /* say "Line:" i "Col:" n "width:" width */                            
+      if width >= 0 then do                                                     
+         ThisColD = strip(substr(ThisLine,Start,Width))                         
+         ReplLine = ReplLine||ThisColD|| ,                                      
+         Copies(' ',(MaxW.n-length(ThisColD)))||'|'                             
+      end                                                                       
+      if nextDelm = 0 then do     /* end of line */                             
+         leave                    /* get next line... */                        
+      end                                                                       
+                                                                                
+      start = nextDelm + Delilen                                                
+   end                                                                          
+   "Line" i "= (ReplLine)"                                                      
+   MaxRc = max(MaxRc, rc)                                                       
+   MaxLenOut= max(MaxLenOut,length(ReplLine))                                   
+   CntRecPrc = CntRecPrc +1                                                     
+end                                                                             
+                                                                                
+   zedsmsg = 'Data Column-ised' MaxRc                                           
+   zedlmsg = 'ColmEyes processed' CntRecPrc 'lines and found',                  
+             'The maximum record lenghts; input('MaxLenIn')',                   
+             'and output('MaxLenOut').',                                        
+             'The line with the most columns had:' MaxW.0 'cols. ',             
+             'compared to the line with the least at:' MinCol '. ',             
+             'The widest columns found was' MaxColWid 'characters.'             
+                                                                                
+/* If invoked in batch the save and exit, otherwise just exit */                
+IF SYSVAR(SYSENV) = "BACK" THEN do                                              
+   say zedsmsg                                                                  
+   say zedlmsg                                                                  
+   "SAVE "                                                                      
+   MaxRc = max(MaxRc, rc)                                                       
+   "CANCEL"                                                                     
+   say "Max Rc" MaxRc                                                           
+end                                                                             
+else do                                                                         
+   address ispexec "SETMSG MSG(ISRZ000)"                                        
+end                                                                             
+return MaxRc                                                                    

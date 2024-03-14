@@ -1,0 +1,60 @@
+/* Rexx - Apply sequence numbers to named column on non comment lines */        
+address isredit                                                                 
+"MACRO (PARMS)"                                                                 
+"ISREDIT (SAVE) = USER_STATE"                                                   
+if PARMS = '' then PARMS = 'Pri' /* by default assume Pri */                    
+CheckParms:                                                                     
+ValidParm = pos(TRANSLATE(PARMS)||'|','PRI|ALT|')                               
+If ValidParm = 0 then signal InvalidParm /* only Pri or Alt allowed */          
+"SEEK '* Heading' 1 FIRST"                                                      
+if RC > 0 then signal MissHeading                                               
+"(LP CP)=CURSOR"                                                                
+"(DATALINE)=LINE" LP                                                            
+PrmStrt = pos(TRANSLATE(PARMS),TRANSLATE(DATALINE))                             
+if PrmStrt = 0 then signal MissParm                                             
+WrdEnd = 'FALSE'                                                                
+do I = (PrmStrt + LENGTH(PARMS)) by 1 to 81                                     
+  ThisChr = SubStr(DATALINE,I,1," ")                                            
+  if WrdEnd == 'FALSE' then                                                     
+    if  ThisChr == ' ' then WrdEnd = 'TRUE'                                     
+    else iterate /* haven't found end word yet */                               
+  else                                                                          
+    if  ThisChr \== ' ' then                                                    
+      leave     /* leave - we're done */                                        
+end                                                                             
+PrmEnd = I - 2 /* back up two chrs - the gap and the first chr of the next */   
+SequenceEm:                                                                     
+SeqNum = 0                                                                      
+'ISREDIT (LASTL) = LINENUM .ZLAST'                                              
+DO i = 1 to LASTL                                                               
+  "(DATALINE)=LINE" I                                                           
+  If left(DATALINE,1) == '*' THEN ITERATE /* skip comment lines */              
+  SeqNum = Seqnum + 10                    /* increment by 10 */                 
+  OverLay = right(SeqNum,(PrmEnd-PrmStrt+1),'0')                                
+  "LINE (I) = (DATALINE) + <(PRMSTRT,OVERLAY)> "                                
+END                                                                             
+Message:                                                                        
+zedsmsg = 'Columns ReNumbered'                                                  
+zedlmsg = 'Non-COmment lines have been renumbered in the' PARMS 'column'        
+xrc = 0                                                                         
+signal fini                                                                     
+InvalidParm:                                                                    
+MissHeading:                                                                    
+zedsmsg = 'Invalid Parm'                                                        
+zedlmsg = 'Only valid parms are PRI and ALT, omit to default to PRI'            
+xrc = 12                                                                        
+signal fini                                                                     
+MissHeading:                                                                    
+zedsmsg = 'Missing Heading'                                                     
+zedlmsg = 'Looks like you don''t have a ''* Heading'' record, try RESET'        
+xrc = 12                                                                        
+signal fini                                                                     
+MissParm:                                                                       
+zedsmsg = 'Missing Parm'                                                        
+zedlmsg = 'Can''t find the heading ('PARMS') to sort on - check heading line'   
+xrc = 12                                                                        
+signal fini                                                                     
+fini:                                                                           
+address ISPEXEC "SETMSG MSG(ISRZ000)"                                           
+"ISREDIT USER_STATE = (SAVE)"                                                   
+return(xrc)                                                                     

@@ -1,0 +1,293 @@
+/* Rexx - Parse the column data for non-comment lines */                        
+address ISREDIT                                                                 
+"MACRO (PARMS)"                                                                 
+trace o                                                                         
+"ISREDIT (SAVE) = USER_STATE"                                                   
+/* If data changed, request refresh */                                          
+"(CHGFLAG) = DATA_CHANGED"                                                      
+if ChgFlag == 'YES' then                                                        
+do                                                                              
+  ECOLREF = "YES"                                                               
+  address ISPEXEC "VPUT (ECOLREF) SHARED"                                       
+end                                                                             
+address ISPEXEC "VGET (VARPFX) SHARED" /* Get control vars from ecols*/         
+/* perform a sort by Alt and then back to Pri to make sure all values in        
+   correct order and incrementing by 10s */                                     
+"SORT ALT"                                                                      
+"SORT PRI"                                                                      
+/* Now carry on with parsing... */                                              
+"SEEK '* Heading' 1 FIRST"                                                      
+if RC > 0 then signal MissHeading                                               
+"(LP CP)=CURSOR"                                                                
+"(DATALINE)=LINE" LP                                                            
+HeadO  = POS('Heading',DATALINE)          /*Get offset of Heading field */      
+VarNO  = POS('VarName',DATALINE)          /*Get offset of VarName field */      
+AttrO  = POS('Atr',DATALINE)              /*Get offset of Attribute Fld */      
+MaxLO  = POS('Max',DATALINE)              /*Get offset of max Len field */      
+DftLO  = POS('Dft',DATALINE)              /*Get offset of Dft Len field */      
+PrsSO  = POS('Pri',DATALINE)              /*Get offset of Pri Seq field */      
+PriLO  = POS('Len',DATALINE,PrsSO)        /*Get offset of Pri Len field */      
+AltSO  = POS('Alt',DATALINE)              /*Get offset of Alt Seq field */      
+AltLO  = POS('Len',DATALINE,AltSO)        /*Get offset of Alt Len field */      
+DivdO  = POS('Divider',DATALINE)          /*Get offset of Divider field */      
+HeadE  = VarNO - 1                        /* then calculate ending points */    
+VarNE  = AttrO - 1                                                              
+AttrE  = AttrO + 1                                                              
+MaxLE  = DftLO - 1                                                              
+DftLE  = PrsSO - 1                                                              
+PrsSE  = PriLO - 1                                                              
+PriLE  = AltSO - 1                                                              
+AltSE  = AltLO - 1                                                              
+AltLE  = DivdO - 1                                                              
+ParseEm:                                                                        
+J = 0                                     /* initialise line counter */         
+PRI = 'PRI'                               /* set default values for  */         
+ALT = 'ALT'                               /* ...stem VARS for parsing*/         
+Ptr.  = ''                                /* and initialise pointers */         
+'ISREDIT (LASTL) = LINENUM .ZLAST'                                              
+DO i = 1 to LASTL                                                               
+  "(DATALINE)=LINE" I                                                           
+  If left(DATALINE,1) == '*' THEN ITERATE /* skip comment lines */              
+  J = J + 1                               /* increment index */                 
+  PARSE VAR DATALINE =(HeadO) Head.J     =(HeadE),                              
+                     =(VarNO) VarN.J     =(VarNE),                              
+                     =(AttrO) Attr.J     =(AttrE),                              
+                     =(MaxLO) MaxL.J     =(MaxLE),                              
+                     =(DftLO) DftL.J     =(DftLE),                              
+                     =(PrsSO) Seq.PRI.J  =(PrsSE),                              
+                     =(PriLO) Len.PRI.J  =(PriLE),                              
+                     =(AltSO) Seq.ALT.J  =(AltSE),                              
+                     =(AltLO) Len.ALT.J  =(AltLE),                              
+                     =(DivdO) Divd.J                                            
+  /* call routine to process this line for col PRI */                           
+  call PROCLINE  PRI, J                                                         
+  If result = 12 then signal BadSeq                                             
+  /* call routine to process this line for col ALT */                           
+  call PROCLINE  ALT, J                                                         
+  If result = 12 then signal BadSeq                                             
+END                                                                             
+/* Do house keeping */                                                          
+Ptr.PRI.0 = J                                                                   
+Ptr.ALT.0 = J                                                                   
+/* Construct full strings */                                                    
+call CONSLINE PRI                                                               
+/* use interpret to allow dynamic resolution of variable name with VARPFX */    
+interpret VARPFX'0H1 = Head.PRI.ALL'                                            
+interpret VARPFX'0H2 = Divd.PRI.ALL'                                            
+interpret VARPFX'0M1 = Modl.PRI.ALL'                                            
+interpret VARPFX'0VR = Vars.PRI.ALL'                                            
+interpret VARPFX'0CL = ClrV.PRI.ALL'                                            
+call CONSLINE ALT                                                               
+interpret VARPFX'1H1 = Head.ALT.ALL'                                            
+interpret VARPFX'1H2 = Divd.ALT.ALL'                                            
+interpret VARPFX'1M1 = Modl.ALT.ALL'                                            
+interpret VARPFX'1VR = Vars.ALT.ALL'                                            
+interpret VARPFX'1CL = ClrV.ALT.ALL'                                            
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0H1 'VARPFX'1H1) PROFILE" '        
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0H2 'VARPFX'1H2) PROFILE" '        
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0VR 'VARPFX'1VR) PROFILE" '        
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0CL 'VARPFX'1CL) PROFILE" '        
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0M1 'VARPFX'1M1) PROFILE" '        
+call ENDVWIDE /* now trim for current width */                                  
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0H1 'VARPFX'1H1) SHARED" '         
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0H2 'VARPFX'1H2) SHARED" '         
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0VR 'VARPFX'1VR) SHARED" '         
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0CL 'VARPFX'1CL) SHARED" '         
+interpret ' address ISPEXEC "VPUT   ('VARPFX'0M1 'VARPFX'1M1) SHARED" '         
+Message:                                                                        
+zedsmsg = 'Parsed' J 'Columns'                                                  
+zedlmsg = 'Successfully parsed the Column settings file'                        
+xrc = 0                                                                         
+signal fini                                                                     
+MissHeading:                                                                    
+zedsmsg = 'Missing Heading'                                                     
+zedlmsg = 'Looks like you don''t have a ''* Heading'' record, try RESET'        
+xrc = 12                                                                        
+signal fini                                                                     
+BadSeq:                                                                         
+zedsmsg = 'Non-Unique Sequence number'                                          
+zedlmsg = 'Check your "'COL'" sequence numbers or use SORT and NUM to reset'    
+xrc = 12                                                                        
+signal fini                                                                     
+fini:                                                                           
+"BUILTIN SAVE" /* since user pressed End to get here, make sure we can save*/   
+if RC > 4 then do /* save error */                                              
+   xrc = RC       /* severe error */                                            
+   zedsmsg = 'Save Error'                                                       
+   zedlmsg = 'Save got RC:'RC 'Does your PROFILE dataset need to be' ,          
+             'compressed?  Try issuing the BUILTIN SAVE command to see ',       
+             'detailed messages.'                                               
+end                                                                             
+address ISPEXEC "SETMSG MSG(ISRZ000)"                                           
+address ISPEXEC "VGET (AUTOENTR) SHARED" /* get state of AutoEnter Flag */      
+if AUTOENTR = 'YES' THEN                 /* is Left/Right scrolling enabled? */ 
+   address ISPEXEC "CONTROL NONDISPL ENTER" /* simulate ENTER for user */       
+"ISREDIT USER_STATE = (SAVE)"                                                   
+"BUILTIN END" /* since user pressed End to get here, issue the end now */       
+return(xrc)                                                                     
+                                                                                
+/* inline routines start here                                                   
+   */                                                                           
+PROCLINE:                                                                       
+  /*  This routine uses the parsed values to build the column variables */      
+  /*  It must be called with two parameters as follows;                 */      
+  /*  - PRI/ALT - the name of the column it is storing values for       */      
+  /*  - Row - the line number it is processing                          */      
+  parse arg COL, ROW                                                            
+  /* Save this lines pointer so we can find it again in correct sequence */     
+  ThisSeq = Seq.COL.Row / 10 /* get division error if bad! = OK          */     
+  If Ptr.COL.ThisSeq == '' then Ptr.COL.ThisSeq = ROW                           
+    Else Return 12 /* BadSeq */                                                 
+  /* Trim Heading or prefix it with a null if all spaces                   */   
+  Head.ROW = strip(Head.ROW)                       /* trim trailing spaces */   
+  If Head.ROW == '' then                           /* was it all spaces?   */   
+    Head.ROW = left('00'x,DftL.ROW)                /* use null padded      */   
+  If strip(Len.COL.ROW) == '' Then                 /* If there is no override?*/
+    Len.COL.ROW = DftL.ROW                         /* use the default width */  
+  Divd.ROW = strip(Divd.ROW)                       /* trim trailing spaces */   
+  If Divd.ROW = '' Then Divd.ROW = Copies('-',Len.COL.ROW)                      
+  /* Do we need to center or truncate Primary model segment                   */
+  if Len.COL.ROW = 0 then                                                       
+    do                     /* if column is hidden - reset it's vars */          
+      Head.COL.ROW = ''                                                         
+      Divd.COL.ROW = ''                                                         
+      Modl.COL.ROW = ''                                                         
+      Vars.COL.ROW = ''                                                         
+      ClrV.COL.ROW = ''                                                         
+    end                                                                         
+  else                                                                          
+    DO                                                                          
+      Head.COL.ROW = Left(Head.ROW,Len.COL.ROW) || ' '                          
+      Divd.COL.ROW = Left(Divd.ROW,Len.COL.ROW,'-') || ' '                      
+      Vars.COL.ROW = VarN.ROW || ' '                                            
+      if DftL.ROW = 0 THEN ClrV.COL.ROW = VarN.ROW || ' '                       
+      ELSE ClrV.COL.ROW = ''                                                    
+      if MaxL.ROW < Len.COL.ROW then               /* Do we need to center? */  
+        Modl.COL.ROW = '+'|| ,                                                  
+        center(left(Attr.ROW||'Z',(MaxL.ROW+1)),Len.COL.ROW,' ')                
+      else Modl.COL.ROW = Attr.ROW||'Z'||copies(' ',(Len.COL.ROW - 1))          
+    END                                                                         
+  /* Uncomment the following to debug processed values if necessary             
+  say right(ROW,2,'0') ' '||Head.COL.ROW ||'|'                                  
+  say right(ROW,2,'0') ' '||Divd.COL.ROW ||'|'                                  
+  say right(ROW,2,'0')    Modl.COL.ROW  ||' +'                                  
+  say right(ROW,2,'0') '*'||Vars.COL.ROW ||'|'                                  
+  say right(ROW,2,'0') '*'||ClrV.COL.ROW ||'|'                                  
+  */                                                                            
+return 0                                                                        
+                                                                                
+CONSLINE:                                                                       
+  /*  This routine uses the stored results to construct the             */      
+  /*  full heading, divider, model, ZVAR and clear restuls              */      
+  /*  It takes one parameter;                                           */      
+  /*  - PRI/ALT - the name of the column it is storing values for       */      
+  parse arg COL                                                                 
+  Head.COL.ALL = '' /* Initialise the variables TO NULL */                      
+  Divd.COL.ALL = ''                                                             
+  Modl.COL.ALL = ''                                                             
+  Vars.COL.ALL = ''                                                             
+  ClrV.COL.ALL = ''                                                             
+  do I = 1 to Ptr.COL.0                                                         
+    ThisSeq = Ptr.COL.I                                                         
+    Head.COL.ALL = Head.COL.ALL || Head.COL.ThisSeq                             
+    Divd.COL.ALL = Divd.COL.ALL || Divd.COL.ThisSeq                             
+    Modl.COL.ALL = Modl.COL.ALL || Modl.COL.ThisSeq                             
+    Vars.COL.ALL = Vars.COL.ALL || Vars.COL.ThisSeq                             
+    ClrV.COL.ALL = ClrV.COL.ALL || ClrV.COL.ThisSeq                             
+  end                                                                           
+return 0                                                                        
+                                                                                
+ENDVWIDE:                                                                       
+/*                                                                              
+*REXX (ZSCREENW hvarxzm  ESRCHWRP varpfx                                        
+       hvarxH1  hvarxH2  hvarxM1  hvarxM2  hvarxVR  hvarxCL                     
+       hvarxH1  hvarxH2  hvarxM1  hvarxM2  hvarxVR  hvarxCL (ENDVWIDE))         
+*/                                                                              
+  address ISPEXEC "VGET (ZSCREENW ZTDMARK ESRCHWRP) ASIS" /* Get missing vars */
+  sa= 'Vars:' ZSCREENW'/'ZTDMARK'/'ESRCHWRP'/'varpfx                            
+  if ESRCHWRP == 'DEBUG' then TRACE R /* activate trace from Dialog defaults */ 
+  tgtWidth = ZSCREENW                                                           
+  WrapOpt.0 = 'PRI BOTH'                                                        
+  WrapOpt.1 = 'ALT BOTH'                                                        
+/* main loop - for Primary and alternate screens */                             
+do x = 0 to 1 by 1                                                              
+  /* use Value to lookup the variables we need to change */                     
+  hvarxh1 = value(varpfx||x||'H1')                                              
+  hvarxh2 = value(varpfx||x||'H2')                                              
+  hvarxm1 = value(varpfx||x||'M1')                                              
+  hvarxm2 = value(varpfx||x||'M2')                                              
+  hvarxvr = value(varpfx||x||'VR')                                              
+  hvarxcl = value(varpfx||x||'CL')                                              
+  hvarxzm = value(varpfx||x||'ZM')                                              
+  sa= x'VB4:' hvarxH1'/'hvarxH2'/'hvarxM1'/'hvarxM2'/'hvarxVR'/'hvarxCL         
+  /* process Screen values                                             */       
+  if wordpos(ESRCHWRP,WrapOpt.X) > 0 then do /* Has user enabled wrap?*/        
+    if tgtWidth >= length(hvarxH2) then   /* if no need to split */             
+      hvarxM2 = 'OMIT'                    /* set continuation to off */         
+    else do                                                                     
+      if substr(hvarxM1,(tgtWidth+1)) == 'Z' then /* split on between attr & Z*/
+        tgtWidth = tgtWidth - 1           /* split a bit earlier */             
+      else                                                                      
+        if substr(hvarxM1,(tgtWidth+2)) == 'Z' then /* split on boundry */      
+          nop                             /* we can just split where we are */  
+        else                              /* otherwise find prev var end...*/   
+          tgtWidth = lastpos('Z',left(hvarxM1,tgtWidth)) - 2                    
+      hvarxM2 = '+   '||Substr(hvarxM1,(tgtWidth+1),(ZSCREENW-5))               
+      hvarxM2 = '+   '||Substr(hvarxM1,(tgtWidth+1),(ZSCREENW-5))               
+      RestOfH = '-- -'||strip(Substr(hvarxH1,(tgtWidth+1)))                     
+      RHandBt = Substr(hvarxH2,(length(RestOfH)+1))                             
+      hvarxH2 = left(RestOfH||RhandBt,(ZSCREENW-5))                             
+    end                                                                         
+  end                                                                           
+  else                                    /* User disabled Wrap...   */         
+    hvarxM2 = 'OMIT'                      /* set continuation to off */         
+  hvarxH1 = LEFT(hvarxH1,(tgtWidth - 1))  /* The header lines are displaced */  
+  hvarxH2 = LEFT(hvarxH2,(tgtWidth - 1))  /* so shorten them a little less */   
+  hvarxM1 = LEFT(hvarxM1,(tgtWidth - 0))  /* But model line should match */     
+  if right(hvarxM1,1) == ' ' | ,          /* If the last char is a space */     
+     right(hvarxM1,1) == 'Z' | ,          /* ...or a Z/z place holder */        
+     right(hvarxM1,1) == 'z' Then  NOP    /* that's OK , otherwise... */        
+  Else                                    /* we found some unexpected chr */    
+    hvarxM1 = LEFT(hvarxM1,(tgtWidth - 1))/* ...so trim it off */               
+  ZEDs = length(space(hvarxM1||hvarxM2, 0)) - ,    /* How many Zs are left? */  
+         length(space(translate(hvarxM1||hvarxM2, '  ', 'Zz'), 0))              
+  myline = (space(hvarxVR, 1,':'))        /* save the var list delim by : */    
+  do i = 1 by 1 while myline <> ''        /* Loop to save each word */          
+      parse var myline w.i ':' myline     /* grab each word and store it */     
+  end                                                                           
+  w.0 = i - 1                             /* Save word count (-1)     */        
+  hvarxVR = ""                            /* Reset and build the new VarLine */ 
+  do i = 1 to ZEDs                        /* for each var required */           
+      hvarxVR = hvarxVR || w.i || ' '     /* append it to the list */           
+  end                                                                           
+  myline = (space(hvarxCL, 1,':'))        /* now scan the clear var list */     
+  do i = 1 by 1 while myline <> ''        /* Loop to save each word */          
+      parse var myline c.i ':' myline                                           
+  end                                                                           
+  c.0 = i - 1                             /* Save word count (-1)     */        
+  hvarxCL = ""                            /* Now rebuild the clear list */      
+  do i = 1 to c.0                         /* for each var found    */           
+      if pos(c.i, hvarxVR) > 0 then       /* if it's a valid variable */        
+         hvarxCL = hvarxCL || c.i || ' '  /* append it to the list */           
+  end                                                                           
+  /* Set the ZTDMARK to match the max width of the Pri Panael      */           
+  if wordpos(varpfx,'ENWL ENLS') > 0 then /* if Screen supports long marks */   
+    hvarxZM = center(' Bottom of the List ', ,                                  
+      (min(160,max((length(strip(hvarxH1))),(length(strip(hvarxH2)))))),"-")    
+  else             /* otherwise, we're limited by the size of the VDEFINE */    
+    hvarxZM = center(' Bottom of the List ', ,                                  
+      (min(160,max((length(strip(hvarxH1))),(length(strip(hvarxH2)))))),"-")    
+  /*  (min(133,max((length(strip(hvarxH1))),(length(strip(hvarxH2)))))),"-") */ 
+  /* Update the values for the for the panel that called us */                  
+  newhvar = value(varpfx||x||'H1',hvarxh1)                                      
+  newhvar = value(varpfx||x||'H2',hvarxh2)                                      
+  newhvar = value(varpfx||x||'M1',hvarxm1)                                      
+  newhvar = value(varpfx||x||'M2',hvarxm2)                                      
+  newhvar = value(varpfx||x||'VR',hvarxvr)                                      
+  newhvar = value(varpfx||x||'CL',hvarxcl)                                      
+  newhvar = value(varpfx||x||'ZM',hvarxzm)                                      
+  sa= x'Aft:' hvarxH1'/'hvarxH2'/'hvarxM1'/'hvarxM2'/'hvarxVR'/'hvarxCL         
+  sa= 'Zeds:' zeds 'Words:' words(hvarxvr)                                      
+end /* main loop */                                                             
+  address ISPEXEC "VPUT (ZTDMARK) ASIS" /* Save new values */                   
+return 0                                                                        
