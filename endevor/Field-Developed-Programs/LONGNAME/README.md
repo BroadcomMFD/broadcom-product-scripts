@@ -123,7 +123,7 @@ When you are happy, submit the job to run, and then exit Edit mode to free up th
 ![Alt text](image-12.png)![
 
 ### Note: For users with multiple LPARs
-If you execute the FDP on multiple LPARS - you may need custom versions of the @<SYSID> members, one for each LPAR. The @@START3 job is now enhanced to make extra copies of the 'current' @<sysid> member (@DE25) in this example below... simply uncomment the extra copy, select member lines and update the "target @<sysid> member names" (CA11, CA31, CA31, XAD1 in the example below)
+If you execute the FDP on multiple LPARS - you may need custom versions of the @<SYSID> members, one for each LPAR. The @@START3 job is now enhanced to make extra copies of the 'current' @<sysid> member (@DE25) in this example below... simply uncomment the extra copy, select member lines and update the "target @<sysid> member names" (MF03, MF04, MF05, MF06 in the example below)
 
 ![Alt text](image-16.png)
 
