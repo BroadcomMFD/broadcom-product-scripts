@@ -16,13 +16,13 @@
 *    &WhereIam to match all your LPAR names                                     
 *                                                                               
 * COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
-* SELECT MEMBER=((&WhereIam,@CA11,R))                                           
+* SELECT MEMBER=((&WhereIam,@MF01,R))                                           
 * COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
-* SELECT MEMBER=((&WhereIam,@CA31,R))                                           
+* SELECT MEMBER=((&WhereIam,@MF02,R))                                           
 * COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
-* SELECT MEMBER=((&WhereIam,@CA32,R))                                           
+* SELECT MEMBER=((&WhereIam,@MF03,R))                                           
 * COPY INDD=INDD,OUTDD=CSIQCLS2                                                 
-* SELECT MEMBER=((&WhereIam,@XAD1,R))                                           
+* SELECT MEMBER=((&WhereIam,@MF04,R))                                           
 //INDD      DD DISP=SHR,DSN=&ThisLib                                            
 //CSIQCLS2  DD DSN=&MyCLS2Library,                                              
 //             SPACE=(CYL,(5,5,45)),                                            
