@@ -1,0 +1,57 @@
+)ATTR                                                                           
+@ TYPE(TEXT)   color(yellow)                                                    
+º AREA(SCRL)   EXTEND(ON)   /* Scrollable area - support small screens */       
+¶ TYPE(PS)                  /* Point and Shoot to select field...      */       
+)BODY EXPAND({}) CMD(ZCMD)                                                      
+%-{-}- Endevor Field Developed Program (FDP) -{-}-                              
+%COMMAND ===>_ZCMD                                          { }+                
++                                                                               
+ºSCRLAREA                                                                      º
+)AREA SCRLAREA                                                                  
+  ¶ E +Endevor      - Classic ENDEVOR                                           
+  ¶ Q +QuickEdit    - Quick Edit (with WideScreen & ESrchfor)                   
+  ¶ L +LongName     - LongName utility (Prototype)                              
+  ¶ P +PDM          - Parallel Development Manager                              
+  ¶ A +ACMQ         - Perform ACM Where-Used / Uses-What Queries                
+  ¶ U +User         - Display user option menu                                  
+  ¶ R +Reports      - Build Report Requests                                     
+  ¶ S +Activity     - Endevor Activity Display                                  
++                                                                               
+@  Note: The Field Developed Program (FDP) are provided by CA Technologies      
+@        "ASIS" to allow users to evaluate new or prototype features and        
+@        is subject to change or withdrawal by CA at any time without           
+@        notice.  The development, release and timing of any features or        
+@        functions demonstrated here remain at CA's sole discretion.            
+@                                                                               
+@        Please provide feedback, at http://communities.ca.com                  
++                                                                               
++  Copyright (C) 1986-2015 CA. All Rights Reserved.                             
++                                                                               
++                                                                               
++Use the%EXIT+option to terminate                                               
++                                                                               
+)INIT                                                                           
+   &ZPRIM = NO    /* This probably shouldn't be a Primary panel */              
+)PROC                                                                           
+&ZSEL = TRANS (TRUNC (&ZCMD,'.')                                                
+  E,'PGM(C1SM1000) NOCHECK SCRNAME(FdpEn)'                                      
+  Q,'PGM(ENDIE000) NOCHECK SCRNAME(FdpQE)'                                      
+  L,'CMD(%LONGNAME)        SCRNAME(FdpLN)'                                      
+  P,'PGM(BC1G1000) NOCHECK SCRNAME(FdpPDM)'                                     
+  A,'CMD(%ACMQ)            SCRNAME(FdpAcmq)'                                    
+  U,'PANEL(NDVRUSER)       SCRNAME(FdpUsr)'                                     
+  R,'CMD(%C1SR1000)        SCRNAME(FdpRpt)'                                     
+  S,'CMD(%SNAPMON)         SCRNAME(SnapMon)'                                    
+  X,EXIT                                                                        
+ ' ',' '                                                                        
+   *,'?' )                                                                      
+&ZTRAIL=.TRAIL                                                                  
+)PNTS                                                                           
+FIELD(ZPS01001) VAR(ZCMD) VAL(E)                                                
+FIELD(ZPS01002) VAR(ZCMD) VAL(Q)                                                
+FIELD(ZPS01003) VAR(ZCMD) VAL(L)                                                
+FIELD(ZPS01004) VAR(ZCMD) VAL(P)                                                
+FIELD(ZPS01005) VAR(ZCMD) VAL(A)                                                
+FIELD(ZPS01006) VAR(ZCMD) VAL(U)                                                
+FIELD(ZPS01007) VAR(ZCMD) VAL(R)                                                
+)END                                                                            

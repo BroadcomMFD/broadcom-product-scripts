@@ -1,0 +1,34 @@
+)ATTR DEFAULT(%+_)                                                              
+/*-----------------------------------------------------------------------*/     
+/* Copyright (C) 2007 CA. All Rights Reserved.                           */     
+/*-----------------------------------------------------------------------*/     
+ › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                        
+ | TYPE(OUTPUT) INTENS(LOW)                                                     
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)                                    
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)                        
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)                        
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)                        
+)BODY EXPAND(\\)                                                                
+%\-\ Long-Name Batch Submit \-\                                                 
+%Command ===>_VARWKCMD                                                         +
++                                                                               
++ Complete the JCL JOB card and press%ENTER+to submit the jobstream.            
++ Enter the%END+command to terminate the submit.                                
++                                                                               
++  _C1BJC1                                                                  +   
++  _C1BJC2                                                                  +   
++  _C1BJC3                                                                  +   
++  _C1BJC4                                                                  +   
++                                                                               
++ Edit JCL?_Z+(Y/N)  If editing JCL, use SUBMIT command in the Edit session.    
++                    Automatic submission of JCL will not take place.           
++                                                                               
+)INIT                                                                           
+  .ZVARS = '(EEVINJCL)'                                                         
+  &LIST2 = 'Y N'                                                                
+  &VARWKCMD = ' '                                                               
+  IF (&EEVINJCL = ' ')                                                          
+    &EEVINJCL = 'N'                                                             
+)PROC                                                                           
+  VER  (&EEVINJCL,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+)END                                                                            

@@ -1,0 +1,180 @@
+)PANEL KEYLIST(ISRSABX,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)            /* ISRUUDL0 - ENGLISH - 7.1 */        
+ 0B TYPE(AB)                                                                    
+ 04 TYPE(ABSL) GE(ON)                                                           
+ 05 TYPE(PT)                                                                    
+ 09 TYPE(FP)                                                                    
+ 0A TYPE(NT)                                                                    
+ 13 TYPE(NEF) PADC(USER)                                                        
+ 16 TYPE(VOI) PADC(USER)                                                        
+ 1D TYPE(LI) PADC(USER)                                                         
+ 22 TYPE(WASL) SKIP(ON) GE(ON)                                                  
+ 08 TYPE(CH)                                                                    
+ 30 TYPE(NEF) CAPS(OFF) PADC(USER)                                              
+ 31 TYPE(OUTPUT) INTENS(LOW) CAPS(OFF) COLOR(BLUE)                              
+ 32 TYPE(OUTPUT) INTENS(LOW) CAPS(OFF) COLOR(GREEN)                             
+ 37 TYPE(TEXT) COLOR(BLUE)                                                      
+ 38 TYPE(OUTPUT) INTENS(LOW) CAPS(OFF) COLOR(WHITE)                             
+ 39 TYPE(OUTPUT) INTENS(LOW) CAPS(OFF) JUST(RIGHT) COLOR(GREEN)                 
+ 26 AREA(DYNAMIC)                                                               
+ 33 TYPE(DATAOUT) COLOR(BLUE)                                                   
+ 34 TYPE(DATAOUT) COLOR(GREEN)                                                  
+ 35 TYPE(DATAOUT) COLOR(WHITE)                                                  
+ 36 TYPE(DATAOUT) INTENS(LOW)                                                   
+ 3A TYPE(DATAOUT) COLOR(TURQ)                                                   
+)ABC DESC('Menu') MNEM(1)                                                       
+PDC DESC('Settings') UNAVAIL(ZPM1) MNEM(1) ACC(CTRL+S)                          
+ ACTION RUN(ISRROUTE) PARM('SET')                                               
+PDC DESC('View') UNAVAIL(ZPM2) MNEM(1) ACC(CTRL+V)                              
+ ACTION RUN(ISRROUTE) PARM('BR1')                                               
+PDC DESC('Edit') UNAVAIL(ZPM3) MNEM(1) ACC(CTRL+E)                              
+ ACTION RUN(ISRROUTE) PARM('ED1')                                               
+PDC DESC('ISPF Command Shell') UNAVAIL(ZPM4) MNEM(6) ACC(CTRL+C)                
+ ACTION RUN(ISRROUTE) PARM('C1')                                                
+PDC DESC('Dialog Test...') UNAVAIL(ZPM5) MNEM(8) ACC(CTRL+T)                    
+ ACTION RUN(ISRROUTE) PARM('DAL')                                               
+PDC DESC('Other IBM Products...') UNAVAIL(ZPM6) MNEM(1) ACC(CTRL+O)             
+ ACTION RUN(ISRROUTE) PARM('OIB')                                               
+PDC DESC('SCLM') UNAVAIL(ZPM7) MNEM(3) ACC(CTRL+L)                              
+ ACTION RUN(ISRROUTE) PARM('SCL')                                               
+PDC DESC('ISPF Workplace') UNAVAIL(ZPM8) MNEM(6) ACC(CTRL+W)                    
+ ACTION RUN(ISRROUTE) PARM('WRK')                                               
+PDC DESC('Status Area...') UNAVAIL(ZPMS) MNEM(8) ACC(CTRL+A)                    
+ ACTION RUN(ISRROUTE) PARM('SAM')                                               
+PDC DESC('Exit') MNEM(2) PDSEP(ON) ACC(CTRL+X) ACTION RUN(EXIT)                 
+)ABCINIT                                                                        
+.ZVARS=ISR@OPT                                                                  
+)ABC DESC('Utilities') MNEM(1)                                                  
+PDC DESC('Library') UNAVAIL(ZUT1) MNEM(1) ACC(ALT+1)                            
+ ACTION RUN(ISRROUTE) PARM('U1')                                                
+PDC DESC('Data set') UNAVAIL(ZUT2) MNEM(1) ACC(ALT+2)                           
+ ACTION RUN(ISRROUTE) PARM('U2')                                                
+PDC DESC('Move/Copy') UNAVAIL(ZUT3) MNEM(1) ACC(ALT+3)                          
+ ACTION RUN(ISRROUTE) PARM('U3')                                                
+PDC DESC('Data Set List') UNAVAIL(ZUT4) MNEM(2) ACC(ALT+4)                      
+ ACTION RUN(ISRROUTE) PARM('U4')                                                
+PDC DESC('Reset Statistics') UNAVAIL(ZUT5) MNEM(5) ACC(ALT+5)                   
+ ACTION RUN(ISRROUTE) PARM('U5')                                                
+PDC DESC('Hardcopy') UNAVAIL(ZUT6) MNEM(1) ACC(ALT+6)                           
+ ACTION RUN(ISRROUTE) PARM('U6')                                                
+PDC DESC('Download...') UNAVAIL(ZUTDT) MNEM(2) ACC(ALT+7)                       
+ ACTION RUN(ISRROUTE) PARM('UDT')                                               
+PDC DESC('Outlist') UNAVAIL(ZUT7) MNEM(2) ACC(ALT+8)                            
+ ACTION RUN(ISRROUTE) PARM('U8')                                                
+PDC DESC('Commands...') UNAVAIL(ZUT8) MNEM(1) ACC(ALT+9)                        
+ ACTION RUN(ISRROUTE) PARM('U9')                                                
+PDC DESC('Reserved') UNAVAIL(ZUT9) MNEM(6) ACTION RUN(ISRROUTE) PARM('U10')     
+PDC DESC('Format') UNAVAIL(ZUT10) MNEM(1) ACC(ALT+F1)                           
+ ACTION RUN(ISRROUTE) PARM('U11')                                               
+PDC DESC('SuperC') UNAVAIL(ZUT11) MNEM(1) PDSEP(ON) ACC(CTRL+F2)                
+ ACTION RUN(ISRROUTE) PARM('U12')                                               
+PDC DESC('SuperCE') UNAVAIL(ZUT12) MNEM(3) ACC(CTRL+F3)                         
+ ACTION RUN(ISRROUTE) PARM('U13')                                               
+PDC DESC('Search-For') UNAVAIL(ZUT13) MNEM(2) ACC(CTRL+F4)                      
+ ACTION RUN(ISRROUTE) PARM('U14')                                               
+PDC DESC('Search-ForE') UNAVAIL(ZUT14) MNEM(4) ACC(CTRL+F5)                     
+ ACTION RUN(ISRROUTE) PARM('U15')                                               
+PDC DESC('Table Utility') UNAVAIL(ZUT15) MNEM(3) ACC(CTRL+F6)                   
+ ACTION RUN(ISRROUTE) PARM('U16')                                               
+PDC DESC('Directory List') UNAVAIL(ZUT16) MNEM(2) ACC(CTRL+F7)                  
+ ACTION RUN(ISRROUTE) PARM('U17')                                               
+)ABCINIT                                                                        
+.ZVARS=PDFUTIL                                                                  
+     &zut9 = '1'                                                                
+)ABC DESC('View') MNEM(1)                                                       
+PDC DESC('Sort...') MNEM(1) ACTION RUN(>UDLSRT)                                 
+)ABCINIT                                                                        
+.ZVARS=UDLVIEW                                                                  
+)ABC DESC('Options') MNEM(1)                                                    
+PDC DESC('Directory List Options...') MNEM(1) ACTION RUN(>UDLOPTS)              
+PDC DESC('Directory List Column Arrangement...') UNAVAIL(ZULCA0) MNEM(2)        
+ ACTION RUN(>UDLCOLA)                                                           
+PDC DESC('Directory List Default Line Commands...') MNEM(3) ACTION RUN(>UDLDFLC)
+PDC DESC('&ZUDSWTX.') MNEM(2) ACTION RUN(>SU)                                   
+PDC DESC('Refresh List') MNEM(2) ACTION RUN(>REF)                               
+PDC DESC('Save List') MNEM(1) ACTION RUN(>SAVE)                                 
+PDC DESC('Reset') MNEM(5) ACTION RUN(>RES)                                      
+)ABCINIT                                                                        
+.ZVARS=UDLUOPT                                                                  
+      *REXX(ZUSRUID,ZUSREUID)                                                   
+       call syscalls('ON')                                                      
+       address syscall 'getuid'                                                 
+       zusruid = retval                                                         
+       address syscall 'geteuid'                                                
+       zusreuid = retval                                                        
+      *ENDREXX                                                                  
+      if (&zusreuid=&ziniuid)                                                   
+        &zudswtx='Enable superuser mode(SU)'                                    
+      else                                                                      
+        &zudswtx='Reset UID to &ziniuid'                                        
+)ABC DESC('Help') MNEM(1)                                                       
+PDC DESC('General') MNEM(1) ACTION RUN(TUTOR) PARM('ISR3U000')                  
+PDC DESC('Description of ISPF supplied line commands') MNEM(1)                  
+ ACTION RUN(TUTOR) PARM('ISR3U015')                                             
+PDC DESC('Using the pathname substitution character') MNEM(1)                   
+ ACTION RUN(TUTOR) PARM('ISR3U027')                                             
+PDC DESC('Format of the displayed list') MNEM(1)                                
+ ACTION RUN(TUTOR) PARM('ISR3U012')                                             
+PDC DESC('Available primary commands when the list is displayed') MNEM(1)       
+ ACTION RUN(TUTOR) PARM('ISR3U100')                                             
+PDC DESC('Index') MNEM(1) ACTION RUN(TUTOR) PARM('ISR91000')                    
+)ABCINIT                                                                        
+.ZVARS=EDMHELP                                                                  
+)BODY  EXPAND(~~) WIDTH(&ZSCREENW)  CMD(ZCMD)                                   
+ Menu Utilities View Options Help                                        
+--~-~------------------------------------------------------------------------- 
+	~ ~Endevor Directory List~ ~                                                  
+Command ===>ZCMD~ ~                                         Scroll ===>ZAMT
+                                                                              
+&ZUDLHDPR   ZPTHNM~ ~                                                   ZI 
+EUID . . . :ZEUID~ ~                                                         
+ZDATA~ ~                                                                      
+--~-~--                                                                        
+)MODEL                                                                          
+&ZULMODL                                                                        
+)INIT                                                                           
+ vget (ndvselnw) shared                                                         
+ if (&ndvselnw = 'YES')                                                         
+    .RESP = END                                                                 
+    exit                                                                        
+&ZWINTTL = ' '                                                                  
+.HELP = ISR3U014                                                                
+.ZVARS = &ZULZVARS                                                              
+&ZUT16 = 0                                                                      
+*REXX(ZEUID)                                                                    
+ call syscalls('ON')                                                            
+ address syscall 'geteuid'                                                      
+ zeuid = retval                                                                 
+*ENDREXX                                                                        
+)REINIT                                                                         
+ vget (ndvselnw) shared                                                         
+ if (&ndvselnw = 'YES')                                                         
+    .RESP = END                                                                 
+    exit                                                                        
+)PROC                                                                           
+&ZULCSR = .CURSOR                                                               
+&ZULCSP = .CSRPOS                                                               
+)FIELD                                                                          
+FIELD(ZPTHNM) IND(ZI)                                                           
+FIELD(ZULSEL) LEN(256) SCROLL(NOLR)                                             
+FIELD(ZULFNAME) LEN(255)                                                        
+FIELD(&ZULSC01) LEN(ZULL01)                                                     
+FIELD(&ZULSC02) LEN(ZULL02)                                                     
+FIELD(&ZULSC03) LEN(ZULL03)                                                     
+FIELD(&ZULSC04) LEN(ZULL04)                                                     
+FIELD(&ZULSC05) LEN(ZULL05)                                                     
+FIELD(&ZULSC06) LEN(ZULL06)                                                     
+FIELD(&ZULSC07) LEN(ZULL07)                                                     
+FIELD(&ZULSC08) LEN(ZULL08)                                                     
+FIELD(&ZULSC09) LEN(ZULL09)                                                     
+FIELD(&ZULSC10) LEN(ZULL10)                                                     
+FIELD(&ZULSC11) LEN(ZULL11)                                                     
+FIELD(&ZULSC12) LEN(ZULL12)                                                     
+FIELD(&ZULSC13) LEN(ZULL13)                                                     
+FIELD(&ZULSC14) LEN(ZULL14)                                                     
+FIELD(&ZULSC15) LEN(ZULL15)                                                     
+FIELD(&ZULSC16) LEN(ZULL16)                                                     
+)END                                                                            
+/* 5650-ZOS     COPYRIGHT IBM CORP 2006, 2013 */                                
+/* ISPDTLC Release: 7.1.  Level: PID                                  */        
+/* z/OS 02.01.00.  Created - Date: 11 Dec 2012, Time: 13:13           */        

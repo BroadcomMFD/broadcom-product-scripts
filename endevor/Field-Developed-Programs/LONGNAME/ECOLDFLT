@@ -1,0 +1,58 @@
+/* Rexx - reset columns to default */                                           
+address ISREDIT                                                                 
+"MACRO (PARMS)"                                                                 
+xrc = 0                                /* default Return Code */                
+address ISPEXEC "VGET (VARPFX) SHARED" /* Get control var if set*/              
+if VARPFX == '' then VARPFX = ENDQ     /* default to QuickEdit option prefix */ 
+GetDflt: /* Get a copy of the default arrangement */                            
+  ADDRESS ISPEXEC "FTOPEN TEMP"                                                 
+  if rc <> 0 THEN SAY "FTOPEN Error" ZERRSM ZERRLM                              
+  ADDRESS ISPEXEC "FTINCL CTLI"VARPFX" NOFT" /* Default arrangement skeleton */ 
+  if rc <> 0 THEN SAY "FTINCL Error" ZERRSM ZERRLM                              
+  ADDRESS ISPEXEC "FTCLOSE"                                                     
+  if rc <> 0 THEN SAY "FTClose Error" ZERRSM ZERRLM                             
+  ADDRESS ISPEXEC "VGET (ZTEMPF ZTEMPN)"                                        
+  if rc <> 0 THEN SAY "VGET Error" ZERRSM ZERRLM ZTEMPF ZTEMPN                  
+/*                                                                              
+  Note: At this point we should have a temporary copy of the default column     
+  arrangement in the temporary file and we can just copy it in.  However if     
+  the ISPF temp file is preallocated We can't just use it's name instead        
+  we need to read it into a stem variable and so long as we got some records    
+  can go ahead and delete the original content and isert from the stem vars     
+*/                                                                              
+address MVS "EXECIO * DISKR" ZTEMPN "(STEM DATA. FINIS"                         
+IF RC ^= 0 THEN                                                                 
+Do                                                                              
+  ZEDSMSG = "Temp file read error"                                              
+  ZEDLMSG = "Read request for File-Tailoring temporary file:" ZTEMPN ,          
+            "D/S '"ZTEMPF"'",                                                   
+            "Failed with RC:" RC                                                
+  ADDRESS ISPEXEC "VPUT (ZEDLMSG) SHARED"                                       
+  xrc = 16                               /* set bad RC */                       
+  signal fini                            /* set message and exit */             
+end                                                                             
+If DATA.0 < 1  then do                   /* Check we have records? */           
+  ZEDSMSG = "No Records found"                                                  
+  ZEDLMSG = "Default cols not fnd, Contact Endevor Admin."                      
+  ADDRESS ISPEXEC "VPUT (ZEDLMSG) SHARED"                                       
+  xrc = 12                               /* set bad RC */                       
+  signal fini                            /* set message and exit */             
+end                                                                             
+DelOld:   /* Delete any old content left lying around */                        
+"BUILTIN RESET"                                                                 
+"DEL NX ALL"                                                                    
+InsDflt:  /* Insert all default layout lines */                                 
+do i = 1 to DATA.0                                                              
+  newline = data.i                                                              
+  ADDRESS ISREDIT "LINE_AFTER .ZLAST = DATALINE (NEWLINE)"                      
+end                                                                             
+ShowNote: /* add a few notes to help new users */                               
+"BUILTIN RESET"                                                                 
+"ECOLHELP"                                                                      
+Message:                                                                        
+zedsmsg = 'Columns Reset'                                                       
+zedlmsg = 'All column overrides reset to default (CTLI'VARPFX')'                
+fini:                                                                           
+if XRC = 0 then address ISPEXEC "SETMSG MSG(ISRZ000)"                           
+   else  address ISPEXEC "SETMSG MSG(ISRZ001)"                                  
+return(xrc)                                                                     

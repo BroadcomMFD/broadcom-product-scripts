@@ -1,0 +1,13 @@
+&TOFILE1                                                                        
+)SEL &TOFILE2 NE &Z                                                             
+&TOFILE2                                                                        
+)ENDSEL &TOFILE2 NE &Z                                                          
+)SEL &TOFILE3 NE &Z                                                             
+&TOFILE3                                                                        
+)ENDSEL &TOFILE3 NE &Z                                                          
+)SEL &TOFILE4 NE &Z                                                             
+&TOFILE4                                                                        
+)ENDSEL &TOFILE4 NE &Z                                                          
+)SEL &TOFILE5 NE &Z                                                             
+&TOFILE5                                                                        
+)ENDSEL &TOFILE5 NE &Z                                                          

@@ -1,0 +1,184 @@
+CTLIENQ  CSECT                                                                  
+*  THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+*  "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+*  FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+*  ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+*  CORRECTED.                                                                   
+*                                                                               
+*  This version enhances the basic queue operation but allows                   
+*  the QName to be specified rather than just defaulting to                     
+*  CTLIELEM.  The old call is still supported requiring that                    
+*  the new format includes the Q= identifier followed by an                     
+*  eight byte QName field - the calling structure now looks                     
+*  like this:                                                                   
+*                                                                               
+*  M Q=qqqqqqqq rrrrrrr...                                                      
+*  | |          |                                                               
+*  | |          +RName resource name is required and specfies                   
+*  | |               The resource name to be used on the Enque                  
+*  | |               e.g. "IS ACTIVE IN SCREEN n"                               
+*  | |                                                                          
+*  | |           Note: The length of the RName is determined                    
+*  | |               by the length of the Parm which should be                  
+*  | |               enclosed in quotes to ensure teh correct                   
+*  | |               length is passed - see examples below                      
+*  | |                                                                          
+*  | +QName(Optional) if specified determines the QName                         
+*  |      used on the Enqueue request.  If omitted,                             
+*  |      the QName defaults to CTLIELEM and RName starts                       
+*  |      in position 3.                                                        
+*  |      Note: If the Queue name is CTLIELEM then the                          
+*  |      ENqueue will be a SYSTEMS level, otherwise                            
+*  |      STEP is assumed.  This may change later.                              
+*  |                                                                            
+*  +Mode - E - Exclusive Enqueue                                                
+*          S - Shared Enqueue                                                   
+*          D - Dequeue request                                                  
+*                                                                               
+*  Example of use:                                                              
+*                                                                               
+*      address rexx "ispexec vget (zscreen)"                                    
+*      parm = "S" "Q=MYAPPLIC" "IS ACTIVE IN SCREEN" ZSCREEN                    
+*      address linkmvs 'CTLIENQ parm'                                           
+*                                                                               
+*  Currently routines using this routine for Element enqueues                   
+*  Need to manually call a System Enqueue (SHRD) first                          
+*  Consider automating a System Enque before hand...                            
+*  However a different return code would be needed for locked                   
+*  versus InUse status...                                                       
+*                                                                               
+*  /* WRITTEN BY Eoin O'Cleirigh */                                             
+*                                                                               
+R0       EQU   0                                                                
+R1       EQU   1                                                                
+R2       EQU   2                                                                
+R3       EQU   3                        RNAME LENGTH                            
+R4       EQU   4                        LOOP COUNTER                            
+R5       EQU   5                                                                
+R6       EQU   6                                                                
+R7       EQU   7                                                                
+R8       EQU   8                                                                
+R9       EQU   9                                                                
+R10      EQU   10                                                               
+R11      EQU   11                                                               
+R12      EQU   12                       PROGRAM BASE                            
+R13      EQU   13                                                               
+R14      EQU   14                                                               
+R15      EQU   15                       RETURN CODES                            
+         SPACE 5                                                                
+         USING *,R12                                                            
+         STM   R14,R12,12(R13)                                                  
+         LA    R12,0(R15)                                                       
+         LA    R15,SAVE                                                         
+         ST    R15,8(R13)                                                       
+         ST    R13,4(R15)                                                       
+         LR    R13,R15                                                          
+         XC    RCODE,RCODE          POSIT GOOD RETURN                           
+   SPACE 2                                                                      
+         L     R2,0(R1)             POINT R2 TO PARM DATA                       
+         LH    R3,0(R2)             PARM LENGTH                                 
+         MVC   MODE(1),2(R2)        S (SHARED) OR E (EXCLUSIVE)                 
+         S     R3,=F'2'             Reduce length to account for mode           
+         LA    R2,4(R2)             ADVANCE TO next PARM                        
+         CLC   =CL2'Q=',0(R2)       Does parm start with "Q=" ?                 
+         BNE   SAVRNAM              USE CTLIELEM, and get RNAME                 
+SAVQNAM  MVC   QNAME(8),2(R2)       Save QNAME (8 characters)                   
+* RName length is Parm Length - (Mode(1)+Sep(1)+Q=(2)Qname(8)+Sep(1))           
+* But I've already allowed for the mode bytes above so I just need 11           
+         S     R3,=F'11'            Length = ParmL - (2+8+1)                    
+         LA    R2,11(R2)            ADVANCE TO RNAME PARM                       
+SAVRNAM  STC   R3,RLEN              STORE RNAME LENGTH                          
+         XC    RTEXT,RTEXT          CLEAR RNAME                                 
+         BCTR  R3,0                 DECREMENT FOR EX                            
+         EX    R3,RMOVE             MOVE REMAINING PARM TO RNAME                
+*RMOVE   MVC   RTEXT(0),0(42)       TARGET INSTRUCTION FOR EX                   
+   SPACE                                                                        
+         EXTRACT  TSO,FIELDS=(TSO)                                              
+         L     R1,TSO                                                           
+         LA    R4,5                 POSIT ONLINE (2 secs Max)                   
+         TM    0(R1),X'80'          TSO BIT ON ?                                
+         BO    BC10                 YES; PROCEED                                
+   SPACE                                                                        
+         LA    R4,1200              NO; ALLOW BATCH TO WAIT 5 MIN               
+* Next choice is whether the ENQUEUE should be at step or System                
+* Level - the CTLIELEM requests need to be at System everything                 
+* else we'll do at step level (maybe later add a parm?)                         
+* note RName Length is set to 0 here which implies it should                    
+* be in the first byte of the RName, but maybe using assembled                  
+* length instead... 100? - should I use RLEN?                                   
+BC10     DS    0H                                                               
+         CLC   =CL8'CTLIELEM',QNAME CTLIELEM request?                           
+         BE    BS10                                                             
+         CLI   MODE,C'D'            DeQueue Request?                            
+         BE    BC100                                                            
+         CLI   MODE,C'S'            Share Request?                              
+         BE    BC101                ...otherwise Exclusive                      
+         ENQ   (QNAME,RNAME,E,0,STEP),RET=USE                                   
+         B     CHECKRTN                                                         
+BC100    DS    0F                   Issue DEQ                                   
+         DEQ   (QNAME,RNAME,0,STEP),RET=HAVE                                    
+         LTR   R15,R15              All OK?                                     
+         BZ    RETURN               ...Return                                   
+         LA    R15,4                Otherwise, Warn and return                  
+         ST    R15,RCODE                                                        
+         B     RETURN                                                           
+BC101    DS    0F                                                               
+         ENQ   (QNAME,RNAME,S,0,STEP),RET=USE                                   
+         B     CHECKRTN             Otherwise do we want to wait?               
+BS10     DS    0H                                                               
+*        CLC   =CL8'CTLIELEM',QNAME CTLIELEM request?                           
+         CLI   MODE,C'D'            DeQueue Request?                            
+         BE    BS100                                                            
+         CLI   MODE,C'S'            Share Request?                              
+         BE    BS101                ...otherwise Exclusive                      
+         ENQ   (QNAME,RNAME,E,0,SYSTEMS),RET=USE                                
+         B     CHECKRTN                                                         
+BS100    DS    0F                   Issue DEQ                                   
+         DEQ   (QNAME,RNAME,0,SYSTEMS),RET=HAVE                                 
+         LTR   R15,R15              All OK?                                     
+         BZ    RETURN               ...Return                                   
+         LA    R15,4                Otherwise, Warn and return                  
+         ST    R15,RCODE                                                        
+         B     RETURN                                                           
+BS101    DS    0F                                                               
+         ENQ   (QNAME,RNAME,S,0,SYSTEMS),RET=USE                                
+         B     CHECKRTN             Otherwise do we want to wait?               
+CHECKRTN DS    0H                                                               
+         LTR   R15,R15                                                          
+         BZ    RETURN              All Good, we're done                         
+*                                                                               
+*    LOOP FOR (N) SECONDS (R4) TIMES                                            
+*                                                                               
+         BCT   R4,WAITABIT          R4 > 0, then wait                           
+         LA    R15,8                Otherwise, fail and return                  
+         ST    R15,RCODE                                                        
+         B     RETURN                                                           
+WAITABIT STIMER WAIT,BINTVL=SECONDS                                             
+         B     BC10                 Go back and try enqueue again               
+*                                                                               
+*    RETURN                                                                     
+*                                                                               
+RETURN   DS    0F                                                               
+         L     R15,RCODE                                                        
+         L     R13,4(R13)                                                       
+         LM    R0,R12,20(R13)                                                   
+         L     R14,12(R13)                                                      
+         BR    R14                                                              
+   SPACE 5                                                                      
+*                                                                               
+SAVE     DC    18F'0'        SAVEAREA                                           
+TSO      DC    F'0'          ADDRESS OF TSO BYTE                                
+RCODE    DC    F'0'                                                             
+*                                                                               
+RMOVE    MVC   RTEXT(0),0(R2)       TARGET INSTRUCTION FOR EX                   
+*                                                                               
+QNAME    DC    CL8'CTLIELEM'        Endevor Element Enqueue                     
+*                                                                               
+RNAME    DS    0CL100        RNAME FIELD                                        
+RLEN     DC    X'00'         LENGTH                                             
+RTEXT    DC    XL99'00'      NAME                                               
+*                                                                               
+MODE     DC    CL1' '                                                           
+*                                                                               
+SECONDS  DC    F'025'        0.25 SECONDS                                       
+         END                                                                    

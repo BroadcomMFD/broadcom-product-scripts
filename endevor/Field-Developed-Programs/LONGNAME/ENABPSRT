@@ -1,0 +1,42 @@
+/* Rexx - This utility gains control when the user presses Enter and the        
+          cursor is in the column heading area.                                 
+                                                                                
+          On entry:                                                             
+          MCURSOR  -  Identifies the field that the cursor is in                
+          MCSRPOS  -  Contains the offset in that field (1-fld_length)          
+          MYHEADN  -  Contains the name of the heading field                    
+          MYHEADV  -  Contains the actual column headings variable data         
+                                                                                
+          On Exit:                                                              
+          VARWKCMD - Is set to a sort column command                            
+*/                                                                              
+sa= "MCURSOR..." MCURSOR    "MYHEADN..." MYHEADN                                
+sa= "MCSRPOS..." MCSRPOS    "ZVERB....." ZVERB                                  
+sa= "VARWKCMD.." VARWKCMD   "ZUSER....." ZUSER                                  
+sa= "MYHEADV..." MYHEADV                                                        
+/* consider the case of cursor at pos 1... maybe default sort?   */             
+if MCSRPOS = 1 then do                      /* At Start header?  */             
+   VARWKCMD = "ESort"                       /* default order     */             
+   return                                   /* Exit panel rexx   */             
+end                                                                             
+MYHEADV = translate(strip(MYHEADV,'t'))     /* upper and strip   */             
+max_len = length(MYHEADV)                                                       
+if MCSRPOS > max_len then MCSRPOS = max_len /* at end of header? */             
+alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ+-/17' /* permitted chrs */                  
+do i = (MCSRPOS) by -1 until i=1  /* find white space or beg fld */             
+   test_chr=substr(MYHEADV,i,1)                                                 
+   if pos(test_chr,alpha) = 0 then leave                                        
+end                                                                             
+do j = i to max_len               /* find start of word */                      
+   test_chr=substr(MYHEADV,j,1)                                                 
+   if pos(test_chr,alpha) > 0 then leave                                        
+end                                                                             
+do K = J+1 to J+2                 /* find end of word or 3 chrs */              
+   test_chr=substr(MYHEADV,K,1)                                                 
+   if pos(test_chr,alpha) = 0 then leave                                        
+end                                                                             
+first3 = substr(MYHEADV,J,K-J)    /* get the word or prefix     */              
+if wordpos(first3,'MES NDR PRR VVL NOS GEN CUR') > 0 then /* special    */      
+   first3 = '-' || first3         /* default to reverse         */              
+sa= "i:" i "j:" j "k:" k "String:'"first3"'"                                    
+VARWKCMD = "ESort "first3                                                       

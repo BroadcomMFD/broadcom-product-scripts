@@ -1,0 +1,71 @@
+LONG010I 'Signed-Out to ''&EEVETSO.'''                     .TYPE=W NOKANA       
+'LONG010I Element &ELEMENT is signed out to ''&EEVETSO.'''                      
+                                                                                
+LONG011I 'Some Patterns Ignored'                           .TYPE=W NOKANA       
+'LONG011I When entering multiple element masks one or more of them failed ' +   
+'to match any elements.  Review messages for more details. RC:&APIRC.'          
+                                                                                
+LONG011W 'No Elements Match'                               .TYPE=W NOKANA       
+'LONG011W List Element CSV request failed, or no elements found.  Check your ' +
+'selection criteria, and/or review the message. RC:&APIRC.'                     
+                                                                                
+LONG011E 'No Patterns Matched'                            .TYPE=A NOKANA        
+'LONG011E Multiple name(s) and/or patterns were entered but no elements ' +     
+'were found.  Review messages for more details. RC:&APIRC.'                     
+                                                                                
+LONG012E 'Invalid Environment'                             .TYPE=W NOKANA       
+'LONG012E List Element CSV request failed.  Check your ' +                      
+'selection criteria, and/or review the message. RC:&APIRC.'                     
+                                                                                
+LONG013E 'Invalid Command'                                 .TYPE=W NOKANA       
+'LONG013E Command ''&THISCMD.'' not recognized'                                 
+                                                                                
+LONG014W 'Not Found'                                       .TYPE=W NOKANA       
+'LONG014W Locate for element ''&THISLOCV.'' failed.  TBScan RC:&TBSCANRC.'      
+                                                                                
+LONG015E 'Invalid User Cmd'                                .TYPE=W NOKANA       
+'LONG015E User commands must be in the form Ux, where x is a valid member ' +   
+'name suffix, so that your user clist (UsrRtn&SELS.) can be found.'             
+                                                                                
+LONG016E 'Invalid Diff Cmd'                                .TYPE=W NOKANA       
+'LONG016E To invoke the ''Difference'' display to compare two elements, '     + 
+'mark both names with ''D'' and press ENTER, or use ''DN'' and ''DO'' to '    + 
+'mark the NEW/OLD files for compare (or D1/D2 respectively).  Alternatively ' + 
+'use ''DU'' to compare with the next found version up the map, or ''DP'' to ' + 
+'compare with the Prod(top of the map) version.'                                
+                                                                                
+LONG017I 'Differences Found'                               .TYPE=N NOKANA       
+'LONG017I Differences were found between the NEW and OLD files '    +           
+'selected.  SuperC return code:&SUPCRC.  The elements compared were, ' +        
+'New:&NT. Old:&OT.'                                                             
+                                                                                
+LONG017W 'No Differences Found'                            .TYPE=W NOKANA       
+'LONG017W No Differences were found between the NEW and OLD files '    +        
+'selected.  SuperC return code:0  The elements compared were, ' +               
+'New:&NT. Old:&OT.'                                                             
+                                                                                
+LONG017E 'Same Element:Ver'                                .TYPE=A NOKANA       
+'LONG017E There is no point comparing the selected elements the '    +          
+'currently selected OLD and NEW point to the same element. '         +          
+'Choose another element/version to compare with:&NT.'                           
+                                                                                
+LONG018I 'Multiple Patterns Match'                         .TYPE=N NOKANA       
+'LONG018I It looks like you wanted wanted to use multiple element '  +          
+'names or wild card masks.  This has resulted in an extended '        +         
+'list with all the elements that matched your request returned. '               
+                                                                                
+LONG018W 'Duplicate Paths Detected'                        .TYPE=N NOKANA       
+'LONG018W When performing the CSV search of elements we found the '  +          
+'same element more than once.  This can happen when you use '        +          
+'parallel development sand-boxes, and is normal.  The duplicate '    +          
+'row (Rec#:&rec#.) is dropped.'                                                 
+                                                                                
+LONG019C 'Out of Sync'                                     .TYPE=A NOKANA       
+'LONG019C LongName has detected an out of sync condition, the  '    +           
+'table data no longer matches the Endevor element data. Exit and  ' +           
+'re-enter to refresh the view'                                                  
+                                                                                
+LONG019E 'Not Implemented'                                 .TYPE=A NOKANA       
+'LONG019E The requested feature is not implemented yet.  Please '   +           
+'contact your Endevor Administrator or CA Technologies Field '      +           
+'Engineering Services for assistance.'                                          

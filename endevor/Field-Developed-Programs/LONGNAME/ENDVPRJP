@@ -1,0 +1,31 @@
+/* rexx - This routine is used to Pick a project from the list of stored        
+          project and parse it into parms that can be returned to the           
+          calling panel                                                         
+                                                                                
+   Change Log:                                                                  
+    19may16 - Initial proof of concept work                                     
+    25may16 - Shorten variable names                                            
+                                                                                
+ Call format:                                                                   
+ *REXX (ENABPRJ P1 P2 P3 P4 P5 p6 p7 p8 p9 EPRL1 EPRL2                          
+        EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8, (ENDVPRJP))                        
+*/                                                                              
+SelProj = value(EPRL||right(ENABPRJ,1,'0')) /* get project */                   
+parse value '' with p1 p2 p3 p4 p5 p6 p7 p8 p9 /* reset all values */           
+thisparm = ''                                                                   
+prmnum = 0                                                                      
+do i = 1 to length(SelProj)                   /* for length of string */        
+   thisChr = substr(selProj,i,1)              /* this Chr */                    
+   if thisChr = '\' then do                                                     
+      prmnum = prmnum + 1                                                       
+      dmy = value('p'||prmnum,thisparm)       /* save what we got */            
+      thisparm = ''                           /* ...and reset for next */       
+      if prmnum = 8 then do                   /* We got all regular parms? */   
+         p9 = Substr(selProj,i+1)             /* set comment to the rest */     
+         leave                                /* and get out early */           
+      end                                     /* to allow ANY chr in comment */ 
+   end                                                                          
+   else                                                                         
+      thisparm = thisparm || thischr                                            
+end                                                                             
+Return /* all done here */                                                      

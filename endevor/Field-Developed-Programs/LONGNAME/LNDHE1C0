@@ -1,0 +1,637 @@
+)ATTR DEFAULT(^+~)                                                              
+   AREA(SCRL) EXTEND(ON)                                                       
+  ¸ TYPE(text) COLOR(pink)                                                      
+)BODY EXPAND (\\) CMD(ZCMD)                                                     
+^TUTORIAL \-\ Long-Name Help \-\ TUTORIAL                                       
+^Command ===>~ZCMD                                                             +
++                                                                               
++The^Long-Name+utility is actively changing based on user requests, some of     
++the recent features include;                                                   
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+^*Quick Edit CCols compatibility+(LU09037,LU09038)                              
++   Support/compatibility for Quick/Edit Element list column customisation      
++   feature - CCols, allowing Point-n-Shoot column sorting.                     
++                                                                               
+^*Element list panels performance enhancement+(LU00249)                         
++   EDUPS, EFIND, ESRCHFOR handle unkeyed tables.                               
++                                                                               
+^*Quick Edit Submit after Edit compatibility+(SO14221)                          
++   compatibility problem P7807 - Allows user to request that Quick Edit        
++   will always prompt to submit the all queued requests after an Edit.         
++                                                                               
+^*Quick Edit User Routine compatibility+(SO14471)                               
++   compatibility with innovation IP P7777 - Available User routines are        
++   visible on Q/E ENDIE25x screens, and there is a new user defaults           
++   option to hide them.                                                        
++                                                                               
+^*Hilite Processor Support                                                      
++   A sample processor (EHISAMPR) and Edit imacro (IEDITERR) are provided       
++   to support highlighting error messages during compile and allow the user    
++   to toggle support for them in QuickEdit using the^EHIlite+command.          
++                                                                               
+^*Quick Edit Batch Actions Update                                               
++   With PTF SO12079 applied there were some minor changes to panels/           
++   clists included for WideScreen support - this bundle V63 includes           
++   compatibility for this level.                                               
++                                                                               
+^*Quick Edit Batch Actions+(CD180101)                                           
++   With PTFs SO11288/1901 applied, Quick Edit supports Queueing multiple       
++   actions in batch instead of submitting each request as a single job.        
++   Bundle version 62 includes compatibility in the LongName utility.           
++                                                                               
+^*LockPackage                                                                   
++   With PTFs SO08738/8734 applied, Quick Edit now allows the LockPackage       
++   field to be scrolled left/right and/or Expanded.  Bundle version 61         
++   provides compatible support for the LongName utility.                       
++                                                                               
+^*COPYELM/COMPELM                                                               
++   With PTFs SO07890 and SO07891 applied, The LongName utility no longer       
++   needs to provide the COMPELM Rexx as this is now included in the base       
++   product.  The COPYELM and COMPELM commands now support selection of         
++   versions/levels and the ability to Browse the element, view the History,    
++   Changes and Master information.                                             
++                                                                               
+^*V18.0.12 GA                                                                   
++   Endevor V18.0.12 (or GA Complete) included many changes, including          
++   dynamic panels, and later extended column support in Quick Edit.            
++   As a result there is less need to use the LongName utility per se.          
++   However, you may still wish to use the panel overrides to Enhance the       
++   standard Endevor with the prototype features (like click-to-sort on         
++   the QuickEdit Column headings or to re-arrange the column headings to       
++   give you access to fields) not available in the base product.               
++                                                                               
+^*Deploy to Test                                                                
++   Access the^DT+option+to deploy sandbox elements to a test environment       
++   e.g.^CICS, IMS+or^DB2+locations. From any Quick/Edit element Selection      
++   list, simply use the "DT" primary command (or access it from                
++   the ActionBar drop-down menu under Endevor, Deploy to Test.  The dialog     
++   will use the current sandbox elements to build a package of elements to be  
++   deployed. Enter (or click on) the Target Test environment from the list,    
++   and press Enter to build, cast, validate and execute the package.           
++   Optionally you can review, (select/unselect) individual elements            
++   to be deployed by setting the "Select Elements" option.                     
++                                                                               
+^*Endevor Hilite                                                                
++   Now when you Browse or Edit Endevor messages they should be highlighted     
++   according to message severity.  Error messages will be flagged as RED,      
++   Warning messages in YELLOW etc.  This makes it much easier to find the      
++   root cause when there are muptiple errors.  You can control                 
++   hilighting appearance with the new^EHIlite+command.                         
++                                                                               
++   In addition there is a new command^EVEdit+that allows you to switch         
++   between^VIEW, EDIT+and^BROWSE+modes, and to invoke the^ENDVHISC+iMacro.     
++                                                                               
++   To use EHIlite with^Sysview+or^SDSF+use the^ESYSview+or^ESDsf+commands      
++   from within Endevor.  In Edit views (ED or SE) you can use the^ENDVHISC+    
++   command to scan the file and insert a message summary, or set this as       
++   the initial macro (IMacro) so it happens automatically.                     
++                                                                               
+^*Endevor C1MSGS3                                                               
++   An often requested feature (C1MSGS3) or the abiltiy to show a summary       
++   of important messages from a batch job and therefore make it easier to      
++   find the real error is now included.  Users can enable the feature on       
++   a personal basis by copy/pasting the following snippet as "Additional JCL"  
++   when submitting batch requests, and/or the Endevor admin can add them to    
++   the appropriate skeletons/batch jobs as needed.  The feature works by       
++   saving a copy of the C1MSGS1 and C1MSGS2 to a temporary file, and then      
++   invoking a rexx routine to format them if there are any error messages.     
++                                                                               
+¸   //*-------------------------------------------------------------------*     
+¸   //*    SAVE A COPY OF MESSAGES IN CASE OF ERROR                       *     
+¸   //*-------------------------------------------------------------------*     
+¸   //EN$DPMSG DD DISP=(NEW,PASS,KEEP),DSN=&&EN$DPMSG,                          
+¸   //         LRECL=133,RECFM=FBA,BLKSIZE=0,UNIT=SYSDA,                        
+¸   //         SPACE=(CYL,(1,5),RLSE)                                           
+¸   //*-------------------------------------------------------------------*     
+¸   //*    PROCESS C1MSGS3 IF THERE WAS AN ERROR                          *     
+¸   //*-------------------------------------------------------------------*     
+¸   //IFNDVERR IF (ABEND | RC > 0) THEN                                         
+¸   //C1SMGS3  EXEC PGM=IRXJCL,PARM='ENDVHIC3'                                  
+¸   //EN$DPMSG DD DISP=(OLD,DELETE,DELETE),DSN=&&EN$DPMSG                       
+¸   //SYSEXEC  DD DISP=SHR,DSN=&MyCLS2Library                                   
+¸   //C1MSGS3  DD SYSOUT=*,RECFM=VBA                                            
+¸   //SYSTSPRT DD DUMMY    <=== or code SYSOUT=*                                
+¸   //IFNDVER$ ENDIF                                                            
++                                                                               
++  ^Note:+ Adjust the space allocation or Condition code checks as needed.      
++                                                                               
+^*CUA Compliance (Experimental)                                                 
++   Gain complete control over the look and feel of the Endevor screens.        
++   The WideScreen enhanced panels are now fully CUA compliant so you can       
++   more easily identify "Hot-Spots" that are Point-N-Shoot, recognize          
++   toggle-able options in a way that is more consistent across all ISPF        
++   applications.  You can also use the CUAATTR command to tailor the colour    
++   and high-lighting of any CUA field, for example to enable REVERSE video     
++   on point-n-shoot fields.                                                    
++                                                                               
+^*Click-to-Sort                                                                 
++   QuickEdit and LongName gain the ability to sort by columns simply by        
++   clicking in the column header, or if you prefer just position the cursor    
++   and press Enter.                                                            
++   Note: In Quick/Edit, you get a preview of the command before it's           
++   processed.                                                                  
++                                                                               
+^*Widescreen compatibility with Quick/Edit v18.0.8                              
++   If you have installed^R00174+- Support for Long-Named Elements in Quick Edit
++   there are now compatible WideScreen prototypes available for all Q/E actions
++   So you can have full access to ECOLS and ActionBar support while the base   
++   Q/E features now fully support LongNames.                                   
++  ^Note:+You must issue an^ECols+followed by^RESET+command to update the       
++   columns displayed - after that you can tailor as usual.                     
++                                                                               
+^*Widescreen compatibility with Endevor v18.0.7                                 
++   If you have installed^R00144+- ISPF LONG-NAMED ELEMENT SUPPORT FEATURE      
++   there are now compatible WideScreen prototypes available for the Display    
++   and Retrieve element selection lists.  ESort and Eonly are also updated     
++   to support the new fields.                                                  
++  ^Note:+You must issue an^ECols+followed by^RESET+commands for each of these  
++   views to update the columns displayed - after that you can tailor as usual. 
++                                                                               
+^*WherAmI Helper Function Rename                                                
++   Some sites reported an issue on install where because they had a system     
++   routine with the same name as the FDP site customisation function           
++  ^(WHEREAMI).+ To avoid problems, this function is renamed as^WHERE@M1.+      
++                                                                               
+^*Code Page 285 & Endevor v18 compatibility                                     
++   For sites that run with non-English code pages, some symbols used on        
++   panels may not display correctly (for example square brackets, pound or     
++   hash sign etc.) to avoid problems the LongName utility will use more        
++   common/generic symbols such as the regular brackets^(+&&^)+instead.         
++                                                                               
++   Panel C1SP1000 was also enhanced in V18 to complete the removal of the      
++   CI - Correlation Information. LongName will now detect V18 sites and        
++   also hide this option.                                                      
++                                                                               
+^*Project ActionBar Support                                                     
++   You can now use the^Project+ActionBar menu item to quickly switch           
++   between Endevor inventory locations(Projects).  As you use Endevor the      
++   project history is automatically updated with your recently used projects   
++   allowing easy access to previous locations.                                 
++                                                                               
++   You can edit locations or mark favourite locations with an '/' to keep      
++   them at the top of the list using the^Manage Project(9)+option.             
++                                                                               
++   You can also select whether the SearchMap, FirstFound, CCID, and COMMENT    
++   values are saved and restored when you change Projects.                     
++                                                                               
+^*Submit Sample User Routine                                                    
++   New Sample User Routine (USRRTNUS) can be used to^SUBMIT+the selected       
++   element as a job for processing.  This sample routine, which performs       
++   an API based^RETRIEVE,+followed by regular^TSO Submit^can be used as a      
++   basis for any number of custom commands that require a local copy of        
++   an element to work with - please add and share your ideas on                
++   http://communities.ca.com                                                   
++                                                                               
+^*View and Edit Profile                                                         
++   LongName will now select a profile based on the element type whenever       
++  ^View+or^Edit+is invoked - this will ensure that your prefered settings      
++   are "sticky" and won't change from session to session.  If you need to      
++   change this behavior you can override it in the Initial edit macro          
++   (LONGIMAC)                                                                  
++                                                                               
+^*View and Edit ASCII or UTF8                                                   
++   LongName now allows both Edit and View^ASCII+or^UTF-8+files using the       
++  ^EA+and^VA+(ASCII) and^EU+and^VU+(UTF-8) commands respectivly.  When the     
++   ASCII or UTF-8 options are in effect , the element is retrieved to a        
++   temporary path instead of a temporary file before the Editor is             
++   invoked.                                                                    
++                                                                               
+^*Preserve VB Record Length                                                     
++   LongName now supports the Preserve VB record length edit option rather      
++   than having to specify^PRESERVE ON/OFF+after starting Edit.  If 'Y' is      
++   specified the trailing spaces of any record in a variable record edit       
++   session will be preserved. If N is specified the trailing spaces will       
++   be removed.                                                                 
++                                                                               
+^*Dynamic Element Length/Record Format                                          
++   LongName now will now query Endevor to determine the appropriate record     
++   length and record format before invoking Edit/View on an element.  This     
++   can still be overridden (if required) on a TYPE basis by customizing the    
++   LongName defaults.                                                          
++                                                                               
+^*View CSV Data in Column format (COLMEYES)                                     
++   An Edit macro (COLMEYES) is provided to convert standard CSV data into      
++   a more easily read "columnar" format - just Edit or view a CSV file and     
++   issue the^COLMEYES+command.                                                 
++                                                                               
+^*Route by Type Support                                                         
++   LongName now sets a variable (EMULTYPS) which can be used by the            
++   skeleton which will contain a list of all TYPEs being processed in the      
++   current job.  This can be used to determine where the job should be         
++   Executed, for example processing all C or COBOL compiles on spefic          
++   LPARS by insertive/validating the SYSAFF or SCHENV attributes.              
++                                                                               
+^*SnapMon Job Type Support                                                      
++   SnapMon now uses a more reliable method to determine Job type and now       
++   shows a breakdown of Endevor workload by Job type; TSO, JOB, STC, Other.    
++   Additionally, if you use Endevor distributed workload, jobs that are        
++   waiting for remote step execution will be highlighted.                      
++                                                                               
+^*Support for ENUXSITE                                                          
++   If your site uses the Endevor initialisation exit (ENUXSITE) to control     
++   loading of specific Endevor tables, this will now work with LongName too.   
++                                                                               
+^*Additional Columns                                                            
++   LongName now provides addidional columns in the selection list to           
++   show the Stage Number, Stage Name and Logical Stage Number.  These          
++   new fields will be hidden by default (width=0) but you can enable them      
++   using the ECOLs command.                                                    
++   Note: If you have already modified your default columns use the RESET       
++   command to pull in the updated defaults.                                    
++                                                                               
+^*Endevor Duplicates Filter (EDUPs)                                             
++   Like the^EONLY+and the^EFind+commands, that act to filter the element       
++   selection list, there is a new command^EDUPs+which you can use to show      
++  ^Duplicates+(same element name in multiple locations) or^Unique elements     
++   (where the element name is found in only one location).                     
++                                                                               
++   The filter is controlled by the parametrs passed:                           
+^     =  +To show all duplicates, except those up the map                       
+^     &P +To show all duplicates, including those up the map                    
+^     -  +To show only the unique elements                                      
++                                                                               
++   Enter^EDUPs+again,without any parameters, to restore the prior selection    
++   list.                                                                       
++                                                                               
++   Note:^EDUPs+works only with the "visible" selection list so the current     
++   settings for Search Map, and Return First Found and any inventory filters   
++   also apply.                                                                 
++                                                                               
+^*Additional ActionBar options                                                  
++   LongName now provides drop down menu support for QuickEdit, Packages        
++   and the Endevor Activity moniter(SNAPMON) from the Action bar.              
++   However you are still limited to running only one of each application       
++   in a single split screen. ^LongName+now supports this too.                  
++   In addition there is now an^Endevor Activity+option in the Action Bar       
++   under the Endevor item.                                                     
++                                                                               
+^*Added Endevor Snapshot Monitor                                                
++   The Endevor^SnapMon+tool provides a simple way for Administrators to        
++   check on Endevor activity for an entire LPAR.  It works using the           
++   'IS ACTIVE IN SCREEN' Enqueues that Endevor and it's options use            
++   to detect being already active. ^LongName+now supports this too.            
++   In addition there is now an^Endevor Activity+option in the Action Bar       
++   under the Endevor item.                                                     
++                                                                               
+^*Support Endevor V18 Spaces in Ele Names                                       
++   Endevor v18 allows spaces in element names (RO85779) but has new SCL        
++   syntax to ensure spaces are preserved when continued over multiple          
++   lines by wrapping each "chunk" with quotes and adding a comma to            
++   indicate a continued string. ^LongName+now supports this too.               
++                                                                               
+^   Note:+Because of this, now to specify^MULTIPLE+element names in the         
++   selection criteria, you must separate them with^Commas,+for example;        
++                                                                               
++      ELEMENT:                                                                 
++   ^>+ABC*, OneEle, Another Element With Spaces, z*                            
++                                                                               
+^*Sample StartFDP Menu                                                          
++   There is now a sample startup command^STARTFDP+which will perform the       
++   required^LIBDEFs+to enable support for the Field Developed Program          
++   proto-type enhancements.  Use this as a method of invoking Endevor,         
++   QuickEdit, LongName, PDM etc. with support for WideScreen, Esrchfor etc.    
++                                                                               
+^*Element Locked Status                                                         
++   Element selection lists now include the^Locked Status+of an element         
++   so you can see Elements that are locked, the package (Current Package)      
++   and the Locked Date and Time.  If you attempt to edit an element that       
++   is Locked a warning message is shown with details of it's locked status     
++   The^Apply Filter+option is also enhanced to allow filtering the element     
++   selection list to only include Locked elements.                             
++  ^Note:+If you can't see the Locked Element details, you may need to reset    
++   your column settings using the ECols command(ECols;RESET)                   
++                                                                               
+^*Edit Line Command Table Support                                               
++   The Line Command Table field on the LongName entry panel gives you          
++   the opportunity to define a set of user line commands that you can          
++   use during the edit or view requests.                                       
++                                                                               
+^*Stage Filter                                                                  
++   The LongName utility now supports a^Stage Filter+to allow you to specify    
++   exactly which stage(s) you want to appear in the element selection list.    
++   By default, the LongName utility operates like QuickEdit showing all        
++   elements in the selected ENVIRONMENT (i.e. both stage 1 and 2) so even if   
++   Build Using Map is set to No, you may see elements at more than one stage.  
++   A stage filter list has been added to the Filter options panel to allow you 
++   to specify one (or more) stage IDs to be listed (filtering out all others), 
++   or this field can be left blank to request all stages.  This option can be  
++   combined with a Search up the map to return specific satages only.          
++   Alternatively you can change the^Build Using Map+option to specify a value  
++   of^"1"+or^"2"+to restrict the list to elements to stage number 1 or 2 only. 
++                                                                               
+^*Package Action Support                                                        
++   The LongName utility now supports a action processing option of^Package.    
++   Typically used after using^'Append'+to queue up multiple requests, the      
++  ^'Package'+action will then prompt the user for a Package name and           
++   Description (with a default Package name that can be generated by rules     
++   that the user selects - for example to create a Package name using the      
++   Target Stage ID, followed by a uniqe data/time based string.  In addition   
++   the user may select to automatically, cast/validate/execute the Package.    
++   Note: If you have saved pending requests and you change your mind you       
++   can use the^CANCEL+command to clear the current and all pending requests.   
++                                                                               
+^*PkgEleS Primary Command                                                       
++   Use the^PKGeles+command to create a Package based on the elements in the    
++  ^current selection list,+and to optionally^Cast/Validate/Execute it in a     
++   submitted job.  Use search filters,^EFind,+or^EOnly+to exclude elements     
++   you don't want in your Package or if you prefer, set the^'Use Pick-list'    
++   option to 'Y'to bring up an extra prompt panel where you can ^Select/       
++  ^Unselect+elements from a list before you submit the request.                
++   The Package name is generated automatically, based on the date/time,        
++   but may be overridden if required.  CCID and Comment default to the         
++   current dialog values.                                                      
++   Note: The generated Package may also contain long name Elements.            
++                                                                               
+^*Multiple SubSystem Name Masks                                                 
++   You are no longer restricted to entering a Single SubSystem name when       
++   starting the utility, simply enter multiple names or patterns separated     
++   by space or comma - for example;^ESCM* SIQ000%9 +to show elements matching  
++   either SubSystem pattern.  This is especially useful if you use^Sandboxs    
++   for parallel development.  However if you are creating an element then      
++   you can only specify a single SubSystem and it may not be wild carded.      
++   Note: Like the element name field, you use the^EXPAND+or^LEFT/RIGHT+        
++   scrolling to view/enter more subsystems.                                    
++                                                                               
+^*C1MSGSA/C1MSGSA                                                               
++   Sometimes you need both^C1MSGSA+and^C1MSGS1+to diagnose a problem with      
++   an API or CSV request.  Now the C1MSGSA+file is appended to C1MSGS1 so      
++   that you can see them all messages in a single place.                       
++   Note: Additionally temp files are now always deleted on exit.               
++                                                                               
+^*Submit Symbols(Extended support)                                              
++   Now when you submit a job for batch you can use regular Endevor             
++   symbols name in the job card(s) and have them expanded when you             
++   submit the job.  Expansion is controled by an option (Y/N) and symbols      
++   are identified by starting them with "&&C1" as in the example below;        
++                                                                               
++      //OCLEO01Y JOB (108400000),'&&C1ACTION &&C1ELEMENT',                     
++      //         CLASS=A,MSGCLASS=3,NOTIFY=    &&SYSUID                        
++      //*                                                                      
++      //* ENV: &&C1ENVMNT STG: &&C1STGID USERDATA: &&C1EUDATA                  
++      //* SYS: &&C1SYSTEM SBS: &&C1SUBSYS                                      
++      //* TYP: &&C1ELTYPE VVL: &&C1LEV PRG:&&C1PRGRP                           
++      //* ELE: &&C1ELMNT255                                                    
++      //*                                                                      
++                                                                               
++   ...results in submitted job cards like this;                                
++                                                                               
++      //OCLEO01Y JOB (108400000),'Generate BALONEY',                           
++      //         CLASS=A,MSGCLASS=3,NOTIFY=    &SYSUID                         
++      //*                                                                      
++      //* ENV: SMPLTEST STG: T USERDATA: ASSIGNED DATA BY C1UEXT02             
++      //* SYS: FINANCE SBS: ACCTPAY                                            
++      //* TYP: COPY VVL: 0108 PRG:SHOWSYMS                                     
++      //* ELE: BALONEY                                                         
++      //*                                                                      
++                                                                               
+^*COMPELM Command (Beta)                                                        
++   Like the^COPYELM+command, only to invoke the Edit Compare to compare the    
++   current element to another element or another location.                     
++   Note: This version is only supported in QuickEdit.                          
++                                                                               
+^*Filter By Backout Status                                                      
++   The^Apply Filter+option is enhanced to allow filtering the element          
++   selection list to only include backed out elements.                         
++                                                                               
+^*Alter Endevor Meta-data                                                       
++   The^UA+(User Alter) user routine can now update the Element metadata        
++   so long as Endevor V17 (or later) is installed, SMF logging is active,      
++   and the user has security access to the^Alter+action at this location.      
++   Fields that can be updated include; the^Description,+the^Processor Group,   
++   the^Singout-UserID,+the^Generate, Retireve,+and^LastAction CCIDs+and,       
++   the^UserData+field (like the^UD+line command/User Routine).                 
++                                                                               
+^*Generate && Retrieve CCIDs                                                    
++   Now the Element^Generate+and^Retrive CCIDs+are available in addition        
++   to the^Last Action CCID+in the Element selection list.                      
++   They are distributed with a default length of zero to hide them, but        
++   you can use^ECols+to adjust their column width and position.                
++                                                                               
+^*WideScreen support for Shipment Display                                       
++   The Shipment Display (C1SP9300/C1SP9301) are updated to support WideScreen. 
++   Hint: Remeber to use^ECols RESET,+to change column width/order or           
++  ^Ecols Off+to return to default display.                                     
++                                                                               
+^*CustomerName and SiteID                                                       
++   The^CUNAME+and^SITEID+from the defaults table are now visible in the        
++   LongName primary Help screen after the first successful Endevor request.    
++   Just press^PF1+to see them. Note: if CUNAME is shown as UNKNOWN please      
++   contact your Endevor Administrator as it means there was a problem loading  
++   the defaults table.                                                         
++                                                                               
+^*Support for ASCII files                                                       
++   The^EA+(Edit ASCII) command can be used to edit^ASCII+files stored in       
++   Endevor.  When using^EA+elements are retrieved to a temporary PATH and      
++   the editor is invoked with the ASCII option.  When the file is saved        
++   it is re-added to Endevor (from the temp location).                         
++                                                                               
+^*Modify User Data                                                              
++   The^UD+(User Data) user routine can now update the Element user data        
++   so long as Endevor V17 (or later) is installed, SMF logging is active,      
++   and the user has security access to the^Alter+action.                       
++                                                                               
+^*Extra Date and Time Fields                                                    
++   LongName now defaults to showing the^Last Action Date+and^Time+on the       
++   element selection list. However, other date and time fields are also        
++   available and can be 'un-hidden' by setting a non-zero column width         
++   through the^ECols+command. In addition to the^Last Action Date/Time         
++   available fields include:^Update, Move, Generate, and Package+timestamps.   
++   Note: Use the^ECols, RESET+sub-command to reset to your sites defaults.     
++                                                                               
+^*Unique Element Actions                                                        
++   If only a single element matches the selection criteria, AND a valid        
++   line command is entered on the primary screen, that command is actioned     
++   as if it had been entered on the single row.  This allows quick access to   
++   Edit, or Generate etc. After the action the row is updated with the status  
++   and further commands can be entered normally.                               
++                                                                               
+^*Element In Use                                                                
++   The LongName utility will now check if anybody is already editing an        
++   element before allowing an Edit action and if it's being used by another    
++   user a message will be returned.  Likewise if a QuickEdit user attempts     
++   to edit an element that is open in LongName they will get the same warning. 
++                                                                               
+^*Package Information && Backout Status                                         
++   Now the Element Package information^(Source Package, Output Package,        
++  ^date, and backout status)+are available in the Element selection list.      
++   They are distributed with a default length of zero to hide them, but        
++   you can use^ECols+to adjust their column width and position.                
++   Additionally these variables are available in the initial macro when an     
++   Edit session is invoked (LNAMIMAC) so you can add custom messaging.         
++                                                                               
+^*Variable Record Length Support                                                
++   You can now customize a table providing the^Record length, BlockSize+and    
++  ^record format+on a type by type basis for any type that does not use the    
++   default FB80 format.  Edit the header block in the LONGNAME rexx to match   
++   your site's specific requirements.                                          
++   as per sample below;                                                        
++                                                                               
++      ^Non_80byte_Types+=,                                                     
++       "JAVA      NATURAL  OTHER     CSV         CSVG"                         
++      ^Non_80byte_Lengths+=,                                                   
++       "600/27998 90/27990 100/27900 32004/32008 32004/32008"                  
++      ^Non_80byte_Recfms+=,                                                    
++       "VB        FB       FB        VB          VB"                           
++                                                                               
++                                                                               
+^*Edit Fail Prompt                                                              
++   Now if, after editing or creating an element, the Add/Update action failes, 
++   after reviewing the messages, you will be returned to Edit mode where if    
++   you can't resolve the problem (e.g. supply a valid CCID or Comment) you     
++   will have the chance to save your work.                                     
+^   Note:+Options to change the CCID, Comment, or Override signout are          
++   available from the action bar, under the Edit item.                         
++                                                                               
+^*New Sample IMACRO on Edit                                                     
++   When Long-Name is used to Create or Edit an element, an initial edit macro; 
+^   LONGIMAC+is invoked.  Sites can tailor this macro to provide their own      
++   custom setup logic, for example selecting Edit profiles, Hilite, etc.       
++                                                                               
+^*Action Request Mode                                                           
++   After requesting any action you are prompted to either^Submit+the request   
++   to batch,^Edit+the request SCL, or^Append+this request to a queue to be     
++   processed later.  In addition, if foreground processing is active you       
++   can request your actions to be processed in^F/G.+                           
++                                                                               
++   You can also set the^Enable AUTO processing+option to 'Y' to allow your     
++   current choice to be automatically applied to the next request, so if       
++   you set the processing mode to F/G, all actions are attempted in F/G        
++   without prompting you (unless an error occurs which resets the flag).       
++   If you set the option to Auto/Append but don't remember to use the^SUB      
++   primary command, you will be prompted on exit.                              
++                                                                               
+^*EFind Primary Command                                                         
++   Allow you to^Search+any Endevor table view, filtering lines that do not     
++   contain the requested string.                                               
++   Entering^EFind+without any operands,^Restores+the previous contents.        
++                                                                               
+^*Edit/Sub Primary Commands                                                     
++   You can now use^EDIT+or^SUB+Primary commands to submit any pending          
++   requests to be processed (including requesting them to be processed in F/G.)
++   These commands also reset the^Auto Processing+option to 'N'.                
++                                                                               
+^*Refresh Primary Command                                                       
++   You can now use^REFRESH+Primary command to re-build the element selection   
++   list.  This will NOT clear any pending batch requests, but will allow       
++   updates from batch (or other) requests to be seen.                          
++                                                                               
+^*Difference Line Commands                                                      
++   You can select any two elements marking them with^D+to invoke a SuperC      
++   side-by-side compare.  Additionally you can use^D1+or^DN+to Explicitly      
++   select the^NEW+element or,^D2+or^DO+to select the^OLD+Element.              
++  ^Note:+You can also select elements on different split screens.              
++                                                                               
++   Use^DU+to compare an element with it's next occurrence up the map, or       
++  ^DP+to compare it with the element at the top of the map(typically Prod).    
++                                                                               
+^*Difference Setting                                                            
++   From the ActionBar,^Settings, Difference...+you can now control the SuperC  
++   process and statement options, for example to select Wide or LongLine       
++   support, or to change the Compare Columns.                                  
++                                                                               
+^*List Filters                                                                  
++   List filters are now enabled to allow you to limit/filter elements that     
++   only match the CCID/Userid, or Processor Group you require.                 
++   Are there other filters you'd like to use?  Please let me know...           
++                                                                               
+^*Multiple Element Name Masks                                                   
++   You are no longer restricted to entering a Single element name when         
++   starting the utility, simply enter multiple names or patterns separated     
++   by comma - for example;^B%AT*,THIS*+to show elements matching               
++   either pattern.                                                             
++                                                                               
+^*Summary of Levels                                                             
++   The Summary of levels display is enhanced to now support^CCID+and^Comment   
++   for each version level in addition to the Stmts, inserts, Deletes and Sync  
++   counts and flags.  This panel also supports the WideScreen enhancement to   
++   allow you to to scroll left/right and/or change your column prefrences      
++   using the ECols primary command or Settings Action Bar item.                
++                                                                               
+^*Extra Fields on Element Selection List                                        
++   When you drive an Element Selection list, additional fields, not visible    
++   in QuickEdit are available for each row.  For example the^Date+and^Time+    
++   of last update, The^CCID+and^Comment+of the last action.  For elements with 
++   Long Names, the internal or short name (often called CONGNAME) is available 
++   in the field^EleShort+and any^UserData+that has been saved using an exit    
++   or the new ALTER statement in v17 will be visible.  That said, whether any  
++   of these fields will be visible is controlled on a per-user basis using the 
++  ^ECols+command by setting that columns width to a non-zero value.  If there  
++   is too much data to fit comfortably on one screen, use the^LEFT/RIGHT+      
++   commands to access the^primary/alternate+element list views. Finally if you 
++   need to see more data than will fit in your current physical screen you can 
++   enable Wrapping, which allows each row to use TWO lines of output.  Use the 
++   command^ECols WrapON|WrapPri|WrapAlt|WrapOff+to control this option.        
++                                                                               
+^*Submit History                                                                
++   Now when you submit a job for batch processing the 'Red' message is         
++   captured and displayed in a short message.  The long message, press^PF1,    
++   will show a table of recently submitted jobs, and can also be accessed      
++   from the Action bar,^Endevor, SubmittedJobs...                              
++                                                                               
+^*Submit Symbols                                                                
++   Now when you submit a job for batch you have the option of including        
++   Long-Name symbols in the job card(s) and having them expanded when you      
++   submit the job.  Expansion is controled by an option (Y/N) and symbols      
++   are identified by starting them with "&&" as in the example below;          
++                                                                               
++      //OCLEO01F JOB (108400000),'&&LNLASACT &&LNELMNAM',                      
++      //         CLASS=A,MSGCLASS=3,NOTIFY=&&SYSUID                            
++      //*                                                                      
++      //* ENV: &&EEVETKEN STG: &&EEVETKSI                                      
++      //* SYS: &&EEVETKSY SBS: &&EEVETKSB                                      
++      //* TYP: &&EEVETKTY VVL: &&EEVETDVL                                      
++      //* ELE: &&EEVETKEL                                                      
++      //*                                                                      
++                                                                               
++   ...results in submitted job cards like this;                                
++                                                                               
++      //OCLEO01N JOB (108400000),'Generate E4QETBUP',                          
++      //         CLASS=A,MSGCLASS=3,NOTIFY=&&SYSUID                            
++      //*                                                                      
++      //* ENV: SMPLTEST STG: T                                                 
++      //* SYS: CONCURNT SBS: ACCTPAY                                           
++      //* TYP: JAVA VVL: 0104                                                  
++      //* ELE: ElapsedDaysCalcs                                                
++      //*                                                                      
++                                                                               
++   We liked this option so much, we doubled the number of job cards you can    
++   supply, so now you can create your own flower boxes with details of the     
++   submitted job so it's easier than ever to keep track of what each job is    
++   doing.  To see all the available symbols, just issue UX beside any element. 
++                                                                               
+^*Save/Forget Element Name                                                      
++   You can now control whether Long-Name 'remembers' the long element name(s)  
++   from the Settings ActionBar item.  Additionally there is an option to       
++   control whether the element name(s) are upper-cased on entry.  This option  
++   is also available on the transfer request screen, Option^T,+to allow        
++   easy 'renaming' of mixed to upper case element names or vice-versa.         
++                                                                               
+^*User Commands                                                                 
++   Long-Name supports^User Extensions+in the form of User supplied Rexx Execs  
++   or Clists.  When Long-Name encounters a line command starting with 'U' it   
++   appends that command to the string 'UsrRtn' and attempts to pass control    
++   to that command(UsrRtnUx) using the select service.  All the details of     
++   the current command, row, and table variables are passed via the shared     
++   pool, with the variable names passed as a string in the Parm.  Review the   
++   sample routines UsrRtnU, UsrRtnUX,... for ideas and build your own.         
++   The Difference commands were built using this mechanism as a demonstration  
++   (see UsrRtnD*), but other uses might include^"Deploy for Test",+or          
++  ^"Compile for Debugger"+or any other action that you can imagine against     
++   one or more elements from the list.                                         
++                                                                               
++                                                                               
++\ \ ^COMING SOON!!! \ \                                                        
++\ \ +(Ideas on the backlog) \ \                                                
++                                                                               
+^*PDM Line Commands                                                             
++   Like the Difference commands only they invoke Endevor PDM to compare Root   
++   and up to two derivations.                                                  
++                                                                               
++                                                                               
++                                                                               
++\ \ (^ENTER+to continue,^END+to return) \ \                                    
+)INIT                                                                           
+ &P = '+' /* Plus symbol when needed. */                                        
+)PROC                                                                           
+)END                                                                            

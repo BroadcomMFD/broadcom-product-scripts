@@ -1,0 +1,27 @@
+ARCHIVE ELEMENT                                                                 
+'&ELEMENT'                                                                      
+    FROM ENVIRONMENT &ENVIRON                                                   
+           STAGE &STAGE                                                         
+          SYSTEM &SYSTEM                                                        
+       SUBSYSTEM &SUBSYS                                                        
+            TYPE &TYPE                                                          
+    TO DDN '&ARCHNAME'                                                          
+)SEL &EEVCOMM NE &Z                                                             
+    OPTIONS COMMENT "&EEVCOMM"                                                  
+)ENDSEL &EEVCOMM NE &Z                                                          
+)SEL &EEVCOMM EQ &Z                                                             
+    OPTIONS COMMENT "ARCHIVING ELEMENTS"                                        
+)ENDSEL &EEVCCID EQ &Z                                                          
+)SEL &VNBF9NOD EQ N                                                             
+            BYPASS ELEMENT DELETE                                               
+)ENDSEL &VNBF9NOD EQ N                                                          
+)SEL &C1SISOFR EQ Y                                                             
+            OVERRIDE SIGNOUT                                                    
+)ENDSEL &C1SISOFR EQ Y                                                          
+)SEL &EEVCCID NE &Z                                                             
+            CCID "&EEVCCID"                                                     
+)ENDSEL &EEVCCID NE &Z                                                          
+)SEL &EEVOOSGN EQ Y                                                             
+            OVERRIDE SIGNOUT                                                    
+)ENDSEL &EEVOOSGN EQ Y                                                          
+    .                                                                           

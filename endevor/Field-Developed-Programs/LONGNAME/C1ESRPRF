@@ -1,0 +1,24 @@
+)PANEL KEYLIST(ISRHLP2,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ 05 TYPE(PT)                                                                    
+ 0A TYPE(NT)                                                                    
+ 26 AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(50,14) CMD()                                                       
+               	Resume Mode                                                  
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+This option controls how ESRchfor will use a                                 
+previously generated source or print file.                                   
+The default option (AUTO) lets ESRchfor reuse                                
+an existing file IF it appears to have the                                   
+expected members in it.  The Refresh option                                  
+forces ESRchfor to rebuild the search file -                                 
+Use this if you want to be sure that you are                                 
+searching the most up to data data.                                          
+Use Re-Use with caution as it will bypass                                    
+ESRchfor's automatic checks and just ues the                                 
+existing search file (if it exists).                                         
+)INIT                                                                           
+&ZWINTTL = ' '                                                                  
+.HHELP = ISP00006                                                               
+)END                                                                            

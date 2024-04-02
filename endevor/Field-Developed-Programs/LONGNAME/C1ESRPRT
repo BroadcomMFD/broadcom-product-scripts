@@ -1,0 +1,18 @@
+)PANEL KEYLIST(ISRHLP2,ISR)                                                     
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ 05 TYPE(PT)                                                                    
+ 0A TYPE(NT)                                                                    
+ 26 AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(50,10) CMD()                                                       
+               	ESRchfor Search Type                                         
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+Select the type of Endevor data that your want                               
+to search.  By default ESRchfor will search                                  
+The source, but you can also direct ESRchfor                                 
+to look for the selected string in the CCID                                  
+Comment, Component areas etc.                                                
+)INIT                                                                           
+&ZWINTTL = ' '                                                                  
+.HHELP = ISP00006                                                               
+)END                                                                            

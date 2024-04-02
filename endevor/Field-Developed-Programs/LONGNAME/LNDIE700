@@ -1,0 +1,26 @@
+)ATTR DEFAULT(%+_)                                                              
+/*-----------------------------------------------------------------------*/     
+/* Copyright (C) 2007 CA. All Rights Reserved.                           */     
+/*-----------------------------------------------------------------------*/     
+ › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                        
+ | TYPE(OUTPUT) INTENS(LOW)                                                     
+ _ TYPE(INPUT) INTENS(HIGH) PADC(_) CAPS(ON)                                    
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI) PADC(_)                        
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM) PADC(_)                        
+ ~ TYPE(INPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) PADC(_)                        
+)BODY EXPAND(\\)                                                                
+%\-\ Long-Name Archive Batch Submit \-\                                         
+%Command ===>_VARWKCMD                                                         +
++                                                                               
++ Complete the JCL JOB card and press%ENTER+to Edit the jobstream.              
++ You must submit the job from the Edit session.                                
++ Enter the%END+command to terminate.                                           
++                                                                               
++  _C1BJC1                                                                  +   
++  _C1BJC2                                                                  +   
++  _C1BJC3                                                                  +   
++  _C1BJC4                                                                  +   
++                                                                               
+)INIT                                                                           
+)PROC                                                                           
+)END                                                                            

@@ -1,0 +1,15 @@
+/* REXX - Sample routine to un-mark rows as selected (clear the status)         
+          It may be sufficient to depend on the message status, but             
+          a more robust solution would REMOVE entries in a file or table        
+          */                                                                    
+parse arg PassParm                                                              
+PassName = strip(PassParm,,"'")                                                 
+ADDRESS ISPEXEC "VGET ("PassName") SHARED"                                      
+interpret 'ALLVALS = 'PassName                                                  
+ADDRESS ISPEXEC "VGET ("ALLVALS") SHARED"                                       
+/*                                                                              
+  insert logic here to remove the selected rows if needed                       
+*/                                                                              
+USERMSG = '*UnSelected'                                                         
+ADDRESS ISPEXEC "VPUT (USERMSG) SHARED"                                         
+EXIT 0                                                                          

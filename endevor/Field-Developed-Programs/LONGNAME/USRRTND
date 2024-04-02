@@ -1,0 +1,20 @@
+/* REXX - Sample routine redirect a user command to another user command        
+          Works like Alias, but can adjust values                               
+          */                                                                    
+parse arg PassParm                                                              
+ADDRESS ISPEXEC "VGET (DiffSet1 DiffSet2) profile"                              
+select                                                                          
+  When DiffSet1 ^== 'YES' & Diffset2  == 'YES' Then UserCmd = 'D1'              
+  When DiffSet1  == 'YES' & Diffset2 ^== 'YES' Then UserCmd = 'D2'              
+  When DiffSet1 ^== 'YES' & Diffset2 ^== 'YES' Then UserCmd = 'D1'              
+  Otherwise                                   /* if both are set...    */       
+    do                                        /*  ... reset them       */       
+      Do DiffNum = 1 to 2                     /* for each saved set... */       
+         call UsrRtnDR "'"DiffNum"'"          /* reset row pointed to  */       
+      end                                                                       
+      UserCmd = 'D1'                          /* Use this row as first */       
+    end                                                                         
+end                                                                             
+ADDRESS ISPEXEC "VPUT (USERCMD) SHARED"       /* save cmd to pass      */       
+call UsrRtnD# "'"PassParm"'" /* call Diff Line Cmd routine to store details */  
+EXIT 0                                                                          

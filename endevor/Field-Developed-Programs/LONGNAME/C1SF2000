@@ -1,0 +1,155 @@
+)INEXIT LOAD,ENDDYNPX                                                           
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   @ TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)                              
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)      /* UNIQUE ATTRIBUTES FOR   */          
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  /* DASHES AND NULL PADDING */          
+   › TYPE(OUTPUT) INTENS(HIGH) JUST(RIGHT)                                      
+   | TYPE(OUTPUT) INTENS(LOW) CAPS(OFF)                                         
+ ^ TYPE(INPUT) CAPS(&VARCACCI) FORMAT(&VARFMCCI)                                
+ ` TYPE(INPUT) CAPS(&VARCACOM) FORMAT(&VARFMCOM)                                
+ µ AREA(SCRL)  EXTEND(ON)                                                       
+)BODY EXPAND(\\)                                                                
+%\-\ RETRIEVE ELEMENTS --WS5--\-\                                               
+%OPTION  ===>_ZCMD                                            %SCROLL ===>_AMT +
+µSCRAREA                                                                       µ
+)AREA SCRAREA                                                                   
+   %blank+- Element list           %S+- Summary  %B+- Browse  %H+- History      
+   %R+- Retrieve element           %M+- Master   %C+- Changes                   
++                                                                               
+<SELECT Dynamic Element Location>                                               
+<WHEN &VNTUIELM=S>                                                              
++CCID%===>^CTLNBR      +   COMMENT%===>`DESCRPT1                                
++                                                                               
++FROM LOCATION:                         ACTION OPTIONS:                         
++  ENVIRONMENT%===>_VAREVNME+             EXPAND INCLUDES        %===>_Z+(Y/N)  
++  SYSTEM     %===>_SYS     +             SIGNOUT ELEMENT        %===>_Z+(Y/N)  
++  SUBSYSTEM  %===>_SBS     +             OVERRIDE SIGNOUT       %===>_Z+(Y/N)  
++  ELEMENT    %===>@VNT1ENME  |VNTIND1   +REPLACE MEMBER         %===>_R+(Y/N)  
++  TYPE       %===>_TYPEN   +                                                   
++  STAGE      %===>_D+ ›Z+-|CLU1ID  +   LIST OPTIONS:                           
++                      ›Z+-|CLU2ID  +     DISPLAY LIST           %===>_Z+(Y/N)  
++TO ISPF LIBRARY:                         APPLY LIST FILTERS     %===>_Z+(Y/N)  
++  PROJECT    %===>_PRJ0    +             BUILD USING MAP        %===>_Z+(Y/N)  
++  LIBRARY    %===>_LIB0    +             RETURN FIRST FOUND     %===>_Z+(Y/N)  
++  TYPE       %===>_TYP0    +                                                   
++  MEMBER     %===>_ISPFMB    +                                                 
++TO OTHER ISPF DATA SET:                                                        
++  DATA SET   %===>_OTHDSN                                                  +   
+<OTHERWISE>                                                                     
++ELEMENT%===>@VNT1ENME                                           |VNTIND1       
++  TYPE %===>_TYPEN   +                                                         
++  CCID %===>^CTLNBR      +COMMENT%===>`DESCRPT1                                
++                                                                               
++FROM LOCATION:                         OPTIONS:                                
++  ENVIRONMENT%===>_VAREVNME+             DATA SET TYPE(USS/ISPF)%===>_Z+(U/D)  
++  SYSTEM     %===>_SYS     +             SIGNOUT ELEMENT        %===>_Z+(Y/N)  
++  SUBSYSTEM  %===>_SBS     +             OVERRIDE SIGNOUT       %===>_Z+(Y/N)  
++  STAGE      %===>_D+ ›Z+-|CLU1ID  +     REPLACE MEMBER         %===>_R+(Y/N)  
++                      ›Z+-|CLU2ID  +     EXPAND INCLUDES        %===>_Z+(Y/N)  
++TO ISPF LIBRARY:                         DISPLAY LIST           %===>_Z+(Y/N)  
++  PROJECT    %===>_PRJ0    +             APPLY LIST FILTERS     %===>_Z+(Y/N)  
++  LIBRARY    %===>_LIB0    +             BUILD USING MAP        %===>_Z+(Y/N)  
++  TYPE       %===>_TYP0    +             RETURN FIRST FOUND     %===>_Z+(Y/N)  
++  MEMBER     %===>_ISPFMB    +           UPPERCASE ELM NAME     %===>_Z+(Y/N)  
++                                         CASE-SENSITIVE ELM NAME%===>_Z+(Y/N)  
++TO OTHER ISPF DATA SET:                                                        
++  DATA SET   %===>_OTHDSN                                                  +   
++                                                                               
++TO USS PATH AND FILE NAME:                                                     
++  PATH%===>@VNTPATH                                            |VNTIND2        
++  FILE%===>@VNT2ENME                                           |VNTIND3        
+</SELECT>                                                                       
+)INIT                                                                           
+<SELECT Dynamic Element Location - Make ZVARs match the field positions>        
+<WHEN &VNTUIELM=S>                                                              
+  .ZVARS = '(VAREXPIN C1SISOCP C1SISOFR CLU1I CLU2I VARWKLST VARWHPNL +         
+             VARSHMAP VARRTNFF )'                                               
+  &VNTUPPER = 'Y'                              /* Force uppercase on         */ 
+  &VNTSCASE = 'Y'                              /* Force Case sensitive on    */ 
+  &VNTDSTYP = 'D'                              /* Force ISPF Dataset type    */ 
+<OTHERWISE>                                                                     
+  .ZVARS = '(VNTDSTYP C1SISOCP C1SISOFR CLU1I CLU2I VAREXPIN VARWKLST  +        
+             VARWHPNL VARSHMAP VARRTNFF VNTUPPER VNTSCASE)'                     
+  &tcursor = .cursor                                                            
+  if (.CURSOR = ZCMD AND .MSG = &Z)            /* if cursor is top and no msg*/ 
+      .CURSOR = 'VNT1ENME'                     /* If on top put cursor here */  
+</SELECT>                                                                       
+  .HELP = CITF2000                                                              
+  &LIST2 = 'Y N'                                                                
+  IF (&VARWHPNL = ' ')                                                          
+    &VARWHPNL = 'N'                                                             
+  IF (&AMT = ' ')                                                               
+     &AMT = PAGE                                                                
+  IF (&ETMPCASE = ' ')                                                          
+    &VNTSCASE = 'Y'                                                             
+    &ETMPCASE = 'Y'                                                             
+/* Check the Split/Screen option and default if not set               */        
+  VGET (ESRCHWRP) PROFILE                                                       
+  IF (&ESRCHWRP EQ ' ' )                                                        
+    &ESRCHWRP = 'NO'                                                            
+/* did user change the column headings?                               */        
+  VGET (ECOLREF) SHARED                                                         
+  if (&ECOLREF = 'PENDING')                                                     
+    .RESP = ENTER                                                               
+  &ECOLREF = ''                                                                 
+/* ...and set VARPFX for Retrieve mode"                               */        
+  &VARPFX = 'ENWR'                                                              
+  VPUT (ECOLREF VARPFX) SHARED                                                  
+)PROC                                                                           
+  VPUT (AMT) PROFILE                                                            
+  VER  (&VARWHPNL,NB,LISTV,&LIST2,MSG=CIFV005)                                  
+/* Always reset refresh options...                                    */        
+  &ECOLREF = ''                                                                 
+/* ...and set VARPFX for Retrieve mode"                               */        
+  &VARPFX = 'ENWR'                                                              
+  VPUT (ECOLREF VARPFX) SHARED                                                  
+/* Start code for WideScreen - Primary View - C1SF2000 */                       
+/* This code establishes a default view (before ECols) */                       
+  VGET (ENWR0H1 ENWR0H2 ENWR0M1 ENWR0VR ENWR0CL) profile                        
+  if (&ENWR0H1 = '')                                                            
+    &ENWR0H1 =           '  ELEMENT    NEWNAME    TYPE     NS ENVIRON  S'       
+    &ENWR0H2 =           '- ---------- ---------- -------- -- -------- -'       
+    &ENWR0M1 =          '_Z›Z         _Z         ›Z       +›Z›Z       ›Z'       
+    &ENWR0H1 = '&ENWR0H1. SYSTEM    SUBSYSTEM  VVLL RC'                         
+    &ENWR0H2 = '&ENWR0H2. --------  ---------  ---- ----'                       
+    &ENWR0M1 = '&ENWR0M1.›Z        ›Z         ›Z   ›Z'                          
+    &ENWR0VR = 'SO ENTEN255 TOFRNAME EMTYPE ENSC EMENV EMSTGID +                
+                EMSYS EMSBS ECVL EMRC'                                          
+    &ENWR0CL = ' '                                                              
+    &ENWR0M2 = 'OMIT'                                                           
+  VGET (ENWR1H1 ENWR1H2 ENWR1M1 ENWR1VR ENWR1CL) profile                        
+  if (&ENWR1H1 = '')                                                            
+    &ENWR1H1 =           '  ELEMENT    NEWNAME    TYPE     NS ENVIRON  S'       
+    &ENWR1H2 =           '- ---------- ---------- -------- -- -------- -'       
+    &ENWR1M1 =          '_Z›Z         _Z         ›Z       +›Z›Z       ›Z'       
+    &ENWR1H1 = '&ENWR1H1. SYSTEM    SUBSYSTEM  VVLL RC'                         
+    &ENWR1H2 = '&ENWR1H2. --------  ---------  ---- ----'                       
+    &ENWR1M1 = '&ENWR1M1.›Z        ›Z         ›Z   ›Z'                          
+    &ENWR1VR = 'SO ENTEN255 TOFRNAME EMTYPE ENSC EMENV EMSTGID +                
+                EMSYS EMSBS ECVL EMRC'                                          
+    &ENWR1CL = ' '                                                              
+    &ENWR1M2 = 'OMIT'                                                           
+/* Use Panel Rexx to do the heavy lifting to ensure that models and   */        
+/* their respective headings and ZVAR placeholders etc. are truncated */        
+/* or split over two lines as necessary depending on the screen size  */        
+/*                                                                    */        
+ VGET (ZSCREENW) ASIS                                                           
+*REXX (ZSCREENW ZTDMARK  ESRCHWRP VARPFX                                        
+       ENWR0H1  ENWR0H2  ENWR0M1  ENWR0M2  ENWR0VR  ENWR0CL ENWR0ZM             
+       ENWR1H1  ENWR1H2  ENWR1M1  ENWR1M2  ENWR1VR  ENWR1CL ENWR1ZM, (ENDVWIDE))
+/* Make sure variables are available to other commands - e.g. COPYELM */        
+  VPUT (ENWR0H1 ENWR0H2 ENWR0M1 ENWR0M2 ENWR0VR ENWR0CL ENWR0ZM                 
+        ENWR1H1 ENWR1H2 ENWR1M1 ENWR1M2 ENWR1VR ENWR1CL ENWR1ZM) SHARED         
+  vput (VNTMORE1 VNTL1H1 VNTL1M1 VNTL1V1 VNTL1V2) shared                        
+  vput (VNTMORE2 VNTL2H1 VNTL2M1 VNTL2V1 VNTL2V2) shared                        
+  vput (VNTMORE3 VNTL3H1 VNTL3M1 VNTL3V1 VNTL3V2) shared                        
+  vput (VNTMORE4 VNTL4H1 VNTL4M1 VNTL4V1 VNTL4V2) shared                        
+  vput (VNTMORE5 VNTL5H1 VNTL5M1 VNTL5V1 VNTL5V2) shared                        
+)FIELD                                                                          
+ FIELD(VNT1ENME) IND(VNTIND1) SCROLL(ON)                                        
+ FIELD(VNTPATH)  IND(VNTIND2) SCROLL(ON)                                        
+ FIELD(VNT2ENME) IND(VNTIND3) SCROLL(ON)                                        
+)END                                                                            

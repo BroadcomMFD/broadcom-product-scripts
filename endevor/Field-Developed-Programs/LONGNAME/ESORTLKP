@@ -1,0 +1,143 @@
+/* REXX - Return Table Associated with Passed Panel name                        
+                                                                                
+          usage:                                                                
+                                                                                
+             CURRTABL = ESORTLKP(PANEL)                                         
+                                                                                
+          Where:                                                                
+                                                                                
+             Panel is either set from ZPANELID (most accurate) or by            
+             looking up profile variable PANELIDz with 'z' being substituted    
+             by the Screen number ZSCREEN.  This should return a panel name     
+             with a prefix ZSCREEN and ":". Use this method when you just       
+             want to check that the last screen used is supported.              
+                                                                                
+          Example:                                                              
+                                                                                
+             ADDRESS ISPEXEC "vget (ZSCREEN) PROFILE"       /* Get screen # */  
+             PANVARNM = 'PANELID' || ZSCREEN                /* PANELIDz     */  
+             ADDRESS ISPEXEC "vget ("PANVARNM") PROFILE"    /* Retrieve var */  
+             PANVALUE = value(PANVARNM)                     /* Interpret Val*/  
+             if left(PANVALUE,2) \== ZSCREEN || ':' then do /* Check Prefix */  
+               say "Invalid Panel for table operations detected:" PANVALUE      
+               exit 999                                     /* Getout...    */  
+             end                                                                
+             PANEL = substr(PANVALUE,3)                     /* extract name */  
+             TABLE = ESORTLKP(PANEL)                        /* Lookup table */  
+                                                                                
+          Note:                                                                 
+                                                                                
+          This Exec must be kept in sync with ESORTTBL or converted to          
+          load and scan the table inside one of EONLY|ESORT|EPRINT              
+          */                                                                    
+IF ARG() <> 1 then return  /* ESORTLKP must be called with one parameter only */
+PANEL = ARG(1)             /* ...passed in first/only  arg                    */
+select                                                                          
+   when PANEL == 'ENDIE250' then TBLNAME='ENZIE250'                             
+   when PANEL == 'ENDIE251' then TBLNAME='ENZIE250'                             
+   when PANEL == 'ENDIE910' then TBLNAME='ENZIE910'                             
+   when PANEL == 'ENDIE911' then TBLNAME='ENZIE910'                             
+   when PANEL == 'ENDIE270' then TBLNAME='ENZIE270'                             
+   when PANEL == 'ENDIE280' then TBLNAME='ENZIE280'                             
+   when PANEL == 'LONGLIST' then TBLNAME='LNZIE250' /* LongName support */      
+   when PANEL == 'LONGLIS2' then TBLNAME='LNZIE250' /*   "        "     */      
+   when PANEL == 'SUMLEVLS' then TBLNAME='SUMZLVL'  /*   "        "     */      
+   when PANEL == 'SUMLEVL2' then TBLNAME='SUMZLVL'  /*   "        "     */      
+   when PANEL == 'BC1G3ELM' then TBLNAME='BC1G3ELZ'                             
+   when PANEL == 'BC1G3ENV' then TBLNAME='BC1G3ENZ'                             
+   when PANEL == 'BC1G3LVL' then TBLNAME='BC1G3LVZ'                             
+   when PANEL == 'BC1G3SUB' then TBLNAME='BC1G3SUZ'                             
+   when PANEL == 'BC1G3SYS' then TBLNAME='BC1G3SYZ'                             
+   when PANEL == 'BC1G3TYP' then TBLNAME='BC1G3TYZ'                             
+   when PANEL == 'BC1G430L' then TBLNAME='BC1G430L'                             
+   when PANEL == 'BC1G440L' then TBLNAME='BC1G440Z'                             
+   when PANEL == 'C1EILIST' then TBLNAME='C1EILISZ'                             
+   when PANEL == 'C1SD4100' then TBLNAME='CIULTBLZ'                             
+   when PANEL == 'C1SEUSY1' then TBLNAME='CISYMSLZ'                             
+   when PANEL == 'C1SEUSY2' then TBLNAME='CISYMSLZ'                             
+   when PANEL == 'C1SE5100' then TBLNAME='C1SE510Z'                             
+   when PANEL == 'C1SE5200' then TBLNAME='C1SE520Z'                             
+   when PANEL == 'C1SE6100' then TBLNAME='C1SE610Z'                             
+   when PANEL == 'C1SE6200' then TBLNAME='C1SE620Z'                             
+   when PANEL == 'C1SFA100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SFA300' then TBLNAME='C1SFA30Z'                             
+   when PANEL == 'C1SFB100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SFB300' then TBLNAME='C1SFB30Z'                             
+   when PANEL == 'C1SFC100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SFNMTL' then TBLNAME='C1SFB30Z'                             
+   when PANEL == 'C1SFTYPL' then TBLNAME='C1SFTYPZ'                             
+   when PANEL == 'C1SF1500' then TBLNAME='CIULTBLZ'                             
+   when PANEL == 'C1SF2120' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SF2150' then TBLNAME='C1SF215Z'                             
+   when PANEL == 'C1SF3100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SF4100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SF5100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SF6100' then TBLNAME='C1SF610Z'                             
+   when PANEL == 'C1SF6200' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SF6300' then TBLNAME='C1SF630Z'                             
+   when PANEL == 'C1SM1100' then TBLNAME='C1SATTBZ'                             
+   when PANEL == 'C1SPMSYS' then TBLNAME='C1ZPMSYS'                             
+   when PANEL == 'C1SPMSBS' then TBLNAME='C1ZPMSBS'                             
+   when PANEL == 'C1SPMTYP' then TBLNAME='C1ZPMTYP'                             
+   when PANEL == 'C1SPMPRG' then TBLNAME='C1ZPMPRG'                             
+   when PANEL == 'C1SPMPRH' then TBLNAME='C1ZPMPRG'                             
+   when PANEL == 'C1SP0100' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0101' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0102' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0103' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0104' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0105' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0106' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0107' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0108' then TBLNAME='C1ZP0100'                             
+   when PANEL == 'C1SP0200' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0201' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0202' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0203' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0204' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0205' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0206' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0207' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP0208' then TBLNAME='C1ZP0200'                             
+   when PANEL == 'C1SP1200' then TBLNAME='C1ZP1200'                             
+   when PANEL == 'C1SPMGJL' then TBLNAME='C1ZPMGJL'                             
+   when PANEL == 'C1SP1300' then TBLNAME='C1ZP1300'                             
+   when PANEL == 'C1SP1400' then TBLNAME='C1ZP1400'                             
+   when PANEL == 'C1SP1600' then TBLNAME='C1ZP1600'                             
+   when PANEL == 'C1SP1800' then TBLNAME='C1ZP1800'                             
+   when PANEL == 'C1SP1801' then TBLNAME='C1ZP1801'                             
+   when PANEL == 'C1SP1900' then TBLNAME='C1ZP1900'                             
+   when PANEL == 'C1SP1910' then TBLNAME='C1ZP1910'                             
+   when PANEL == 'C1SP1920' then TBLNAME='C1ZP1920'                             
+   when PANEL == 'C1SP1930' then TBLNAME='C1ZP1930'                             
+   when PANEL == 'C1SP1940' then TBLNAME='C1ZP1940'                             
+   when PANEL == 'C1SP9300' then TBLNAME='C1ZP9300'                             
+   when PANEL == 'C1SESS00' then TBLNAME='C1SYMBSZ'                             
+   when PANEL == 'C1SSSYSL' then TBLNAME='CISSSELZ'                             
+   when PANEL == 'C1SSSBSL' then TBLNAME='CISSSELZ'                             
+   when PANEL == 'C1SSSYL2' then TBLNAME='CISSSELZ'                             
+   when PANEL == 'C1SF7100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SF9100' then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SN1100' then TBLNAME='CIULTBLZ'                             
+   when PANEL == 'C1SN5100' then TBLNAME='CIULTBLZ'                             
+   when PANEL == 'C1SSEL2'  then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SSLE2'  then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SSLE3'  then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SSLEA'  then TBLNAME='CIELMSLZ'                             
+   when PANEL == 'C1SSIDRS' then TBLNAME='CISIDSLZ'                             
+   when PANEL == 'C1SPD10D' then TBLNAME='C1ZPD10D'                             
+   when PANEL == 'C1SPD10E' then TBLNAME='C1ZPD10D'                             
+   when PANEL == 'C1SPD50D' then TBLNAME='C1ZPD50D'                             
+   when PANEL == 'ENIP1100' then TBLNAME='ENZP110Z'                             
+   when PANEL == 'C1SE5101' then TBLNAME='C1TYPESZ'                             
+   when PANEL == 'C1SE5102' then TBLNAME='C1TYPESZ'                             
+   when PANEL == 'C1SDDC01' then TBLNAME='C1DCMTBZ'                             
+   when PANEL == 'C1SSLELL' then TBLNAME='C1SZLELL'                             
+otherwise                                                                       
+   TBLNAME='INVALID'        /* If we didn't find a match, return invalid */     
+end                                                                             
+if pos('Z',TBLNAME) > 0 then do  /* Most tables will have a screen num   */     
+   address ispexec "vget (ZSCREEN ZPANELID)" /* If so get the screen num */     
+   TBLNAME = overlay(ZSCREEN,TBLNAME,pos('Z',TBLNAME)) /* and insert it  */     
+END                                                                             
+return TBLNAME                                                                  

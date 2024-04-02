@@ -1,0 +1,8 @@
+/* REXX - Sample routine redirect a user command to another user command        
+          Works like Alias, but can adjust values                               
+          */                                                                    
+parse arg PassParm                                                              
+UserCmd = "D1"           /* as if user Command D1 were entered */               
+ADDRESS ISPEXEC "VPUT (USERCMD) SHARED"                                         
+call UsrRtnD# "'"PassParm"'" /* call Diff Line Cmd routine to store details */  
+EXIT 0                                                                          

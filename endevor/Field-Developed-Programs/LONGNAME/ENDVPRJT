@@ -1,0 +1,66 @@
+)ATTR DEFAULT(^+~)                                                              
+   AREA(SCRL) EXTEND(ON)                                                       
+)BODY EXPAND ({{) CMD(ZCMD)                                                     
+^TUTORIAL {-{ Endevor Project Help {-{ TUTORIAL                                 
+^Command ===>~ZCMD                                                             +
++                                                                               
++The^Endevor Project ActionBar+item provides a quick and easy way to            
++switch between Endevor inventory locations.  The^Project Manager+              
++dialog supports the following features;                                        
+SAREA38                                                                       
+)AREA SAREA38                                                                   
+^*Project History                                                               
++   A list of up to 8 project locations are stored and can be edited by         
++   simply over-typing the project location field to specify the Environment,   
++   System, SubSystem, Type, Element, Search Map, First Found, CCID and         
++   Comment, with each value delimited by '\'.                                  
++                                                                               
++   If the location field is not big enough to fit ALL the data you'd like      
++   to save you can use^left/right+scrolling and/or the^EXPAND+command          
++                                                                               
+^*Auto-Save                                                                     
++   In normal use, Endevor will "remember" the previous locations visited       
++   and mark the most recent one with a^>>>+flag, the previous one with^>>+     
++   and the entry before that with^>+flag.  Prior locations will be stored      
++   as space permits untill all locations are filled, at which point the        
++   oldest entry will be dropped.                                               
++   Note: When saving locations, if that location is already in the list        
++   this ripple down will stop at that point so as to avoid filling the         
++   history with duplicates.                                                    
++                                                                               
+^*Favourite Locations                                                           
++   You can use the Project Manager to "MARK" any location as a favourite       
++   my placing a '/' in the Fav column. which will cause it to float to         
++   the top and NOT be rolled off as new entries are added.                     
++                                                                               
+^*Naming Favourites                                                             
++   You can also add a 'Friendly' name to any favourite to make it easy         
++   to identify when inspecting from the project list.                          
++                                                                               
+^*Delete Locations                                                              
++   To delete a saved location, simply erase the location information           
++   data by pressing EOF in that field.                                         
++                                                                               
+^*Save/Restore Options                                                          
++   Whether the CCID, Comment, Search Map,and First Found, options are          
++   saved is controlled by setting the appropriate option to '/' to enable      
++   it for that field.  You can use this to ensure that the appropriate         
++   values are restored on a Project by Project basis.  You can of course       
++   simply overtype the corresponding values in the location fields             
++                                                                               
+^*Confirm/Jump Option                                                           
++   When you select a new project the corresponing Environment, System,         
++   SubSystem, etc. are recalled but by default you still have to press         
++  ^ENTER+to confirm the selection.  If you set this option to '2' you are      
++   requesting an immediate JUMP to the selected location as if you had         
++   pressed Enter.                                                              
++   Note: If you select a new project from an element selection list            
++   you will always be 'jumped' to that location                                
++  ^Hint:+When setting the immediate jump option, but wildcarding on the        
++   too many fields results in the^"are you sure"+prompt use^"%*"_as the        
++   element name.                                                               
++                                                                               
++                                                                               
++{ { (^ENTER+to continue,^END+to return) { {                                    
+)PROC                                                                           
+)END                                                                            

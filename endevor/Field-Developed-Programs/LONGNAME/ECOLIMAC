@@ -1,0 +1,26 @@
+/* Rexx - Initial edit macro for editing QuickEdit Columns */                   
+address ISREDIT                                                                 
+"MACRO (PARMS)"                                                                 
+"BUILTIN RESET" /* reset any warnings */                                        
+"HILITE OTHER"  /* turn on default hilighting*/                                 
+SetCmds:                                                                        
+"DEFINE  ECOLSORT MACRO"                 /* Define macro to sort by col name */ 
+"DEFINE  ECOLNUM  MACRO"                 /*  '       '   to number ' ' ''    */ 
+"DEFINE  ECOLDFLT MACRO"                 /*  '       '   to reset all to dflt*/ 
+"DEFINE  ECOLPARS MACRO"                 /*  '       '   to parse all data   */ 
+"DEFINE  ECOLHELP MACRO"                 /*  '       '   to Insert Note lines*/ 
+"DEFINE  SORT     ALIAS ECOLSORT"        /* Replace Sort with our sort       */ 
+"DEFINE  NUM      ALIAS ECOLNUM"         /*   '     Num    '   '  re-num     */ 
+"DEFINE  END      ALIAS ECOLPARS"        /*   '     End    '   '  parse & end*/ 
+"DEFINE 'RESET'   ALIAS ECOLDFLT"        /*   '     Reset  '   '  default    */ 
+ChkEmpty:                                                                       
+"(TOTLINES) = LINENUM .ZLAST"            /* get the number of lines */          
+if TOTLINES = 0 then "ECOLDFLT"          /* if no data, set to default */       
+ShowNote: /* add a few notes to help new users */                               
+"ECOLHELP"                                                                      
+Message:                                                                        
+zedsmsg = 'Use Num, Sort, and Reset'     /* let user know the new cmds       */ 
+zedlmsg = 'You can re-number, or sort by column name (Pri|alt) or RESET'        
+fini:                                                                           
+address ISPEXEC "SETMSG MSG(ISRZ000)"                                           
+return                                                                          

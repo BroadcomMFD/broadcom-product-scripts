@@ -1,0 +1,15 @@
+/* REXX - this Simple Exec can be used to brows the C1MSGS dataset from         
+          The last API call.  Note if you are using split screens and           
+          the latest request will overwirte the C1MSGS                          
+          */                                                                    
+   ADDRESS ISPEXEC "LMINIT DATAID(DDID) DDNAME(C1MSGS1)"                        
+   if RC > 0 then do                                                            
+      ZERRLM   = 'API Messages DD (C1MSGS1) is empty or not allocated, RC:'RC   
+      ZERRSM   = 'No Messages'                                                  
+      ZERRALRM = 'YES'                                                          
+      ADDRESS ISPEXEC "SETMSG MSG(ISRZ002)"                                     
+      Exit 4                                                                    
+   end                                                                          
+   ADDRESS ISPEXEC "VIEW DATAID(&DDID) PANEL(ISREDDHI) MACRO(ENDVHISC)"         
+   ADDRESS ISPEXEC "LMFREE DATAID(&DDID)"                                       
+EXIT 0                                                                          

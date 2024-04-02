@@ -1,0 +1,5 @@
+&&&&ACTION ELEMENT                                                              
+'&ELEMENT'                                                                      
+    FROM ENVIRONMENT &ENVIRON STAGE &STAGE                                      
+         SYSTEM &SYSTEM SUBSYSTEM &SUBSYS TYPE &TYPE                            
+    .                                                                           

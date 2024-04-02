@@ -1,0 +1,87 @@
+/* rexx - This routine is used to store the current Project so it can be        
+          restored using the project dropdown                                   
+          the necessary variables.                                              
+                                                                                
+   Change Log:                                                                  
+    16may16 - Initial proof of concept work                                     
+    25may16 - Shorten variable names                                            
+                                                                                
+   ToDo                                                                         
+    / Only save values if option set (otherwise null)                           
+    / had to move this logic into panel Rexx string too long!                   
+    / only restore values if value exists (not on option?).                     
+    / What happens when Flags are out of sync... (fav released)                 
+    - ripple down of friendly name                                              
+    - should a non-fav even be allowed a friendly name?                         
+    / handle more than 6 entries but limited by max rexx string length          
+      I can fit 8 at current length - 9*3*8+8+14 = 238, max 255                 
+      or 14 of var length 5 xxxNN, going with 8 but shorter names...            
+    - handle other source panels (Q/E, Endevor, PDM,...)                        
+      since panel must handle building PushPrj each invocation will do this     
+      Done for QuickEdit, but PDM and Classic Endevor dont have wide screen yet 
+          */                                                                    
+/*                                                                              
+*REXX (Pushprj                                                                  
+       EPRN1 EPRN2 EPRN3 EPRN4 EPRN5 EPRN6 EPRN7 EPRN8                          
+       EPRV1 EPRV2 EPRV3 EPRV4 EPRV5 EPRV6 EPRV7 EPRV8                          
+       EPRL1 EPRL2 EPRL3 EPRL4 EPRL5 EPRL6 EPRL7 EPRL8                          
+*/                                                                              
+NumSave = 8                      /* how many entries to scan/save */            
+FlagBytes = '>>>'                /* Flag our last used value */                 
+SavePrj = PushPrj                /* Save The new one to avoid dups */           
+Sa= "Entry:",                                                                   
+     PushPrj                                                                    
+Sa= "BEfore",                                                                   
+     EPRL1"\"EPRL2"\"EPRL3"\"EPRL4"\" || ,                                      
+     EPRL5"\"EPRL6"\"EPRL7"\"EPRL8"\"                                           
+                                                                                
+/* Main loop to update saved locations          */                              
+do i = 1 to NumSave                                                             
+    thisFav = value(EPRV||right(i,1,'0')) /* get Fav opt */                     
+    thisPrj = value(EPRL||right(i,1,'0')) /* get project */                     
+    thisFrN = value(EPRN||right(i,1,'0')) /* get flages    */                   
+    select                                                                      
+       when thisFav = '/' then iterate  /* don't overwrite favourites */        
+       when thisPrj = PushPrj then do   /* Already here - just update flags */  
+          dmy = value(EPRN||right(i,1,'0'),right(FlagBytes,8,'_'))              
+          FlagBytes = Left(FlagBytes,max(length(FlagBytes)-1,0))                
+          PushPrj = ''                  /* nothing more to save */              
+          SavePrj = '***'               /* or skip */                           
+          iterate                                                               
+       end                                                                      
+       when thisPrj = SavePrj then do   /* Found Later - stop ripple */         
+          dmy = value(EPRL||right(i,1,'0'),PushPrj) /* save Pop prj */          
+          dmy = value(EPRN||right(i,1,'0'),right(FlagBytes,8,'_'))              
+          FlagBytes = Left(FlagBytes,max(length(FlagBytes)-1,0))                
+          PushPrj = ''                  /* nothing more to do */                
+          SavePrj = '***'               /* or skip */                           
+          iterate                                                               
+       end                                                                      
+       when PushPrj \= '' ,             /* Something to save, and...      */    
+        &   thisPrj \= PushPrj then do  /* New one, save old and push new */    
+          PopPrj = thisPrj              /* save old value */                    
+          dmy = value(EPRL||right(i,1,'0'),PushPrj) /* save Push prj */         
+          dmy = value(EPRN||right(i,1,'0'),right(FlagBytes,8,'_'))              
+          FlagBytes = Left(FlagBytes,max(length(FlagBytes)-1,0))                
+          PushPrj = PopPrj              /* Ripple down */                       
+          iterate                                                               
+       end                                                                      
+       when PushPrj = '' ,              /* ripple status ? */                   
+        & thisPrj \= '' then do         /* and not end of projects */           
+          if right(thisFrN,1) = '>' then do /* and holds a status */            
+             dmy = value(EPRN||right(i,1,'0'),right(FlagBytes,8,'_'))           
+             FlagBytes = Left(FlagBytes,max(length(FlagBytes)-1,0))             
+          end                                                                   
+          iterate                                                               
+       end                                                                      
+       when thisPrj = '' then do        /* Clear Project? */                    
+          dmy = value(EPRN||right(i,1,'0'),'') /* then clear fr name */         
+          iterate                                                               
+       end                                                                      
+       otherwise Say "fellout!" ThisFav ThisFrN ThisPrj                         
+    end /*select */                                                             
+end /* main loop */                                                             
+Sa= "After",                                                                    
+     EPRL1"\"EPRL2"\"EPRL3"\"EPRL4"\" || ,                                      
+     EPRL5"\"EPRL6"\"EPRL7"\"EPRL8"\"                                           
+Return /* all done here */                                                      

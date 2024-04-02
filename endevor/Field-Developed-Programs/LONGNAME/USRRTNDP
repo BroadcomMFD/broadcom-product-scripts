@@ -1,0 +1,8 @@
+/* REXX - DiffProd (DP) this routine sets the request to be diff command        
+          comparing this element to the top of the map (Prod)                   
+          */                                                                    
+parse arg PassParm                                                              
+UserCmd = "DP"           /* as if user Command DP were entered */               
+ADDRESS ISPEXEC "VPUT (USERCMD) SHARED"                                         
+call UsrRtnDU "'"PassParm"'" /* call Diff Up the map to resolve the top */      
+EXIT 0                                                                          

@@ -1,0 +1,5 @@
+/* REXX - This routine to allow user to access QuickEdit Action Options Screen*/
+address ispexec                                                                 
+"display panel(ENDIE150)"                                                       
+/* note - just updating the variables might not be enough - might need to       
+   access to EWA to actually update the 'live variables' */                     

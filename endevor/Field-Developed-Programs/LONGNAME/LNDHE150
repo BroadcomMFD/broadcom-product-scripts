@@ -1,0 +1,23 @@
+)BODY EXPAND (\\)                                                               
+%TUTORIAL \-\ Long-Name Help \-\ TUTORIAL                                       
+%Command ===>_ZCMD                                                             +
++                                                                               
+%Action Options+continued.                                                      
++                                                                               
+%Move Sync+- A%Y+in this field indicates that you want to move an element       
++   whose base level at the source location is different from the current       
++   level at the target location. A "sync" level is created at the target       
++   that reflects the differences before any additional change levels are       
++   created. An%N+will cause the move to fail if the base level at the          
++   source and the current level at the target are different.                   
+%Move With History+- A%Y+in this field causes all change levels at the          
++   source to be carried forward to the target location. An%N+will cause        
++   the change levels to be consolidated into a single level at the             
++   target.                                                                     
+%Move Del From Elem+-A%Y+in this field causes the source element to be          
++   deleted after the move. An%N+leaves the source element in place.            
++                                                                               
++                                                                               
++\ \ (%END+to return) \ \                                                       
+)PROC                                                                           
+)END                                                                            

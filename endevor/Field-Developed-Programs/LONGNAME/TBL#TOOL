@@ -1,0 +1,610 @@
+/*     REXX   */
+/*  Written by Dan Walther        (v126)                              */
+/*  PURPOSE:                                                          */
+/*     The TBL#TOOL tool is a generic "Table lookup" Rexx             */
+/*     routine that processes every row of an input table, and        */
+/*     produces output based on each row's content and a              */
+/*     "Model" (similar to a dialog skeleton). One or more            */
+/*     models may contain symbolics that are replaced during          */
+/*     the processing of a "Table" by the TBL#TOOL utility.           */
+/*     The values for the symbolics, and the choice(s) for the        */
+/*     "Model", may be sellected from each row of the table.          */
+/*                                                                    */
+/*     TBL#TOOL can be executed in two ways. The first method is      */
+/*     slightly simpler than the other. The simpler type of           */
+/*     execution causes each row to be processed with only one        */
+/*     MODEL. The MODEL DDName in the running jobstream becomes       */
+/*     the "Model" used.                                              */
+/*                                                                    */
+/*     On the other hand, if the "Table" includes a column entitled   */
+/*     "MODEL", then the more complicated execution of TBL#TOOL       */
+/*     is used. In this case, each unique value under the "MODEL"     */
+/*     heading must also be a DDName in the running JCL.              */
+/*                                                                    */
+/*     Only one row of the Table is used. Variables (specified in     */
+/*     the heading) are given values specified on a row, and          */
+/*     then used in substitutions against the Model. The              */
+/*     post-substitution image of Model is then written to the        */
+/*     TBLOUT file.                                                   */
+/*                                                                    */
+/*     An optional input file with the DDName of OPTIONS can add      */
+/*     additional functionality. Any standard REXX variables          */
+/*     assigned values in OPTIONS, are variables that can be          */
+/*     substituted in the Model. For example,                         */
+/*        DB2_SUBSYS = 'DB2Q'                                         */
+/*     Any REXX variables assigned values in OPTIONS and which        */
+/*     appear as a header on the table, keep the value assigned       */
+/*     in OPTIONS. This feature enables OPTIONS to provide            */
+/*     override values to entries on the Table.                       */
+/*     IF C1STAGE is a variable (from the Table or OPTIONS) and       */
+/*     its value matches a prefix for an OPTIONS statement, then      */
+/*     the prefix is truncated and the resulting statement is         */
+/*     evaluated. For example, a column in the table is DB2-SUBSYS,   */
+/*     and is given a value of 'DB2Q', then the following OPTIONS     */
+/*     would change the value to 'DB2R' at the Endevor QA stage.      */
+/*                                                                    */
+/*     //OPTIONS DD  *                                                */
+/*       C1STAGE = &C1STAGE                                           */
+/*       QA-DB2-SUBSYS =  'DB2R'                                      */
+/*                                                                    */
+/*                                                                    */
+/*  PARMS:                                                            */
+/*     The first word in the parameter string indicates which         */
+/*     rows of the Table are to be processed:                         */
+/*          A - indicates all rows                                    */
+/*       number - indicates a fixed number of rows                    */
+/*          M - indicates only rows matching the provided             */
+/*              search values.                                        */
+/*                                                                    */
+/*     If additional words appear in the PARM string, then they       */
+/*     are search words. Multiple values may be present, but must be  */
+/*     separated by at least one space. Each of these are paired      */
+/*     as a search value for a column from the table.                 */
+/*     The first value is used as selection critieria for             */
+/*     the first column in the table.  The second value (if           */
+/*     provided) is used as selection critieria for the second        */
+/*     column in the table.  Each subsequent provided value is        */
+/*     used as selection critieria for the next column in the         */
+/*     table.  When a row is found which contains values that         */
+/*     Match  all passed PARMs, then the row is selected. If no       */
+/*     rows $Match, then a return-code 4 is returned.                 */
+/*                                                                    */
+/*     For example,                                                   */
+/*         if the PARM='1 Green Apples'                               */
+/*            then using a top to bottom search, the first row        */
+/*               that has 'Green' in the first column and             */
+/*               'Apples' in the second column is the row selected.   */
+/*                                                                    */
+/*     If the "A"  (all rows) option is designated, then no other     */
+/*     parameters are necessary.                                      */
+/*                                                                    */
+/*  INPUTS:                                                           */
+/*       A Table containing a header and values for variables         */
+/*       named in the header (Using DDname TABLE)                     */
+/*                                                                    */
+/*       A Model containing text (with embedded symbolics)            */
+/*                           (Using DDname MODEL or name from TABLE)  */
+/*                                                                    */
+/*       Options containing program specific build requirments.       */
+/*                           (Using DDname OPTIONS)                   */
+/*                                                                    */
+/*  OUTPUTS:                                                          */
+/*                                                                    */
+/*       Table output containing images of the Model, after variable  */
+/*       substitutions. One image is written to TBLOUT for each row   */
+/*       in the Table.      (Using DDname TBLOUT)                     */
+/*                                                                    */
+/*                                                                 */
+/*     C1STAGE - IF OPTIONS CONTAINS ANY VARIABLE WITH A PREFIX    */
+/*               THAT MATCHES THE VALUE OF C1STAGE, THEN           */
+/*               THE PREFIX IS STRIPPED FROM THE VARIABLE BEFORE   */
+/*               BEING USED. FOR EXAMPLE:                          */
+/*               IF OPTIONS CONTAINS THIS SYNTAX ...               */
+/*                  TEST-DB2-SUBSYS = 'DB2T'                       */
+/*               THEN DB2-SUBSYS OVERRIDDEN TO 'DB2T', BUT ONLY    */
+/*               AT THE TEST STAGE.                                */
+/*               C1STAGE MUST BE EITHER A SEARCH COLUMN ON THE     */
+/*               TABLE, OR ASSIGNED WITHIN THE OPTIONS.            */
+/*                                                                 */
+/*     LIST-TYPE - An option for the first column in the Table.    */
+/*                 If the value is assigned a value from OPTIONS   */
+/*                 and the value contains multiple Words, then     */
+/*                 each word is searched from the table.           */
+/*                 LIST-TYPE MUST be the first column in the       */
+/*                 TABLE. Example,                                 */
+/*                     LIST-TYPE = 'BIND1 BIND2'                   */
+/*                 ... causes a search through the table where     */
+/*                     LIST-TYPE = 'BIND1'                         */
+/*                 ... and a second search through the table where */
+/*                     LIST-TYPE = 'BIND2'                         */
+/*                                                                 */
+/*                                                                 */
+   /* WRITTEN BY DAN WALTHER */
+
+   trace o;
+   ARG $parms;
+   $scanning = WORD($parms,1) ;
+   IF DATATYPE($scanning) = "NUM" THEN NOP
+   ELSE
+   IF WORDPOS($scanning,"A M S") > 0 THEN NOP
+   ELSE
+      DO
+      SAY 'Invalid $scanning value' $scanning ;
+      say '  VALID values are: A -ALL M - Multiple matching ',
+          ' S - Single $Match or a number (of matches)';
+      exit (8)
+      end;
+
+/* ESTABLISH DEFAULT and initial values            */
+
+   $row# = 0 ;
+   $tbl  = 0 ;
+   $running_sysname = MVSVAR(SYSNAME) ;
+   $options_VARIABLES = ' ' ;
+   $date = '"'date()'"' ;
+   $time = '"'time()'"' ;
+   $delimiter = "^" ;
+   TBLOUT = 'TBLOUT' ; /* DEFAULT NAME OF OUTPUT FILE */
+   $search_PARMS_COUNT = WORDS($parms) - 1 ;
+   $Matches = 0 ;
+   if $search_PARMS_COUNT = 0 THEN $searching = 'N'
+   ELSE                            $searching = 'Y' ;
+   $OTHER_VARIABLES = "$running_sysname $row# $tbl ",
+                      "$Matches $date $time" ;
+   $Using_Table_Positions = "N" ;
+   $Table_Row_start = 2 ;
+   $List_Read_Models = " " ;
+
+   $command = '' ;
+
+   $my_rc = -999999 ;
+
+/* Read file containing table ENTRIES */
+   "EXECIO * DISKR TABLE (STEM $tablerec. FINIS"
+
+/* Process the heading record (rec 1) */
+
+   SA= '$tablerec.0=' $tablerec.0 ;
+   IF SUBSTR($tablerec.1,1,1) = "*" THEN,
+      CALL Process_Heading;
+   else
+      do
+      "EXECIO * DISKR POSITION (STEM $positions. FINIS"
+      if rc = 0 then,
+         CALL Process_$positions ;
+      else,
+         do
+         say "First record must be heading with '*' in col 1"
+         exit (8)
+         end; /* if rc > 0 then */
+      end; /* else */
+
+   IF $search_PARMS_COUNT >  $Heading_Variable_count THEN,
+      DO
+      SAY 'FEWER TABLE COLUMNS THAN SEARCH $parms'
+      EXIT (8)
+      END;
+
+/* Initialize Search parms from parm string      */
+   Do_Display = "N" ;
+   If $searching = 'Y' then,
+      Call Build_Search_criteria ;
+   Do_Display = "Y" ;
+
+/* Read file containing OPTIONS       */
+/*   and EXAMINE OPTIONS (OPTIONS) FOR KEY VALUES   */
+   "EXECIO * DISKR OPTIONS (STEM $OPT. FINIS "
+   IF $OPT.0 > 0 THEN,
+      do
+      CALL EXAMINE_OPTIONS ;
+      SA= $options_VARIABLES ;
+      end;
+
+/*********************************************************************/
+/*   If searching through a table, the first search word can be     **/
+/****given multiple values in the OPTIONS. Example:                 **/
+/****SEARCH1 = 'VALUE1 VALUE2 VALUE3'                               **/
+/****In this case, TBL#TOOL will process each value specified :     **/
+/****   a search will be made for VALUE1, then                      **/
+/****   a search will be made for VALUE2, then                      **/
+/****   a search will be made for VALUE3                            **/
+/*********************************************************************/
+   if $searching = 'Y' then,
+      do
+      $primary_VARIABLE = WORD($TABLE_VARIABLES,1) ;
+      $temp_word = value($primary_VARIABLE) ;
+      IF DATATYPE($temp_word,S) = 1 THEN,
+         $temp = "$primary_VALUE = " $temp_word ;
+      ELSE,
+         $temp = "$primary_VALUE = '" || $temp_word || "'" ;
+      SA= $temp ;
+      INTERPRET $temp ;
+      end;
+
+   IF WORDS($primary_VALUE) > 1 THEN, /* "LIST-TYPE" OPTION SPECIFIED */
+      DO
+      $LIST_$primary_VALUES = $primary_VALUE ;
+      IF $my_rc = -999999 then,
+         Do
+         IF WORDS($LIST_$primary_VALUES) < 5 then,
+            $my_rc = 2;
+         ELSE $my_rc = 4;
+         End
+      DO $listcnt = 1 TO WORDS($LIST_$primary_VALUES)
+         $primary_VALUE = WORD($LIST_$primary_VALUES,$listcnt) ;
+         $temp = $primary_VARIABLE " = '"$primary_VALUE"'" ;
+         INTERPRET $temp ;
+         CALL $Search_TABLE;
+         $position_PREFIX = POS('-',$primary_VALUE) ; /* 2 FOR 1 ? */
+         IF $position_PREFIX > 1 THEN,
+            DO
+            $primary_VALUE = ,
+                  SUBSTR($primary_VALUE,1,($position_PREFIX - 1)
+            CALL $Search_TABLE;
+            END
+      END; /* DO $listcnt = 1 TO WORDS($LIST_$primary_VALUES) */
+      END; /* IF WORDS($LIST_$primary_VALUES) > 0 */
+   ELSE,
+      DO
+      IF $my_rc = -999999 then,
+         $my_rc = 1;
+      CALL $Search_TABLE;
+      END; /* IF $primary_VALUE /= ' ' (NO "LIST-TYPE" $OPTION) */
+
+   IF $my_rc = -999999 then $my_rc = 0;
+   EXIT ($my_rc) ;
+/*                                                                    */
+$Search_TABLE :
+
+   $FOUND_ATLEAST1_TABLE_ENTRY = 'N' ;
+   $All_VARIABLES = $options_VARIABLES,
+                    $TABLE_VARIABLES $OTHER_VARIABLES;
+
+   IF $searching = 'Y' THEN,
+      Call Build_Search_criteria ;
+
+   DO $tbl = $Table_Row_start  TO $tablerec.0
+/*    Read through each record (row) of Table                        */
+      $row# = $tbl - 1 ;
+      $Match = 'Y' ;
+      Call Evaluate_Table_row ;
+      IF $Match = 'N' THEN ITERATE ;
+/*                                                                   */
+/*    SELECTED A TABLE ENTRY ...                                     */
+/*                                                                   */
+      $Matches = $Matches + 1 ;
+      If $table_variable = "$Temp_RC" then,
+         $my_rc = $Temp_RC ;
+      IF DATATYPE($scanning) = "NUM" THEN,
+         IF $Matches > $scanning THEN,
+            DO
+            $tbl = $tablerec.0 ;
+            LEAVE ;
+            END;
+ /*                                                          */
+      IF $OPT.0 > 0 THEN,
+         DO
+         $SAVE_primary_VALUE = $primary_VALUE
+         CALL EXAMINE_OPTIONS ;  /* APPLY OVERRIDES FROM OPTIONS */
+         $primary_VALUE = $SAVE_primary_VALUE ;
+         IF $searching = 'Y' THEN,
+            do
+            $primary_VARIABLE = WORD($TABLE_VARIABLES,1) ;
+            Call Restore_Search_criteria ;
+            end
+         END;
+         IF $Match = 'N' THEN $Matches = $Matches - 1 ;
+ /*                                                          */
+      IF $Match = 'Y' THEN CALL BUILD_FROM_MODEL ;
+ /*   LEAVE ;                                                */
+      ITERATE ;
+   END; /* DO $tbl = 1 .... */
+
+   IF $FOUND_ATLEAST1_TABLE_ENTRY = 'N' THEN,
+      DO
+      SAY 'INVALID TABLE SEARCH SPECIFICATION ',
+          $parms ;
+      EXIT (4) ;
+      END ; /* IF $FOUND_ATLEAST1_TABLE_ENTRY = 'N' */
+
+   RETURN;
+
+Build_Search_criteria :
+
+   Searching_Display = " " ;
+
+   Do $parmcnt = 1 to $search_PARMS_COUNT
+      $temp_word =  word($TABLE_VARIABLES,$parmcnt) ;
+      if wordpos($temp_word,$options_VARIABLES) > 0 then,
+         DO
+         $temp = "$src_" || $temp_word "=" $temp_word ;
+         INTERPRET $temp ;
+         ITERATE ;
+         END
+      $temp_valu = word($parms,($parmcnt+1)) ;
+
+      IF DATATYPE($temp_valu,S) = 1 THEN,
+         $temp = "$src_" || $temp_word " = " $temp_valu ;
+      ELSE,
+         $temp = "$src_" || $temp_word " = '" || $temp_valu || "'" ;
+      SA= $temp ;
+      Searching_Display = Searching_Display $temp_valu ;
+      INTERPRET $temp ;
+   end; /* do $parmcnt = 1 to $search_PARMS_COUNT */
+
+   $temp = " $primary_VALUE = " word($TABLE_VARIABLES,1)
+   INTERPRET $temp ;
+
+   If Do_Display = "Y" then,
+      Say "Searching " Searching_Display ;
+
+   RETURN;
+
+Restore_Search_criteria :
+
+   $temp = word($TABLE_VARIABLES,1) ||,
+                   " = " $primary_VALUE
+   INTERPRET $temp ;
+
+   Do $parmcnt = 2 to $search_PARMS_COUNT
+      $temp_word =  word($TABLE_VARIABLES,$parmcnt) ;
+      $temp = $temp_word " = $src_" || $temp_word ;
+      SAy $temp ;
+      INTERPRET $temp ;
+   end; /* do $parmcnt = 1 to $search_PARMS_COUNT */
+
+   RETURN;
+
+Evaluate_Table_row :
+/*    Assign heading variables to values from next table record      */
+
+   If $Match = "N" then return ;
+
+   DO $column = 1 TO $Heading_Variable_count
+      $table_variable = WORD($TABLE_VARIABLES,$column) ;
+      If $table_variable = "$my_rc" then,
+         $table_variable = "$Temp_RC"
+      If $Using_Table_Positions = "Y" then,
+         do
+         $start = $Starting_$position.$table_variable ;
+         $stop  = $Ending_$position.$table_variable ;
+         $stop  = $stop - $start + 1;
+         sa= $tablerec.$tbl ;
+         $temp_valu = substr($tablerec.$tbl,$start,$stop);
+         $temp_valu = strip($temp_valu) ;
+         $temp = $table_variable "=" '"'$temp_valu'"' ;
+         INTERPRET $temp;
+         SA= $temp ;
+         end;
+      else,
+         do
+         $temp_value = WORD($tablerec.$tbl,$column);
+         IF DATATYPE($temp_value,S) = 1 THEN,
+           $temp = $table_variable || "=" ||,
+              " VALUE(" || $temp_value || ")" ;
+         else,
+           $temp = $table_variable ||,
+              " = '" || $temp_value || "'" ;
+         $temp = TRANSLATE($temp,'_','-') ;
+         INTERPRET $temp;
+         SA= $temp ;
+         END; /* if wordpos($table_value .... */
+
+    /* Compare Table values with search criteria                 */
+      IF $searching = 'Y' & $column <= $search_PARMS_COUNT then,
+         do
+         $temp = "If" $table_variable "= '*' then ",
+                 $table_variable "=  $src_" || $table_variable ;
+         INTERPRET $temp;
+         $temp = "If  $src_" || $table_variable "/= '*' & ",
+                 $table_variable "/= $src_" || $table_variable,
+                 " then $Match = 'N' " ;
+         INTERPRET $temp;
+         end; /* IF $searching = 'Y' & ...  */
+   END; /* DO $column = ... */
+
+   RETURN;
+
+BUILD_FROM_MODEL :
+
+   SAY 'OUTPUT BUILT FROM 'MODEL' FOR ',
+        $parms  ;
+
+   MODEL  = STRIP(MODEL)
+   opened = WordPos(MODEL,$List_Read_Models)
+
+   if opened = 0 then,
+      do
+      "EXECIO * DISKR "MODEL "(STEM $Model. FINIS" ;
+      IF RC > 1 THEN,
+         DO
+         SAY 'CANNOT FIND MODEL FILE ' MODEL
+         EXIT(8)
+         END;
+      Do $cnt = 0 to $Model.0
+         $Stem.MODEL.$cnt = $Model.$cnt
+      end; /* Do $cnt = 0 to $Model.0 */
+      $List_Read_Models = MODEL $List_Read_Models ;
+      end; /* if opened = 0 then */
+   else,
+      Do $cnt = 0 to $Stem.MODEL.0
+         $Model.$cnt = $Stem.MODEL.$cnt ;
+      end; /* Do $cnt = 0 to $Stem.MODEL.0 */
+
+   CALL UPDATE_MODEL_FROM_VARIABLES ;
+   "EXECIO * DISKW "TBLOUT "(STEM $Model. " ;
+   DROP $Model. ;
+
+   $FOUND_ATLEAST1_TABLE_ENTRY = 'Y' ;
+
+   RETURN;
+
+UPDATE_MODEL_FROM_VARIABLES:
+
+   DO $LINE = 1 TO $Model.0
+      $PLACE_VARIABLE = 1;
+      CALL EVALUATE_SYMBOLICS ;
+      END; /* DO $LINE = 1 TO $Model.0 */
+
+   RETURN;
+
+EVALUATE_SYMBOLICS:
+
+   DO FOREVER;
+      $PLACE_VARIABLE = POS('&',$Model.$LINE,$PLACE_VARIABLE)
+      IF $PLACE_VARIABLE = 0 THEN LEAVE;
+      $temp_$LINE = TRANSLATE($Model.$LINE,' ',',.()"/\+-*|');
+      $temp_$LINE = TRANSLATE($temp_$LINE,' ',"'"$delimiter);
+      $table_word = WORD(SUBSTR($temp_$LINE,($PLACE_VARIABLE+1)),1);
+      $table_word = TRANSLATE($table_word,'_','-') ;
+      $varlen = LENGTH($table_word) + 1 ;
+
+      if WORDPOS($table_word,$All_VARIABLES) = 0 then,
+         do
+         $PLACE_VARIABLE = $PLACE_VARIABLE + 1 ;
+         iterate;
+         end;
+
+      $temp_word = VALUE($table_word) ;
+      IF DATATYPE($temp_word,S) = 9 THEN,
+         $temp = 'SYMBVALUE = ' $temp_word ;
+      ELSE,
+         $temp = "SYMBVALUE = '"$temp_word"'" ;
+      INTERPRET $temp;
+      SA= 'SYMBVALUE  = ' SYMBVALUE ;
+
+      $tail = SUBSTR($Model.$LINE,($PLACE_VARIABLE+$varlen)) ;
+      if Substr($tail,1,1) = $delimiter then,
+         $tail = SUBSTR($tail,2) ;
+      IF $PLACE_VARIABLE > 1 THEN,
+         $Model.$LINE = ,
+            SUBSTR($Model.$LINE,1,($PLACE_VARIABLE-1)) ||,
+            SYMBVALUE || $tail ;
+      else,
+         $Model.$LINE = ,
+            SYMBVALUE || $tail ;
+      END; /* DO FOREVER */
+
+   RETURN;
+
+EXAMINE_OPTIONS:
+   DO L# = 1 TO $OPT.0
+      IF SUBSTR($OPT.L#,1,1) = '*' THEN ITERATE ;
+      $OPTION = STRIP($OPT.L#) ;
+      $OPTION_LEN = LENGTH($OPTION) ;
+      IF $OPTION_LEN = 0 THEN ITERATE ;
+      IF SUBSTR($OPTION,$OPTION_LEN,1) = ',' |,
+         SUBSTR($OPTION,$OPTION_LEN,1) = '+' |,
+         SUBSTR($OPTION,$OPTION_LEN,1) = '-' THEN,
+         DO
+         $OPTION = SUBSTR($OPTION,1,$OPTION_LEN-1) ;
+         $OPTION = STRIP($OPTION) ;
+         $OPTION = STRIP($OPTION,B,'"') ;
+         $OPTION = STRIP($OPTION,B,"'") ;
+         $command = $command || $OPTION ;
+         ITERATE ;
+         END ;
+      $OPTION = STRIP($OPTION,L,'"') ;
+      $OPTION = STRIP($OPTION,L,"'") ;
+      $command = $command || $OPTION ;
+      $temp = LASTPOS("=",$command)
+      if $temp > 1 then,
+         do
+         $temp_line = substr($command,1,($temp-1)) ;
+         $temp_line = TRANSLATE($temp_line,' ','=') ;
+         $keyword = WORD($temp_line,WORDS($temp_line));
+         $position = WORDINDEX($temp_line,WORDS($temp_line));
+         end;
+      else,
+         do
+         $temp_line = TRANSLATE($command,' ','=') ;
+         $keyword = WORD($temp_line,1) ;
+         $position = WORDINDEX($temp_line,1) ;
+         end;
+
+      $keyword = TRANSLATE($keyword,'_','-') ;
+      if wordpos($keyword,$options_VARIABLES) = 0 then,
+         $options_VARIABLES = $options_VARIABLES $keyword ;
+      $command = OVERLAY($keyword,$command,$position) ;
+      SA= $command ;
+      $len_stage = LENGTH(C1STAGE) + 1;
+      SA= SUBSTR($command,1,$len_stage) ;
+      IF $len_stage >= LENGTH($command) THEN NOP ;
+      ELSE,
+      IF SUBSTR($command,1,$len_stage) = C1STAGE || '_' THEN,
+         DO
+         $len_stage = $len_stage + 1;
+         $command = SUBSTR($command,$len_stage) ;
+         END; /* IF SUBSTR($command,1,$len_stage) = C1STAGE*/
+      $LEN_SAVE_primary_VALUE = LENGTH($SAVE_primary_VALUE) + 1;
+      IF $LEN_SAVE_primary_VALUE >= LENGTH($command) THEN NOP ;
+      ELSE,
+      IF SUBSTR($command,1,$LEN_SAVE_primary_VALUE) =,
+         $SAVE_primary_VALUE || '_' THEN,
+         DO
+         $LEN_SAVE_primary_VALUE = $LEN_SAVE_primary_VALUE + 1;
+         $command = SUBSTR($command,$LEN_SAVE_primary_VALUE) ;
+         END; /* IF SUBSTR($command,1.....   */
+      INTERPRET $command ;
+      INTERPRET_RC = RC;
+      SA= 'INTERPRETING: ' $command ;
+      $command = '' ;
+   END; /* DO L# = 1 TO $OPT.0 */
+
+   RETURN;
+
+Process_Heading:
+   $temp = TRANSLATE($tablerec.1,' ','*=,.') ;
+   $temp = TRANSLATE($temp,'_','-') ;
+   $TABLE_VARIABLES = strip($temp);
+   $Heading_Variable_count = WORDS($TABLE_VARIABLES) ;
+   return ;
+
+Process_$positions :
+   $TABLE_VARIABLES = " " ;
+   $Heading_Variable_count = $positions.0 ;
+   DO $pos = 1 to $Heading_Variable_count;
+      if substr($positions.$pos,1,1) = "*" then iterate ;
+      $word1 = word($positions.$pos,1) ;
+      $word1 = translate($word1,'_','-');
+      $word2 = word($positions.$pos,2) ;
+      $word3 = word($positions.$pos,3) ;
+      if datatype($word1,S) /= 1 then,
+         do
+         say "Value not valid for variable name - " $word1 ;
+         exit (8)
+         end
+      if datatype($word2,N) /= 1 then,
+         do
+         say "Value not valid for variable starting $position - ",
+             $word2 ;
+         exit (8)
+         end
+      if datatype($word3,N) /= 1 then,
+         do
+         say "Value not valid for variable ending   $position - ",
+             $word3 ;
+         exit (8)
+         end
+      $Starting_$position.$word1 = $word2;
+      $Ending_$position.$word1 = $word3;
+      $TABLE_VARIABLES = $TABLE_VARIABLES $word1 ;
+      $Using_Table_Positions = "Y" ;
+      $Table_Row_start = 1 ;
+   end; /* DO $pos = 1 to $Heading_Variable_count */
+   return ;
+
+SYNTAX:
+   SAY ' \\\\\ SYNTAX ERROR //// ' ;
+   SAY '<<<<RETURN CODE = 8>>>>' ;
+   EXIT (8) ;
+
+FAILURE:
+   SAY ' \\\\\ SYNTAX ERROR //// ' ;
+   SAY '<<<<RETURN CODE = 8>>>>' ;
+   EXIT (8) ;
+
+ERROR:
+   SAY ' \\\\\ SYNTAX ERROR //// ' ;
+   SAY '<<<<RETURN CODE = 8>>>>' ;
+   EXIT (8) ;
