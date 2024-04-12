@@ -1,4 +1,4 @@
-//WALJO11E JOB (55800000),
+//IBMUSERE JOB (55800000),
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //      NOTIFY=&SYSUID
 //*-------------------------------------------------------------------*

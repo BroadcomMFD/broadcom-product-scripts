@@ -1,4 +1,4 @@
-//WALJO113 JOB (55800000),
+//IBMUSER3 JOB (55800000),
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //      NOTIFY=&SYSUID
 //*-------------------------------------------------------------------
@@ -11,7 +11,7 @@
 //*-------------------------------------------------------------------
 //STEP01   EXEC PGM=IKJEFT1B
 //SYSTSIN   DD *
- LISTDS 'WALJO11.ENDEVOR.SOURCE' MEMBERS
+ LISTDS 'IBMUSER.ENDEVOR.SOURCE' MEMBERS
 //SYSPRINT  DD SYSOUT=*
 //SYSTSPRT  DD DSN=&&MBRLIST,DISP=(,PASS),
 //     SPACE=(CYL,(1,1)),UNIT=SYSDA,

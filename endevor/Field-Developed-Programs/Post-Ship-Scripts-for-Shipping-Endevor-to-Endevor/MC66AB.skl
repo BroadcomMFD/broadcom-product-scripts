@@ -1,42 +1,41 @@
 @REM ************************************************************
 @REM * THESE STEPS WILL EXECUTE an Endevor ADD/UPDATE action
-@REM * at CA32, when the Destination name is CA32A (Admin)
+@REM * at MC66, when the Destination name is MC66A (Admin)
 @REM ************************************************************
-//* START CA32AB
+//* START MC66AB
 //* SET PKACTION=OUT        OUT/BAC
-//  SET C1ENVMNT=DEV
-//  SET C1SYSTEM=ESCMSNDV
+//  SET C1ENVMNT=ADM
+//  SET C1SYSTEM=NDVR
 //*--------------------------------------------------------------------
-//COPIES   EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000'   CA32AB
+//COPIES   EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000'   MC66AB
 //   INCLUDE MEMBER=STEPLIB           <- Endevor Steplib etc
 //BSTIPT01 DD *,SYMBOLS=JCLONLY
 SET STOPRC 12.
-SET OPTIONS COMMENT "Shipped from DE32"
-            CCID "FromDE32"
+SET OPTIONS COMMENT "Shipped from MD32"
+            CCID "FromMD32"
 *****       BYPASS GENERATE PROCESSOR
             OVERRIDE SIGNOUT UPDATE.
-SET   TO   ENVIRONMENT "DEV"
-           SYSTEM "ESCMSNDV"  SUBSYSTEM "&C1SUBSYS" .
+SET   TO   ENVIRONMENT "ADM"
+           SYSTEM "NDVR" SUBSYSTEM "&C1SUBSYS" .
 @IF &ZZJCL
 SET   FROM DSN '&ZZJCL' .
 ADD ELEMENT '*' TO TYPE JCL .
 @ENDIF
 @IF &ZZCLSTREXX
 SET   FROM DSN '&ZZCLSTREXX' .
-ADD ELEMENT '*' TO TYPE REXX
-    OPTIONS BYPASS GENERATE PROCESSOR.
+ADD ELEMENT '*' TO TYPE REXX.
 @ENDIF
 @IF &ZZISPS
 SET   FROM DSN '&ZZISPS' .
-ADD ELEMENT '*' TO TYPE SKELS.
+ADD ELEMENT '*' TO TYPE ISPSLIB .
 @ENDIF
 @IF &ZZISPP
 SET   FROM DSN '&ZZISPP' .
-ADD ELEMENT '*' TO TYPE PANELS.
+ADD ELEMENT '*' TO TYPE ISPPLIB .
 @ENDIF
 @IF &ZZISPM
 SET   FROM DSN '&ZZISPM' .
-ADD ELEMENT '*' TO TYPE MSGS.
+ADD ELEMENT '*' TO TYPE ISPMLIB .
 @ENDIF
 @IF &ZZTABLES
 SET   FROM DSN '&ZZTABLES' .
@@ -44,7 +43,7 @@ ADD ELEMENT '*' TO TYPE TABLES .
 @ENDIF
 @IF &ZZPROCESS
 SET   FROM DSN '&ZZPROCESS' .
-ADD ELEMENT '*' TO TYPE PROCESS
+ADD ELEMENT '*' TO TYPE PROC
     OPTIONS BYPASS GENERATE PROCESSOR.
 @ENDIF
 //C1MSGS1  DD SYSOUT=*
@@ -55,11 +54,11 @@ ADD ELEMENT '*' TO TYPE PROCESS
 //SYSPRINT DD SYSOUT=*
 //*--------------------------------------------------------------------
 @IF &ZZALTERS
-//*--- Apply ALTER commands for element info from DE32 ----------------
+//*--- Apply ALTER commands for element info from MD32 ----------------
 //*--------------------------------------------------------------------
 //*    Part 1/2 - Write all ALTER statements out
 //*--------------------------------------------------------------------
-//ALTERS1  EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    CA32AB
+//ALTERS1  EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    MC66AB
 //SYSPRINT DD   SYSOUT=*
 //SYSUT1   DD   DISP=SHR,
 //         DSN=&ZZALTERS
@@ -70,18 +69,26 @@ ADD ELEMENT '*' TO TYPE PROCESS
   PUNCH TYPORG=PO,PREFORM=M,MAXFLDS=1
   RECORD FIELD=(80)
 //*
+//*---------------------------------------------------------------
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K
+//SYSPRINT  DD SYSOUT=*                           MESSAGES
+//SYSUT1  DD DSN=&&ALTERS,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS
+//SYSUDUMP DD SYSOUT=*
+//*--------------------------------------------------------------------
 //*--------------------------------------------------------------------
 //*    Part 2/2 - Execute   ALTER statements
 //*--------------------------------------------------------------------
-//ALTERS2  EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000',  CA32AB
+//ALTERS2  EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000',  MC66AB
 //         COND=(8,LT)
 //   INCLUDE MEMBER=STEPLIB           <- Endevor Steplib etc
-//BSTIPT01 DD *
+//BSTIPT01 DD *,SYMBOLS=JCLONLY
 SET STOPRC 12.
-SET OPTIONS COMMENT "Match  with  DE32"
-            CCID "FromDE32" .
-SET FROM   ENVIRONMENT "DEV" STAGE "1"
-           SYSTEM "ESCMSNDV".
+SET OPTIONS COMMENT "Match  with  MD32"
+            CCID "FromMD32" .
+SET FROM   ENVIRONMENT "ADM" STAGE "1"
+           SYSTEM "&C1SYSTEM".
 //         DD DSN=&&ALTERS,DISP=(OLD,DELETE)
 //C1MSGS1  DD SYSOUT=*
 //C1MSGS2  DD SYSOUT=*

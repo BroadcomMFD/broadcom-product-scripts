@@ -1,14 +1,14 @@
-//WALJO115 JOB (55800000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,
+//IBMUSER5 JOB (55800000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,
 //      REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID
 //*--------------------------------------------------------------------
 //*- SYS1.EXEC(ALLOLIKE)
 //*--------------------------------------------------------------------
-//  SET DSNLIST=WALJO11.MYLIST.DATASETS     <-
-//  SET DSNLIST=WALJO11.CAPRD.DATASETS      <-
-//  SET DSNLIST=WALJO11.TESTING.DATASETS    <-
+//  SET DSNLIST=IBMUSER.MYLIST.DATASETS     <-
+//  SET DSNLIST=IBMUSER.CAPRD.DATASETS      <-
+//  SET DSNLIST=IBMUSER.TESTING.DATASETS    <-
 //  SET SYSEXEC=SYS1.EXEC                   <-
 //*--------------------------------------------------------------------
-//*- WALJO11.JCL(EXAMPL#5) --------------------------------------------
+//*- IBMUSER.JCL(EXAMPL#5) --------------------------------------------
 //*--------------------------------------------------------------------
 //BUILDS   EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC
@@ -84,7 +84,7 @@ QQ
 //
 //TEST001  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'
 //SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC
-//TABLE    DD DISP=SHR,DSN=WALJO11.DSNLIST.DATASETS
+//TABLE    DD DISP=SHR,DSN=IBMUSER.DSNLIST.DATASETS
 //PARMLIST DD *
   NOTHING NOTHING  OPTIONS0 0
   MODEL1  TBLOUT1  OPTIONS1 A

@@ -1,9 +1,9 @@
-//WALJO114 JOB (55800000),                                              JOB04207
+//IBMUSER4 JOB (55800000),                                              JOB04207
 //    'ENDEVOR BATCH',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //    NOTIFY=&SYSUID
 //*-------------------------------------------------------------------*
 //*-- Execute PDM to update elements out of sync. --------------------*
-//*-- Outputs:  WALJO11.ENDEVOR.WIPFILE           --------------------*
+//*-- Outputs:  IBMUSER.ENDEVOR.WIPFILE           --------------------*
 //*-------------------------------------------------------------------*
 // SET SYSEXEC=SYS1.EXEC
 // SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC
@@ -88,7 +88,7 @@
 //PDM#004 EXEC PGM=IRXJCL,PARM='ENBPIU00 A'
 //SYSEXEC  DD DSN=&SYSEXEC,DISP=SHR
 //TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)
-//MODEL    DD DISP=SHR,DSN=WALJO11.MODELS(PDM#ELM)
+//MODEL    DD DISP=SHR,DSN=IBMUSER.MODELS(PDM#ELM)
 //OPTIONS  DD *
   jobchar = Substr(ELM NAME,1,1)    /* First char of element name */
   jobchar = 'P'                     /* for PDM                    */

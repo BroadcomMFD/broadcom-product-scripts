@@ -23,7 +23,7 @@ MyLOADLibrary = SHLQ'.CSIQLOAD'
 /* Non-APF Authorized library:     */
 MyCLS0Library = SHLQ'.CSIQCLS0'
 /* For Rexx items in your bundle, name a MyCLS2Library     */
-MyCLS2Library = 'UKDEMO.CA66.COMMON.CLIST'
+MyCLS2Library = 'UKDEMO.MC66.COMMON.CLIST'
 MyCLS2Library = 'PSP.ENDV.TEAM.REXX'        /* Last one wins */
 MyOPTNLibrary = SHLQ'.CSIQOPTN'
 MyOPT2Library = 'PSP.ENDV.TEAM.OPTIONS'
@@ -56,7 +56,7 @@ MySRC2Library = SHLQ'.CSIQJCL'
     ShipSchedulingMethod = 'Rules'     ;/* Rules - mult destinations */         
 ShipSchedulingMethod = 'One'
    /* Provide details when there is only One shipping destination    */
-   Destination = 'TSO32'   ;     /* The oneShipment Destination   */
+   Destination = 'MTS32'   ;     /* The oneShipment Destination   */
    Hostprefix =  'PSP.ENDV';     /* Host staging file prefix      */
    Rmteprefix =  'PUBLIC.NDVR' ; /* Remote staging file prefix    */
    ModelMember = 'SHIP#FTP'      /* Jcl image for shipment job    */

@@ -1,9 +1,9 @@
-//WALJO11T JOB (0000),
+//IBMUSERT JOB (0000),
 //         CLASS=A,MSGCLASS=X,REGION=4M,NOTIFY=&SYSUID
 //*==================================================================*
 //*- To run the Package Monitory report                   -------
 //*--------------------------------------------------------------
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL.CSV)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL.CSV)
 //*==================================================================*
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available
 //*** STEP 1 -- EXECUTE CSV UTILITY to find APPROVED and EXEC packages

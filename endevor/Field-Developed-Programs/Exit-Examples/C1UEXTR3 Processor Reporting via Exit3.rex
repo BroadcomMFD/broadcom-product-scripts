@@ -10,7 +10,7 @@
    CALL BPXWDYN STRING;
 
 /* Indicate your choices here.....                                */
-   LoggingPrefix = 'SYSDE32.NDVR.LOGGING'
+   LoggingPrefix = 'SYSMD32.NDVR.LOGGING'
    HowManyEntries= 20
 
    /* If C1UEXTR3 is allocated to anything, turn on Trace  */

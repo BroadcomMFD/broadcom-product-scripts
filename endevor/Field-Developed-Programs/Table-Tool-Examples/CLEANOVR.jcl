@@ -1,11 +1,11 @@
-//WALJO11O JOB (0000),'Dan Walther',CLASS=A,MSGCLASS=Z,MSGLEVEL=(1,1),
+//IBMUSERO JOB (0000),'Dan Walther',CLASS=A,MSGCLASS=Z,MSGLEVEL=(1,1),
 //         NOTIFY=&SYSUID,REGION=0M
 //*-------------------------------------------------------------------*
 //*--Report processor group Overrides --------------------------------*
 //*-------------------------------------------------------------------*
-//*  Output:  SYSDE32.NDVR.TEAM.DEFINES(CLEANOVR)
+//*  Output:  SYSMD32.NDVR.TEAM.DEFINES(CLEANOVR)
 //*-------------------------------------------------------------------
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //*-------------------------------------------------------------------
 //*   STEP 1 -- EXECUTE CSV UTILITY
 //STEP1    EXEC PGM=NDVRC1,
@@ -43,5 +43,5 @@
 //   INCLUDE MEMBER=CSIQCLS0    <- Endevor CSIQCLS0
 //SYSTSPRT DD  SYSOUT=*
 //SYSPRINT DD SYSOUT=*
-//TBLOUT   DD DISP=SHR,DSN=SYSDE32.NDVR.TEAM.DEFINES(CLEANOVR)
+//TBLOUT   DD DISP=SHR,DSN=SYSMD32.NDVR.TEAM.DEFINES(CLEANOVR)
 //*---------------------------------------------------------------------

@@ -1,4 +1,4 @@
-//&UseridµB JOB (&AltIDAcctCode),'LONGNAME FDP INST',                           
+//&Useridï¿½B JOB (&AltIDAcctCode),'LONGNAME FDP INST',                           
 //      MSGLEVEL=(1,1),CLASS=&AltIDJobClass,REGION=0M,                          
 //      MSGCLASS=&AltIDMsgClass,NOTIFY=&SYSUID                                  
 //*-------------------------------------------------------------------*         

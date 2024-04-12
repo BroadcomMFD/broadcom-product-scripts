@@ -61,8 +61,8 @@
               MOVE 56         TO PAPP-LENGTH
               MOVE 1          TO PAPP-SEQUENCE-NUMBER
               MOVE SPACES     TO PAPP-APPROVAL-DATA(16)
-              MOVE 'WALJO11'  TO PAPP-APPROVAL-ID(1)
-              MOVE 'WALJO12'  TO PAPP-APPROVAL-ID(2)
+              MOVE 'IBMUSER'  TO PAPP-APPROVAL-ID(1)
+              MOVE 'IBMUSE2'  TO PAPP-APPROVAL-ID(2)
               MOVE 2          TO PAPP-APPROVER-NUMBER
               MOVE 1          TO PECB-NBR-APPR-GRPS-SENT
               MOVE 'NDVRTEAM' TO PAPP-GROUP-NAME

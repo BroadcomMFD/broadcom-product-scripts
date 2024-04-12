@@ -1,11 +1,11 @@
-//WALJO11S JOB (0000),
+//IBMUSERS JOB (0000),
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //      NOTIFY=&SYSUID
 //*-----------------------------------------------------------------*   JOB02096
 //* SWEEP PACKAGE DATABASE AND ESTABLISH RUNJCL FOR PACKAGES THAT   *   JOB02096
 //* ARE APPROVED AND MEET SUBMIT TIMES                              *   JOB02096
 //*-----------------------------------------------------------------*
-//  SET SUBMITDS=WALJO11.PULLTGGR         <- Work  datasets
+//  SET SUBMITDS=IBMUSER.PULLTGGR         <- Work  datasets
 //  SET MODELDSN=CAPRD.ENDV.SHIP.MODELS   <- Where Shipping MODELS
 //  SET SYSSEXEC=CAPRD.ENDV.SHIP.REXX     <- Where is PULLTGGR
 //*-----------------------------------------------------------------*

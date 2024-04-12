@@ -130,7 +130,7 @@
                PACKAGE-EXIT-SHIPMENT-BLOCK
                PACKAGE-EXIT-SCL-BLOCK.
       ****
-           IF PECB-USER-BATCH-JOBNAME(1:7) NOT = 'WALJO11' AND
+           IF PECB-USER-BATCH-JOBNAME(1:7) NOT = 'IBMUSER' AND
               PECB-USER-BATCH-JOBNAME(1:7) NOT = 'PL05958'
               GOBACK.
       ****

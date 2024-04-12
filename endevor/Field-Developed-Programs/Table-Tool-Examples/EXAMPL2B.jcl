@@ -1,8 +1,8 @@
-//WALJO11I JOB (301000000),'EXAMPL2B',CLASS=B,PRTY=6,
+//IBMUSERI JOB (301000000),'EXAMPL2B',CLASS=B,PRTY=6,
 //  MSGCLASS=3,REGION=7M,NOTIFY=&SYSUID
 /*JOBPARM  SYSAFF=*
 //*--------------------------------------------------------------
-// JCLLIB  ORDER=(WALJO11.JCL.CSV)
+// JCLLIB  ORDER=(IBMUSER.JCL.CSV)
 //*--
 //*- To Report Element changes within  a date span    -----------
 //*--------------------------------------------------------------
