@@ -1,17 +1,17 @@
-//WALJO11P JOB (0000),
+//IBMUSERP JOB (0000),
 //         CLASS=A,MSGCLASS=X,REGION=4M,
 //         NOTIFY=&SYSUID
 //*==================================================================*
 //*- To Report Multiple package Component Validations     -------
-//*-- JCL:  SYSDE32.NDVR.TEAM.JCL(PKGVALID)   ------------------------
+//*-- JCL:  SYSMD32.NDVR.TEAM.JCL(PKGVALID)   ------------------------
 //*-- Update SET statements as needed, and list the packages  --------
 //*-- to be validated together in the TABLE input in STEP1    --------
 //*-------------------------------------------------------------------
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL.CSV)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL.CSV)
 //*==================================================================*
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available
 //*------           / where are INCLUDES: STEPLIB,CSIQCLS0,SYSEXEC
-//   SET EXPORTDS='SYSDE32.NDVR.TEAM.EXPORTS'
+//   SET EXPORTDS='SYSMD32.NDVR.TEAM.EXPORTS'
 //   SET ENVIRON=DEV        <-From Env
 //   SET STAGE#=2           <-From Stage number
 //*------                     starting point for listed packages.

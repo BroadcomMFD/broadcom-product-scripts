@@ -7,7 +7,7 @@
 //OPTIONS   DD *                                                 
   where = MVSVAR(SYSNAME)                                        
 * List names where this job is allowed to run.....                              
-  theRightLparS = 'SYS1 DE32 DE57'                               
+  theRightLparS = 'SYS1 MD32 MD57'                               
 *                                             
   If Wordpos(where,theRightLpars) = 0  then, +                   
      Do; QUEUE '*****************************************'; +    

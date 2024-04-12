@@ -3,7 +3,7 @@
 //         NOTIFY=&Notify^&Typrun
 //***==============================================================* *
 //***=====Remote Package Shipment via FTP==========================* *
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //* ISPSLIB(SHIP#FTP)
 //*-----------------------------------------------------
 //*--------------------------------------------------------SHIP#FTP
@@ -43,7 +43,7 @@
 //  SET SENTFROM='&SENTFROM'
 //* Package Shipment Details     (SHIP#FTP)  **
 @@
-//SYSEXEC DD DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
+//SYSEXEC DD DSN=SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
 //           DISP=SHR
 //        DD DSN=&MyCLS0Library,DISP=SHR
 //        DD DSN=&MyCLS2Library,DISP=SHR
@@ -157,7 +157,7 @@
 //         MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //         NOTIFY=&SYSUID TYPRUN=HOLD
 //*-------------------------------------------------------------------*
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //*-------------------------------------------------------------------*
 //* ISPSLIB(SHIP#FTP)
 //*--------------------------------------------------------SHIP#FTP
@@ -305,7 +305,7 @@
 //&Jobname JOB (55800000),'SHIP &Destination',
 //         MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //         NOTIFY=&SYSUID TYPRUN=HOLD
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //* ISPSLIB(SHIP#FTP)
 //*--------------------------------------------------------SHIP#FTP
 //* MY DESTNAME = &Destination
@@ -362,7 +362,7 @@ $$
 //&Jobname JOB (55800000),'SHIP &Destination',
 //         MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //         NOTIFY=&SYSUID TYPRUN=HOLD
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //* ISPSLIB(SHIP#FTP)
 //*--------------------------------------------------------SHIP#FTP
 //* MY DESTNAME = &Destination

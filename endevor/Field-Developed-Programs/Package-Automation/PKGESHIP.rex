@@ -11,9 +11,9 @@
 */
 /*  WRITTEN BY DAN WALTHER */
 
-/* Runs only 4 userid = WALJO11     (if uncommented)  */
+/* Runs only 4 userid = IBMUSER     (if uncommented)  */
 /*
-   If USERID() /= 'WALJO11' then Exit
+   If USERID() /= 'IBMUSER' then Exit
 */
    /* <---- Variable settings for each site          */
 

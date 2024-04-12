@@ -30,8 +30,8 @@
       /* If editing a processor, look for these references */
       Search_Words = '++INCLUDE' ;
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE',
-            'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM2.INCLUDE'
+            'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE',
+            'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM2.INCLUDE'
       /* Return both lists separated by double bar */
       return strip(Search_Words,'B')'||'strip(INCLUDE_LIBRARY_LIST,'B')
       End;
@@ -52,27 +52,27 @@
    /* Looking at the DEV ENvironment      */
    IF EN$BENV = 'DEV' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.'EN$BENV'.'EN$BSYS'.'EN$BSBS'.'lastnode,
-            'SYSDE32.NDVR.QAS.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
+            'SYSMD32.NDVR.'EN$BENV'.'EN$BSYS'.'EN$BSBS'.'lastnode,
+            'SYSMD32.NDVR.QAS.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.SHARED.PROD.'lastnode
    Else,
    IF EN$BENV = 'QAS' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.QAS.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
+            'SYSMD32.NDVR.QAS.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.SHARED.PROD.'lastnode
    Else,
    IF EN$BENV = 'EMER' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.EMER.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
+            'SYSMD32.NDVR.EMER.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.SHARED.PROD.'lastnode
    Else,
    IF EN$BENV = 'PRD' THEN,
       INCLUDE_LIBRARY_LIST =,
-            'SYSDE32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
-            'SYSDE32.NDVR.SHARED.PROD.'lastnode
+            'SYSMD32.NDVR.PRD.'EN$BSYS'.ACCTPAY.'lastnode,
+            'SYSMD32.NDVR.SHARED.PROD.'lastnode
 
   /* Return both lists separated by double bar */
   return strip(Search_Words,'B')'||'strip(INCLUDE_LIBRARY_LIST,'B')

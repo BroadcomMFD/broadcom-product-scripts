@@ -1,4 +1,4 @@
-//WALJO11A JOB (0000),                                                  JOB01236
+//IBMUSERA JOB (0000),                                                  JOB01236
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //      NOTIFY=&SYSUID
 //*-------------------------------------------------------------------*
@@ -7,7 +7,7 @@
 //*-      Modify the TABLE of input components in BILDACM3 step ------*
 //*-      Modify the TABLE of input users      in BILDACM9 step ------*
 //*-------------------------------------------------------------------*
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)      <-Where is STEPLIB incl
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)      <-Where is STEPLIB incl
 //*==================================================================*
 //  EXPORT SYMLIST=(*)
 //*-------------------------------------------------------------------*

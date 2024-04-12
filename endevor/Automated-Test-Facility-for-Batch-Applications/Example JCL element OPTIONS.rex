@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 * An asterisk in Column 1 designates a commment line
 *
 * If you want to turn off FindTxt and Replace messages, include the statement below              
@@ -7,11 +6,6 @@
                                                      
 *-----------------------------------------------------------------*
 * Specifications for the UTC stage
-=======
-*-----------------------------------------------------------------*
-* Specifications for the UTC stage
-*      (an asterisk in Column 1 designates a commment line)
->>>>>>> bd7e7dd6bf037ff027017f29a572cf2986aeb566
 *-----------------------------------------------------------------*
 
 JCL.UNITTEST.FindTxt.1 = '//MISDXW#D JOB '
@@ -56,7 +50,7 @@ JCL.UNITTEST.Insertx.13= '//**  For testing, end the jcl here   ',
                          '//                                    '
 
 JCL.UNITTEST.FindTxt.14= 'DSN=MISDXW.ENDEVOR.LOAD(TESTPGM)'
-JCL.UNITTEST.Replace.14= 'DSN=BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
+JCL.UNITTEST.Replace.14= 'DSN=BST.ENDEVOR.MD32.LOADLIB(DYNMPARM)'
 
 JCL.UNITTEST.FindTxt.15= '//SYSOUT    DD DUMMY '
 JCL.UNITTEST.Replace.15= '//SYSOUT    DD SYSOUT=*'
@@ -85,10 +79,10 @@ JCL.UNITTEST.Replace.SYSLIB.LKED =,
 
 * Replace SYSLMOD for the LKED step
 JCL.UNITTEST.Replace.SYSLMOD.LKED =,
-        'BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
+        'BST.ENDEVOR.MD32.LOADLIB(DYNMPARM)'
 
 JCL.UNITTEST.BASELINE=,
-        'BST.ENDEVOR.CA32.UNITTEST.BASELINE(MISDXW#D)'
+        'BST.ENDEVOR.MC32.UNITTEST.BASELINE(MISDXW#D)'
 
 JCL.UNITTEST.MaxReturnCode= 4 
 
@@ -138,7 +132,7 @@ JCL.UTC.Insertx.13= '//**  For testing, end the jcl here   ',
                     '//                                    '
 
 JCL.UTC.FindTxt.14= 'DSN=MISDXW.ENDEVOR.LOAD(TESTPGM)'
-JCL.UTC.Replace.14= 'DSN=BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
+JCL.UTC.Replace.14= 'DSN=BST.ENDEVOR.MD32.LOADLIB(DYNMPARM)'
 
 JCL.UTC.FindTxt.15= '//SYSOUT    DD DUMMY '
 JCL.UTC.Replace.15= '//SYSOUT    DD SYSOUT=*'
@@ -157,7 +151,7 @@ JCL.UTC.Replace.SYSLIB.LKED =,
 
 * Replace SYSLMOD for the LKED step
 JCL.UTC.Replace.SYSLMOD.LKED =,
-        'BST.ENDEVOR.DE32.LOADLIB(DYNMPARM)'
+        'BST.ENDEVOR.MD32.LOADLIB(DYNMPARM)'
 
 JCL.UTC.MaxReturnCode= 1    
 
@@ -174,7 +168,7 @@ LoopSeconds  = 2
 * If no Baseline is specified, then the current test result 
 * is compared with the previous one.
 JCL.UNITTEST.BASELINE=,                               
-        'BST.ENDEVOR.CA32.UNITTEST.BASELINE(MISDXW#D)'
+        'BST.ENDEVOR.MC32.UNITTEST.BASELINE(MISDXW#D)'
 
 * Only one of the 3 Superc_Parms is necessary. 
 * Each produces a report in a unique format.

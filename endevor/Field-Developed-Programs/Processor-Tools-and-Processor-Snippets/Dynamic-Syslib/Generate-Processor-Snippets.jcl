@@ -7,7 +7,7 @@
 //*   At the top portion of your GENERATE processor, use this 
 //*   variable to define the HLQ prefix for Alias names. 
 //*   The value should match the AliasPrefix value in GALIAS.
-//             ALIASPFX='SYSDE32.ALIAS.&C1SY..',
+//             ALIASPFX='SYSMD32.ALIAS.&C1SY..',
     .  .  .
 //*   In the SYSLIB for your COBOL compile step.....
 //SYSLIB   DD ...

@@ -1,6 +1,6 @@
 //********************************************************************
 //GWRITE   PROC AAA=,
-//         OUTPUT='SYSDE32.NDVR.&C1EN..&C1SY..&C1SU..&C1TY',
+//         OUTPUT='SYSMD32.NDVR.&C1EN..&C1SY..&C1SU..&C1TY',
 //         EXPAND=N,
 //         FOOTPINT=&C1FOOTPRT(39,25),                                  00001500
 //         ZZZ=

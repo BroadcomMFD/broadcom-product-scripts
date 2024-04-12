@@ -1,18 +1,18 @@
-//WALJO11E JOB (55800000),                                              00010000
+//IBMUSERE JOB (55800000),                                              00010000
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      00030000
 //      NOTIFY=&SYSUID                                                  00040000
 //*-------------------------------------------------------------------  00050000
-//  SET WORKLIB=WALJO11.PARMS                                           00060000
+//  SET WORKLIB=IBMUSER.PARMS                                           00060000
 //  SET CSIQCLS0=CAPRD.NDVR.PROD.CATSNDVR.CSIQCLS0                      00070000
 //  SET NDVR#HLQ=CAPRD.NDVR.V180CA06                                    00080000
 //*-------------------------------------------------------------------  00090000
 //*   Report processor usage                                            00100000
 //*   Outputs:                                                          00110000
-//*     &WORKLIB(PRC#ENV1)    WALJO11.PARMS(PRC#ENV1)                   00120000
-//*     &WORKLIB(PRC#ENV2)    WALJO11.PARMS(PRC#ENV2)                   00130000
-//*     &WORKLIB(PRC#GRPS)    WALJO11.PARMS(PRC#GRPS)                   00140000
-//*     &WORKLIB(PROCUSED)    WALJO11.PARMS(PROCUSED)                   00150000
-//*     &WORKLIB(NOTUSED))    WALJO11.PARMS(NOTUSED))                   00160000
+//*     &WORKLIB(PRC#ENV1)    IBMUSER.PARMS(PRC#ENV1)                   00120000
+//*     &WORKLIB(PRC#ENV2)    IBMUSER.PARMS(PRC#ENV2)                   00130000
+//*     &WORKLIB(PRC#GRPS)    IBMUSER.PARMS(PRC#GRPS)                   00140000
+//*     &WORKLIB(PROCUSED)    IBMUSER.PARMS(PROCUSED)                   00150000
+//*     &WORKLIB(NOTUSED))    IBMUSER.PARMS(NOTUSED))                   00160000
 //*-------------------------------------------------------------------  00170000
 //*   STEP 1 -- EXECUTE CSV UTILITY to Gather Environment info          00180000
 //*-------------------------------------------------------------------  00190000

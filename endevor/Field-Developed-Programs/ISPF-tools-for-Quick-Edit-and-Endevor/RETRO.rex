@@ -905,7 +905,7 @@ Replace_Element_Source_with_Transfers:
    TEMP4 = "  TO   ENVIRONMENT "MENVMNT " SYSTEM "MSYSTEM
    TEMP5 = "    SUBSYSTEM "MSUBSYS " TYPE "MELTYPE "STAGE" MSTGID
    TEMP6 = "    ELEMENT '"MELEMENT"##'"
-   TEMP6 = "    ELEMENT 'WALJO11'"
+   TEMP6 = "    ELEMENT 'IBMUSER'"
    TEMP7 = "  OPTIONS IGNORE BYPASS GENERATE PROCESSOR "
    TEMP8 = "                 BYPASS ELEMENT DELETE   . "
    TEMP9 = "  EOF.                                     "

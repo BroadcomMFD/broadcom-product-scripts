@@ -43,7 +43,7 @@
   MODEL    TBLOUT   OPTIONS1  A
 //OPTIONS0 DD *   <- Establish Defaults. Collect Rexx converted fr YAML
 * -- Enter your site variables here.     / C1ELEMENT is a subsys name
-   AliasPrefix = 'SYSDE32.ALIAS.&C1SY..'
+   AliasPrefix = 'SYSMD32.ALIAS.&C1SY..'
    MaxEntries = 6
    Compile_Step. = ''
    Link_Step. = ''
@@ -77,7 +77,7 @@
      (  NAME('&AliasName') -
       RELATE('&DatasetName') )
 //SYSLIBS  DD DSN=&&SOURCE,DISP=(OLD,DELETE)
-//SYSEXEC  DD DISP=SHR,DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
+//SYSEXEC  DD DISP=SHR,DSN=SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
 //SYSTSPRT DD SYSOUT=*
 //DELETES  DD  DSN=&&DELETES,UNIT=&WRKUNIT,
 //             SPACE=(TRK,(1,5),RLSE),

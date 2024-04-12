@@ -436,7 +436,7 @@
       *    As a result, IRXJCL will be always be used to
       *    submit the package Shipment jobs.
 
-*******    IF PECB-USER-BATCH-JOBNAME(1:7) = 'WALJO11'
+*******    IF PECB-USER-BATCH-JOBNAME(1:7) = 'IBMUSER'
 *******        DISPLAY 'C1UEXT07: SHIPPING PACKAGE '
 *******                PECB-PACKAGE-ID
 *******        DISPLAY 'C1UEXT07: PHDR-PKG-ENV  ' PHDR-PKG-ENV
@@ -518,13 +518,13 @@
            MOVE SPACES TO ALLOC-TEXT.
 
            STRING 'ALLOC DD(REXFILE7) ',
-             'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'
+             'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'
                   DELIMITED BY SIZE
              INTO ALLOC-TEXT
            END-STRING .
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
            STRING 'ALLOC DD(SYSEXEC) ',
-             'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'
+             'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'
                   DELIMITED BY SIZE
              INTO ALLOC-TEXT
            END-STRING.

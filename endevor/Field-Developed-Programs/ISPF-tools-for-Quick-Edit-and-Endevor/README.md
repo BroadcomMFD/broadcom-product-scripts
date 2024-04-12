@@ -56,7 +56,7 @@ Command ===>                                                Scroll ===>CSR
 000006//GCOBOLJJ PROC AAAX='',                                                
 - - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 12 Line(s) not Displayed 
 000019       ++INCLUDE SETSTMTS    Standard processor includes                
-=NOTE=       FROM: SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE(SETSTMTS)          
+=NOTE=       FROM: SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.INCLUDE(SETSTMTS)          
 =NOTE=//*   Top of SETSTMTS                                                   
 =NOTE=//             CIICOMP='SYS1.COB2COMP',                                 
 =NOTE=//*            CIILIB='SYS1.COB2LIB',                                   
@@ -82,9 +82,9 @@ EXPLIBS can be used independently or with the previously mentioned **EXP** and *
 Command ===>                                                Scroll ===>PAGE
                                                                                
  Volume   DispositionActDDname   Data Set Name  Actions: B E V M F C I Q  
- TSOD32   SHR,KEEP  >  EXPLIB3 SYSDE32.NDVR.DEV.FINANCE.ACTP0007.COPYBOOK  
- TSOB32   SHR,KEEP  >          SYSDE32.NDVR.QAS.FINANCE.ACCTPAY.COPYBOOK   
- TSOC32   SHR,KEEP  >          SYSDE32.NDVR.PRD.FINANCE.ACCTPAY.COPYBOOK   
+ TSOD32   SHR,KEEP  >  EXPLIB3 SYSMD32.NDVR.DEV.FINANCE.ACTP0007.COPYBOOK  
+ TSOB32   SHR,KEEP  >          SYSMD32.NDVR.QAS.FINANCE.ACCTPAY.COPYBOOK   
+ TSOC32   SHR,KEEP  >          SYSMD32.NDVR.PRD.FINANCE.ACCTPAY.COPYBOOK   
 --------------------------End of Allocation List-----------------------------
 ~~~                                                                             
 

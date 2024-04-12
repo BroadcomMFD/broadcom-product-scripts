@@ -3,12 +3,12 @@
 
    /* Values to be set for your site......                     */
      /* Build a JCL model, and name its location here....        */
-   CastPackageModel = 'SYSDE32.NDVR.TEAM.MODELS(CASTPKGE)'
+   CastPackageModel = 'SYSMD32.NDVR.TEAM.MODELS(CASTPKGE)'
      /* Name a work dataset to be created then deleted...        */
    CastPackageJCL   = USERID()".C1UEXTR7.SUBMIT"
 
    /* If wanting to limit the use of this exit, uncomment...   */
-   If USERID() /= 'WALJO11' then exit
+   If USERID() /= 'IBMUSER' then exit
 
    STRING = "ALLOC DD(SYSTSPRT) SYSOUT(A) "
    CALL BPXWDYN STRING;

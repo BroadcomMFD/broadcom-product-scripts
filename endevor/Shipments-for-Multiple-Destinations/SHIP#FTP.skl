@@ -300,7 +300,7 @@
 //*------------------------------------------------------- SHIP#FTP
 //* *--------------------------------------------* SHIP#FTP (CONT.)  *
 $$
-//SYSUT2   DD  DSN=WALJO11.REMOTE.D&Date6.T&Time6.NOTIFY,
+//SYSUT2   DD  DSN=IBMUSER.REMOTE.D&Date6.T&Time6.NOTIFY,
 //             DISP=(NEW,CATLG,KEEP),SPACE=(TRK,(1,0)),
 //             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
 //             UNIT=SYSALLDA
@@ -356,7 +356,7 @@ $$
   DELETE '&HSTPFX.*' NONVSAM
 //*------------------------------------------------------- SHIP#FTP
 $$
-//SYSUT2   DD  DSN=WALJO11.REMOTE.D&Date6.T&Time6.NOTIFY,
+//SYSUT2   DD  DSN=IBMUSER.REMOTE.D&Date6.T&Time6.NOTIFY,
 //             DISP=(NEW,CATLG,KEEP),SPACE=(TRK,(1,0)),
 //             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
 //             UNIT=SYSALLDA
@@ -375,13 +375,13 @@ $$
 MODE B
 EBCDIC
 SITE FILETYPE=JES
-PUT 'WALJO11.REMOTE.D&Date6.T&Time6.NOTIFY'
+PUT 'IBMUSER.REMOTE.D&Date6.T&Time6.NOTIFY'
 QUIT
 //* *--------------------------------------------* C1BMXJOB (CONT.)  *
 //REMODELT  EXEC PGM=IDCAMS,COND=(4,LT) <-Remote Delete    SHIP#FTP
 //SYSPRINT  DD SYSOUT=*
 //AMSDUMP   DD SYSOUT=*
-//DELETEME  DD DSN=WALJO11.REMOTE.D&Date6.T&Time6.NOTIFY,
+//DELETEME  DD DSN=IBMUSER.REMOTE.D&Date6.T&Time6.NOTIFY,
 //          DISP=(SHR,DELETE)
 //* DELETE '&&Rmteprefix.D&Date6.T&Time6.&Destination.*' NONVSAM
 //SYSIN     DD *
@@ -436,7 +436,7 @@ SHIP PAC '&Package' TO DEST &Destination OPT &ShipOutput .
   BindPackageMask = '&BindPackageMask'
   PathMask        = '&PathMask'
 //SHIPREFS DD *
-  AHREFDSN  WALJO11.HOST.D&Date6.T&Time6.&Destination.AHREF
+  AHREFDSN  IBMUSER.HOST.D&Date6.T&Time6.&Destination.AHREF
 //SYSTSIN  DD  DUMMY
 //SYSEXEC DD DSN=&MyCLS0Library,DISP=SHR
 //        DD DSN=&MyCLS2Library,DISP=SHR
@@ -451,7 +451,7 @@ SHIP PAC '&Package' TO DEST &Destination OPT &ShipOutput .
    Once
 //SYSTSIN  DD  DUMMY
 //OPTIONS  DD  *
-  $delimiter ='¬'
+  $delimiter ='ï¿½'
  VNBSQDSP='SHIP PAC '&Package' TO DEST &Destination OPT &ShipOutput .'
   VPHPKGID = '&Package'
    VNBLSDST = '&Destination'

@@ -1,4 +1,4 @@
-//WALJO11T JOB (55800000),                                             
+//IBMUSERT JOB (55800000),                                             
 //    'ENDEVOR BATCH',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,     
 //    NOTIFY=&SYSUID TYPRUN=SCAN                                       
 //*********************************************************************

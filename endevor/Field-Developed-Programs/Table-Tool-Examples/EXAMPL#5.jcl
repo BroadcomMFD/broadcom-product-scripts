@@ -1,4 +1,4 @@
-//WALJO115 JOB (55800000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,
+//IBMUSER5 JOB (55800000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,
 //      REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID
 //*--------------------------------------------------------------------
 //*- Report the total Track consumption of a list of datasets ---------
@@ -6,8 +6,8 @@
 //*- Also identify and delete old datasets      .             ---------
 //*- (RC=0004 is OK)                                          ---------
 //*--------------------------------------------------------------------
-//  SET TABLE=WALJO11.NDVR.DATASETS         <- Saved 3.4 data
-//  SET TABLE=WALJO11.PUBLIC.DATASETS       <- Saved 3.4 data
+//  SET TABLE=IBMUSER.NDVR.DATASETS         <- Saved 3.4 data
+//  SET TABLE=IBMUSER.PUBLIC.DATASETS       <- Saved 3.4 data
 //  SET SYSEXEC=SYS1.EXEC                   <- Rexx library
 //  SET SYSEXEC=CAPRD.NDVR.EMER.CATSNDVR.CSIQCLS0
 //*--------------------------------------------------------------------

@@ -61,9 +61,9 @@
    /*   TXT.C1Stage.where.2 = 'AFTER'                             */
    /*   TXT.C1Stage.Insertx.2 = '//START  EXEC PGM=IEFBR14'       */
    /*                                                             */
-   /*   TXT.C1Stage.REPLACE.STEPLIB.STEP1 = 'WALJO11.LOADLIB'     */
+   /*   TXT.C1Stage.REPLACE.STEPLIB.STEP1 = 'IBMUSER.LOADLIB'     */
    /*   TXT.C1Stage.REPLACE.STEPLIB.STEP2 = ,                     */
-   /*                 '//     DD DISP=SHR,DSN=WALJO11.LOADLIB     */
+   /*                 '//     DD DISP=SHR,DSN=IBMUSER.LOADLIB     */
    /*                                                             */
    /*                                                             */
    /*----------------------------------------------------------*/

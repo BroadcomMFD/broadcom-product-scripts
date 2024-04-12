@@ -1,4 +1,4 @@
-//WALJO11# JOB (0000),                                                  JOB00133
+//IBMUSER# JOB (0000),                                                  JOB00133
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //      NOTIFY=&SYSUID
 //*-------------------------------------------------------------------
@@ -20,7 +20,7 @@
 //ENESCLIN  DD  *,SYMBOLS=JCLONLY  <- This one is used when Submitted
   DELETE ENVIRONMENT '&NEWENV' .
 //C1MSGS1   DD  SYSOUT=*
-//C1MSGS2   DD  SYSOUT=*     SYSDE32.NDVR.TEAM.DEFINES
+//C1MSGS2   DD  SYSOUT=*     SYSMD32.NDVR.TEAM.DEFINES
 //   INCLUDE MEMBER=STEPLIB
 //SYSTERM   DD  SYSOUT=*
 //SYSABEND  DD  SYSOUT=*

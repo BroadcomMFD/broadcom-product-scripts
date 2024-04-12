@@ -14,22 +14,22 @@ IF TraceRc = 1 then Trace R
 /* Enter High Level Qualifiers */
 /* SHLQ='CADEMO.ENDV.RUN' */
    SHLQ='CARSMINI.NDVR.R1801'
-   AHLQ='SYSDE32.NDVR'   /* APPLICATIONS HIGH LEVEL QUALIFIER */
+   AHLQ='SYSMD32.NDVR'   /* APPLICATIONS HIGH LEVEL QUALIFIER */
 /* Enter the name of the main Libraries for CA Services tools */
 
 /* Name Endevor's APF Authorized libraries:      */
 MyAUTULibrary = SHLQ'.CSIQAUTU'
-MyAUTULibrary = 'SYSDE32.NDVR.R1801.CSIQAUTU'
+MyAUTULibrary = 'SYSMD32.NDVR.R1801.CSIQAUTU'
 MyAUTHLibrary = SHLQ'.CSIQAUTH'
 MyLOADLibrary = SHLQ'.CSIQLOAD'
 /* Non-APF Authorized library:     */
-   MyUTILLibrary = 'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.LOADLIB'
+   MyUTILLibrary = 'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.LOADLIB'
 MyCLS0Library = SHLQ'.CSIQCLS0'
 MyOPTNLibrary = SHLQ'.CSIQOPTN'
 /* For Rexx items in your bundle, name a MyCLS2Library     */
-   MyCLS2Library = 'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX'
+   MyCLS2Library = 'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX'
    MyUTILLibrary = 'CAPRD.ENDV.CSIQOPTN.OVERRIDE'
-   MyOPT2Library = 'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS'
+   MyOPT2Library = 'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS'
 MyMENULibrary = SHLQ'.CSIQMENU'
 /* For Message (ISPMLIB) items in your bundle, name a MyMEN2Library */
    MyMEN2Library = 'SYS2.ISPMLIB'
@@ -38,7 +38,7 @@ MyPENULibrary = SHLQ'.CSIQPENU'
    MyPEN2Library = 'SYS2.ISPPLIB'
 MySENULibrary = SHLQ'.CSIQSENU'
 /* For Skeleton (ISPSLIB) items in your bundle, name a MySEN2Library */
-   MySEN2Library = 'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS'
+   MySEN2Library = 'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.ISPS'
 MyTENULibrary = SHLQ'.CSIQSENU'
 MyTEN2Library = SHLQ'.CSIQSEN2'
 /* Some bundles use a Table. Name the library in MyDATALibrary       */
@@ -46,7 +46,7 @@ MyTEN2Library = SHLQ'.CSIQSEN2'
 /* If shipping to multiple destinations a table dataset is required  */
 /*   for naming the "Rules" that govern automated package shipments. */
 /* Physically the MyDATALibrary should resemble Endevor's CSIQDATA   */
-   MyDATALibrary = 'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.TABLES'
+   MyDATALibrary = 'SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.TABLES'
 MyJCLLibrary  = SHLQ'.CSIQJCL'
 MyJCL2Library = SHLQ'.CSIQJCL'
 /* For JCL items in your bundle, name the library in MySRC2Library   */
@@ -65,17 +65,17 @@ MySRC2Library = SHLQ'.CSIQJCL'
     ShipSchedulingMethod = 'One'       ;/* only 1 destinaation       */
     ShipSchedulingMethod = 'Rules'     ;/* Rules - mult destinations */
 
-   TriggerFileName = 'SYSDE32.NDVR.SHIPMENT.TRIGGER'
+   TriggerFileName = 'SYSMD32.NDVR.SHIPMENT.TRIGGER'
 
    /* Provide details when there is only One shipping destination    */
-/* Destination = 'TSO32'   ;    */ /* The oneShipment Destination   */
-/* Hostprefix =  'SYSDE32.NDVR';*/ /* Host staging file prefix      */
+/* Destination = 'MTS32'   ;    */ /* The oneShipment Destination   */
+/* Hostprefix =  'SYSMD32.NDVR';*/ /* Host staging file prefix      */
 /* Rmteprefix =  'PUBLIC.NDVR' ;*/ /* Remote staging file prefix    */
 /* ModelMember = 'SHIP#FTP'     */ /* Jcl image for shipment job    */
 
 /* MyHomeAddress  = 'myEndevor@mysite.com' */
                  /*   \ your Endevor site's return address */
-   MyHomeAddress  = 'mvsde32.lvn.broadcom.net'   /* DE32 */
+   MyHomeAddress  = 'lpar.mainframe.net'   /*  */
 
 /* JOB INFO FOR ALTERNATE ID */
 AltIDAcctCode = '0000'

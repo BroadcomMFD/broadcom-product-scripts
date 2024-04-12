@@ -1,18 +1,18 @@
 @REM ************************************************************
 @REM * THESE STEPS WILL EXECUTE an Endevor ADD/UPDATE action
-@REM * at CA32, when the Destination name is CA32A (Admin)
+@REM * at MC32, when the Destination name is MC32A (Admin)
 @REM ************************************************************
-//* START CA32AB
+//* START MC32AB
 //* SET PKACTION=OUT        OUT/BAC
 //  SET C1ENVMNT=DEV
 //  SET C1SYSTEM=ESCMSNDV
 //*--------------------------------------------------------------------
-//COPIES   EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000'   CA32AB
+//COPIES   EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000'   MC32AB
 //   INCLUDE MEMBER=STEPLIB           <- Endevor Steplib etc
 //BSTIPT01 DD *,SYMBOLS=JCLONLY
 SET STOPRC 12.
-SET OPTIONS COMMENT "Shipped from DE32"
-            CCID "FromDE32"
+SET OPTIONS COMMENT "Shipped from MD32"
+            CCID "FromMD32"
 *****       BYPASS GENERATE PROCESSOR
             OVERRIDE SIGNOUT UPDATE.
 SET   TO   ENVIRONMENT "DEV"
@@ -55,11 +55,11 @@ ADD ELEMENT '*' TO TYPE PROCESS
 //SYSPRINT DD SYSOUT=*
 //*--------------------------------------------------------------------
 @IF &ZZALTERS
-//*--- Apply ALTER commands for element info from DE32 ----------------
+//*--- Apply ALTER commands for element info from MD32 ----------------
 //*--------------------------------------------------------------------
 //*    Part 1/2 - Write all ALTER statements out
 //*--------------------------------------------------------------------
-//ALTERS1  EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    CA32AB
+//ALTERS1  EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    MC32AB
 //SYSPRINT DD   SYSOUT=*
 //SYSUT1   DD   DISP=SHR,
 //         DSN=&ZZALTERS
@@ -73,13 +73,13 @@ ADD ELEMENT '*' TO TYPE PROCESS
 //*--------------------------------------------------------------------
 //*    Part 2/2 - Execute   ALTER statements
 //*--------------------------------------------------------------------
-//ALTERS2  EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000',  CA32AB
+//ALTERS2  EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000',  MC32AB
 //         COND=(8,LT)
 //   INCLUDE MEMBER=STEPLIB           <- Endevor Steplib etc
 //BSTIPT01 DD *
 SET STOPRC 12.
-SET OPTIONS COMMENT "Match  with  DE32"
-            CCID "FromDE32" .
+SET OPTIONS COMMENT "Match  with  MD32"
+            CCID "FromMD32" .
 SET FROM   ENVIRONMENT "DEV" STAGE "1"
            SYSTEM "ESCMSNDV".
 //         DD DSN=&&ALTERS,DISP=(OLD,DELETE)

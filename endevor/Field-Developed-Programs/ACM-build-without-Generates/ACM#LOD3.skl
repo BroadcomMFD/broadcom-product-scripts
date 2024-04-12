@@ -1,4 +1,4 @@
-//WALJO11&JobChar JOB (0000),
+//IBMUSER&JobChar JOB (0000),
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
 //      NOTIFY=&SYSUID
 //*-------------------------------------------------------------------*
@@ -6,7 +6,7 @@
 //*-      Modify the SET statements ----------------------------------*
 //*-      Submitted by ACM#LOD2     ----------------------------------*
 //*-------------------------------------------------------------------*
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)      <-Where is STEPLIB incl
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)      <-Where is STEPLIB incl
 //*==================================================================*
 //  EXPORT SYMLIST=(*)
 //*-------------------------------------------------------------------*
@@ -14,8 +14,8 @@
 //  SET MODELLIB=&SYSUID..ACM#BILD.WORK       <-Where are ACM#*
 //  SET CSIQCLS0=CARSMINI.NDVR.R1801.CSIQCLS0 <-Where is ENBPIU00
 //*-----------
-//  SET ACMROOT=SYSDE32.NDVR.ACMROOT         <-Name of ACMROOT
-//  SET ACMXREF=SYSDE32.NDVR.ACMXREF         <-Name of ACMXREF
+//  SET ACMROOT=SYSMD32.NDVR.ACMROOT         <-Name of ACMROOT
+//  SET ACMXREF=SYSMD32.NDVR.ACMXREF         <-Name of ACMXREF
 //  SET GROUP=&Group.
 //*-------------------------------------------------------------------*
 //*-------------------------------------------------------------------*
@@ -207,7 +207,7 @@ SET FROM ENVIRONMENT PROD STAGE P .
 //*********************************************************************
 //ACM#PREP EXEC PGM=IKJEFT1B,COND=(4,LT),REGION=40M,       ACM#LOD3
 //       PARM='ACM#REX1 &HLQ..&GROUP.SAVEPDS'
-//*   WALJO11.REXX(ACM#REX1)
+//*   IBMUSER.REXX(ACM#REX1)
 //SYSPRINT DD  SYSOUT=*
 //SYSTSIN  DD  DUMMY
 //SYSTSPRT DD  SYSOUT=*
@@ -242,7 +242,7 @@ SET FROM ENVIRONMENT PROD STAGE P .
 //*********************************************************************
 //*  MERGE ACMQLIST WITH COMPONTS (FROM A PREVIOUS STEP)
 //*********************************************************************
-//****  WALJO11.REXX(ACM#MERG)
+//****  IBMUSER.REXX(ACM#MERG)
 //MERGE   EXEC PGM=IRXJCL,PARM='ACM#MERG',COND=(4,LT)      ACM#LOD3
 //ACMQLIST DD DSN=&HLQ..&GROUP.ACMQLIST,DISP=SHR
 //COMPONTS DD DSN=&HLQ..ACM#LOAD.COMPONTS,DISP=SHR
@@ -273,7 +273,7 @@ SET FROM ENVIRONMENT PROD STAGE P .
 //*********************************************************************
 //ACM#OUT  EXEC PGM=IKJEFT1B,COND=(4,LT),                  ACM#LOD3
 //       PARM='ACM#REX2 &HLQ..&GROUP.SAVEPDS'
-//****  WALJO11.REXX(ACM#REX2)
+//****  IBMUSER.REXX(ACM#REX2)
 //SYSPRINT DD  SYSOUT=*
 //SYSTSIN  DD  DUMMY
 //SYSTSPRT DD  SYSOUT=*

@@ -3,7 +3,7 @@
 //*--------------------------------------------------------------------*
 //*- Report Elements in DEV, flagging those in parallel development
 //*--------------------------------------------------------------------*
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //RUNCSV   EXEC PGM=NDVRC1,REGION=4M,
 //         PARM='BC1PCSV0'
 //   INCLUDE MEMBER=STEPLIB

@@ -4,7 +4,7 @@
 //*-------------------------------------------------------------------
 //*- To Report Element changes within  a date range   -----------
 //*-------------------------------------------------------------------
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL)
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available
 //   SET STRTDATE='280 DAYS AGO'  <- Specify date or # Days ago
 //   SET STOPDATE=2999/12/30      <- Specify stop/end date

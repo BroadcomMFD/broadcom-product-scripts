@@ -555,7 +555,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(REXFILE) ',
-                 'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                 'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
                       DELIMITED BY SIZE
                         ' SHR REUSE'
                       DELIMITED BY SIZE
@@ -570,7 +570,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(SYSEXEC) ',
-                 'DA(SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                 'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
                       DELIMITED BY SIZE
                         ' SHR REUSE'
                       DELIMITED BY SIZE
