@@ -1,190 +1,195 @@
-/* REXX - Rexx edit macro to check for compiler error messages */               
-                                                                                
-/*                                                                              
-   This rexx works with the updated GASM processor that stores                  
-   the assembler TERMLST as a PUBLIC. dataset when the compiler                 
-   return code is greater than 0.  If the file is still around                  
-   when the user next edits it, we grab the messages and insert                 
-   them as note/msglines into the elemment making it easier to                  
-   find and resolve errors.                                                     
-   */                                                                           
-                                                                                
-  address ISPEXEC                                                               
-                                                                                
-  "ISREDIT MACRO (PARM)"                                                        
-                                                                                
-  /* first check that the USER want's this feature enabled  */                  
-  "VGET (EHIQEM) PROFILE"                                                       
-  IF RC > 0 THEN  /* If the user never set an options set a */                  
-     EHIQEM = "/" /* default that makes sense for your site */                  
-  IF EHIQEM \= '/' THEN /* if the feature is not enabled    */                  
-     RETURN             /* ...get out quick!                */                  
-                                                                                
-  /* otherwise the feature is eabled carry on...            */                  
-  "ISREDIT (USRSTATE) = USER_STATE"      /* Save user state */                  
-  "ISREDIT CAPS OFF"                     /* allow mix case  */                  
-                                                                                
-  upper parm                                                                    
-  if parm = 'DEBUG' then trace i                                                
-                                                                                
-  /* Get variables from Endevor. */                                             
-  "VGET (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ,                    
-         EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ,                    
-         EN$ELM  EN$PRGRP EN$CCID EN$COM EN$GENE EN$OSIGN) ,                    
-   SHARED"                                                                      
-  "VGET (ZUSER)"                                                                
-                                                                                
-  /* Tailor the following line to control which Endevor TYPEs                   
-     will be supported, ASM, COBOL, PL/I...                                     
-     Note: Also check that the SUBSYSTEM is a valid node name prefix            
-     numbers only are not allowed, even 42!                                     
-     */                                                                         
-  if EN$BTYP /== 'ASMPGM' ,           /* start with ASM only */                 
-   | pos(left(EN$SSBS,1),"ABCDEFGHIJKLMNOPQERSTUVWXYZ$#@") = 0 then return      
-                                                                                
-  ASMERR = "PUBLIC."EN$SSYS"."EN$SSBS"." ,                                      
-        ||  SUBSTR(EN$SENV,1,1)||EN$SSTGI"."EN$BTYP"."EN$ELM                    
-  sa= "DSS:" ASMERR                                                             
-                                                                                
-  IF SYSDSN("'"ASMERR"'") = "OK" THEN                                           
-     DO                                                                         
-        ADDRESS TSO,                                                            
-         "ALLOC F(ASMERR) DS('"ASMERR"') SHR REU"                               
-        DISKA_rc = RC                                                           
-        IF DISKA_rc = 0 then                                                    
-           do                                                                   
-              ADDRESS TSO,                                                      
-               "EXECIO * DISKR ASMERR (STEM NOTE. FINIS"                        
-              DISKR_rc = RC                                                     
-              ADDRESS TSO,                                                      
-               "FREE  F(ASMERR)"                                                
-              IF DISKR_rc = 0 then                                              
-                 do                                                             
-                    call ProcNote                                               
-                    call InsrtMsg                                               
-                 end                                                            
-           end                                                                  
-     END                                                                        
-                                                                                
-   "ISREDIT LOCATE FIRST SPECIAL"         /* go to top */                       
-   "ISREDIT USER_STATE = (USRSTATE)"      /* Restore status */                  
-                                                                                
-RETURN                                                                          
-                                                                                
-ProcNote:                                                                       
-/*                                                                              
-   Read the Assembler TERMLST and insert into top of element as ==NOTE==        
-   lines, fromatting for long (continued lines) and truncating                  
-   asembler prefix code to make it more readable                                
-                                                                                
-   todo: Consider adding hilight to Error message lines by severity...          
-         default = noteline, high errors = msgline, caution = infoline          
-         maybe not a great idea, msgline and infolines are both white           
-         and reserving MSGLINE for the inserted messages would allow jump       
-   */                                                                           
-                                                                                
-   "ISREDIT LINE_BEFORE .ZF = INFOLINE 'Error messages from: "asmerr"'"         
-   Do no# = 1 to Note.0                                                         
-      ThisNote = SubStr(note.no#,2)              /* strip off asa byte */       
-      if left(ThisNote,37) == copies(" ",37),    /* if echoed source */         
-       | SubStr(ThisNote,20,20) == copies(" ",20), /* or asm line */            
-       | (Left(ThisNote,4) == '0000' & SubStr(ThisNote,9,1) == " ") then        
-         ThisNote = SubStr(ThisNote,50)          /* remove src+num prefix */    
-      if left(ThisNote,08) == 'ASMA435I' then                                   
-         do                                                                     
-            TruncAt = pos(' ON VOLUME:',ThisNote) /* Check for Vol...*/         
-            if TruncAt = 0 then TruncAt = 68     /* default if not found */     
-            ThisNote = left(ThisNote,TruncAt) "..." /* ON VOLUME : xxxxxx */    
-         end                                                                    
-      ThisNote = Strip(ThisNote,'T')             /* remove trailing */          
-      if length(ThisNote) > 72 then              /* need continue? */           
-         do                                                                     
-            SplitAt = lastpos(' ',ThisNote,72)   /* split at word boundry */    
-            If splitAt = 0 then SplitAt = 72     /* if there is one! */         
-            NextNote = "-" SubStr(ThisNote,SplitAt+1)                           
-            ThisNote = Left(ThisNote,SplitAt)                                   
-            "ISREDIT LINE_BEFORE .ZF = NOTELINE (THISNOTE)"                     
-            "ISREDIT LINE_BEFORE .ZF = NOTELINE (NEXTNOTE)"                     
-         end                                                                    
-      else                                                                      
-         "ISREDIT LINE_BEFORE .ZF = NOTELINE (THISNOTE)"                        
-   End                                                                          
-                                                                                
-Return                                                                          
-                                                                                
-InsrtMsg:                                                                       
-/*                                                                              
-   Read the Assembler TERMLST (backwards) to find ASMA435I messages that        
-   tell us that an error was detcted and what line it refers to, then read      
-   the previous messages to grab that message (when you find the prev ASMAxxxx  
-   message) then split the message into 72 byte chunks and go insert them       
-   */                                                                           
-                                                                                
-   MySrcSuff = EN$BTYP"("EN$ELM")"                                              
-   MySrcSLen = Length(MySrcSuff)                                                
-   SKDR = 'LAST'                                  /* start at bottom for Seek*/ 
-                                                                                
-   Do no# = Note.0 to 1 by -1                                                   
-      parse var note.no# 2 ThisMsg 10 11 ThisRest                               
-      if ThisMsg == 'ASMA435I' then                /* identified Source line */ 
-         do                                                                     
-            SaveMsg = ''                                                        
-            parse var ThisRest with . 'RECORD' ThisLoc 'IN ' ThisSrcL ,         
-                  ' ON VOLUME: ' ThisVol .                                      
-            sa= No# ThisMsg ThisLoc "'"ThisSrcl"'" ThisVol                      
-            /* if the ASMA435I message is for a different lib or element        
-               then we can't insert the message in this source - skip */        
-            if right(ThisSrcl,MySrcSLen) /== MySrcSuff then iterate             
-            do i = No#-1 to 1 by -1                                             
-               parse var note.no# 2 ThisPfx 6                                   
-               if ThisPfx == 'ASMA' then                                        
-                  do                                                            
-                     SaveMsg = strip(substr(note.i,2)) SaveMsg                  
-                     ThisNote = Strip(SaveMsg,'T') /* remove trailing */        
-                     call InsrtNow                 /* hard lifting    */        
-                     leave                                                      
-                  end                                                           
-               else                                                             
-                  do                                                            
-                     SaveMsg = strip(substr(note.i,2)) SaveMsg                  
-                  end                                                           
-            end                                                                 
-         end                                                                    
-      if ThisMsg == '** ASMA2' then                /* Macro Msg */              
-         do                                                                     
-            ThisNote = strip(substr(note.No#,4),'T') /* remove trailing */      
-            No# = No# - 1                          /* point to prev record */   
-            parse var note.no# 51 SRCLIN  123      /* Grab the src line */      
-            sa= No# ThisNote                                                    
-            sa= SRCLIN                                                          
-            sa= length(srclin)                                                  
-            sa= c2x(SRCLIN)                                                     
-            if length(srclin) = 0 then iterate     /* nothing to find? Next! */ 
-            "ISREDIT SEEK x'"C2X(SRCLIN)"' 1" SKDR /* look for this line */     
-            if RC > 0 then                         /* Not found ? */            
-               iterate                             /* ...give up, next rec */   
-            SKDR = 'PREV'                          /* keep looking back */      
-            "ISREDIT (THISLOC CP)=CURSOR"          /* use the found line */     
-            call InsrtNow                          /* hard lifting    */        
-         end                                                                    
-   end                                                                          
-   return                                                                       
-                                                                                
-InsrtNow:                                                                       
-/*                                                                              
-   Split and insert a message at the saved location                             
-   */                                                                           
-                                                                                
-   if length(ThisNote) > 72 then              /* need continue? */              
-      do                                                                        
-         SplitAt = lastpos(' ',ThisNote,72)   /* split at word boundry */       
-         If splitAt = 0 then SplitAt = 72     /* if there is one! */            
-         NextNote = "-" SubStr(ThisNote,SplitAt+1)                              
-         ThisNote = Left(ThisNote,SplitAt)                                      
-         "ISREDIT LINE_AFTER "THISLOC" = MSGLINE (NEXTNOTE)"                    
-         "ISREDIT LINE_AFTER "THISLOC" = MSGLINE (THISNOTE)"                    
-      end                                                                       
-   else                                                                         
-      "ISREDIT LINE_AFTER "THISLOC" = MSGLINE (THISNOTE)"                       
-                                                                                
-Return                                                                          
+/* REXX - Rexx edit macro to check for compiler error messages */
+
+/*
+   This rexx works with the updated GASM processor that stores
+   the assembler TERMLST as a PUBLIC. dataset when the compiler
+   return code is greater than 0.  If the file is still around
+   when the user next edits it, we grab the messages and insert
+   them as note/msglines into the elemment making it easier to
+   find and resolve errors.
+   */
+
+  address ISPEXEC
+
+  "ISREDIT MACRO (PARM)"
+
+  /* first check that the USER want's this feature enabled  */
+  "VGET (EHIQEM) PROFILE"
+  IF RC > 0 THEN  /* If the user never set an options set a */
+     EHIQEM = "/" /* default that makes sense for your site */
+  IF EHIQEM \= '/' THEN /* if the feature is not enabled    */
+     RETURN             /* ...get out quick!                */
+
+  /* otherwise the feature is eabled carry on...            */
+  "ISREDIT (USRSTATE) = USER_STATE"      /* Save user state */
+  "ISREDIT CAPS OFF"                     /* allow mix case  */
+
+  upper parm
+  if parm = 'DEBUG' then trace i
+
+  /* Get variables from Endevor. */
+  "VGET (EN$BENV EN$BSYS EN$BSBS EN$BTYP EN$BSTGI EN$BSTGN ,
+         EN$SENV EN$SSYS EN$SSBS EN$STYP EN$SSTGI EN$SSTGN ,
+         EN$ELM  EN$PRGRP EN$CCID EN$COM EN$GENE EN$OSIGN) ,
+   SHARED"
+  "VGET (ZUSER)"
+
+  /* Tailor the following line to control which Endevor TYPEs
+     will be supported, ASM, COBOL, PL/I...
+     Note: Also check that the SUBSYSTEM is a valid node name prefix
+     numbers only are not allowed, even 42!
+     */
+  if EN$BTYP /== 'ASMPGM' ,           /* start with ASM only */
+   | pos(left(EN$SSBS,1),"ABCDEFGHIJKLMNOPQERSTUVWXYZ$#@") = 0 then return
+
+  ASMERR = "PUBLIC."EN$SSYS"."EN$SSBS"." ,
+        ||  SUBSTR(EN$SENV,1,1)||EN$SSTGI"."EN$BTYP"."EN$ELM
+  sa= "DSS:" ASMERR
+
+  IF SYSDSN("'"ASMERR"'") = "OK" THEN
+     DO
+        ADDRESS TSO,
+         "ALLOC F(ASMERR) DS('"ASMERR"') SHR REU"
+        DISKA_rc = RC
+        IF DISKA_rc = 0 then
+           do
+              ADDRESS TSO,
+               "EXECIO * DISKR ASMERR (STEM NOTE. FINIS"
+              DISKR_rc = RC
+              ADDRESS TSO,
+               "FREE  F(ASMERR)"
+              IF DISKR_rc = 0 then
+                 do
+                    call ProcNote
+                    call InsrtMsg
+                 end
+           end
+     END
+
+   "ISREDIT LOCATE FIRST SPECIAL"         /* go to top */
+   "ISREDIT USER_STATE = (USRSTATE)"      /* Restore status */
+
+RETURN
+
+ProcNote:
+/*
+   Read the Assembler TERMLST and insert into top of element as ==NOTE==
+   lines, fromatting for long (continued lines) and truncating
+   asembler prefix code to make it more readable
+
+   todo: Consider adding hilight to Error message lines by severity...
+         default = noteline, high errors = msgline, caution = infoline
+         maybe not a great idea, msgline and infolines are both white
+         and reserving MSGLINE for the inserted messages would allow jump
+   */
+
+   address ISREDIT "(TOTLINES) = LINENUM .ZLAST"
+   /* Make sure element has at least one line otherwise we dont have*/
+   /* workk to do. */
+   if  TOTLINES < 1 then return
+
+   "ISREDIT LINE_BEFORE .ZF = INFOLINE 'Error messages from: "asmerr"'"
+   Do no# = 1 to Note.0
+      ThisNote = SubStr(note.no#,2)              /* strip off asa byte */
+      if left(ThisNote,37) == copies(" ",37),    /* if echoed source */
+       | SubStr(ThisNote,20,20) == copies(" ",20), /* or asm line */
+       | (Left(ThisNote,4) == '0000' & SubStr(ThisNote,9,1) == " ") then
+         ThisNote = SubStr(ThisNote,50)          /* remove src+num prefix */
+      if left(ThisNote,08) == 'ASMA435I' then
+         do
+            TruncAt = pos(' ON VOLUME:',ThisNote) /* Check for Vol...*/
+            if TruncAt = 0 then TruncAt = 68     /* default if not found */
+            ThisNote = left(ThisNote,TruncAt) "..." /* ON VOLUME : xxxxxx */
+         end
+      ThisNote = Strip(ThisNote,'T')             /* remove trailing */
+      if length(ThisNote) > 72 then              /* need continue? */
+         do
+            SplitAt = lastpos(' ',ThisNote,72)   /* split at word boundry */
+            If splitAt = 0 then SplitAt = 72     /* if there is one! */
+            NextNote = "-" SubStr(ThisNote,SplitAt+1)
+            ThisNote = Left(ThisNote,SplitAt)
+            "ISREDIT LINE_BEFORE .ZF = NOTELINE (THISNOTE)"
+            "ISREDIT LINE_BEFORE .ZF = NOTELINE (NEXTNOTE)"
+         end
+      else
+         "ISREDIT LINE_BEFORE .ZF = NOTELINE (THISNOTE)"
+   End
+
+Return
+
+InsrtMsg:
+/*
+   Read the Assembler TERMLST (backwards) to find ASMA435I messages that
+   tell us that an error was detcted and what line it refers to, then read
+   the previous messages to grab that message (when you find the prev ASMAxxxx
+   message) then split the message into 72 byte chunks and go insert them
+   */
+
+   MySrcSuff = EN$BTYP"("EN$ELM")"
+   MySrcSLen = Length(MySrcSuff)
+   SKDR = 'LAST'                                  /* start at bottom for Seek*/
+
+   Do no# = Note.0 to 1 by -1
+      parse var note.no# 2 ThisMsg 10 11 ThisRest
+      if ThisMsg == 'ASMA435I' then                /* identified Source line */
+         do
+            SaveMsg = ''
+            parse var ThisRest with . 'RECORD' ThisLoc 'IN ' ThisSrcL ,
+                  ' ON VOLUME: ' ThisVol .
+            sa= No# ThisMsg ThisLoc "'"ThisSrcl"'" ThisVol
+            /* if the ASMA435I message is for a different lib or element
+               then we can't insert the message in this source - skip */
+            if right(ThisSrcl,MySrcSLen) /== MySrcSuff then iterate
+            do i = No#-1 to 1 by -1
+               parse var note.no# 2 ThisPfx 6
+               if ThisPfx == 'ASMA' then
+                  do
+                     SaveMsg = strip(substr(note.i,2)) SaveMsg
+                     ThisNote = Strip(SaveMsg,'T') /* remove trailing */
+                     call InsrtNow                 /* hard lifting    */
+                     leave
+                  end
+               else
+                  do
+                     SaveMsg = strip(substr(note.i,2)) SaveMsg
+                  end
+            end
+         end
+      if ThisMsg == '** ASMA2' then                /* Macro Msg */
+         do
+            ThisNote = strip(substr(note.No#,4),'T') /* remove trailing */
+            No# = No# - 1                          /* point to prev record */
+            parse var note.no# 51 SRCLIN  123      /* Grab the src line */
+            sa= No# ThisNote
+            sa= SRCLIN
+            sa= length(srclin)
+            sa= c2x(SRCLIN)
+            if length(srclin) = 0 then iterate     /* nothing to find? Next! */
+            "ISREDIT SEEK x'"C2X(SRCLIN)"' 1" SKDR /* look for this line */
+            if RC > 0 then                         /* Not found ? */
+               iterate                             /* ...give up, next rec */
+            SKDR = 'PREV'                          /* keep looking back */
+            "ISREDIT (THISLOC CP)=CURSOR"          /* use the found line */
+            call InsrtNow                          /* hard lifting    */
+         end
+   end
+   return
+
+InsrtNow:
+/*
+   Split and insert a message at the saved location
+   */
+
+   if length(ThisNote) > 72 then              /* need continue? */
+      do
+         SplitAt = lastpos(' ',ThisNote,72)   /* split at word boundry */
+         If splitAt = 0 then SplitAt = 72     /* if there is one! */
+         NextNote = "-" SubStr(ThisNote,SplitAt+1)
+         ThisNote = Left(ThisNote,SplitAt)
+         "ISREDIT LINE_AFTER "THISLOC" = MSGLINE (NEXTNOTE)"
+         "ISREDIT LINE_AFTER "THISLOC" = MSGLINE (THISNOTE)"
+      end
+   else
+      "ISREDIT LINE_AFTER "THISLOC" = MSGLINE (THISNOTE)"
+
+Return
