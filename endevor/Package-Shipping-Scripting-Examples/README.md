@@ -2,7 +2,7 @@
 
 Package shipping can submit a lot of jobs - up to 4 jobs per shipment. If you are shipping from multiple host sites to remote sites, it becomes easy to lose track of which sending host and package name relates to the job. Items in this folder help you to connect jobs to their originations, commenting your remote jobs with backward pointers as demonstrated in this example.
 
-    //SHIPJOBR  JOB (301000000),'FROM DEV1',CLASS=A,PRTY=6,               
+    //SHIPJOBR  JOB (123000),'FROM DEV1',CLASS=A,PRTY=6,               
     //  MSGCLASS=X,REGION=0M                                              
     //***=======Remote Shipping JCL for Site SOMWHER===================* *
     //* Package   := FINA#YEDN0607479                                      
