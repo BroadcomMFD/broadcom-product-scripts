@@ -1,0 +1,43 @@
+)REXX SENDNODE VNBSQDSP PACKAGE DESTIN TYPRUN
+  TRACE Off
+  WHEREAMI = 'C1BMXIN'
+  SENDNODE =  SYSVAR(SYSNODE)
+  PARSE VAR VNBSQDSP str "'" Package "' TO DEST " Destin " OPT" tail
+  Destin = Strip(Destin)
+  If TYPERUN = 'TYPRUN' then TYPRUN = ''
+)ENDREXX
+)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
+)CM
+)CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT
+)CM  TO C1BMX000.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+&VNBSQDSP
+//* *==============================================================* *
+//* *==============================================================* *
+//* Package  := &Package
+//* Destin   := &DESTIN
+//* From     := &SENDNODE
+//* *==============================================================* *
+//* *= Substitute variables in the Remote JCL       ===============* *
+//* *==============================================================* *
+//TAILOR   EXEC PGM=IRXJCL,COND=(4,LT),                    C1BMXIN
+//         PARM='ENBPIU00 A'
+//TABLE    DD *     -- Reads and Writes to MODEL --
+* SENDNODE Destin   TBLOUT
+ &SENDNODE &DESTIN  MODEL
+//MODEL    DD DSN=&VDDHSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN..AHJOB,
+//         DISP=SHR
+//OPTIONS  DD *
+  TYPRUN   = '&TYPRUN'
+  Package  = '&VPHPKGID'
+  HostLibs = '&VDDHSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN'
+  RmotLibs = '&VDDRSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN'
+//SYSEXEC  DD DISP=SHR,DSN=BST.QA.FS.V19.CSIQCLS0
+//SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *
