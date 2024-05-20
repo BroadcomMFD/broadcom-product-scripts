@@ -1,0 +1,61 @@
+# Yaml Search and Replace strings for JCL member ENPBIU00
+JCL:
+ DEV2 :
+   Changes :
+    jobcard :
+      - FindTxt   : "Dan Walther"
+      - Replace   : "Programmer"
+
+      - FindTxt   : "//JOBNUM45 "
+      - Replace   : "//TSTJOB45 "
+
+      - FindTxt   : "// JCLLIB  "
+      - InsertWhere : BEFORE
+      - Insertx   : |
+                    "//*************************"
+                    "//* C1SYSTEM  = &C1SYSTEM *"
+                    "//* C1SUBSYS  = &C1SUBSYS *"
+                    "//* C1STAGE   = &C1STAGE  *"
+                    "//*************************"
+
+    TEST001.TABLE   :
+      - FindTxt   : "B02"
+      - Replace   : "what"
+
+    TEST001.OPTIONS :
+      - FindTxt   : "ELEMENT = 'NOTHING'"
+      - Replace   : "ELEMENT = 'SUMTHING'"
+
+    TEST001.SYSTSPRT :
+      - FindTxt   : "//SYSTSPRT DD SYSOUT=*"
+      - Replace   : "//SYSTSPRT DD DUMMY"
+
+    TEST001.DISPLAYS :
+      - FindTxt   : "//DISPLAYS DD SYSOUT=*"
+      - Replace   : "//DISPLAYS DD DUMMY"
+
+    TEST001.TBLOUT   :
+      - FindTxt   : "//TBLOUT "
+      - InsertWhere : AFTER
+      - Insertx   : |
+                    "//***  Inserted line #1    "
+                    "//***  Inserted line #2    "
+
+    TEST003          :
+      - FindTxt   : "//TEST003 "
+      - InsertWhere : AFTER
+      - Insertx   : |
+                    "//**** /Inserted Steplib\ **"
+                    "//STEPLIB DD DSN=SYSDE32.NDVR.&C1ENVMNT.&C1SYSTEM.&C1SUBSYS.LOADLIB"
+                    "//        DISP=SHR         "                                        
+                    "//        DD DSN=SYSDE32.NDVR.PRD.&C1SYSTEM.ACCTPAY.LOADLIB "       
+                    "//        DISP=SHR         "                                        
+                    "//**** \Inserted Steplib/ **"
+    TEST003.TBLOUT   :
+      - FindTxt   : "//TBLOUT "
+      - InsertWhere : BEFORE
+      - Insertx   : |
+                    "//***  Inserted line #1    "
+                    "//***  &C1SYSTEM     #2    "
+                    "//***  &C1SUBSYS     #3    "
+                    "//***  &C1STAGE      #4    "

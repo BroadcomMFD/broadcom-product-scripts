@@ -28,5 +28,7 @@ Statements in this format enable REXX programs to execute DO-LOOPs to drive an a
 
 [JCLRPLCE.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/ENDEVOR-meet-YAML/endevor/Endevor-meet-YAML/JCLRPLCE.jcl) is a JCL example for a processor step that tailors JCL. (A processor example will come later). It has an additional dependency on **JCLRPLCE.rex** a program in the folder. **Testing and additional changes remain underway for the rexx.** 
 
+**GJCLTAIL.jcl** is a processor example that tailors the element being Generated.
+
 [MCONMOVE.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/ENDEVOR-meet-YAML/endevor/Endevor-meet-YAML/MCONMOVE.jcl) is a processor that uses YAML within a Table Tool step to construct specific instructions for a subsequent CONMOVE step in an Endevor processor.
 

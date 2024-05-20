@@ -151,8 +151,10 @@ ProcessorVariables:
       PARSE VAR ndvrVariable $keyword "=" $keyValue
       $keyword = Strip($keyword)
       $keyValue = Strip($keyValue)
+      $keyValue = Strip($keyValue,'B','"')
+      $keyValue = Strip($keyValue,'B',";")
       ProcessorVariables = $keyword ProcessorVariables
-      VarValue.$keyword = $keyValue
+      VarValue.$keyword = Translate($keyValue,' ','"')
       If TraceRc = 'Y' then,
          Say 'JCLRPLCE-' $keyword '=' $keyValue
    End; /*  Do v# = 1 to var.0 */
