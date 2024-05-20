@@ -26,5 +26,7 @@ Statements in this format enable REXX programs to execute DO-LOOPs to drive an a
 
 [GALAIS.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/Dynamic-Syslib/GALIAS.jcl)  is a processor that shows the construction of DYNAMIC SYSLIBs. Within the DEFINES step of the processor you can see the call to [YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex).
 
+[JCLRPLCE.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/ENDEVOR-meet-YAML/endevor/Endevor-meet-YAML/JCLRPLCE.jcl) is a JCL example for a processor step that tailors JCL. (A processor example will come later). It has an additional dependency on **JCLRPLCE.rex** a program in the folder. **Testing and additional changes remain underway for the rexx.** 
+
 [MCONMOVE.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/ENDEVOR-meet-YAML/endevor/Endevor-meet-YAML/MCONMOVE.jcl) is a processor that uses YAML within a Table Tool step to construct specific instructions for a subsequent CONMOVE step in an Endevor processor.
 
