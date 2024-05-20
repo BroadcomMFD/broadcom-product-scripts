@@ -12,9 +12,9 @@
 //  SET OLDJCL=SYSDE32.NDVR.TEAM.JCL(TESTJCL1)
 //*--------
 //  SET C1STAGE=UNITTEST
-//  SET SYSTEM=FINANCE
-//  SET SUBSYS=ACCTPAY
-//  SET TYPE=JCL
+//  SET C1SYSTEM=FINANCE
+//  SET C1SUBSYS=ACCTPAY
+//  SET C1ELTYPE=JCL
 //*----
 // SET CSIQCLS0=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
 // SET REXXLIB=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
@@ -26,6 +26,22 @@
 //BILDMASK EXEC PGM=IRXJCL,
 //         PARM='JCLRPLCE &C1STAGE'
 //OPTIONS   DD DSN=&MYYAML,DISP=SHR     (OLD,DELETE)
+//VARIABLE DD *,SYMBOLS=JCLONLY         more substitution variables
+* Format:        variable-name = 'value'
+* A variable-name can be existing Endevor/processor/Site Symbol
+*                 variable names, or or any valid (rexx) name
+
+  C1ELEMENT    = '&C1ELEMENT'
+  C1ENVMNT     = '&C1ENVMNT'
+  C1SYSTEM     = '&C1SYSTEM'
+  C1SUBSYS     = '&C1SUBSYS'
+  C1ELTYPE     = '&C1ELTYPE'
+  C1STAGE      = '&C1STAGE'
+  C1STGNUM     = '&C1STGNUM'
+  CSIQCLS0='&#HLQ..EMER.CSIQCLS0'
+  #OCLIST###@1= '&#OREXX####@1'
+  #OCLIST###@2= '&#OREXX####@2'
+  MyDSNPrefix='MOTM.&C1SY..&C1SU..&C1EN(1,1)&C1S#.'
 //*YAML2REX  DD DUMMY   <- Turn on/off Trace
 //JCLRPLCE  DD DUMMY   <- Turn on/off Trace
 //OLDJCL    DD DISP=SHR,DSN=&OLDJCL
@@ -34,47 +50,12 @@
 //          DD DISP=SHR,DSN=&REXXLIB
 //SYSTSPRT  DD SYSOUT=*
 //
-//
-//
-//OPTIONSX  DD *       <- Convert YAML to REXX
- Do yaml# =1 to HowManyYamls; +
-    Parse pull yaml2rexx; +
-    Interpret yaml2rexx ; +
-    say       yaml2rexx ; +
- End
-//MASKING   DD DSN=&&MASKING,DISP=(,PASS),      <-Output Mask
-//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
-//     LRECL=080,RECFM=FB,BLKSIZE=0
-//BPIOPOUT  DD DSN=&&BPIOPT,DISP=(,PASS),       <-DBTool cntlcard
-//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
-//     LRECL=080,RECFM=FB,BLKSIZE=0
-//SPUFIOUT  DD DSN=&&SPUFI,DISP=(,PASS),        <-SPUFI check command
-//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
-//     DCB=(LRECL=080,RECFM=FB,BLKSIZE=0)
-//*-------------------------------------------------------------------*
-//*------------------------------------------------------- C1BMXFTP
-//
-//
-//
-//REPLACE1  EXEC PGM=IRXJCL,PARM='JCLRPLCE &C1STAGE'       C1BMXFTP
-//OLDJCL    DD DSN=&OLDJCL(&MEMBER),
-//          DISP=SHR
-//NEWJCL    DD SYSOUT=*
-//NEWJCLX   DD DSN=&NEWJCL(&MEMBER),
-//          DISP=SHR
-//*JCLRPLCE  DD DUMMY          Turn on/off Trace
-//JCLRPLCE  DD DUMMY          Turn on/off Trace
-//OPTIONS   DD DISP=SHR,DSN=&OPTIONS(&MEMBER)
-//SYSEXEC   DD DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
-//             DISP=SHR
-//          DD DSN=CARSMINI.NDVR.R1801.CSIQCLS0,
-//             DISP=SHR
-//          DD DSN=SYSDE32.NDVR.TEAM.REXX,DISP=SHR
-//SYSTSIN   DD DUMMY
-//VARIABLE  DD *,SYMBOLS=JCLONLY
-  C1ENVMNT ='UNITTEST'
-  C1SYSTEM ='FINANCE'
-  C1SUBSYS ='ACCTPAY'
-  C1ELTYPE ='JCL'
-//SYSTSPRT  DD SYSOUT=*
-//SYSPRINT  DD SYSOUT=*
+ global :
+      - FindTxt   : "&JCLSYSTEM"
+      - Replace   : "&C1SYSTEM"
+
+      - FindTxt   : "&JCLSUBSYS"
+      - Replace   : "&C1SUBSYS"
+
+      - FindTxt   : "&JCLSUBSYS"
+      - Replace   : "&C1SUBSYS"
