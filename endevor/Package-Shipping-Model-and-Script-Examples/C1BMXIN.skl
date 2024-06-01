@@ -1,0 +1,65 @@
+)CM  A Generic skeleton member that replaces variables with their values
+)REXX SENDNODE VNBSQDSP PACKAGE DESTIN TYPRUN OUTRBAK SUBMITER
+TRACE Off
+WHEREAMI = 'C1BMXIN'
+SENDNODE =  SYSVAR(SYSNODE)
+PARSE VAR VNBSQDSP STR "'" PACKAGE "' TO DEST " DESTIN " OPT" TAIL '.'
+DESTIN = STRIP(DESTIN)
+PACKAGE = STRIP(PACKAGE)
+IF TYPERUN = 'TYPRUN' THEN TYPRUN = ''
+OUTRBAK = STRIP(STRIP(TAIL,'T','.'))
+SUBMITER = USERID()
+)ENDREXX
+)CM    XMETHOD = the transmission method
+)CM    XNODE   = the Host site node
+)CM
+)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
+)CM
+)CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT
+)CM  TO C1BMX000.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  TAILORING expands variables in the Remote and Confirmation JCLS
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+&VNBSQDSP
+//*******************************************************************
+//*
+//* SYMBOLS DEFINITION
+//*
+//*******************************************************************
+//  SET DATE=&VNB6DATE
+//  SET TIME=&VNB6TIME
+//  SET USER=NDVRUSR
+//  SET PKGID=&PACKAGE
+//* *==============================================================* *
+//* *= SUBSTITUTE VARIABLES IN THE REMOTE JCL       ===============* *
+//* *==============================================================* *
+//TAILOR   EXEC PGM=IRXJCL,COND=(4,LT),                    C1BMXIN
+//         PARM='ENBPIU00 A'
+//TABLE    DD *      Replaces variable values in listed MODEL DDName
+* MODEL    TBLOUT
+  AHJOB    AHJOB
+)SEL &XMETHOD = NETVIEW_FTP
+  C1BMXFTC C1BMXFTC
+//C1BMXFTC DD DSN=&&&&XFTC,DISP=(OLD,PASS)
+)ENDSEL &XMETHOD = NETVIEW_FTP
+//AHJOB    DD DSN=&VDDHSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN..AHJOB,
+//         DISP=SHR
+//OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
+SENDNODE = '&SENDNODE'
+DESTIN   = '&DESTIN'
+OUTRBAK  = '&OUTRBAK'
+SHIPDATE = '&VNB6DATE'
+SHIPTIME = '&VNB6TIME'
+USERID   = '&USER'
+TYPRUN   = '&TYPRUN'
+PKGID    = '&VPHPKGID'
+HOSTLIBS = '&VDDHSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN'
+RMOTLIBS = '&VDDRSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN'
+ReturnHome = '&XNODE'
+//SYSEXEC  DD DISP=SHR,DSN=NDVRSCM.R19.CSIQCLS0 (your CSIQCLS0)
+//SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *

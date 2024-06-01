@@ -1,4 +1,4 @@
-# Package Shipping examples 
+# Package Shipping Model and Script examples 
 
 Package shipping can submit a lot of jobs - up to 4 jobs per shipment. If you are shipping from multiple host sites to remote sites, it becomes easy to lose track of which sending host and package name relates to the job. Items in this folder help you to connect jobs to their originations, commenting your remote jobs with backward pointers as demonstrated in this example.
 
@@ -12,7 +12,24 @@ Package shipping can submit a lot of jobs - up to 4 jobs per shipment. If you ar
     //* RmotLibs  := PUBLIC.RMOT.D240506.T091612.SOMWHER 
     //* *==============================================================* *
 
-Moreover, the variables used for the commenting can be also be leveraged for other things you might need to do in the remote shipping job. Here are members in this folder:
+Moreover, the variables used for the commenting can be also be leveraged for other things you might need to do in the remote shipping job. 
+
+## Package Shipping Variables
+
+VDDHSPFX  - Host staging dataset name prefix                       
+VDDRSPFX  - Rmot staging dataset name prefix                       
+VNBCPARM  - Endevor parameter string with Date and time values     
+VNBSQDSP  - Ship Package to Destination with Out or Back statement 
+VNB6DATE  - Six character shipping Date                            
+VNB6TIME  - Six character shipping Time                            
+VPHPKGID  - Package ID                                             
+XMETHOD   - Shipping Transmission utility                          
+XNODE     - Host site node name                                    
+
+
+## Skeleton / Model / Script example members
+
+Here are members in this folder:
 
 __C1BMXIN.skl__  is a modified version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for these values be available in your remote JCL. to include references such as the Package name, Destination and others.
 
