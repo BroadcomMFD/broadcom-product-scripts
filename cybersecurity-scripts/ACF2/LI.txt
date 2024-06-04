@@ -1,0 +1,64 @@
+/* rexx */
+/*                                                            */
+/*  This rexx is an example of the art of the possible        */
+/*  in using ACFUNIX interactively                            */
+/*                                                            */
+/*  Purpose: Provide example of quicly listing LIDs within    */
+/*  ACF2 and place output into dynamiclly allocated temp dsn  */
+/*                                                            */
+/*  Version 1.0 May 2024                                      */
+/*          1.1 May 2024 added optional T for SET TERSE       */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in proving ACF2 command output into a       */
+/*  MVS dataset allowing for interactive browse, search or    */
+/*  edit of the results from the ACF2 commands.               */
+/*                                                            */
+/* p1 input can be any list or entity to list using the       */
+/* standard li command                                        */
+/*                                                            */
+/* created by steve hosie                                     */
+/*                                                            */
+/* examples:                                                  */
+/*  LI lid                                                    */
+/*  LI LIKE(ABC-)                                             */
+/*  LI lid T - this will SET TERSE and list the lid           */
+/*  LI LIKE(ABC-) T  this will SET TERSE AND LIST the LIDs with */
+/*  names assigned                                              */
+/*  Review ACF2 Techdocs on ACFUNIX for more info             */
+/*                                                            */
+parse arg p1 p2
+UPPER p1 p2
+if length(p1) = 0 then
+ do
+  say 'NO LID provided'
+  exit
+ end
+if p2 <> ' ' then
+  p2 = substr(p2,1,1)
+if p2 = 'T' then
+ do
+  acf_cmd = 'LI 'p1
+  acf_cmd = "'MULT SET TERSE ~ "acf_cmd"'"
+  end
+else
+  acf_cmd = 'LI 'p1
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF2.TEMP.'last_qual
+udsn = strip(udsn)
+ddname = "A"current_seconds
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(F B) LRECL(80) BLKSIZE(3120)"
+"ACFUNIX -dd "ddname " "acf_cmd
+"ISPEXEC EDIT DATASET('"udsn"')"
+/* "ISPEXEC BROWSE DATASET('"udsn"')" */
+/* "ISPEXEC EDIT DATASET('"udsn"')" */
+/*  use above EDIT versus browse if you want to */
+ STATUS = MSG('OFF')
+"free f("ddname")"
+address tso "DELETE '"udsn"'"
