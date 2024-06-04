@@ -17,7 +17,7 @@
 /* p1 input can be any list or entity to list using the       */
 /* standard li command                                        */
 /*                                                            */
-/* created by steve hosie                                     */
+/*                                                            */
 /*                                                            */
 /* examples:                                                  */
 /*  LI lid                                                    */
