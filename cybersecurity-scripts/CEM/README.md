@@ -5,7 +5,7 @@ This repository houses sample scripts for use cases involving Broadcom Products.
 Sample scripts for each product are located in the directory that shares its name. For example, CEM samples are in the [CEM](CEM) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
 
 # Folders
-
+TBD
 
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Steven.Hosie@Broadcom.com & Vijay.Gundu@Broadcom.com & Rose.Sakach@Broadcom.com or Adam.Wolfe@Broadcom.com to discuss.**
