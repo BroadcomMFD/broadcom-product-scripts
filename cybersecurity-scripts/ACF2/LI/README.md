@@ -1,5 +1,5 @@
 # Broadcom ACF2 LI Script
-LI – reduces the amount of typing for a very common function. This REXX takes the argument in, executes the ACF2 LIST command based upon the input including any LIST LIKE, then places the outputinto a dynamically named temp dataset, and places the user into either ISPF browse or edit mode.  Instead of submitted that batch job to obtain a long listing or any listing, use LI for a more interactive experience and reduce required time from listing to viewing output.  This rexx is an example of the “art of the possible”.
+LI – reduces the amount of typing for a very common function. This REXX takes the argument in, executes the ACF2 LIST command based upon the input including any LIST LIKE, then places the outputinto a dynamically named temp dataset, and places the user into either ISPF browse or edit mode.  Instead of submitted that batch job to obtain a long listing or any listing, use LI for a more interactive experience and reduce required time from listing to viewing output.  This rexx is an example of the “art of the possible” in using the newer ACF2 ACFUNIX utility.
 
 The challenge:  Reduce the sheer volume professionals must type daily while performing their required tasks/functions.
 
