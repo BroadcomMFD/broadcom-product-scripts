@@ -1,4 +1,4 @@
-# Broadcom TAMZ Scripts
+# Broadcom Trusted Access Manager (TAMZ) Scripts
 This repository houses sample scripts for use cases involving Broadcom Products.
 
 # Using
