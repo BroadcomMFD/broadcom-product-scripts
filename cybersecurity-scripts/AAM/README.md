@@ -1,4 +1,4 @@
-# Broadcom AAM Scripts
+# Broadcom Advanced Authentication Mainframe (AAM) Scripts
 This repository houses sample scripts for use cases involving Broadcom Products.
 
 # Using
