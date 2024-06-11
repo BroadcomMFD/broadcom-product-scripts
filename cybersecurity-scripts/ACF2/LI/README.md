@@ -6,7 +6,7 @@ The challenge:  Reduce the sheer volume professionals must type daily while perf
 Background:  ACF2 command to list a LID is to execute ACF, then once in ACF, issue the LI lid command, and the output is displayed with no means to scoll or search within the record.  Enabling Mainframe Cybersecurity Professionals (MCP) to do more with their limited time daily is a must.  LI provides the ability to quickly list a LID, place the output into a temp dataset, place the cybersecurity professional into Browse, and allow them to scroll or search as desired. TSO ALI lid can be executed anywhere within TSO.
 
 # Using
-Sample scripts for each product are located in the directory that shares its name. For example, ACF2 samples are in the [LI](LI) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
+Sample scripts for each product are located in the directory that shares its name. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
 
 What to do:   
 1.	Upload the LI as LI into your CLIST/REXX library.
