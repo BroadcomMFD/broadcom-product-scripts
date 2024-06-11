@@ -2,7 +2,7 @@
 This repository houses sample scripts for use cases involving Broadcom Products.
 
 # Using
-Sample scripts for each product are located in the directory that shares its name. For example, ACF2 LI Script samples are in the [LI](LI) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
+Sample scripts for each product are located in the directory that shares its name. For example, ACF2 LI Script samples are in the [LI](LI1) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
 
 # Folders
 LI - LI REXX example code (brief explaination of it - no more than one line here per REXX/folder)
