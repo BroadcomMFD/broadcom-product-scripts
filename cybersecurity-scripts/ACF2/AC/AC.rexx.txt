@@ -1,0 +1,56 @@
+/* rexx */
+/*                                                            */
+/*  This rexx is an example of the art of the possible        */
+/*  in using ACFUNIX interactively                            */
+/*                                                            */
+/*  Purpose: Provide example of quicly grab the output of an  */
+/*  ACF2 ACCESS command and place into a dynamically          */
+/*  allocaed dataset for edit/browsing                        */
+/*                                                            */
+/*  Version 1.0                                               */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in proving ACF2 command output into a       */
+/*  MVS dataset allowing for interactive browse, search or    */
+/*  edit of the results from the ACF2 commands.               */
+/*                                                            */
+/* p1 input can be access command                             */
+/*                                                            */
+/* created by steve hosie                                     */
+/*                                                            */
+/* examples:                                                  */
+/*  ac dsn('sys1.parmlib')                                    */
+/*  ac RESOURCE('BPX.FILEATTR.APF') TYPE(FAC) CLASS(R)        */
+/*                                                            */
+/* Access   DSNAME('DSNAME')                                  */
+/*          RESOURCE('RESOURCE')                              */
+/*          TYPE(TYPE) CLASS(CLASS) SYSID(SYSID)              */
+/*                                                            */
+/*  Review ACF2 Techdocs on ACFUNIX for more info             */
+/*                                                            */
+parse arg p1
+if length(p1) = 0 then
+ do
+  say 'NO input provided'
+  exit
+ end
+acf_cmd = 'access 'p1
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF2.TEMP.'last_qual
+udsn = strip(udsn)
+ddname = "A"current_seconds
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(F B) LRECL(80) BLKSIZE(3120)"
+"ACFUNIX -dd "ddname " "acf_cmd
+"ISPEXEC EDIT DATASET('"udsn"')"
+/* "ISPEXEC BROWSE DATASET('"udsn"')" */
+/* "ISPEXEC EDIT DATASET('"udsn"')" */
+/*  use above EDIT versus browse if you want to */
+ STATUS = MSG('OFF')
+"free f("ddname")"
+address tso "DELETE '"udsn"'"
