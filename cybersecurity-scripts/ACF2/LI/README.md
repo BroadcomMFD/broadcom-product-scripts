@@ -9,7 +9,7 @@ Background:  ACF2 command to list a LID is to execute ACF, then once in ACF, iss
 Sample scripts for each product are located in the directory that shares its name. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
 
 What to do:   
-1.	Upload the LI as LI into your CLIST/REXX library.
+1.	Upload the LI.rexx.txt as LI into your CLIST/REXX library.
 2.	Execute:  TSO LI lid anywhere in TSO.
 3.	Options:
     a.	LI lid – this will execute the ACF2 LI lid command
