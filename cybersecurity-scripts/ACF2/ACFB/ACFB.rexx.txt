@@ -1,0 +1,50 @@
+/* rexx */
+/*                                                            */
+/*  Version 1.1 April 2024                                    */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in proving ACF2 command output into a       */
+/*  MVS dataset allowing for interactive browse, search or    */
+/*  edit of the results from the ACF2 commands.               */
+/*                                                            */
+/* purpose:  to capture and provide output of ACF2 commands   */
+/* write acf output to temp dataset for ease of viewing       */
+/* provide ability to search displayed output as well as      */
+/* scrolling up/down within the displayed output or           */
+/* utilize output for any other desired purpose interactively */
+/*                                                            */
+/* p1 input can be any ACF2 command and can use full          */
+/* syntax including MULT for multiple commands as allowed     */
+/* and documented for ACFUNIX                                 */
+/*                                                            */
+/*                                                            */
+/* examples:                                                  */
+/*  ACFE SHOW ALL                                             */
+/*  ACFE ACCESS DSN('SYS1.PARMLIB')                           */
+/*  ACFE 'MULT SET LID ~ CHANGE lid PASSWORD(password)'       */
+/*  Review ACF2 Techdocs on ACFUNIX for more info             */
+/*                                                            */
+parse arg p1
+if p1 = '' then
+ do
+  say 'NO input provided'
+  exit
+ end
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF2.TEMP.'last_qual
+udsn = strip(udsn)
+ddname = "A"current_seconds
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(F B) LRECL(80)"
+"ACFUNIX -dd "ddname " "p1
+"ISPEXEC BROWSE DATASET('"udsn"')"
+/* "ISPEXEC EDIT DATASET('"udsn"')" */
+/*  use above EDIT versus browse if you want to */
+ STATUS = MSG('OFF')
+"free f("ddname")"
+address tso "DELETE '"udsn"'"
