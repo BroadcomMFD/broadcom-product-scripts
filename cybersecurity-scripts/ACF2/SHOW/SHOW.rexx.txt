@@ -1,0 +1,62 @@
+/* rexx */
+/*                                                            */
+/*  This rexx is an example of the art of the possible        */
+/*  in using ACFUNIX interactively                            */
+/*                                                            */
+/*  Purpose: Provide example of quicly listing ACF2 SHOW      */
+/*  command, place output into dynamiclly allocated temp dsn  */
+/*  and place into browse/edit mode for review/searching      */
+/*                                                            */
+/*  Version 1.0 May 2024                                      */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in proving ACF2 command output into a       */
+/*  MVS dataset allowing for interactive browse, search or    */
+/*  edit of the results from the ACF2 commands.               */
+/*                                                            */
+/* p1 input can be any SHOW subcommand                        */
+/*                                                            */
+/* created by steve hosie                                     */
+/*                                                            */
+/* examples:                                                  */
+/*  SHOW ALL                                                  */
+/*  SHOW SAFDEF                                               */
+/*  SHOW CLasmap                                              */
+/*  SHOW ACT                                                  */
+/*  SHOW APpldef                                              */
+/*  SHOW AUTOERAS                                             */
+/*  SHOW CACHESRV                                             */
+/*  SHOW CErtmap                                              */
+/*  SHOW CHorus                                               */
+/*  SHOW CPf                                                  */
+/*  SHOW DB2                                                  */
+/*  SHOW ........                                             */
+/*  Review ACF2 Techdocs on SHOW subcommand for more info     */
+/*  Review ACF2 Techdocs on ACFUNIX for more info             */
+/*                                                            */
+parse arg p1
+if length(p1) = 0 then
+ do
+  say 'NO SHOW parameter provided, please try again'
+  exit
+ end
+acf_cmd = 'SHOW 'p1
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF2.TEMP.'last_qual
+udsn = strip(udsn)
+ddname = "A"current_seconds
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(F B) LRECL(80) BLKSIZE(3120)"
+"ACFUNIX -dd "ddname " "acf_cmd
+"ISPEXEC EDIT DATASET('"udsn"')"
+/* "ISPEXEC BROWSE DATASET('"udsn"')" */
+/* "ISPEXEC EDIT DATASET('"udsn"')" */
+/*  use above EDIT versus browse if you want to */
+ STATUS = MSG('OFF')
+"free f("ddname")"
+address tso "DELETE '"udsn"'"
