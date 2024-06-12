@@ -3,46 +3,37 @@
 /*  This rexx is an example of the art of the possible        */
 /*  in using ACFUNIX interactively                            */
 /*                                                            */
-/*  Purpose: Provide example of quicly listing LIDs within    */
-/*  ACF2 and place output into dynamiclly allocated temp dsn  */
+/*  Purpose: Provide example of quicly grab the output of an  */
+/*  ACF2 ACCESS command and place into a dynamically          */
+/*  allocaed dataset for edit/browsing                        */
 /*                                                            */
-/*  Version 1.0 May 2024                                      */
-/*          1.1 May 2024 added optional T for SET TERSE       */
+/*  Version 1.0                                               */
 /*                                                            */
 /*  Broadcom has provided this REXX as an example of the      */
 /*  ACFUNIX usage in proving ACF2 command output into a       */
 /*  MVS dataset allowing for interactive browse, search or    */
 /*  edit of the results from the ACF2 commands.               */
 /*                                                            */
-/* p1 input can be any list or entity to list using the       */
-/* standard li command                                        */
-/*                                                            */
+/* p1 input can be access command                             */
 /*                                                            */
 /*                                                            */
 /* examples:                                                  */
-/*  LI lid                                                    */
-/*  LI LIKE(ABC-)                                             */
-/*  LI lid T - this will SET TERSE and list the lid           */
-/*  LI LIKE(ABC-) T  this will SET TERSE AND LIST the LIDs with */
-/*  names assigned                                              */
+/*  ac dsn('sys1.parmlib')                                    */
+/*  ac RESOURCE('BPX.FILEATTR.APF') TYPE(FAC) CLASS(R)        */
+/*                                                            */
+/* Access   DSNAME('DSNAME')                                  */
+/*          RESOURCE('RESOURCE')                              */
+/*          TYPE(TYPE) CLASS(CLASS) SYSID(SYSID)              */
+/*                                                            */
 /*  Review ACF2 Techdocs on ACFUNIX for more info             */
 /*                                                            */
-parse arg p1 p2
-UPPER p1 p2
+parse arg p1
 if length(p1) = 0 then
  do
-  say 'NO LID provided'
+  say 'NO input provided'
   exit
  end
-if p2 <> ' ' then
-  p2 = substr(p2,1,1)
-if p2 = 'T' then
- do
-  acf_cmd = 'LI 'p1
-  acf_cmd = "'MULT SET TERSE ~ "acf_cmd"'"
-  end
-else
-  acf_cmd = 'LI 'p1
+acf_cmd = 'access 'p1
 current_seconds = TIME(S)
 last_qual = "D"current_seconds
 user = userid()
