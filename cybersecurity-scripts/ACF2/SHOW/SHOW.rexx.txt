@@ -16,7 +16,6 @@
 /*                                                            */
 /* p1 input can be any SHOW subcommand                        */
 /*                                                            */
-/* created by steve hosie                                     */
 /*                                                            */
 /* examples:                                                  */
 /*  SHOW ALL                                                  */
