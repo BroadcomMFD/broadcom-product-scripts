@@ -16,7 +16,6 @@
 /*                                                            */
 /* p1 input can be access command                             */
 /*                                                            */
-/* created by steve hosie                                     */
 /*                                                            */
 /* examples:                                                  */
 /*  ac dsn('sys1.parmlib')                                    */
