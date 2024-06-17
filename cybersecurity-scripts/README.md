@@ -8,7 +8,7 @@ This [sample repository](ACF2) contains Mainframe Cybersecurity Scripts related 
 
 ## CEM - Compliance Event Manager (CEM)
 
-This [sample repository](CEM) contains Mainframe Cybersecurity Scripts related to Compliance Event Manager (CEM).  For further information on CEM, please see the CEM Techdocs: [Compliance Event Manager (CEM) Techdocs]([https://techdocs.broadcom.com/us/en/ca-mainframe-software/security/ca-advanced-authentication-mainframe/2-0.html](https://techdocs.broadcom.com/us/en/ca-mainframe-software/security/ca-compliance-event-manager/6-0.html). 
+This [sample repository](CEM) contains Mainframe Cybersecurity Scripts related to Compliance Event Manager (CEM).  For further information on CEM, please see the CEM Techdocs: [Compliance Event Manager (CEM) Techdocs](https://techdocs.broadcom.com/us/en/ca-mainframe-software/security/ca-compliance-event-manager/6-0.html). 
 
 ## Cleanup
 This [sample repository](AAM) contains Mainframe Cybersecurity Scripts related to Cleanup.  For further information on Cleanup, please see the Cleanup Techdocs: [Advanced Authentication Mainframe (AAM) Techdocs](https://techdocs.broadcom.com/us/en/ca-mainframe-software/security/ca-advanced-authentication-mainframe/2-0.html). 
