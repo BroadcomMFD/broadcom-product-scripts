@@ -1,0 +1,40 @@
+)ATTR
+% TYPE (TEXT) INTENS (HIGH) COLOR (GREEN)
+@ TYPE (TEXT) INTENS (HIGH) COLOR (BLUE)
+# TYPE (TEXT) INTENS (HIGH) COLOR (YELLOW)
+¬ TYPE (TEXT) INTENS (HIGH) COLOR (WHITE) CAPS (OFF)
+_ TYPE (INPUT) INTENS (LOW) COLOR (GREEN) PAD (_)
+$ TYPE (OUTPUT) INTENS (HIGH) COLOR (BLUE)
+)BODY
+#*-------------------------------------------------------------------*
+            #Welcome to Cleanup for z/OS *Interactive*
+#*-------------------------------------------------------------------*
+ %                     Report Generation only                        %
+ %
+ % PARM: _ref      %             % REF=NNN, UNREF=NNN, OR BOTH
+ %
+ % INCLUDE: _include1                                         %
+ %                                                            %
+ % EXCLUDE: _exclude1                                         %
+ %
+ %
+ @  FOR PARM, PLEASE USE UNREF=NNN, REF=NNN OR THE WORD BOTH.  "NNN" IS
+ @  IS A 3 DIGIT NUMBER FROM 001 TO 999.
+ %
+ @  FOR INCLUDES OR EXCLUDES, PLEASE USE THE NORMAL INCLUDE OR
+ @  EXCLUDE STATEMENTS.
+ %
+ @  EXAMPLE:  INCLUDE OF:  ABC1234 WOULD PRODUCE A REPORT FOR THAT
+ @  SPECIFIC ACID.
+ %
+ @  Please press ENTER to generate report
+ %
+#*-------------------------------------------------------------------*
+)INIT
+  .HELP   = ETCLHP01
+  .CURSOR = &ref
+    &DAT = ''
+    &TIM = ''
+)PROC
+ VER (&ref,nonblank)
+)END

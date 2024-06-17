@@ -1,0 +1,355 @@
+/* REXX                                                            */   00010000
+/*                                                                 */   00011000
+/* Cleanup for z/OS *Interactive*                                  */   00020000
+/*                                                                 */   00021000
+/* Purpose:  this REXX code create an interactive interface        */   00030000
+/* to obtain cleanup reports without requiring JCL to be used.     */   00040000
+/* This will only generate REPORTS nothing else.                   */   00050000
+/*                                                                 */   00060000
+/* Idea and code created by Steve Hosie                            */   00070000
+/* Created Feb 2024                                                */   00080000
+/* Updated March 7 2024 - added summary report to end of displayed */   00090000
+/*   report.                                                       */   00100000
+/* Updated June 13 2024 - added code to allow multiple systems and */   00110000
+/*   usage across TSS, ACF2 and RACF                               */   00120000
+/*                                                                 */   00130000
+/* Examples:                                                       */   00140000
+/* a. etcl unref=001 acid                                          */   00150000
+/* b. etcl ref=039 acid                                            */   00160000
+/* c. etcl unref=455 inc(class(userid)name(*all*))                 */   00170000
+/* d. etcl unref=999 inc(class(userid)name(*all*)) exc(class(volume))*/ 00180000
+/* e. etcl unref=455 inc(class(dataset)name(sys1.))                */   00190000
+/* f. etcl unref=455                                               */   00200000
+/*                                                                 */   00210000
+/* You must edit this for your organizational standards            */   00220000
+/*                                                                 */   00221000
+/* Edit/Updates to be done before using:                           */   00222000
+/* Find "***UPDATE INSTRUCTIONS HERE***" and follow instructions   */   00223000
+/*                                                                 */   00224000
+/* Ensure both ETCL and ETCLHP01 panels are uploaded into a        */   00224100
+/* panels dataset.                                                 */   00224200
+/*                                                                 */   00224300
+/* Also edit the ALTLIB and LIBDEF statements to point to your     */   00224400
+/* clist/rexx library and panels datasets                          */   00224500
+/*                                                                 */   00224700
+/* p1 = parm for unref/ref                                         */   00225000
+/*                                                                 */   00226000
+/* p2 = include                                                    */   00227000
+/* p3 = exclude                                                    */   00228000
+/* p4 = S to obtain summary                                        */   00229000
+/*                                                                 */   00230000
+/* If no arguments are passed, then present the ispf panel         */   00240000
+/* otherwise use arguments and produce report                      */   00250000
+/*                                                                 */   00260000
+/* trace(i) */                                                          00270000
+                                                                        00271000
+parse upper arg p1 p2 p3 p4                                             00280000
+UPPER p1 p2 p3 p4                                                       00290000
+SYSID = mvsvar('SYSNAME')                                               00291000
+                                                                        00291100
+/*                                                                   */ 00292000
+/* ***UPDATE INSTRUCTIONS HERE***                                    */ 00293000
+/*                                                                   */ 00294000
+/* 1. Update the SYSID's listed for your organizational systems      */ 00295000
+/*    within each appropriate "when SYSID =" statement below,        */ 00296000
+/*    replacing "XAD1" or "DE28" or 'MSTRMIM" as needed.             */ 00297000
+/*    if you have multiple systems, duplicate the lines as needed.   */ 00298000
+/*                                                                   */ 00299000
+/* 2. If the CLEANUP programs are link listed, then set              */ 00300000
+/*    link_listed = 'Y' otherwise set link_listed = 'N'              */ 00310000
+/*                                                                   */ 00320000
+/* 3. If not link listed, then update the esm_load variable to       */ 00330000
+/*    reflect the CLEANUP link library name for that specific system */ 00340000
+/*                                                                   */ 00350000
+                                                                        00351000
+Select                                                                  00360000
+ when SYSID = 'XAD1' then                                               00370000
+   do                                                                   00371000
+     DBASE_dataset = SYSDEV.CLEANTSS.DB.XAD1                            00372000
+     link_listed = 'Y'                                                  00373000
+     esm_load = 'DECRO01.ETCLNA.R121.CDMFLINK'                          00374000
+   end                                                                  00375000
+ when SYSID = 'DE28' then                                               00376000
+   do                                                                   00377000
+     DBASE_dataset = SECMF.ETCLNA.R121.DB                               00378000
+     link_listed = 'N'                                                  00379000
+     esm_load = 'DECRO01.ETCLNA.R121.CDMELINK'                          00379100
+   end                                                                  00379200
+ when SYSID = 'MSTRMIM' then                                            00379300
+   do                                                                   00379400
+     DBASE_dataset = SHARE.CLEANUP.RACF.AT8.DB                          00379500
+     link_listed = 'N'                                                  00379600
+     esm_load = 'SYS3.CLEANUP.RACF.R121E.CDY1LINK'                      00379700
+   end                                                                  00379800
+ otherwise                                                              00379900
+   say 'ETCL Interactive is not set up for this system: 'SYSID          00380000
+   say ' '                                                              00380100
+   exit                                                                 00380200
+end                                                                     00380300
+                                                                        00380400
+index_p2 = INDEX(p2,'(')                                                00380500
+if index_p2 > 0 then                                                    00380600
+ do                                                                     00380700
+     last_p2 = LASTPOS(')',p2)                                          00380800
+     index_p2 = index_p2 + 1                                            00380900
+     last_p2 = last_p2 - index_p2                                       00381000
+     include_p2 = substr(p2,index_p2,last_p2)                           00381100
+ end                                                                    00381200
+else                                                                    00381300
+ do                                                                     00381400
+  include_p2 = p2                                                       00381500
+ end                                                                    00381600
+                                                                        00381700
+index_p3 = INDEX(p3,'(')                                                00381800
+if index_p3 > 0 then                                                    00381900
+ do                                                                     00382000
+    last_p3 = LASTPOS(')',p3)                                           00382100
+    index_p3 = index_p3 + 1                                             00382200
+    last_p3 = last_p3 - index_p3                                        00383000
+    exclude_p3 = substr(p3,index_p3,last_p3)                            00384000
+ end                                                                    00385000
+else                                                                    00386000
+  do                                                                    00387000
+    exclude_p3 = p3                                                     00388000
+  end                                                                   00389000
+                                                                        00389100
+summary_rqst = p4                                                       00390000
+STATUS = MSG('ON')                                                      00400000
+STATUS = MSG('OFF')                                                     00410000
+                                                                        00411000
+"free f(SUMMARY)"                                                       00420000
+"free f(SYSPRINT)"                                                      00430000
+"free f(SYSOUT)"                                                        00440000
+"free f(SYSIN)"                                                         00450000
+"free f(TEMP1)"                                                         00460000
+"free f(INCLUDE)"                                                       00470000
+"free f(EXCLUDE)"                                                       00480000
+                                                                        00481000
+TIM = TIME()                                                            00490000
+DAT = DATE()                                                            00500000
+/* determine sysid, esm, sysplex */                                     00510000
+CVT      = C2d(Storage(10,4))                /* point to CVT         */ 00520000
+CVTRAC   = C2d(Storage(D2x(CVT + 992),4))    /* point to RACF CVT    */ 00530000
+RCVT     = CVTRAC                            /* use RCVT name        */ 00540000
+RCVTID   = Storage(D2x(RCVT),4)              /* point to RCVTID      */ 00550000
+ESMNAME = RCVTID                                                        00560000
+SYSPLEX = mvsvar('sysplex')                                             00570000
+IF LENGTH(SYSPLEX) < 1 then SYSPLEX = "NONE"                            00580000
+If RCVTID = 'RCVT' then ESMNAME = 'RACF'                                00590000
+If RCVTID = 'RTSS' then ESMNAME = 'TSS '                                00600000
+                                                                        00601000
+if length(p1) = 0 then                                                  00610000
+  do                                                                    00620000
+                                                                        00621000
+    /* edit ALTLIB and LIBDEF ISPPLIB datasets to proper locations */   00622000
+                                                                        00623000
+    ADDRESS TSO "ALTLIB ACT APPL(CLIST) DATASET('hosst03.rexx')"        00630000
+    ADDRESS ISPEXEC;                                                    00640000
+    "LIBDEF ISPPLIB",                                                   00650000
+             "DATASET ID('hosst03.panels')"                             00660000
+                                                                        00690000
+    IF (SYSVAR('SYSISPF') ^= ACTIVE) THEN DO                            00700000
+       'ISPF PANEL(ETCL)'                                               00710000
+       RETURN(0)                                                        00720000
+    END                                                                 00730000
+    'ISPEXEC DISPLAY PANEL(ETCL)'                                       00740000
+    IF RC > 0 then                                                      00750000
+      do                                                                00760000
+       return                                                           00770000
+      end                                                               00780000
+  end                                                                   00790000
+                                                                        00791000
+INITIATE:                                                               00800000
+STATUS = MSG('ON')                                                      00810000
+STATUS = MSG('OFF')                                                     00820000
+user = userid()                                                         00840000
+                                                                        00841000
+current_seconds = TIME(S)                                               00842001
+last_qual = "D"current_seconds                                          00843001
+                                                                        00848001
+summary_dsn = user'.ETCL.SUMMARY.REPORT.'last_qual                      00850001
+outds = user'.ETCL.OUTPUT.RPT.'last_qual                                00860001
+etcl_rpt = user'.etcl.detail.report.'last_qual                          00870001
+include_dsn = user'.etcl.include.'last_qual                             00880001
+exclude_dsn = user'.etcl.exclude.'last_qual                             00890001
+sysin = user'.etcl.sysin.'last_qual                                     00900001
+sysout = user'.etcl.sysout.'last_qual                                   00910001
+                                                                        00911000
+If length(p1) > 0 then                                                  00920000
+ do                                                                     00930000
+   input_parm = "'"p1"'"                                                00940000
+   input_dataset = p1                                                   00950000
+   include.1 = include_p2                                               00960000
+   include.0 = 1                                                        00970000
+   exclude.1 = exclude_p3                                               00980000
+   exclude.0 = 1                                                        00990000
+ end                                                                    01000000
+else                                                                    01010000
+ do                                                                     01020000
+   input_parm = ref                                                     01030000
+   input_parm = "'"input_parm"'"                                        01040000
+   include.1 = include1                                                 01050000
+   exclude.1 = exclude1                                                 01060000
+ end                                                                    01070000
+                                                                        01071000
+select                                                                  01080000
+when ESMNAME = 'TSS' then                                               01090000
+ if link_listed = 'Y' then                                              01100000
+  do                                                                    01110000
+    esm_call = "CALL *(AT6#RPT)" input_parm                             01120000
+  end                                                                   01130000
+ else                                                                   01140000
+  do                                                                    01150000
+    esm_call = "CALL '"esm_LOAD"(AT6#RPT)'" input_parm                  01160000
+  end                                                                   01170000
+when ESMNAME = 'ACF2' then                                              01180000
+ if link_listed = 'Y' then                                              01190000
+  do                                                                    01200000
+    esm_call = "CALL *(AT5#RPT)" input_parm                             01210000
+  end                                                                   01220000
+ else                                                                   01230000
+  do                                                                    01240000
+    esm_call = "CALL '"esm_LOAD"(AT5#RPT)'" input_parm                  01250000
+  end                                                                   01260000
+when ESMNAME = 'RACF' then                                              01270000
+ if link_listed = 'Y' then                                              01280000
+  do                                                                    01290000
+    esm_call = "CALL *(AT6#RPT)" input_parm                             01300000
+  end                                                                   01310000
+ else                                                                   01320000
+  do                                                                    01330000
+    esm_call = "CALL '"esm_LOAD"(AT8#RPT)'" input_parm                  01340000
+  end                                                                   01350000
+otherwise                                                               01360000
+  say 'ETCL Interactive is not set up for this system: 'SYSID           01370000
+  say ' '                                                               01380000
+  exit                                                                  01390000
+end                                                                     01400000
+                                                                        01401000
+if length(include.1) > 0 then                                           01410000
+ do                                                                     01420000
+   if sysdsn("'"include_dsn"'") = OK then                               01430000
+     do                                                                 01440000
+     address tso "alloc f(INCLUDE) da('"include_dsn"') SHR REU"         01450000
+     END                                                                01460000
+   else                                                                 01470000
+     do                                                                 01480000
+       address tso "alloc f(INCLUDE) da('"include_dsn"') NEW SP(2 10)   01490000
+       TR DSORG(PS) RECFM(F B) LRECL(80) "                              01500000
+     END                                                                01510000
+    address tso "execio * diskw INCLUDE (stem include. finis"           01520000
+ end                                                                    01530000
+if length(exclude.1) > 0 then                                           01540000
+ do                                                                     01550000
+   if sysdsn("'"exclude_dsn"'") = OK then                               01560000
+     do                                                                 01570000
+     address tso "alloc f(EXCLUDE) da('"exclude_dsn"') SHR REU"         01580000
+     END                                                                01590000
+   else                                                                 01600000
+     do                                                                 01610000
+       address tso "alloc f(EXCLUDE) da('"exclude_dsn"') NEW SP(2 10)   01620000
+       TR DSORG(PS) RECFM(F B) LRECL(80) "                              01630000
+     END                                                                01640000
+    address tso "execio * diskw EXCLUDE (stem exclude. finis"           01650000
+ end                                                                    01660000
+p1 = good                                                               01670000
+exclude = p3                                                            01680000
+if sysdsn("'"summary_dsn"'") = OK then                                  01690000
+ do                                                                     01700000
+   address tso "alloc f(SUMMARY) da('"summary_dsn"') SHR REU"           01710000
+ END                                                                    01720000
+else                                                                    01730000
+ do                                                                     01740000
+   address tso "alloc f(SUMMARY) da('"summary_dsn"') NEW SP(2 10)       01750000
+   TR DSORG(PS) RECFM(F B) LRECL(133) "                                 01760000
+ END                                                                    01770000
+if sysdsn("'"etcl_rpt"'") = OK then                                     01780000
+ do                                                                     01790000
+   address tso "alloc f(SYSPRINT) da('"etcl_rpt"') SHR REU"             01800000
+ END                                                                    01810000
+else                                                                    01820000
+ do                                                                     01830000
+   address tso "alloc f(SYSPRINT) da('"etcl_rpt"') NEW SP(50 50)        01840000
+   TR DSORG(PS) RECFM(F B) LRECL(133) "                                 01850000
+ END                                                                    01860000
+if sysdsn("'"sysin"'") = OK then                                        01870000
+ do                                                                     01880000
+   address tso "alloc f(SYSIN) da('"sysin"') SHR REU"                   01890000
+ END                                                                    01900000
+else                                                                    01910000
+ do                                                                     01920000
+   address tso "alloc f(SYSIN) da('"sysin"') NEW SP(2 10)               01930000
+   TR DSORG(PS) RECFM(F B) LRECL(80)"                                   01940000
+ END                                                                    01950000
+if sysdsn("'"outds"'") = OK then                                        01960000
+ do                                                                     01970000
+   address tso "alloc f(TEMP1) da('"outds"') SHR REU"                   01980000
+ END                                                                    01990000
+else                                                                    02000000
+ do                                                                     02010000
+   address tso "alloc f(TEMP1) da('"outds"') NEW SP(50 50)              02020000
+   TR DSORG(PS) RECFM(F B) LRECL(133) "                                 02030000
+ END                                                                    02040000
+ do                                                                     02050000
+   address tso "alloc f(SORTWK01) NEW SP(2 10) CYLINDERS"               02060000
+ END                                                                    02070000
+ do                                                                     02080000
+   address tso "alloc f(SORTWK02) NEW SP(2 10) CYLINDERS"               02090000
+ END                                                                    02100000
+if sysdsn("'"sysout"'") = OK then                                       02110000
+ do                                                                     02120000
+   address tso "alloc f(SYSOUT) da('"sysout"') SHR REU"                 02130000
+ END                                                                    02140000
+else                                                                    02150000
+ do                                                                     02160000
+   address tso "alloc f(SYSOUT) da('"sysout"') NEW SP(2 10)             02170000
+   TR DSORG(PS) RECFM(F B) LRECL(133) "                                 02180000
+ END                                                                    02190000
+                                                                        02200000
+address tso "alloc f(DBASE) da('"DBASE_dataset"') SHR"                  02220000
+Address TSO esm_call                                                    02230000
+address tso "EXECIO * DISKR "SYSPRINT" (STEM sysp. FINIS"               02240000
+address tso "EXECIO * DISKR "SUMMARY" (STEM sum. FINIS"                 02250000
+                                                                        02251000
+/* load the SUMMARY so it can be displayed at the end */                02252000
+                                                                        02253000
+total_rec = sysp.0 + sum.0                                              02260000
+j = 1                                                                   02270000
+do i= 1 to total_rec                                                    02280000
+ if i <= sysp.0 then                                                    02290000
+  do                                                                    02300000
+   out.i = sysp.i                                                       02310000
+  end                                                                   02320000
+ else                                                                   02330000
+ do                                                                     02340000
+   out.i = sum.j                                                        02350000
+   j = j + 1                                                            02360000
+ end                                                                    02370000
+end                                                                     02380000
+                                                                        02381000
+address tso "EXECIO * DISKW "TEMP1" (STEM out. FINIS"                   02390000
+address tso "ISPEXEC EDIT DATASET('"outds"')"                           02400000
+/*  "ISPEXEC BROWSE DATASET('"etcl_rpt"')" */                           02410000
+                                                                        02411000
+address tso "free f(SUMMARY)"                                           02420000
+address tso "free f(SYSPRINT)"                                          02430000
+address tso "free f(INCLUDE)"                                           02440000
+address tso "free f(EXCLUDE)"                                           02450000
+address tso "free f(DBASE)"                                             02460000
+address tso "free f(SYSOUT)"                                            02470000
+address tso "free f(SYSIN)"                                             02480000
+address tso "free f(TEMP1)"                                             02490000
+address tso "free f(SORTWK01)"                                          02500000
+address tso "free f(SORTWK02)"                                          02510000
+                                                                        02511000
+address tso "DELETE '"etcl_rpt"'"                                       02520000
+address tso "DELETE '"summary_dsn"'"                                    02530000
+address tso "DELETE '"include_dsn"'"                                    02540000
+address tso "DELETE '"exclude_dsn"'"                                    02550000
+address tso "DELETE '"sysout"'"                                         02560000
+address tso "DELETE '"sysin"'"                                          02570000
+address tso "DELETE '"outds"'"                                          02580000
+return                                                                  02590000
+/*             */                                                       02600000
+/* END OF CODE */                                                       02610000
+/*             */                                                       02620000

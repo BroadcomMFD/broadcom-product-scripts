@@ -1,0 +1,21 @@
+%TUTORIAL ------ Cleanup interactive panel help ------------------------------
+%OPTION ===>_OPT                          %
++
++%How to specify input parameters:
++
+% PARM      +- This will be UNREF=xxx or UNREF=BOTH or UNREF=ALL or
++              REF=xxx or REF=BOTH or REF=ALL where "xxx" is the number of days
++
+% INCLUDE   +- This is what you want to report on
++              ACID or PROFILE or CLASS(DATASET)NAME(SYS) or
++              CLASS(USERID) NAME(*ALL*) for the ALL Record, etc.
++
+% EXCLUDE   +- This for what you want to EXCLUDE from the report
++              Want to exclude all SYS1.* dataset, use
++              CLASS(DATASET) NAME(SYS1.)
++
++
+%(For more information on CLEANUP, see the Cleanup Techdocs.
+%
+)PROC
+)END
