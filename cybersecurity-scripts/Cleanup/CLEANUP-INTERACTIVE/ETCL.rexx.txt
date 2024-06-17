@@ -6,7 +6,6 @@
 /* to obtain cleanup reports without requiring JCL to be used.     */   00040000
 /* This will only generate REPORTS nothing else.                   */   00050000
 /*                                                                 */   00060000
-/* Idea and code created by Steve Hosie                            */   00070000
 /* Created Feb 2024                                                */   00080000
 /* Updated March 7 2024 - added summary report to end of displayed */   00090000
 /*   report.                                                       */   00100000
