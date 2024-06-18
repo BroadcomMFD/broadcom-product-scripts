@@ -1,65 +1,139 @@
-)CM  A Generic skeleton member that replaces variables with their values
-)REXX SENDNODE VNBSQDSP PACKAGE DESTIN TYPRUN OUTRBAK SUBMITER
-TRACE Off
-WHEREAMI = 'C1BMXIN'
-SENDNODE =  SYSVAR(SYSNODE)
-PARSE VAR VNBSQDSP STR "'" PACKAGE "' TO DEST " DESTIN " OPT" TAIL '.'
-DESTIN = STRIP(DESTIN)
-PACKAGE = STRIP(PACKAGE)
-IF TYPERUN = 'TYPRUN' THEN TYPRUN = ''
-OUTRBAK = STRIP(STRIP(TAIL,'T','.'))
-SUBMITER = USERID()
+)CM Capture Package shipping variables for JCL substitutions
+)REXX HOSTHLQ VDDHSPFX RMOTHLQ VDDRSPFX SHIPPER SYSUID SENDNODE
+  TRACE Off
+  WHEREAMI = 'C1BMXIN'
+  HOSTHLQ = Strip(VDDHSPFX)
+  RMOTHLQ = Strip(VDDRSPFX)
+  SHIPPER = USERID()
+  SYSUID  = USERID()
+  SENDNODE =  SYSVAR(SYSNODE)
 )ENDREXX
-)CM    XMETHOD = the transmission method
-)CM    XNODE   = the Host site node
-)CM
-)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
+)REXX VNBSQDSP PKGID DESTIN TYPRUN OUTRBAK VDDXNODE NODENAME
+  TRACE ?R
+  WHEREAMI = 'C1BMXIN'
+  PARSE VAR VNBSQDSP STR "'" PKGID "' TO DEST " DESTIN " OPT" TAIL '.'
+  DESTIN = STRIP(DESTIN)
+  PKGID = STRIP(PKGID)
+  IF TYPERUN = 'TYPRUN' THEN TYPRUN = ''
+  OUTRBAK = STRIP(STRIP(TAIL,'T','.'))
+  NODENAME = Strip(VDDXNODE)
+  NODENAME = REXALDST(DESTIN)
+)ENDREXX
+)REXX  VNBCPARM DATE6 TIME6 DATE8 TIME8 NEXTJOB
+  TRACE Off
+  WHEREAMI = 'C1BMXIN'
+  NEXTJOB  = SUBMITER || '@'
+  PARSE VAR VNBCPARM STR "," DATE8 "," TIME8
+  DATE6 = Substr(DATE8,3)
+  TIME6 = Substr(TIME8,1,6)
+)ENDREXX
+)CM  PKGID SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
 )CM
 )CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT
 )CM  TO C1BMX000.
 )CM
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 )CM
-)CM  TAILORING expands variables in the Remote and Confirmation JCLS
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.
 )CM
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 )CM
 &VNBSQDSP
-//*******************************************************************
-//*
-//* SYMBOLS DEFINITION
-//*
-//*******************************************************************
-//  SET DATE=&VNB6DATE
-//  SET TIME=&VNB6TIME
-//  SET USER=NDVRUSR
-//  SET PKGID=&PACKAGE
 //* *==============================================================* *
-//* *= SUBSTITUTE VARIABLES IN THE REMOTE JCL       ===============* *
+//* *= Substitute variables in the Remote JCL       ===============* *
 //* *==============================================================* *
-//TAILOR   EXEC PGM=IRXJCL,COND=(4,LT),                    C1BMXIN
-//         PARM='ENBPIU00 A'
+//TAILOR   EXEC PGM=IRXJCL,PARM='ENBPIU00 A',              C1BMXIN
+//         COND=(4,LT)
 //TABLE    DD *      Replaces variable values in listed MODEL DDName
 * MODEL    TBLOUT
   AHJOB    AHJOB
-)SEL &XMETHOD = NETVIEW_FTP
   C1BMXFTC C1BMXFTC
-//C1BMXFTC DD DSN=&&&&XFTC,DISP=(OLD,PASS)
-)ENDSEL &XMETHOD = NETVIEW_FTP
-//AHJOB    DD DSN=&VDDHSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN..AHJOB,
+//C1BMXFTC DD DSN=&&XFTC,DISP=(OLD,PASS)
+//AHJOB    DD DSN=&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN..AHJOB,
 //         DISP=SHR
 //OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
-SENDNODE = '&SENDNODE'
-DESTIN   = '&DESTIN'
-OUTRBAK  = '&OUTRBAK'
-SHIPDATE = '&VNB6DATE'
-SHIPTIME = '&VNB6TIME'
-USERID   = '&USER'
-TYPRUN   = '&TYPRUN'
-PKGID    = '&VPHPKGID'
-HOSTLIBS = '&VDDHSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN'
-RMOTLIBS = '&VDDRSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN'
-ReturnHome = '&XNODE'
-//SYSEXEC  DD DISP=SHR,DSN=NDVRSCM.R19.CSIQCLS0 (your CSIQCLS0)
+  DESTIN   = '&DESTIN'
+  OUTRBAK  = '&OUTRBAK'
+  DATE6    = '&DATE6'
+  TIME6    = '&TIME6'
+  SHIPPER  = '&USER'
+  PKGID    = '&PKG'
+  SHIPPER  = '&SHIPPER'
+  RUNNETRC = '&RUNNETRC'
+  NODENAME = '&NODENAME'
+  HOSTLIBS = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN'
+  RMOTLIBS = '&RMOTHLQ..D&DATE6..T&TIME6..&DESTIN'
+  Say 'HOSTLIBS='HOSTLIBS ; Say 'RMOTLIBS='RMOTLIBS
+//*YSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//SYSEXEC  DD DISP=SHR,DSN=SYSSHR.NDVR.R190.CSIQCLS0
+//SHOWME   DD SYSOUT=*
 //SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *
+//SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *
+)SEL &DESTIN = CA32A
+//*-------------------------------------------------------------------
+//*   Report PKGID element actions for selected packages
+//*-------------------------------------------------------------------
+//*   STEP 1 -- EXECUTE CSV UTILITY
+//*-------------------------------------------------------------------
+//BILDSCL1 EXEC PGM=NDVRC1,                                C1BMXIN
+//         COND=(4,LT),
+//         PARM='BC1PCSV0'
+//STEPLIB  DD  DISP=SHR,DSN=SYSSHR.NDVR.R190.CSIQAUTU      SCMM@LIB
+//         DD  DISP=SHR,DSN=SYSSHR.NDVR.R190.CSIQAUTH      SCMM@LIB
+//         DD  DISP=SHR,DSN=SYSSHR.NDVR.R190.CSIQLOAD      SCMM@LIB
+//CONLIB   DD  DISP=SHR,DSN=SYSSHR.NDVR.R190.CSIQLOAD      SCMM@LIB
+//BSTIPT01 DD *
+    LIST PACKAGE ACTION FROM PACKAGE '&PKGID'
+         TO FILE CSVEXTR  .
+//CSVEXTR  DD DSN=&&CSVFILE,
+//      DCB=(RECFM=FB,LRECL=2000,BLKSIZE=24000,DSORG=PS),
+//      DISP=(NEW,PASS),
+//      SPACE=(TRK,(5,1),RLSE)
+//C1MSGS1  DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//*--------------------------------------------------------------------
+//SHOWME   EXEC PGM=IEBGENER,                              C1BMXIN
+//         COND=(4,LT)
+//SYSPRINT  DD SYSOUT=*                           MESSAGES
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS
+//SYSUDUMP DD SYSOUT=*
+//*----------------------- WALJO11.CLIST.TSO06(ENBPIU00) --------------
+//BILDSCL2 EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST',       C1BMXIN
+//         COND=(4,LT)
+//PARMLIST DD *
+  COMMENT  AHSCL    DEFAULTS 1
+  MODEL    AHSCL    OPTIONS  A
+//SYSEXEC  DD DISP=SHR,DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX
+//         DD DISP=SHR,DSN=SYSSHR.NDVR.R190.CSIQCLS0
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)
+//COMMENT  DD *
+* SCL built for &PKGID on &SENDNODE
+//DEFAULTS DD *
+  FromLib.         = ''
+  FromLib.ASMPGM   = 'LOADLIB'
+  FromLib.COBOL    = 'LOADLIB'
+  FromLib.JCL      = 'JCL'
+  FromLib.ISPS     = 'SKELS'
+  FromLib.ISPP     = 'PANELS'
+  FromLib.CLSTREXX = 'REXX'
+//NOTHING  DD DUMMY
+//MODEL    DD *    Include ADD Statement SCL
+)IM ADDELEMT NT
+//OPTIONS  DD * CSV contains sending and receiving variables
+  ENV_NAME_@T@  =  Word(ENV_NAME_@S@ ENV_NAME_@T@,1)
+  TYPE_NAME_@T@ =  Word(TYPE_NAME_@T@ TYPE_NAME_@S@,1)
+  ELM_@T@       =  Word(ELM_@T@ ELM_@S@,1)
+  SBS_NAME_@T@  =  Word(SBS_NAME_@T@ SBS_NAME_@S@,1)
+  FromLibraryDD = FromLib.TYPE_NAME_@T@
+  COMMENT = Left(PKG_ID':'COMMENT,40)
+//SYSTSPRT DD SYSOUT=*
+//AHSCL    DD DSN=&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN..AHSCL,
+//         DCB=(RECFM=FB,LRECL=080,BLKSIZE=0,DSORG=PS),
+//         DISP=(,CATLG),SPACE=(TRK,(1,5))
+//*--------------------------------------------------------------------
+)ENDSEL &DESTIN = CA32A
 //* *===================================================== C1BMXIN / *
