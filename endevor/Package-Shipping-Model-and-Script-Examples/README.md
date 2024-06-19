@@ -1,66 +1,101 @@
 # Package Shipping Model and Script examples 
 
-Package shipping can submit a lot of jobs - up to 4 jobs per shipment. If you are shipping from multiple host sites to remote sites, it becomes easy to lose track of which sending host and package name relates to the job.
+One Package shipmet can submit up to 4 jobs, depending on the transmission tool used. If you are shipping from multiple host sites to remote sites, it becomes challenging to track which sending host and package relates to the local and remote job outputs. Each job consists of members from Endevor's CSIQOPTN and CSIQSENU libraries. Determining which member you need to change can be quite difficult.   
 
-Items in this folder are intended to complement the contents of [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie) .
+Items in this folder are intended to help with these challenges, and to complement the [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie) content.
+
 Included in this folder are:
 
  - Items to comment your package shipping jobs
- - Miscenaleous examples of tips and techniques for package shipping
-
+ - Miscellaneous examples of tips and techniques 
 
 ## Commenting Package Shipment Jobs
 
- help you to connect jobs to their originations, commenting your remote jobs with backward pointers as demonstrated in this example.
-
+Generous commenting of your package shipping objects helps you to connect jobs to their originations.
+For example, a remote shipment job might be commented this way, giving you backward pointers to the origin of the package shipment. 
+ 
     //SHIPJOBR  JOB (123000),'FROM DEV1',CLASS=A,PRTY=6,               
     //  MSGCLASS=X,REGION=0M                                              
     //***=======Remote Shipping JCL for Site SOMWHER===================* *
     //* Package   := FINA#YEDN0607479                                      
-    //* Destin    := SOMWHER                                               
+    //* Destin    := SOMWHER             
+    //* Submitter := LEWIS                                            
     //* From      := DEVBOX1    240506  091612                        
     //* HostLibs  := PUBLIC.HOST.D240506.T091612.SOMWHER
     //* RmotLibs  := PUBLIC.RMOT.D240506.T091612.SOMWHER 
     //* *==============================================================* *
 
-Moreover, the variables used for the commenting can be also be leveraged for other things you might need to do in the remote shipping job.
-In the **C1BMXIN** member values for package shipping variables can be captured and expanded within the reamining package shpping job.
-
-There is an unlimited number of ways to leverage these variables, so for the most part this folder offers examples and alternatives. 
-
-### Package Shipping Variables
-
-VDDHSPFX  - Host staging dataset name prefix                       
-VDDRSPFX  - Rmot staging dataset name prefix                       
-VNBCPARM  - Endevor parameter string with Date and time values     
-VNBSQDSP  - The Package ship command containing package name, Destinati#on and the Out/Back option
-VNB6DATE  - Six character shipping Date                            
-VNB6TIME  - Six character shipping Time                            
-VPHPKGID  - Package ID                                             
+Additionally, the steps in your shipping jobs may contain backward pointers, such as:
 
 
+    Command ===>                                                  Scroll ===> CSR 
+    ****** ***************************** Top of Data *****************************
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 35 Line(s) not Displayed
+    ==CHG> //SCL1     EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    QBOXB       
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 12 Line(s) not Displayed
+    ==CHG> //COPIES   EXEC PGM=NDVRC1,DYNAMNBR=1500,PARM='C1BM3000'   QBOXB       
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 20 Line(s) not Displayed
+    ==CHG> //ALTERS1  EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    QBOXB       
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 11 Line(s) not Displayed
+    ==CHG> //SHOWME   EXEC PGM=IEBGENER,REGION=1024K                  QBOXB       
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 40 Line(s) not Displayed
+    000121 //CONFGT12 EXEC PGM=IEBGENER                               C1BMXRCN    
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 11 Line(s) not Displayed
+    000133 //CONFCOPY EXEC PGM=NDVRC1,                                C1BMXRCN    
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 24 Line(s) not Displayed
+    000158 //CONFGT04 EXEC PGM=IEBGENER                               C1BMXRCN    
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 11 Line(s) not Displayed
+    000170 //CONFCOPY EXEC PGM=NDVRC1,                                C1BMXRCN    
+    - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 24 Line(s) not Displayed
+    000195 //CONFGT00 EXEC PGM=IEBGENER                               C1BMXRCN    
 
-### Skeleton / Model / Script example members
+Where QBOXB, C1BMXRCM are package shipping members or elements in your Endevor Admin area.
 
-Here are members in this folder:
+Package Shipping variables quickly appear and then disappear, making it difficult to apply them. Examples in this folder show a timely capture of shipping variables, allowing you to embellish them with your own, and rendering them to be avaiable across all the related package shipping jobs. Member **C1BMXIN** and others in this folder serve as examples and alternatives.
 
-__C1BMXIN.skl__  is a modified version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for these values be available in your remote JCL. to include references such as the Package name, Destination and others. 
+These are some of the variables, briefly made available by package shipping, and captured by the examples and alternatives in this folder:
 
-Package shipments for all transmission methods use the C1BMXIN member. This example shows capturing variables, usng Table Tool to expand those variables that mignt be found in subsequent jobs.
+- VDDHSPFX  - Host staging dataset name prefix                       
+- VDDRSPFX  - Rmot staging dataset name prefix                       
+- VNBCPARM  - Endevor parameter string with Date and time values     
+- VNBSQDSP  - The Package ship command containing package name, Destinati#on and the Out/Back option
+- VNB6DATE  - Six character shipping Date                            
+- VNB6TIME  - Six character shipping Time                            
+- VPHPKGID  - Package ID                                             
 
-__#RJICPY1.skl__ is a modified version of the #RJICPY1 "model" found in your CSIQOPTN library. This version shows how to comment the remote shipment job as shown above.
 
-__C1BMXJOB.skl__  is a modified version of the C1BMXJOB skeleton found in your CSIQSENU library. This version is an example for inserting one or more "override" libraries into your package shipping procedure.  See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
-). The example C1BMXJOB.skl member in this folder shows three "override" libraries, any one of which might contain modified versions of C1BMXIN and #RJICPY1.
+
+### Skeleton / Model / Script example members for commenting
+
+Members in this folder that help with commenting include:
+
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Package shipments for all transmission methods use the C1BMXIN member. The example shows capturing and expanding variables using Table Tool for subsequent shipping jobs.
+
+__#RJICPY1.skl__ is a modified version of the #RJICPY1 "model" found in your CSIQOPTN library. This version shows how to comment the remote shipment job as shown above. 
+
+For commenting the steps within a shipment object, the edit maccro __JCLCOMMNT__ can help. 
+
+## Tips and Techniques
+
+Miscellaneous tips and techniques for package shipping are given here.
+
+
+### Preparing a library for your Shipping software members
+
+By default, Endevor builds package shipping JCL from members of the Endevor CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "override" libraries, and place your modified members into them. **C1BMXJOB.skl** is where that is done, and an example is provided. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
+). The example **C1BMXJOB.skl** member in this folder shows three "override" libraries, any one of which might contain modified versions of package shipping objects. 
 
     BST.QA.FS.ADMIN1.ENDEVOR.ISPS
     BST.QA.FS.ADMIN2.ENDEVOR.ISPS
     BST.QA.FS.$SKELS
 
+It is not necessary to maintain the separation of CSIQOPTN and CSIQSEUN members. You can place override members into one library, regardless of their original locations. It is strongly recommended, though that you comment them generously with their names in the comments, so that you have the backward pointers in your shipping JCL.
 
-## Tips and Techniques
+ 
+### Using your Transmission tool for the Confirmation job
 
-Package shipping uses an IEBGENER to submit the "notification" job back to the Host system. The requires that you have a "ROUTE XEQ" card in the JCL and a connection between systems that can successfully route jobs. Sometimes it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can use the RMOTLIB variable to create a new dataset (From the IEBGENER) and transmit it to the HOST system. 
+Package Shipping assumes that a remote submission of JCL will cause the "Notification" job to run on the Host system. An IEBGENER is used, requiring a "ROUTE XEQ" card in the JCL and a connection between systems. Sometimes it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can capture and use variables to create a new dataset (From the IEBGENER) and transmit it to the capture HOST system. 
+
 
 Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
 
@@ -98,12 +133,18 @@ Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
 
 
 
+### IEBPTPCH 
+
+IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. The utility can perform various tasks, including copying members from a partitioned dataset (PDS) into a sequential dataset (PS). If you have shipped members of a datset that contain commands, such as DB2 Binds or CICS newcopies, then IEBPTPCH is useful for writing all the shipped members into a sequential file for subsequent processing.
+
+See the __#RJNDVRA__ member example.
+ 
+### Multiple Endevors
 
 
-If you are running multiple Endevors at your site, you need a way to allow all of them to execute the same package shipping code, and at the same time support site-specific differences for them. Dataset names and jobcard variations must be different from one Endevor to the next. 
+If you are running multiple Endevors, it would be unreasonable to assume they use the same dateaset names and jobcard values. Rather, it might be preferable to allow them to execute the same package shipping software, while allowing for site-specific differences. Dataset names,  jobcard variations, and anything that must be different from one Endevor to the next can be supported, using a "callable Rexx" service described here. Where there might be something different from one Endevor to the next, you can create and place variable names into the package shipping objects, and expect variable substitutions to occur differently at each site.
 
-You can leverage the REXX method depicted in the **@DBOX** example in this folder. Name your member(S) after the Lpar name (or other) name, so that each one can operate with its own unique values. A section like this one can be used in a skeleton member, such as the C1BMXIN member to support site-specific variables designated for your multiple Lpars or Endevor images.
-
+On the mainframe, REXX can run in many places - including within an ISPF skeleton. Moreover, a REXX module can serve as a simple database of information. You can leverage this REXX versatility by adopting the methods of the **@DBOX** member in this folder. It supports variables whose values depend on the site. Name your copies of  **@DBOX** after the Lpar (or other) names, so that each one can operate with its own unique values based on common variable names. You can add your own variables as needed. A section like this one can be used in a skeleton member, such as the C1BMXIN member to support site-specific variables designated for your multiple Lpars or Endevor images.
 
 
     )CM ---------- This section shows accessing Site-Specific variables  
@@ -154,12 +195,7 @@ Lines 13 and 14 show the REXX code identifying where it is running. The REXX "MV
 
 The remainder of the trace output shows various calls to @DBOX to fetch site values.
 
-
-
-
-
-
-
+Engaging the "callable REXX" service can be made from any running REXX. The example above shows calls from an ISPF panel. The process that automates package shipments can use the "calleble REXX" service from an Endevor REXX exit, or from REXX executions from zowe.
 
 
 
