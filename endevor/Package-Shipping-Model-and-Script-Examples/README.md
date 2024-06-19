@@ -102,7 +102,7 @@ Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
     //CONFCOPY EXEC PGM=IEBGENER           EXECUTED AT THE REMOTE SITE      
     -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  7 Line(s) not Displayed 
     //*YSUT2   DD SYSOUT=(A,INTRDR)                                         
-    //SYSUT2   DD  DSN=&VDDRSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN..NOTIFY,  
+    //SYSUT2   DD  DSN=&RMOTHLQ..D&DATE6..T&TIME6..NOTIFY,  
     //             DISP=(,CATLG),SPACE=(TRK,(1,0)),                         
     //             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),           
     //             UNIT=SYSALLDA                                            
@@ -110,7 +110,7 @@ Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
     //CONFABND EXEC PGM=IEBGENER,COND=ONLY EXECUTED AT THE REMOTE SITE      
     -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  8 Line(s) not Displayed 
     //*YSUT2   DD SYSOUT=(A,INTRDR)                                         
-    //SYSUT2   DD  DSN=&VDDRSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN..NOTIFY,  
+    //SYSUT2   DD  DSN=&RMOTHLQ..D&DATE6..T&TIME6..NOTIFY,  
     //             DISP=(,CATLG),SPACE=(TRK,(1,0)),                         
     //             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),           
     //             UNIT=SYSALLDA                                            
@@ -127,11 +127,11 @@ Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
     MODE B                                                                
     EBCDIC                                                                
     SITE FILETYPE=JES                                                     
-    PUT '&VDDRSPFX..D&VNB6DATE..T&VNB6TIME..&DESTIN..NOTIFY'              
+    PUT '&RMOTHLQ..D&DATE6..T&TIME6..NOTIFY'           
     QUIT                                                                  
     //***--------------------------------------------* C1BMXRCN (CONT.)  *
 
-
+Notice that the &RMOTHLQ, &DATE6 and &TIME6 variables are among those captured by the TAILOR step within C1BMXIN.
 
 ### IEBPTPCH 
 
@@ -196,12 +196,5 @@ Lines 13 and 14 show the REXX code identifying where it is running. The REXX "MV
 The remainder of the trace output shows various calls to @DBOX to fetch site values.
 
 Engaging the "callable REXX" service can be made from any running REXX. The example above shows calls from an ISPF panel. The process that automates package shipments can use the "calleble REXX" service from an Endevor REXX exit, or from REXX executions from zowe.
-
-
-
-
-
-
-
 
 
