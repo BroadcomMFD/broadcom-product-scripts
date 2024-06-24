@@ -11,8 +11,7 @@ if Substr(DSNVAR,1,1) /= ' ' then TraceRc = 1;
 IF TraceRc = 1 then Trace R
 /*--+----1----+----2----+----3----+----4----+----5----+----6----+----7--*/
 /* Enter High Level Qualifiers */
-/* SHLQ='CADEMO.ENDV.RUN' */
-   SHLQ='NDVR.R190'
+   SHLQ='SYSDBOX.R190'
    AHLQ='SYSDBOX.NDVR'   /* APPLICATIONS HIGH LEVEL QUALIFIER */
 
 /* Name Endevor's APF Authorized libraries:      */
@@ -65,9 +64,9 @@ MySRC2Library = SHLQ'.CSIQJCL'
    TriggerFileName = 'SYSDBOX.NDVR.SHIPMENT.TRIGGER'
 
    /* Provide details when there is only One shipping destination    */
-/* Destination = 'TSO32'   ;    */ /* The oneShipment Destination   */
+/* Destination = 'QBOX'   ;    */ /* The oneShipment Destination   */
 /* Hostprefix =  'SYSDBOX.NDVR';*/ /* Host staging file prefix      */
-/* Rmteprefix =  'PUBLIC.NDVR' ;*/ /* Remote staging file prefix    */
+/* Rmteprefix =  'TEST.NDVR' ;*/ /* Remote staging file prefix    */
 /* ModelMember = 'SHIP#FTP'     */ /* Jcl image for shipment job    */
 
 /* MyHomeAddress  = 'myEndevor@mysite.com' */
@@ -79,9 +78,7 @@ MySRC2Library = SHLQ'.CSIQJCL'
    PDAMaplist = ,        /* required only for PDA  */
       " DEV/D-QAS/Q ",
       " EMER/1-EMER/2 "
-   /* " DEV/1-QAS/2 "        */
-   /* " EMER/1-EMER/2 "                                        */
-   /*                                                          */
+                       
 /* JOB INFO FOR ALTERNATE ID */
 AltIDAcctCode = '0000'
 AltIDJobClass = 'A'

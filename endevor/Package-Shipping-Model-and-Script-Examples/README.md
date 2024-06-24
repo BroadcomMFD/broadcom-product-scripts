@@ -1,18 +1,21 @@
 # Package Shipping Model and Script examples 
 
-One Package shipmet can submit up to 4 jobs, depending on the transmission tool used. If you are shipping from multiple host sites to remote sites, it becomes challenging to track which sending host and package relates to the local and remote job outputs. Each job consists of members from Endevor's CSIQOPTN and CSIQSENU libraries. Determining which member you need to change can be quite difficult.   
+There are many challenges when working with Endevor's package shipping.
 
-Items in this folder are intended to help with these challenges, and to complement the [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie) content.
+One Package shipment can submit up to 4 jobs, depending on the transmission tool used. If you are shipping to and from multiple sites, it becomes difficult to track the site names and packages to the job outputs.
 
-Included in this folder are:
+There are many parts to the package shipping process. It can be confusing to know where to insert new code you want to include.
 
- - Items to comment your package shipping jobs
- - Miscellaneous examples of tips and techniques 
+PObjects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons). Package shipping objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping.
+
+Items in this folder are intended to help with these challenges, and to complement the material found in [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie). Included are: 
+
+ - Items to comment your package shipping jobs - a first step in keeping track of package shipping objects
+ - Miscellaneous tips and techniques
 
 ## Commenting Package Shipment Jobs
 
-Generous commenting of your package shipping objects helps you to connect jobs to their originations.
-For example, a remote shipment job might be commented this way, giving you backward pointers to the origin of the package shipment. 
+Generous commenting of your package shipping objects helps you to connect jobs to their originations. Remote and confirmation jobs might be commented this way, giving you backward pointers to the origin for each package shipment.
  
     //SHIPJOBR  JOB (123000),'FROM DEV1',CLASS=A,PRTY=6,               
     //  MSGCLASS=X,REGION=0M                                              
@@ -25,7 +28,7 @@ For example, a remote shipment job might be commented this way, giving you backw
     //* RmotLibs  := PUBLIC.RMOT.D240506.T091612.SOMWHER 
     //* *==============================================================* *
 
-Additionally, the steps in your shipping jobs may contain backward pointers, such as:
+Job steps may be commented this way to indicate the package shipment object that contributed the step to the JCL:
 
 
     Command ===>                                                  Scroll ===> CSR 
@@ -49,11 +52,9 @@ Additionally, the steps in your shipping jobs may contain backward pointers, suc
     - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 24 Line(s) not Displayed
     000195 //CONFGT00 EXEC PGM=IEBGENER                               C1BMXRCN    
 
-Where QBOXB, C1BMXRCM are package shipping members or elements in your Endevor Admin area.
+Where QBOXB, C1BMXRCM are package shipping members and/or elements in your Endevor Admin area.
 
-Package Shipping variables quickly appear and then disappear, making it difficult to apply them. Examples in this folder show a timely capture of shipping variables, allowing you to embellish them with your own, and rendering them to be avaiable across all the related package shipping jobs. Member **C1BMXIN** and others in this folder serve as examples and alternatives.
-
-These are some of the variables, briefly made available by package shipping, and captured by the examples and alternatives in this folder:
+Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use then within the shipping objects to better comment , or to improve functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
 
 - VDDHSPFX  - Host staging dataset name prefix                       
 - VDDRSPFX  - Rmot staging dataset name prefix                       
@@ -63,17 +64,17 @@ These are some of the variables, briefly made available by package shipping, and
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
 
-
+See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables.  Paired with the **@DBOX** member,  **C1BMXIN**  is able to leverage additional variables whose values are specific to the host or sending site.
 
 ### Skeleton / Model / Script example members for commenting
 
 Members in this folder that help with commenting include:
 
-__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Package shipments for all transmission methods use the C1BMXIN member. The example shows capturing and expanding variables using Table Tool for subsequent shipping jobs.
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example shows capturing and expanding variables using Table Tool for subsequent shipping jobs.
 
-__#RJICPY1.skl__ is a modified version of the #RJICPY1 "model" found in your CSIQOPTN library. This version shows how to comment the remote shipment job as shown above. 
+__#RJICPY1.skl__ is a modified version of the #RJICPY1 "model" found in your CSIQOPTN library. This version simply shows how to comment the steps in your package shipping JCL. 
 
-For commenting the steps within a shipment object, the edit maccro __JCLCOMMNT__ can help. 
+The edit maccro __JCLCOMMNT__ can help insert comments for a member or element that contains JCL.
 
 ## Tips and Techniques
 
@@ -82,19 +83,19 @@ Miscellaneous tips and techniques for package shipping are given here.
 
 ### Preparing a library for your Shipping software members
 
-By default, Endevor builds package shipping JCL from members of the Endevor CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "override" libraries, and place your modified members into them. **C1BMXJOB.skl** is where that is done, and an example is provided. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
-). The example **C1BMXJOB.skl** member in this folder shows three "override" libraries, any one of which might contain modified versions of package shipping objects. 
+By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are Endevor output libraries. **C1BMXJOB.skl** is member where Override libraries are named. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
+). The example **C1BMXJOB.skl** member in this folder gives an example, naming three "override" libraries. Any one of the libraries may contain your modified package shipping objects.
 
     BST.QA.FS.ADMIN1.ENDEVOR.ISPS
     BST.QA.FS.ADMIN2.ENDEVOR.ISPS
     BST.QA.FS.$SKELS
 
-It is not necessary to maintain the separation of CSIQOPTN and CSIQSEUN members. You can place override members into one library, regardless of their original locations. It is strongly recommended, though that you comment them generously with their names in the comments, so that you have the backward pointers in your shipping JCL.
+It is not necessary to separate CSIQOPTN members from CSIQSENU members. You can choose to place override members into one library, regardless of their original locations. However, it is strongly recommended, that you comment them generously with their names in the comments.
 
  
 ### Using your Transmission tool for the Confirmation job
 
-Package Shipping assumes that a remote submission of JCL will cause the "Notification" job to run on the Host system. An IEBGENER is used, requiring a "ROUTE XEQ" card in the JCL and a connection between systems. Sometimes it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can capture and use variables to create a new dataset (From the IEBGENER) and transmit it to the capture HOST system. 
+The last package shipping job is the "Notification" job. It returns back to the host the overall status of a single package shlipment. See the **C1BMXRCN** reference in the  [Shipment Tracking and Confirmation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/package-administration/package-ship-facility/build-track-and-confirm-package-shipments/shipment-tracking-and-confirmation.html)  documentation. Package Shipping assumes an IEBGENER can write the Notification JCL to the internal reader to submit the job on the Host system. In many cases a "ROUTE XEQ" statement on the jobcard can route the job submission onto the host system. However, at some sites it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can leverage captured variables and submit the Notification job onto the host system, using this IBM FTP example:
 
 
 Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
@@ -141,60 +142,54 @@ See the __#RJNDVRA__ member example.
  
 ### Multiple Endevors
 
+If you are running multiple Endevors, it would be unreasonable to expect that dateaset names and jobcard values (for example) be the same on all of them. A more resonable expectation is to allow each Endevor to use its own dataset names, jobcard values and other site-specific variations.
 
-If you are running multiple Endevors, it would be unreasonable to assume they use the same dateaset names and jobcard values. Rather, it might be preferable to allow them to execute the same package shipping software, while allowing for site-specific differences. Dataset names,  jobcard variations, and anything that must be different from one Endevor to the next can be supported, using a "callable Rexx" service described here. Where there might be something different from one Endevor to the next, you can create and place variable names into the package shipping objects, and expect variable substitutions to occur differently at each site.
+If **DBOX** is the name of an Lpar, then **@DBOX** is the name of a "callable Rexx" service, providing site-specific information for just that Lpar. Other Lpars can have their own "callable Rexx" services too. Then, the necessary differences from one Endevor to the next can be managed in "callable Rexx" service routines, and not managed in the common code. The example **C1BMXIN.skl**, paired with the **@DBOX** member, shows how this can be done.
 
-On the mainframe, REXX can run in many places - including within an ISPF skeleton. Moreover, a REXX module can serve as a simple database of information. You can leverage this REXX versatility by adopting the methods of the **@DBOX** member in this folder. It supports variables whose values depend on the site. Name your copies of  **@DBOX** after the Lpar (or other) names, so that each one can operate with its own unique values based on common variable names. You can add your own variables as needed. A section like this one can be used in a skeleton member, such as the C1BMXIN member to support site-specific variables designated for your multiple Lpars or Endevor images.
+A "callable Rexx" service can be engaged anywhere REXX is run. One of the places is  within an ISPF skeleton. Member **C1BMXIN.skl** must reference a CSIQCLS0 library whose name might differ from one Lpar to the next. It calls **@DBOX** for the value of **MyCLS0Library** and re-assigns the returned value to a new variable named **CSIQCLS0**. Then the **&CSIQCLS0** reference will be replaced with the datset name returned by **@DBOX**.
+
+The lines of code below come from  **C1BMXIN.skl**. Notice that the trace is turned on.
 
 
-    )CM ---------- This section shows accessing Site-Specific variables  
-    )CM ----------      Longer variable names must be assigned to        
-    )CM ----------      valid 8-byte ISPF variable names                 
-    )REXX  ORDERDSN JOBCLASS ACCTCODE MSGCLASS                           
-    TRACE ?R                                                           
-    WHERE = 'C1BMXIN Get local variables '                             
-    WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;                    
+    )CM ---------- This section shows accessing Site-Specific variables    
+    )CM ----------      Longer variable names must be assigned to          
+    )CM ----------      valid 8-byte ISPF variable names                   
+    )REXX  CSIQCLS0 ORDERDSN                                               
+    TRACE ?R                                                             
+    WHERE = 'C1BMXIN Get local variables '                               
+    WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;                      
                                                                         
-    interpret 'Call' WhereIam "'AltIDAcctCode'"                        
-    ACCTCODE  = Result                                                 
-    interpret 'Call' WhereIam "'AltIDJobClass'"                        
-    JOBCLASS  = Result                                                 
-    interpret 'Call' WhereIam "'AltIDMsgClass'"                        
-    MSGCLASS  = Result                                                 
-    interpret 'Call' WhereIam "'AltIDOrderfile'"                       
-    ORDERDSN  = Result                                                 
+    interpret 'Call' WhereIam "'MyCLS0Library'"                          
+    CSIQCLS0  = Result                                                   
+    interpret 'Call' WhereIam "'AltIDOrderfile'"                         
+    ORDERDSN  = Result                                                   
                                                                         
-    )ENDREXX                                                                                                                
+    )ENDREXX                                                                       
 
-The example shows the Trace turn on. If you submit a package shipment before turning the Trace option off, will see trace output such as this example: 
-
-
+If you submit a package shipment leaving the trace turned on, the trace output will look something like this on your screen:
 
     13 *-*  WHERE = 'C1BMXIN Get local variables '                            
-    >>>    "C1BMXIN Get local variables "                                  
+       >>>    "C1BMXIN Get local variables "                                  
     14 *-*  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8))                     
-    >>>    "@DBOX"                                                         
-    16 *-*  interpret 'Call' WhereIam "'AltIDAcctCode'"                       
-    >>>    "Call @DBOX 'AltIDAcctCode'"                                    
-    17 *-*  ACCTCODE  = Result                                                
-    >>>    "0012300"                                                          
-    18 *-*  interpret 'Call' WhereIam "'AltIDJobClass'"                       
-    >>>    "Call @DBOX 'AltIDJobClass'"                                    
-    19 *-*  JOBCLASS  = Result                                    
-    >>>    "A"                                                 
-    20 *-*  interpret 'Call' WhereIam "'AltIDMsgClass'"           
-    >>>    "Call @DBOX 'AltIDMsgClass'"                        
-    21 *-*  MSGCLASS  = Result                                    
-    >>>    "Z"                                                 
-    22 *-*  interpret 'Call' WhereIam "'AltIDOrderfile'"          
-    >>>    "Call @DBOX 'AltIDOrderfile'"                       
-    23 *-*  ORDERDSN  = Result       
-    >>>   "SYSDBOX.NDVR.JCL"         
-
-Lines 13 and 14 show the REXX code identifying where it is running. The REXX "MVSVAR(SYSNAME) tells you "the name of the system your REXX exec is running on". Our "bundles" process assumes it also names a REXX module (like **DBOX** in the folode) that contains site-specific information.
-
-The remainder of the trace output shows various calls to @DBOX to fetch site values.
-
-Engaging the "callable REXX" service can be made from any running REXX. The example above shows calls from an ISPF panel. The process that automates package shipments can use the "calleble REXX" service from an Endevor REXX exit, or from REXX executions from zowe.
+       >>>    "@DBOX"                                                         
+    16 *-*  interpret 'Call' WhereIam "'MyCLS0Library'"                       
+       >>>    "Call @DBOX 'MyCLS0Library'"                                    
+       *-*   Call @DBOX 'MyCLS0Library'                                       
+       >>>     "MyCLS0Library"                                                
+       >>>     "SYSDBOX.R190.CSIQCLS0"                                    
+    17 *-*  CSIQCLS0  = Result                                                
+       >>>    "SYSDBOX.R190.CSIQCLS0"                                     
+    18 *-*  interpret 'Call' WhereIam "'AltIDOrderfile'"                      
+       >>>    "Call @DBOX 'AltIDOrderfile'"                                   
+       *-*   Call @DBOX 'AltIDOrderfile'                                      
+       >>>     "AltIDOrderfile"                                               
+       >>>     "SYSDBOX.NDVR.JCL"       
+    19 *-*  ORDERDSN  = Result               
+       >>>    "SYSDBOX.NDVR.JCL"        
 
 
+Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR(SYSNAME)** tells you "the name of the system your REXX exec is running on". The remainder of the trace output shows various calls to @DBOX to fetch site values.
+
+Engaging the "callable REXX" service may also be performed from an Endevor REXX exit or from REXX zowe executions.
+
+Here is an interesting thing about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skelelon, and is used as an ISPF variable on the SYSEXEC statement of th TAILOR step. You can make vaiables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if included in the Tailor step.
