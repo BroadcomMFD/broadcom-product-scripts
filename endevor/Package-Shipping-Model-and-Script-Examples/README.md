@@ -4,11 +4,11 @@ There are many challenges when working with Endevor's package shipping.
 
 One Package shipment can submit up to 4 jobs, depending on the transmission tool used. If you are shipping to and from multiple sites, it becomes difficult to track the site names and packages to the job outputs.
 
-There are many parts to the package shipping process. It can be confusing to know where to insert new code you want to include.
+There are many parts to the package shipping process. It can be confusing to know where to insert the new code you want to include.
 
-PObjects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons). Package shipping objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping.
+Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping.
 
-Items in this folder are intended to help with these challenges, and to complement the material found in [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie). Included are: 
+Items in this folder may help with these challenges, and to complement the material found in [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie). Included are: 
 
  - Items to comment your package shipping jobs - a first step in keeping track of package shipping objects
  - Miscellaneous tips and techniques
@@ -24,8 +24,8 @@ Generous commenting of your package shipping objects helps you to connect jobs t
     //* Destin    := SOMWHER             
     //* Submitter := LEWIS                                            
     //* From      := DEVBOX1    240506  091612                        
-    //* HostLibs  := PUBLIC.HOST.D240506.T091612.SOMWHER
-    //* RmotLibs  := PUBLIC.RMOT.D240506.T091612.SOMWHER 
+    //* HostLibs  := SHIP.HOST.D240506.T091612.SOMWHER
+    //* RmotLibs  := SHIP.RMOT.D240506.T091612.SOMWHER 
     //* *==============================================================* *
 
 Job steps may be commented this way to indicate the package shipment object that contributed the step to the JCL:
@@ -54,25 +54,25 @@ Job steps may be commented this way to indicate the package shipment object that
 
 Where QBOXB, C1BMXRCM are package shipping members and/or elements in your Endevor Admin area.
 
-Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use then within the shipping objects to better comment , or to improve functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
+Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use then within the shipping objects to better comment, or to enhance functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
 
 - VDDHSPFX  - Host staging dataset name prefix                       
-- VDDRSPFX  - Rmot staging dataset name prefix                       
-- VNBCPARM  - Endevor parameter string with Date and time values     
+- VDDRSPFX  - Remote staging dataset name prefix                       
+- VNBCPARM  - Endevor parameter string with 8-byte Date and time values
 - VNBSQDSP  - The Package ship command containing package name, Destinati#on and the Out/Back option
 - VNB6DATE  - Six character shipping Date                            
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
 
-See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables.  Paired with the **@DBOX** member,  **C1BMXIN**  is able to leverage additional variables whose values are specific to the host or sending site.
+See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to leverage additional variables whose values are applicable to only one host or sending site.
 
 ### Skeleton / Model / Script example members for commenting
 
 Members in this folder that help with commenting include:
 
-__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example shows capturing and expanding variables using Table Tool for subsequent shipping jobs.
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs.
 
-__#RJICPY1.skl__ is a modified version of the #RJICPY1 "model" found in your CSIQOPTN library. This version simply shows how to comment the steps in your package shipping JCL. 
+__#RJICPY1.skl__ is a version of the #RJICPY1 "model" found in your CSIQOPTN library. This example shows commented steps in the recommended manner.
 
 The edit maccro __JCLCOMMNT__ can help insert comments for a member or element that contains JCL.
 
@@ -83,16 +83,15 @@ Miscellaneous tips and techniques for package shipping are given here.
 
 ### Preparing a library for your Shipping software members
 
-By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are Endevor output libraries. **C1BMXJOB.skl** is member where Override libraries are named. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
-). The example **C1BMXJOB.skl** member in this folder gives an example, naming three "override" libraries. Any one of the libraries may contain your modified package shipping objects.
+By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are Endevor output libraries. **C1BMXJOB.skl** is the member that names your Override libraries. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
+). The **C1BMXJOB.skl** member in this folder gives an example, naming three "override" libraries. Any one of which may contain your modified objects.
 
-    BST.QA.FS.ADMIN1.ENDEVOR.ISPS
-    BST.QA.FS.ADMIN2.ENDEVOR.ISPS
-    BST.QA.FS.$SKELS
+    DBOX.OVER1.ENDEVOR.ISPS
+    DBOX.OVER2.ENDEVOR.ISPS
+    DBOX.PROD.ISPS
 
 It is not necessary to separate CSIQOPTN members from CSIQSENU members. You can choose to place override members into one library, regardless of their original locations. However, it is strongly recommended, that you comment them generously with their names in the comments.
 
- 
 ### Using your Transmission tool for the Confirmation job
 
 The last package shipping job is the "Notification" job. It returns back to the host the overall status of a single package shlipment. See the **C1BMXRCN** reference in the  [Shipment Tracking and Confirmation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/package-administration/package-ship-facility/build-track-and-confirm-package-shipments/shipment-tracking-and-confirmation.html)  documentation. Package Shipping assumes an IEBGENER can write the Notification JCL to the internal reader to submit the job on the Host system. In many cases a "ROUTE XEQ" statement on the jobcard can route the job submission onto the host system. However, at some sites it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can leverage captured variables and submit the Notification job onto the host system, using this IBM FTP example:

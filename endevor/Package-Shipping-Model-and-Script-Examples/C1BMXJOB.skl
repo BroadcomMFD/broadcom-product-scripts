@@ -97,9 +97,9 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),
 //            UNIT=&T@DISK
 //*               /** Ship Skels + Models **\
-//C1BMXXCM DD DSN=BST.QA.FS.ADMIN1.ENDEVOR.ISPS,DISP=SHR
-//         DD DSN=BST.QA.FS.ADMIN2.ENDEVOR.ISPS,DISP=SHR
-//         DD DSN=BST.QA.FS.$SKELS,DISP=SHR
+//C1BMXXCM DD DSN=DBOX.OVER1.ENDEVOR.ISPS,DISP=SHR
+//         DD DSN=DBOX.OVER2.ENDEVOR.ISPS,DISP=SHR
+//         DD DSN=DBOX.PROD.ISPS,DISP=SHR
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,
 //            DISP=SHR
 //*
@@ -112,7 +112,7 @@
 //C1BMXLCC DD DSN=&&&&XLCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),
 //            UNIT=&T@DISK
-//C1BMXLCM DD DSN=BST.QA.FS.$SKELS,DISP=SHR ** Ship Skels + Models **
+//C1BMXLCM DD DSN=DBOX.PROD.ISPS,DISP=SHR ** Ship Skels + Models **
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,
 //            DISP=SHR
 //*
@@ -124,7 +124,7 @@
 //C1BMXB1C DD DSN=&&&&XB1C,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),
 //            UNIT=&T@DISK
-//C1BMXB1M DD DSN=BST.QA.FS.$SKELS,DISP=SHR ** Ship Skels + Models **
+//C1BMXB1M DD DSN=DBOX.PROD.ISPS,DISP=SHR ** Ship Skels + Models **
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,
 //            DISP=SHR
 //*
@@ -137,7 +137,7 @@
 //C1BMXBDC DD DSN=&&&&XBDC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),
 //            UNIT=&T@DISK
-//C1BMXBDM DD DSN=BST.QA.FS.$SKELS,DISP=SHR ** Ship Skels + Models **
+//C1BMXBDM DD DSN=DBOX.PROD.ISPS,DISP=SHR ** Ship Skels + Models **
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,              C9223300
 //            DISP=SHR
 //*
@@ -149,7 +149,7 @@
 //C1BMXFTC DD DSN=&&&&XFTC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),
 //            UNIT=&T@DISK
-//C1BMXFTM DD DSN=BST.QA.FS.$SKELS,DISP=SHR ** Ship Skels + Models **
+//C1BMXFTM DD DSN=DBOX.PROD.ISPS,DISP=SHR ** Ship Skels + Models **
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,
 //            DISP=SHR
 //*
@@ -161,7 +161,7 @@
 //C1BMXNWC DD DSN=&&&&XNWC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),
 //            UNIT=&T@DISK
-//C1BMXNWM DD DSN=BST.QA.FS.$SKELS,DISP=SHR ** Ship Skels + Models **
+//C1BMXNWM DD DSN=DBOX.PROD.ISPS,DISP=SHR ** Ship Skels + Models **
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,              C9221790
 //            DISP=SHR
 //*
@@ -169,9 +169,9 @@
 //* *  PDS CONTAINING REMOTE IEBCOPY AND IDCAMS JOBSTEP MEMBERS
 //* ******************************************************************
 //*
-//C1BMXRJC DD DSN=BST.QA.FS.ADMIN1.ENDEVOR.ISPS,DISP=SHR
-//         DD DSN=BST.QA.FS.ADMIN2.ENDEVOR.ISPS,DISP=SHR
-//         DD DSN=BST.QA.FS.$SKELS,DISP=SHR
+//C1BMXRJC DD DSN=DBOX.OVER1.ENDEVOR.ISPS,DISP=SHR
+//         DD DSN=DBOX.OVER2.ENDEVOR.ISPS,DISP=SHR
+//         DD DSN=DBOX.PROD.ISPS,DISP=SHR
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQSENU,
 //            DISP=SHR
 //*
@@ -203,9 +203,9 @@
 //* *  REMOTE JCL MODEL MEMBERS
 //* ******************************************************************
 //*
-//C1BMXMDL DD DSN=BST.QA.FS.ADMIN1.ENDEVOR.ISPS,DISP=SHR
-//         DD DSN=BST.QA.FS.ADMIN2.ENDEVOR.ISPS,DISP=SHR
-//         DD DSN=BST.QA.FS.$SKELS,DISP=SHR
+//C1BMXMDL DD DSN=DBOX.OVER1.ENDEVOR.ISPS,DISP=SHR
+//         DD DSN=DBOX.OVER2.ENDEVOR.ISPS,DISP=SHR
+//         DD DSN=DBOX.PROD.ISPS,DISP=SHR
 //         DD DSN=&I@PRFX..&I@QUAL..CSIQOPTN,
 //            DISP=SHR
 //*
