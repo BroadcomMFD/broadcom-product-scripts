@@ -15,7 +15,7 @@ Items in this folder may help with these challenges, and to complement the mater
 
 ## Commenting Package Shipment Jobs
 
-Generous commenting of your package shipping objects helps you to connect jobs to their originations. Remote and confirmation jobs might be commented this way, giving you backward pointers to the origin for each package shipment.
+Generous commenting of your package shipping objects helps you to connect jobs to their originations. Remote and confirmation jobs might be commented this way, giving you backward pointers to the origin of each package shipment.
  
     //SHIPJOBR  JOB (123000),'FROM DEV1',CLASS=A,PRTY=6,               
     //  MSGCLASS=X,REGION=0M                                              
@@ -28,7 +28,7 @@ Generous commenting of your package shipping objects helps you to connect jobs t
     //* RmotLibs  := SHIP.RMOT.D240506.T091612.SOMWHER 
     //* *==============================================================* *
 
-Job steps may be commented this way to indicate the package shipment object that contributed the step to the JCL:
+Job steps may be commented this way to name the package shipment object that contributed the step to the JCL:
 
 
     Command ===>                                                  Scroll ===> CSR 
@@ -52,14 +52,14 @@ Job steps may be commented this way to indicate the package shipment object that
     - - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 24 Line(s) not Displayed
     000195 //CONFGT00 EXEC PGM=IEBGENER                               C1BMXRCN    
 
-Where QBOXB, C1BMXRCM are package shipping members and/or elements in your Endevor Admin area.
+Where QBOXB, C1BMXRCN are package shipping members and/or elements in your Endevor Admin area.
 
-Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use then within the shipping objects to better comment, or to enhance functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
+Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use them within the shipping objects to better comment, and to enhance functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
 
 - VDDHSPFX  - Host staging dataset name prefix                       
 - VDDRSPFX  - Remote staging dataset name prefix                       
 - VNBCPARM  - Endevor parameter string with 8-byte Date and time values
-- VNBSQDSP  - The Package ship command containing package name, Destinati#on and the Out/Back option
+- VNBSQDSP  - The Package ship command containing package name, Destination and the Out/Back option
 - VNB6DATE  - Six character shipping Date                            
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
@@ -70,11 +70,13 @@ See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an ex
 
 Members in this folder that help with commenting include:
 
-__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs.
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
 
-__#RJICPY1.skl__ is a version of the #RJICPY1 "model" found in your CSIQOPTN library. This example shows commented steps in the recommended manner.
+The example tailors the content of C1BMXFTC, which is the job submitted for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility.
 
-The edit maccro __JCLCOMMNT__ can help insert comments for a member or element that contains JCL.
+__#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
+
+The edit maccro __JCLCOMMNT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter JCLCOMMT on the Command line.
 
 ## Tips and Techniques
 
@@ -94,7 +96,7 @@ It is not necessary to separate CSIQOPTN members from CSIQSENU members. You can 
 
 ### Using your Transmission tool for the Confirmation job
 
-The last package shipping job is the "Notification" job. It returns back to the host the overall status of a single package shlipment. See the **C1BMXRCN** reference in the  [Shipment Tracking and Confirmation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/package-administration/package-ship-facility/build-track-and-confirm-package-shipments/shipment-tracking-and-confirmation.html)  documentation. Package Shipping assumes an IEBGENER can write the Notification JCL to the internal reader to submit the job on the Host system. In many cases a "ROUTE XEQ" statement on the jobcard can route the job submission onto the host system. However, at some sites it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can leverage captured variables and submit the Notification job onto the host system, using this IBM FTP example:
+The last package shipping job is the "Notification" job. It returns back to the host the overall status of a single package shipment. See the **C1BMXRCN** reference in the  [Shipment Tracking and Confirmation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/package-administration/package-ship-facility/build-track-and-confirm-package-shipments/shipment-tracking-and-confirmation.html)  documentation. Package Shipping assumes an IEBGENER can write the Notification JCL to the internal reader to submit the job on the Host system. In many cases a "ROUTE XEQ" statement on the jobcard can route the job submission onto the host system. However, at some sites it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can leverage captured variables and submit the Notification job onto the host system, using this IBM FTP example:
 
 
 Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
@@ -141,13 +143,13 @@ See the __#RJNDVRA__ member example.
  
 ### Multiple Endevors
 
-If you are running multiple Endevors, it would be unreasonable to expect that dateaset names and jobcard values (for example) be the same on all of them. A more resonable expectation is to allow each Endevor to use its own dataset names, jobcard values and other site-specific variations.
+If you are running multiple Endevors, it would be unreasonable to expect that dataset names and jobcard values (for example) be the same on all of them. A more reasonable expectation is to allow each Endevor (or Lpar) to use its own dataset names, jobcard values and other site-specific variations.
 
 If **DBOX** is the name of an Lpar, then **@DBOX** is the name of a "callable Rexx" service, providing site-specific information for just that Lpar. Other Lpars can have their own "callable Rexx" services too. Then, the necessary differences from one Endevor to the next can be managed in "callable Rexx" service routines, and not managed in the common code. The example **C1BMXIN.skl**, paired with the **@DBOX** member, shows how this can be done.
 
-A "callable Rexx" service can be engaged anywhere REXX is run. One of the places is  within an ISPF skeleton. Member **C1BMXIN.skl** must reference a CSIQCLS0 library whose name might differ from one Lpar to the next. It calls **@DBOX** for the value of **MyCLS0Library** and re-assigns the returned value to a new variable named **CSIQCLS0**. Then the **&CSIQCLS0** reference will be replaced with the datset name returned by **@DBOX**.
+A "callable Rexx" service can be engaged anywhere REXX is run. One of the places is  within an ISPF skeleton. Member **C1BMXIN.skl** references a CSIQCLS0 library whose name might differ from one Lpar to the next. When running on the DBOX Lpar, it calls **@DBOX** for the value of **MyCLS0Library** and assigns the returned dataset name to a new variable named **CSIQCLS0**. Then, the **&CSIQCLS0** variable will be replaced with the datset name whenever it is found.
 
-The lines of code below come from  **C1BMXIN.skl**. Notice that the trace is turned on.
+These lines of code come from  **C1BMXIN.skl**. Notice that the trace is turned on.
 
 
     )CM ---------- This section shows accessing Site-Specific variables    
@@ -189,6 +191,6 @@ If you submit a package shipment leaving the trace turned on, the trace output w
 
 Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR(SYSNAME)** tells you "the name of the system your REXX exec is running on". The remainder of the trace output shows various calls to @DBOX to fetch site values.
 
-Engaging the "callable REXX" service may also be performed from an Endevor REXX exit or from REXX zowe executions.
+Engaging a "callable REXX" service may also be performed from other REXX programs, such as an Endevor REXX exit or from REXX zowe executions.
 
-Here is an interesting thing about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skelelon, and is used as an ISPF variable on the SYSEXEC statement of th TAILOR step. You can make vaiables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if included in the Tailor step.
+One final note about about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skelelon, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
