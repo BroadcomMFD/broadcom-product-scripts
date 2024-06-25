@@ -64,7 +64,7 @@ Package Shipping variables are made available early in the shipment process. If 
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
 
-See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to leverage additional variables whose values are applicable to only one host or sending site.
+See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as examples for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to leverage additional variables whose values are applicable to only one host or sending site.
 
 ### Skeleton / Model / Script example members for commenting
 
