@@ -1,0 +1,99 @@
+)CM Capture Package shipping variables for JCL substitutions
+)REXX HOSTHLQ VDDHSPFX RMOTHLQ VDDRSPFX SHIPPER SYSUID SENDNODE
+  TRACE Off
+  WHEREAMI = 'C1BMXIN'
+  HOSTHLQ = Strip(VDDHSPFX)
+  RMOTHLQ = Strip(VDDRSPFX)
+  SHIPPER = USERID()
+  SYSUID  = USERID()
+  SENDNODE =  SYSVAR(SYSNODE)
+)ENDREXX
+)CM ----------
+)REXX VNBSQDSP PKGID DESTIN TYPRUN OUTRBAK VDDXNODE NODENAME
+  TRACE Off
+  WHEREAMI = 'C1BMXIN'
+  PARSE VAR VNBSQDSP STR "'" PKGID "' TO DEST " DESTIN " OPT" TAIL '.'
+  DESTIN = STRIP(DESTIN)
+  PKGID = STRIP(PKGID)
+  IF TYPERUN = 'TYPRUN' THEN TYPRUN = ''
+  OUTRBAK = STRIP(STRIP(TAIL,'T','.'))
+  NODENAME = Strip(VDDXNODE)
+)ENDREXX
+)CM ----------
+)REXX  VNBCPARM DATE6 TIME6 DATE8 TIME8 NEXTJOB
+  TRACE Off
+  WHEREAMI = 'C1BMXIN'
+  NEXTJOB  = SUBMITER || '@'
+  PARSE VAR VNBCPARM STR "," DATE8 "," TIME8
+  DATE6 = Substr(DATE8,3)
+  TIME8 = Strip(TIME8)
+  TIME6 = Substr(TIME8,1,6)
+)ENDREXX
+)CM ---------- This section shows accessing Site-Specific variables
+)CM ----------      Longer variable names must be assigned to
+)CM ----------      valid 8-byte ISPF variable names
+)REXX  CSIQCLS0 ORDERDSN                            
+  TRACE ?R                                          
+  WHERE = 'C1BMXIN Get local variables '            
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;   
+                                                    
+  interpret 'Call' WhereIam "'MyCLS0Library'"       
+  CSIQCLS0  = Result                                
+  interpret 'Call' WhereIam "'AltIDOrderfile'"      
+  ORDERDSN  = Result                                
+)ENDREXX                                            
+)CM ---------- This section only applies to DE32
+)REXX PKGID C1SUBSYS
+  /* code for DE32 shipping only */
+  TRACE Off
+  WHERE = 'C1BMXIN DE32 only code '
+  PkgInfo  = GETSYRSB(PKGID) ; /* get sys/sub from pkg name*/
+  If Words(PkgInfo) = 2 then,
+     C1SUBSYS = Word(PkgInfo,1); /* get sys/sub from pkg name*/
+  Else,
+     C1SUBSYS = 'NA'
+)ENDREXX
+)CM  PKGID SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
+)CM
+)CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT
+)CM  TO C1BMX000.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+&VNBSQDSP
+//* *==============================================================* *
+//* *= Substitute variables in the Remote JCL       ===============* *
+//* *==============================================================* *
+//TAILOR   EXEC PGM=IRXJCL,PARM='ENBPIU00 A',              C1BMXIN
+//         COND=(4,LT)
+//TABLE    DD *      Replaces variable values in listed MODEL DDName
+* MODEL    TBLOUT
+  AHJOB    AHJOB
+  C1BMXFTC C1BMXFTC
+//C1BMXFTC DD DSN=&&XFTC,DISP=(OLD,PASS)
+//AHJOB    DD DSN=&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN..AHJOB,
+//         DISP=SHR
+//OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
+  Destin   = '&DESTIN'
+  Package  = '&PKGID'
+  OUTRBAK  = '&OUTRBAK'
+  SENDNODE = '&SENDNODE'
+  DATE6    = '&DATE6'
+  TIME6    = '&TIME6'
+  SHIPPER  = '&SHIPPER'
+  NODENAME = '&NODENAME'
+  HOSTLIBS = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN'
+  RMOTHLQ  = '&RMOTHLQ'
+  RMOTLIBS = '&RMOTHLQ..D&DATE6..T&TIME6..&DESTIN'
+  Say 'HOSTLIBS='HOSTLIBS ; Say 'RMOTLIBS='RMOTLIBS
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//SHOWME   DD SYSOUT=*
+//SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *
+//SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *
+//* *===================================================== C1BMXIN / *
