@@ -58,7 +58,7 @@ MySRC2Library = SHLQ'.CSIQJCL'
 /* Select one of the following automated package shipping methods:   */
 
     ShipSchedulingMethod = 'None '     ;/* No Shipping               */
-    ShipSchedulingMethod = 'One'       ;/* only 1 destinaation       */
+    ShipSchedulingMethod = 'One'       ;/* only 1 destination        */
     ShipSchedulingMethod = 'Rules'     ;/* Rules - mult destinations */
 
    TriggerFileName = 'SYSDBOX.NDVR.SHIPMENT.TRIGGER'
