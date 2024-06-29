@@ -40,4 +40,4 @@ Setup steps for the Automated Test Facility for Batch Applications:
     The provided OPTIONS specify the Endevor C1STAGE, where Automated Testing is to occur. You can modify it to meet your needs, including using C1ENVMNT or C1SUBSYS to provide Automated Testing for Deploy to Test actions.
 
 
-Note: Members OPTVALDT, TXTRPLCE and YAML2REX are REXX subroutines required for the **Automated Test Facility for Batch Applications**. They are used by more than one solution on this GitHub, but can be found under the **Field-Developed-Programs** folder in the **Processor-Tools-and-Processor-Snippets** subfolder.
+Note: Members **OPTVALDT**, **TXTRPLCE**, **JCLRPLCE** and **YAML2REX** are REXX subroutines required for the **Automated Test Facility for Batch Applications**. They are used by more than one solution on this GitHub, but can be found under the **Field-Developed-Programs** folder in the **Processor-Tools-and-Processor-Snippets** subfolder.
