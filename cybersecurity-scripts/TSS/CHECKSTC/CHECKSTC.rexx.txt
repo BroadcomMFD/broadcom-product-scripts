@@ -1,0 +1,82 @@
+/*REXX ***************************************************************/
+/*                                                                   */
+/* PURPOSE:  List the STC and identify entries where the ACID no     */
+/* longer exists.  Create TSS commands to cleanup out of date        */
+/* entries in the STC table based upon ACID not found.               */
+/*                                                                   */
+/* syntax:  CHECKSTC                                                 */
+/*                                                                   */
+/* OUTPUT:                                                           */
+/* (1) On screen, so to allow security team member to know the       */
+/*     process is working                                            */
+/* (2) Temp datset at the end of the process, providing all of the   */
+/* proper TSS syntax commands to cleanup and remove all entries      */
+/* found with invalid ACIDs.                                         */
+/*                                                                   */
+/* idea, written and coded by Steve Hosie                            */
+/*                                                                   */
+/*                                                                   */
+/*                                                                   */
+PARSE UPPER ARG CMD CMD1
+Say 'CHECKSTC takes a couple minutes to complete, please be patient'
+Say ' '
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+ddname = "A"current_seconds
+DSN = USERID() || ".TSS.STC." || last_qual
+UNIT = "UNIT(SYSDA)"
+SPC = "TRACKS SPACE(50,50)"
+"FREE F("ddname")"
+"DELETE" DSN
+
+if sysdsn("'"DSN"'") = OK then
+  "alloc f("ddname") da('"DSN"') shr reu"
+else
+  "alloc f("ddname") da('"DSN"') NEW SP(50 50)
+   TR DSORG(PS) RECFM(F B) LRECL(133)"
+
+"ISPEXEC VGET (DATA) PROFILE"
+X=OUTTRAP('REC.')
+"ISPEXEC VPUT (DATA) PROFILE"
+    "TSS list(STC)"
+j = 0
+x = 1
+do i=x to rec.0
+  if substr(rec.i,1,8) = 'TSS0314E' then
+   do
+     say cmd '   ' rec.i
+   exit
+   end
+  if substr(rec.i,1,3) ^= 'STC' then nop
+    else
+     if substr(rec.i,1,8) = 'TSS0300I' then nop
+     else
+      do
+        proc_name = strip(substr(rec.i,14,8))
+        user_id = strip(substr(rec.i,37,8))
+        if user_id = '*FAIL*' then nop
+        else
+         if user_id = '*BYPASS*' then nop
+         else
+           do
+            "TSS LIST("user_id")"
+            if rc > 0 then
+             do
+              j = j + 1
+              new.j = 'TSS REM(STC)PROCNAME('proc_name')'
+              new.j = new.j||'TAR(=)'
+              say proc_name 'has undefined acid' user_id
+             end
+           end
+      end
+end
+
+"EXECIO" j "DISKW "ddname" (STEM new. FINIS"
+
+"ISPEXEC EDIT DATASET('"DSN"')"
+
+"FREE F("ddname")"
+address tso "DELETE '"dsn"'"
