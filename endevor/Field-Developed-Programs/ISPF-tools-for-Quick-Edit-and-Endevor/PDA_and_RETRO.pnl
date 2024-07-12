@@ -1,0 +1,59 @@
+./  ADD  NAME=RETROPOP
+)ATTR
+  ! TYPE(INPUT)    INTENS(LOW) PAD(NULLS)
+  › TYPE(OUTPUT)   INTENS(LOW)
+  | TYPE(OUTPUT)   INTENS(HIGH)
+  } TYPE(TEXT)   INTENS(HIGH) COLOR(RED)
+  $ TYPE(TEXT)   INTENS(HIGH) COLOR(PINK)
+  # TYPE(TEXT)   INTENS(HIGH) COLOR(TURQUOISE)
+  @ TYPE(TEXT)   INTENS(HIGH) COLOR(YELLOW)
+  * TYPE(TEXT)   INTENS(HIGH) COLOR(TURQ) HILITE(REVERSE)
+  { TYPE(TEXT)   INTENS(LOW)  COLOR(BLUE)
+  ~ TYPE(TEXT)   INTENS(LOW)  COLOR(TURQUOISE)
+)BODY DEFAULT(%+_)  WINDOW(40,10)
+|MSG1
+|MSG2
+|MSG3
+|MSG4
+% _Z+ &MSG5
+%
+)INIT
+ .ZVARS = '(WANT)'
+)PROC
+)END
+./  ADD  NAME=RETRSHOW
+)ATTR DEFAULT(%+_)
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */
+   # TYPE(INPUT) INTENS(HIGH) CAPS(OFF) JUST(LEFT)
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)
+   _ TYPE(OUTPUT) INTENS(LOW)
+   | TYPE(OUTPUT) INTENS(HIGH) CAPS(OFF)
+)BODY EXPAND(\\)
+%\-\ RETROFIT PDM EXECUTION FOR|ELEMENT %/|MELTYPE +%\-\
++OPTION%===>#ZCMD
+%
+%       Please review inputs determined for PDM execution:
+%
++ ROOT:     Environment ===>|RENVMNT +   Version=>|BASEVV+
++                 Stage ===>|Z+           Level =>|BASELL+
++                System ===>|RSYSTEM +
++             Subsystem ===>|RSUBSYS +
++
++ DV1:      Environment ===>_MENVMNT +   Userid ===>|MUSERID+
++                 Stage ===>_Z+         %(your edited version)
++                System ===>_MSYSTEM +
++             Subsystem ===>_MSUBSYS +
++
++ DV2:      Environment ===>_TENVMNT +   Userid ===>|TUSERID+
++                 Stage ===>_Z+          Version=>|DV2VER+
++                System ===>_TSYSTEM +    Level =>|DV2LVL+
++             Subsystem ===>_TSUBSYS +
+%
++     (PRESS%ENTER+ or%PF3+TO CANCEL OR END)
+)INIT
+ &USERID = &ZUSER
+ .ZVARS = '(RSTGID MSTGID TSTGID)'
+)PROC
+)END
