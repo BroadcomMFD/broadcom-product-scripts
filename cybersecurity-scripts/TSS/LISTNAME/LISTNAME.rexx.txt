@@ -16,7 +16,7 @@
 /*  Syntax:  LISTNAME profile_acid                                   */
 /*           LISTNAME group_acid                                     */
 /*                                                                   */
-/* idea, written and coded by Steve Hosie                            */
+/*                                                                   */
 /*                                                                   */
 /*                                                                   */
 PARSE UPPER ARG CMD CMD1
