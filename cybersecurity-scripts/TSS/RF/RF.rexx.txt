@@ -1,0 +1,26 @@
+/*REXX *************************************************************/   00010002
+/*                                                                 */   00020002
+/* CREATED TO REDUCE AMOUNT OF TYPING REQUIRED                     */   00021002
+/*                                                                 */   00021102
+/*                                                                 */   00021202
+/* Cleanup for z/OS *Interactive*                                  */   00021302
+/*                                                                 */   00021402
+/*  This rexx is an example of the art of the possible             */   00021602
+/*  in creating a short cut to reduce the amount of daily typing   */   00021703
+/*                                                                 */   00021802
+/* PURPOSE:  This REXX code was created to reduce the amount       */   00021903
+/*  of typeing required to refresh the security record for an ACID */   00022003
+/*                                                                 */   00024002
+/*  Broadcom has provide this REXX as an example of using          */   00025003
+/*  TSS commands and the ability to reduce typing of long repeated */   00026003
+/*  commands required to refresh an the security record of an ACID */   00027003
+/*                                                                 */   00030002
+/* Examples:                                                       */   00030102
+/* A. TSO RF ACID   FROM ANY WHERE IN TSO                          */   00030202
+/* --------------------------------------------------------------- */   00031002
+PARSE UPPER ARG CMD CMD1                                                00040000
+IF LENGTH(CMD) = 0 THEN DO                                              00050000
+       SAY "COMMAND STRING MISSING"                                     00060000
+       EXIT                                                             00070000
+       END                                                              00080000
+    "TSS REF(" CMD ")JOBNAME(*)"                                        00090000
