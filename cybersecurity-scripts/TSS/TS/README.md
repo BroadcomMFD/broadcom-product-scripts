@@ -1,7 +1,7 @@
 # Broadcom TSS TS and TSE REXX Scripts
-TS and TSE REXX scripts provide the capability to interactively use TSS commands, capture the output, and display the output in a temporary dataset, allowing PF7/8 scrolling. TS places the user into ISPF Browse mode to view, while TSE places the user into ISPF Edit mode. This REXX is an example of the “art of the possible” in using REXX with TSS. 
+TS and TSE REXX scripts provide the capability to interactively use TSS commands, capture the output, and display the output in a temporary dataset, allowing PF7/8 scrolling. TS places the user in ISPF Browse mode to view, while TSE places the user in ISPF Edit mode. This REXX is an example of the “art of the possible” in using REXX with TSS. 
 
-The challenge is to have more interactive capability with TSS commands and reduce the need to submit many batch jobs to generate longer TSS command output while also allowing nested lists or nest TSS commands regardless if in split screen mode or not by dynamically generating both the DD Name and the dataset name used for the output.   
+The challenge is to have more interactive capability with TSS commands and reduce the need to submit many batch jobs to generate longer TSS command output.  TS and TSE also allow nested lists or nest TSS commands regardless if in split screen mode or not by dynamically generating both the DD Name and the dataset name used for the output.   
 
 # Using
 Sample scripts for each product are located in the directory that shares its name. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
