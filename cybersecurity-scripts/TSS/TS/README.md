@@ -14,7 +14,7 @@ What to do:
     TSO TS MODIFY
   	TSO TS LIST(STC)
   	TSO TS WHOHAS DSN(SYS1.)
-5.  FOR TSE, same examples as #3, any TSS command will provide the same output, just placing the user into Edit mode.  Some have reasons to copy/paste the output, edit or otherwise as needed. 
+4.  FOR TSE, same examples as #3, any TSS command will provide the same output, just placing the user into Edit mode.  Some have reasons to copy/paste the output, edit or otherwise as needed. 
   	
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Steven.Hosie@Broadcom.com & Vijay.Gundu@Broadcom.com & Rose.Sakach@Broadcom.com or Adam.Wolfe@Broadcom.com to discuss.**
