@@ -8,11 +8,11 @@ Sample scripts for each product are located in the directory that shares its nam
 
 What to do:   
 1.	Upload the LST.rexx.txt as LST into your CLIST/REXX library.
-3.	Execute: LST acid where "acid" is any ACID or table defined in TSS, placing the output into a temporary dataset, allowing PF7/8 scrolling or searching.  PF3 to exit.
+2.	Execute: LST acid where "acid" is any ACID or table defined in TSS, placing the output into a temporary dataset, allowing PF7/8 scrolling or searching.  PF3 to exit.
     LST acid will issue TSS LIST(acid)DATA(ALL)
   	LST STC will list the STC Table
   	LST RDT will list the RDT Table
     Options:
   	    LST acid PROF will issue TSS LIST(acid)DATA(ALL,PROFILE)
   	    LST acid PASS will issue TSS LIST(acid)DATA(ALL,PASSWORD)
-4.  This can be used anywhere in TSO:  TSO LST acid 
+3.  This can be used anywhere in TSO:  TSO LST acid 
