@@ -1,0 +1,80 @@
+/*REXX ***************************************************************/
+/* ----------------------------------------------------------------  */
+/*  This rexx is an example of the art of the possible               */
+/*  in using TSS interactively.                                      */
+/*                                                                   */
+/*  Broadcom has provided this REXX as an example of the             */
+/*  TSS commands, capturing output and displaying to the professional*/
+/*  allowing for scrolling, searching, etc.                          */
+/*                                                                   */
+/* ----------------------------------------------------------------  */
+/*                                                                   */
+/*    General Description                                            */
+/*    ===================                                            */
+/*                                                                   */
+/*                                                                   */
+/*   TS is a REXX EXEC which allows you to browse the output         */
+/*   of a CA-Top Secret command, using the advanced features of      */
+/*   TSO/ISPF to                                                     */
+/*      -- Scroll up and down inside the command output              */
+/*      -- Locate specific information using the FIND command        */
+/*      -- Review information previously seen without having to      */
+/*         re-issue the command                                      */
+/*    To use TS, you must make this member available to a            */
+/*    data set in your TSO SYSPROC or SYSEXEC concatenation.  Then   */
+/*    issue any TSS command, for instance                            */
+/*       TS MODIFY STATUS                                            */
+/*    (This will allow you to browse the output of the               */
+/*       TSS MODIFY STATUS                                           */
+/*    command)                                                       */
+/*                                                                   */
+/*    Technical Information                                          */
+/*    =====================                                          */
+/*                                                                   */
+/*   This EXEC allocates a data set in which the output of the       */
+/*   user-specified command will be captured. The following          */
+/*   parameters may be used to customize this allocation for your    */
+/*   site standards:                                                 */
+/*                                                                   */
+/*   Build a unique data set name using seconds after midnight       */
+/*                                                                   */
+/* trace(i) */
+parse arg p1 p2 p3 p4 p5 p6 p7 p8 p9
+if p1 = '' then
+ do
+  say 'NO input provided, please try again'
+   return
+ end
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.TSS.TEMP.'last_qual'.'TS
+udsn = strip(udsn)
+ddname = "A"current_seconds
+
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(200 200)
+   TR DSORG(PS) RECFM(F B) LRECL(80) BLKSIZE(28720)"
+
+STATUS = MSG('OFF')
+STATUS = MSG('ON')
+"ISPEXEC VGET (DATA) PROFILE"
+X=OUTTRAP('REC.')
+"TSS "p1" "p2" "p3" "p4" "p5" "p6" "p7" "p8" "p9
+"ISPEXEC VPUT (DATA) PROFILE"
+"execio * diskw "ddname" (stem REC. finis"
+IF RC > 1 THEN DO
+          SAY "STORAGE OF COMMAND OUTPUT FAILED. EXECIO RC=" RC
+          SAY "TRUNCATED OUTPUT MAY BE VIEWED IN" udsn
+          EXIT
+          END
+ELSE
+/*   the ISPEXEC command below can be changed to edit */
+/*   if needed.  ISPEXEC edit dataset('"udsn"')"      */
+"ISPEXEC browse dataset('"udsn"')"
+/*  "ISPEXEC EDIT DATASET('"udsn"')" */
+address tso "FREE F("ddname")"
+address tso "DELETE '"udsn"'"
+exit(0)
