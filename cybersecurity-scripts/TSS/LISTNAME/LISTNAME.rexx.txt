@@ -1,0 +1,116 @@
+/*REXX ***************************************************************/
+/* ----------------------------------------------------------------  */
+/* Purpose:  This REXX exec provides the ability to take all acids   */
+/* a profile is attached to, list each acid and provide output in    */
+/* into a temporary dataset all acids and names assigned for each    */
+/* acid.                                                             */
+/* ----------------------------------------------------------------  */
+/*  This rexx is an example of the art of the possible               */
+/*  in using TSS interactively.                                      */
+/*                                                                   */
+/*  Broadcom has provided this REXX as an example of the             */
+/*  TSS commands, capturing output and displaying to the professional*/
+/*  allowing for scrolling, searching, etc.                          */
+/*                                                                   */
+/* ----------------------------------------------------------------  */
+/*  Syntax:  LISTNAME profile_acid                                   */
+/*           LISTNAME group_acid                                     */
+/*                                                                   */
+/* idea, written and coded by Steve Hosie                            */
+/*                                                                   */
+/*                                                                   */
+PARSE UPPER ARG CMD CMD1
+IF LENGTH(CMD) = 0 THEN DO
+       SAY "COMMAND STRING MISSING"
+       EXIT
+       END
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+ddname = "A"current_seconds
+ddname2 = "B"current_seconds
+DSN = USERID() || ".SECBRWZ." || cmd || "." || last_qual
+DSN2 = USERID() || ".SECBRWZ." || out || "." || last_qual
+UNIT = "UNIT(SYSDA)"
+SPC = "TRACKS SPACE(50,50)"
+"FREE F(SECBRWZ)"
+"FREE F(SECCRWZ)"
+"DELETE" DSN
+"DELETE" DSN2
+
+if sysdsn("'"DSN"'") = OK then
+  "alloc f("ddname") da('"DSN"') shr reu"
+else
+  "alloc f("ddname") da('"DSN"') NEW SP(50 50)
+   TR DSORG(PS) RECFM(F B) LRECL(133)"
+
+if sysdsn("'"DSN2"'") = OK then
+  "alloc f("ddname2") da('"DSN2"') shr reu"
+else
+  "alloc f("ddname2") da('"DSN2"') new sp(50 50)
+   TR DSORG(PS) RECFM(F B) LRECL(133)"
+
+"ISPEXEC VGET (DATA) PROFILE"
+X=OUTTRAP('REC.')
+"ISPEXEC VPUT (DATA) PROFILE"
+    "TSS list(" CMD ")data(acids)"
+j = 0
+x = 1
+do i=x to rec.0
+if substr(rec.i,1,8) = 'TSS0314E' then
+ do
+   say cmd '   ' rec.i
+ exit
+ end
+if substr(rec.i,1,10) = 'ACCESSORID' then nop
+else
+if substr(rec.i,1,8) = 'TSS0300I' then nop
+else
+if substr(rec.i,14,8) = '        ' then nop
+else
+do
+j = j + 1
+new.j = 'tss list('substr(rec.i,14,8)')data(name)'
+if substr(rec.i,26,8) = '        ' then nop
+else
+ do
+   j = j + 1
+   new.j = 'tss list('substr(rec.i,26,8)')data(name)'
+  end
+if substr(rec.i,38,8) = '        ' then nop
+ else
+  do
+   j = j + 1
+   new.j = 'tss list('substr(rec.i,38,8)')data(name)'
+  end
+if substr(rec.i,50,8) = '        ' then nop
+else
+ do
+   j = j + 1
+   new.j = 'tss list('substr(rec.i,50,8)')data(name)'
+ end
+end
+end
+
+"EXECIO" j "DISKW "ddname" (STEM new. FINIS"
+"EXECIO" j "DISKR "ddname" (STEM out. FINIS"
+
+do i=1 to out.0
+ do
+    "ISPEXEC VGET (DATA) PROFILE"
+    X=OUTTRAP('rec1.')
+    "ISPEXEC VPUT (DATA) PROFILE"
+   out.i
+   out1.i = rec1.1
+   "EXECIO" i "DISKW "ddname2" (STEM out1. finis"
+ end
+end
+
+"ISPEXEC EDIT DATASET('"DSN2"')"
+
+"FREE F("ddname")"
+"FREE F("ddname2")"
+address tso "DELETE '"dsn"'"
+address tso "DELETE '"dsn2"'"
