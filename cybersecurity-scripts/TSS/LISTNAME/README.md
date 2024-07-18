@@ -15,4 +15,4 @@ What to do:
 # Contributing
 **We are not accepting third-party contributions at this time. If you are interested in contributing, please contact Steven.Hosie@Broadcom.com & Vijay.Gundu@Broadcom.com & Rose.Sakach@Broadcom.com or Adam.Wolfe@Broadcom.com to discuss.**
 
-It is the responsibility of the original contributor to resolve vulnerabilities id
+It is the responsibility of the original contributor to resolve vulnerabilities identified by Dependabot within their contributions.
