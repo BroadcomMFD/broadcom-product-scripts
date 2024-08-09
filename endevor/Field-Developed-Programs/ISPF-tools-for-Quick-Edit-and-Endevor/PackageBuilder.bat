@@ -2,9 +2,9 @@ REM   In Windows, execute this command file to collect all Package Builder membe
 @ECHO OFF
 ECHO.   > BLANKS.hdr
 ECHO ./  ADD  NAME=@README                                        > PackageBuilder.hdr  
-ECHO The members named PACKAGE and PKGELES are REXX              >> PackageBuilder.hdr
-ECHO     CIUU02 is an ISPMLIB member (message)                   >> PackageBuilder.hdr
-ECHO     all others are ISPPLIB members (Panels)                 >> PackageBuilder.hdr
+ECHO The members named PACKAGE and PKGELES are REXX/CSIQCLS0     >> PackageBuilder.hdr
+ECHO     CIUU02 is an ISPMLIB/CSIQMENU member (message)          >> PackageBuilder.hdr
+ECHO     all others are ISPPLIB/CSIQPENU members (Panels)        >> PackageBuilder.hdr
 ECHO ./  ADD  NAME=PACKAGE                                        > PACKAGE.hdr	
 ECHO ./  ADD  NAME=PKGELES                                        > PKGELES.hdr	
 ECHO ./  ADD  NAME=PACKAGEP                                       > PACKAGEP.hdr
