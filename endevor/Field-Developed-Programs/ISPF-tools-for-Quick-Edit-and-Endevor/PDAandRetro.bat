@@ -2,9 +2,9 @@ REM   In Windows, execute this command file to collect members for the Parallel 
 @ECHO OFF
 ECHO.   > BLANKS.hdr
 ECHO ./  ADD  NAME=@README                                        > PDAandRetro.hdr  
-ECHO PDA and NOTIFY are REXX MEMBERS                             >> PDAandRetro.hdr
-ECHO     RETR01 is an ISPMLIB (Message) member                   >> PDAandRetro.hdr
-ECHO     all others are ISPPLIB (PAnel) members                  >> PDAandRetro.hdr
+ECHO PDA and NOTIFY are REXX MEMBERS/CSIQCLS0                    >> PDAandRetro.hdr
+ECHO     RETR01 is an ISPMLIB/CSIQMENU (Message) member          >> PDAandRetro.hdr
+ECHO     all others are ISPPLIB/CSIQPENU (Panel) members         >> PDAandRetro.hdr
 ECHO ./  ADD  NAME=PDA                                            > PDA.hdr	
 ECHO ./  ADD  NAME=NOTIFY                                         > NOTIFY.hdr	
 ECHO ./  ADD  NAME=RETRO                                          > RETRO.hdr	
