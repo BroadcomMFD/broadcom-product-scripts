@@ -2,7 +2,9 @@
 
 This collection of mainframe tools is dependent upon IBM's ISPF. The items can only be used on the mainframe by users of Quick-Edit and Endevor. Although these tools are not available to  VS Code or Zowe users, some provide a user experience similar to one from a modern tool.
 
-Use the extension on each item to determine where the item needs to reside.
+You have a choice on how to upload to your mainframe:
+ 1. Use the extension on each item to determine where the item needs to reside. Upload the items you need individually.
+ 2. Look for a .bat file whose name matches a function you want to install. If you click on the .bat file in your cloned location, it will copy all the files you need into a .moveout fle. Then you can upload the single .moveout file to your mainframe, and use the @README member to know where everything goes.
 
 - rex items must reside in a REXX library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library
 - pnl items must reside in an ISPF panel library, typically an ISPPLIB or a CSIQPENU library

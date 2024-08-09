@@ -922,4 +922,3 @@ Process_Input_Package:
   UseTable = PickLstTable ; /*  Use Pick List table now */
 
   Return ;
-
