@@ -10,29 +10,13 @@
    isItThere = ,
      BPXWDYN("INFO FI(PACKAGE) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then Trace ?r
-/*                                                                   */
+
 /* Variable settings for each site --->           */
    VCAPRN= '0'
    VCAPYN = 'N'
 
    WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
-
-   interpret 'Call' WhereIam "'SchedulingPackageShipBundle'"
-   SchedulingPackageShipBundle = Result
-
-   interpret 'Call' WhereIam "'SchedulingOption'"
-   SchedulingOption = Result
-
-   interpret 'Call' WhereIam "'ShipSchedulingMethod'"
-   ShipSchedulingMethod = Result
-
-   interpret 'Call' WhereIam "'MyCLS2Library'"
-   HSYSEXEC  = Result
-   MyCLS2Library = HSYSEXEC
-
-   interpret 'Call' WhereIam "'MyDATALibrary'"
-   MyDATALibrary = Result
-   ShipRules       = MyDATALibrary"(SHIPRULE)"
+   /* Site-based logic was obsolete here, and was removed */
 
    /* Decide on Temporary Dataset name prefix...                         */
    ADDRESS ISPEXEC "VGET (ZSCREEN zUSER zSYSID zPREFIX)"
@@ -147,12 +131,7 @@
   Call Build_Package_Suffix ;
   Call Calculate_Date_Fields ;
   System_List = Strip(System_List) ;
-  If ShipSchedulingMethod = 'Notes' then,
-     Call Build_NOTES_Fields   ;
-/*
-  If ShipSchedulingMethod = 'Rules' then nop
-  VPHNOTE8 = SchedulingOption'>' BTSTDATE '00:00' ;
-*/
+
   ACTION = 'MOVE'
   Call SHOW_PANEL;
   Call Build_Package ;
@@ -331,13 +310,13 @@ SHOW_PANEL:
   PACKAGE = PKGSTAGE||"#"     ||Substr(PKGPRFIX,1,4)||PKGUNIQ ;
   PACKAGE = STAGE   ||"#" || PKGUNIQ ;
   PACKAGE = PKGSTAGE ||"#" || PKGUNIQ ;
+  COMMENT = Left(UseCCID||':' COMMENT,50)
 */
   PACKAGE = UseCCID || PKGUNIQ
+  PKGPRFIX = Left(PKGPRFIX,4,'#')
   PACKAGE = Substr(PKGPRFIX,1,4)|| '#' || PKGUNIQ
 
   PACKAGE = Left(PACKAGE,16,'#')
-
-  COMMENT = Left(UseCCID||':' COMMENT,50)
 
   ADDRESS ISPEXEC,
      "DISPLAY  PANEL(PACKAGEP) "
@@ -353,20 +332,6 @@ SHOW_PANEL:
   DATE = BTENDATE ;
   CALL VALIDATE_DATE ;
   IF DATE_RC > 0 THEN SIGNAL SHOW_PANEL;
-
-  /*
-  If Words(SchedulingOption) > 3 then,
-     Do
-     place = Pos('>',VPHNOTE8) + 1
-     DATE = Strip(Substr(VPHNOTE8,place)) ;
-     CALL VALIDATE_DATE ;
-     IF DATE_RC > 0 THEN,
-        Do
-        ADDRESS ISPEXEC "SETMSG MSG(CIUU027E)" ;
-        SIGNAL SHOW_PANEL;
-        End;
-     End;
-  */
 
   ADDRESS ISPEXEC,
      "VPUT (C1BJC1 C1BJC2 C1BJC3 C1BJC4) PROFILE "
@@ -547,90 +512,6 @@ CAST_Package:
       END;
 
    return;
-
-Build_NOTES_Fields:
-
-  If SchedulingPackageShipBundle /= 'Y' then return;
-  X = OUTTRAP(LINE.);
-  DSNCHECK = SYSDSN("'"ShipRules"'") ;
-  IF DSNCHECK /= OK Then Return  ;
-
-  Tday = DATE('U');
-  #days = DATE('B',Tday,'U');
-   ADDRESS TSO,
-     "ALLOC F(TABLE) DA('"ShipRules"') SHR REUSE "
-
-  ADDRESS TSO,
-     "EXECIO * DISKR TABLE (STEM $tbl. finis"
-   ADDRESS TSO,
-     "FREE  F(TABLE)"
-  List_Destinations = " " ;
-  Time_Destinations = " " ;
-
-  /* Determine where critical columns are located */
-  $heading = ' ' Substr($tbl.1,2) ;
-  $heading = Translate($heading,' ','-');
-  EnvironmentWrdPos = Wordpos('Environment',$heading);
-  StageWrdPos       = Wordpos('Stage',$heading);
-  SystemWrdPos      = Wordpos('System',$heading);
-  DestinationWrdPos = Wordpos('Destination',$heading);
-  DateWrdPos        = Wordpos('Date',$heading);
-  TimeWrdPos        = Wordpos('Time',$heading);
-  JobnameWrdPos     = Wordpos('Jobname',$heading);
-  TyprunWrdPos      = Wordpos('Typrun',$heading);
-  TypRunPosition    = Wordindex($heading,TyprunWrdPos);
-
-  Do cnt# = 1 to Words(System_List)
-     srch = Word(System_list,cnt#) ;
-     Do tbl# = 2 to $tbl.0
-        env = Word($tbl.tbl#,EnvironmentWrdPos)
-        stg = Word($tbl.tbl#,StageWrdPos)
-        sys = Word($tbl.tbl#,SystemWrdPos);
-        If (env =ProductionEnvironment | env = '*') &,
-           (stg =ProductionStage | stg = '*') &,
-           (sys = srch | sys = '*') then,
-           Do
-           Destination = Word($tbl.tbl#,DestinationWrdPos)
-           If Wordpos(Destination,List_Destinations) > 0 then,
-              iterate ;
-           tmp         = Word($tbl.tbl#,DateWrdPos)
-           tmp = Strip(tmp,'L','+') ;
-           Tday = DATE('U');
-           #days = DATE('B',Tday,'U');
-           #days = #days + tmp ;
-           Date = DATE('S',#days,'B') ;
-           Time_Str    = Word($tbl.tbl#,TimeWrdPos)
-           Jobname     = Word($tbl.tbl#,JobnameWrdPos)
-           Hold_Str    = Strip(Substr($tbl.tbl#,TypRunPosition,8))
-           Time_Entry = Date"\"Time_Str"\"Hold_Str ;
-           entry = Strip(Destination)'/'Strip(Jobname)
-           List_Destinations = entry List_Destinations;
-           Time_Destinations = Time_Entry Time_Destinations ;
-           End;
-     End;  /* Do tbl# = 2 to $tbl.0  */
-  End ; /* Do cnt# = 1 to Words(System_List)  */
-  VPHNOTE8 = " "
-  Do cnt# = 1 to Words(List_Destinations)
-     Time_Entry = Word(Time_Destinations,cnt#) ;
-     Time_Entry = Translate(Time_Entry," ","\") ;
-     Date     = Word(Time_Entry,1) ;
-     Time_Str = Word(Time_Entry,2) ;
-     Hold_Str = Word(Time_Entry,3) ;
-     entry       = Word(List_Destinations,cnt#)
-     entry       = Translate(entry,' ','/')
-     Destination = Word(entry,1)
-     Jobname     = Word(entry,2)
-     nbr = 9 - cnt# ;
-     If Hold_Str /= "HOLD" then Hold_Str = " "
-     tmp = "VPHNOTE"nbr" = 'To "Left(Destination,8)":",
-        Date  Time_Str LEFT(Jobname,8) Hold_Str "'"
-     interpret tmp ;
-  End;
-
-  tmp = "Elm Cnt: "COUNT
-  VPHNOTE8 = Overlay(tmp,VPHNOTE8,48);
-
-  return;
 
 Create_PickList_Table:
 
@@ -922,3 +803,4 @@ Process_Input_Package:
   UseTable = PickLstTable ; /*  Use Pick List table now */
 
   Return ;
+

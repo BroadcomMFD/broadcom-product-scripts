@@ -7,7 +7,11 @@ They are tested, secure and available for your use.
 
 Do you just want to copy and upload the code? 
 
-Here is a simple procedure you can use. Start from [GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts) and find the green box containing the text **'<> Code'**.  Choose one of the options that appears. If you select the **Download ZIP** option, then GitHub will create a zip file that you can extract to your desktop, and use TSO SEND to upload to a mainframe.  
+Here is a simple procedure you can use. Start from [GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts) and find the green box containing the text **'<> Code'**.  Choose one of these options:
+ - Clone using the web URL   or 
+ - Open with GitHub Desktop  
+
+Within your cloned location, click on a .bat file. There are several - each named for a high-level feature you can upload. The .bat file will collect all the items for that feature and place them into a .moveout file. You can then upload the .moveout file and use the MOVEOUT edit macro to create members for each item that supports that feature.
 
 ## ACM-build-without-Generates
 

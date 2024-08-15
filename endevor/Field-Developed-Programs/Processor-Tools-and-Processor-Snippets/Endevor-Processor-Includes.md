@@ -2,6 +2,8 @@
 
 COBOL programmers use Copybooks and Assembler programmers use macros. IBM's Job Control Language is supported by PROCs, and the C++ language is supported by Headers. All the supporting items represent places where frequently used lines of code can be coded once, and then referenced as needed by the others. This document presents how to provide the same feature for Endevor processors, using processor "Includes". Any Endevor site can incorporate the method by following these simple steps.
 
+See a short demo on [Panvalet-like Includes](https://community.broadcom.com/viewdocument/panvalet-like-includes?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2&tab=librarydocuments) .
+
 ## Update the Defaults table
 
 Modify the LIBENV value on your Defaults table
