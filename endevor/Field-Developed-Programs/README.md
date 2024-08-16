@@ -52,4 +52,4 @@ This [collection](Processor-Tools-and-Processor-Snippets) contains widely-used o
 
 ## Table-Tool-Examples
 
-A [collection](Field-Developed-Programs/Table-Tool-Examples) of JCL and processor members that demonstrate the use of Table Tool. Many of the objects in this folder were produced as a result of requests from the [Endevor Community website](https://community.broadcom.com/home).
+A [collection](Table-Tool-Examples) of JCL and processor members that demonstrate the use of Table Tool. Many of the objects in this folder were produced as a result of requests from the [Endevor Community website](https://community.broadcom.com/home).
