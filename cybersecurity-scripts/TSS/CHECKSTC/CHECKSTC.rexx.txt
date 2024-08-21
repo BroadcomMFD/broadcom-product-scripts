@@ -13,12 +13,16 @@
 /* proper TSS syntax commands to cleanup and remove all entries      */
 /* found with invalid ACIDs.                                         */
 /*                                                                   */
-/*                                                                   */
+/* idea, written and coded by Steve Hosie                            */
 /*                                                                   */
 /*  Version 1.0 July 2024                                            */
 /*          1.1 July 30 2024 Updated messages                        */
+/*          1.2 August 21 2024 added text statement                  */
 /*                                                                   */
 PARSE UPPER ARG CMD CMD1
+say 'CHECKSTC will evaluate each ACID entry to ensure a valid ACID'
+say 'exist for each STC PROCNAME entry'
+say ' '
 Say 'CHECKSTC takes a couple minutes to complete, please be patient'
 Say ' '
 STATUS = MSG('ON')
@@ -66,7 +70,7 @@ do i=x to rec.0
             "TSS LIST("user_id")"
             if rc = 0 then
               do
-                SAY proc_name ' STC Proc has a defined ACID'
+          /*    SAY proc_name ' STC Proc has a defined ACID'  */
               end
             else
               if rc > 0 then
@@ -74,9 +78,9 @@ do i=x to rec.0
                 j = j + 1
                 new.j = 'TSS REM(STC)PROCNAME('proc_name')'
                 new.j = new.j||'TAR(=)'
-          say ' '                                                    
+          say ' '
           say proc_name 'definition has an undefined acid - ' user_id
-          say ' '                                                    
+          say ' '
                end
            end
       end
