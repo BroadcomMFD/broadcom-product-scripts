@@ -17,12 +17,13 @@
 /*                                                                   */
 /*  Version 1.0 July 2024                                            */
 /*          1.1 July 30 2024 Updated messages                        */
-/*          1.2 August 21 2024 added text statement                  */
+/*          1.2 August 29 2024 Updated messages                      */
 /*                                                                   */
 PARSE UPPER ARG CMD CMD1
-say 'CHECKSTC will evaluate each ACID entry to ensure a valid ACID'
-say 'exist for each STC PROCNAME entry'
-say ' '
+Say 'CHECKSTC validates the STC Table, identifying STC entries'
+Say 'defined with undefined ACIDs (deleted ACIDs) and builds the '
+Say 'TSS commands to remove those STC entries.'
+Say ' '
 Say 'CHECKSTC takes a couple minutes to complete, please be patient'
 Say ' '
 STATUS = MSG('ON')
@@ -68,31 +69,20 @@ do i=x to rec.0
          else
            do
             "TSS LIST("user_id")"
-            if rc = 0 then
-              do
-          /*    SAY proc_name ' STC Proc has a defined ACID'  */
-              end
-            else
-              if rc > 0 then
-               do
-                j = j + 1
-                new.j = 'TSS REM(STC)PROCNAME('proc_name')'
-                new.j = new.j||'TAR(=)'
-          say ' '
-          say proc_name 'definition has an undefined acid - ' user_id
-          say ' '
-               end
+            if rc > 0 then
+             do
+              j = j + 1
+              new.j = 'TSS REM(STC)PROCNAME('proc_name')'
+              new.j = new.j||'TAR(=)'
+  say proc_name 'STC entry is defined with an undefined acid' user_id
+             end
            end
       end
 end
 
 "EXECIO" j "DISKW "ddname" (STEM new. FINIS"
-if j > 0 then
-  "ISPEXEC EDIT DATASET('"DSN"')"
-else
-  do
-    say ' '
-    say 'All STC definitions have a defined ACID'
-  end
+
+"ISPEXEC EDIT DATASET('"DSN"')"
+
 "FREE F("ddname")"
 address tso "DELETE '"dsn"'"
