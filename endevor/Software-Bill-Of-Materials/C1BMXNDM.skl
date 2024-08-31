@@ -1,0 +1,108 @@
+)CM  PACKAGE SHIPMENT BATCH JCL - NETWORK DM XMISSION - CSIQSENU(C1BMXNDM)      
+)CM                                                                             
+)CM  THIS SKELETON IS USED TO TRANSMIT STAGING DATASETS AND "RUN JOB"           
+)CM  COMMANDS VIA NETWORK DATA MOVER.                                           
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *        
+)CM                                                                             
+)CM  TAILORING INSTRUCTIONS:                                                    
+)CM                                                                             
+)CM  1.  MODIFY THE "LINKLIB", "NETMAP", "MSG", AND "PROCESS.LIB"               
+)CM      DSNAMES USING SITE SPECIFIC PREFIX, QUALIFIER, AND NAME.               
+)CM                                                                             
+)CM  2.  IF YOU NEED A SIGNON STATEMENT MODIFY THE SIGNON STATEMENT             
+)CM      IN THE &VNBXSTP JOB STEP USING SITE SPECIFIC SIGNON DATA.              
+)CM      ADDITIONAL KEYWORDS AND CONNECT:DIRECT CONTROL STATEMENTS              
+)CM      OTHER THAN SIGNON MAY ALSO BE ADDED. IF A SIGNON STATEMENT             
+)CM      IS NOT NEEDED, DELETE THE SYSIN DD AND SIGNON STATEMENT                
+)CM      IN THE &VNBXSTP JOB STEP AND CODE A SYSIN DD ON THE                    
+)CM      CONNCMD.FILE DD STATEMENT.                                             
+)CM                                                                             
+)IM C1BMXSBD                                                                    
+//* *==============================================================* *          
+//* *===========================================* CSIQSENU(C1BMXNDM) *          
+//* *==============================================================* *          
+//* *==============================================================* *          
+//*#####################################################################        
+//*                                                                             
+//* Tailor AHJOB                                                                
+//*                                                                             
+//*#####################################################################        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//XXCC     DD DSN=&&&&XNWC,DISP=(OLD,PASS)                                      
+//AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
+    MODAHJOB     +                                                              
+      &VPHPKGID  +                                                              
+      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
+//*#####################################################################        
+//*                                                                             
+//* Transmit SBOM to REMOTE SYSTEM                                              
+//*                                                                             
+//*#####################################################################        
+//*DCTXSBOM EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)                 
+//*STEPLIB  DD  DISP=SHR,                   NDM LOAD MODULES                    
+//*             DSN=&I@PRFX..NDM.LINKLIB                                        
+//*DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP                     
+//*             DSN=&I@PRFX..NDM.NETMAP                                         
+//*DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET                 
+//*             DSN=&I@PRFX..NDM.MSG                                            
+//*DMPUBLIB DD  DISP=SHR,                                                       
+//*             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE             
+//*SYSPRINT DD  SYSOUT=*    ******************************************          
+//*NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *          
+//*DMPRINT  DD  SYSOUT=*    ******************************************          
+//*SYSUDUMP DD  SYSOUT=*                                                        
+//*SYMDUMP  DD DUMMY                                                            
+//*SYSIN    DD  *                                                               
+//* SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                           
+//*         DD  DISP=SHR,                                                       
+//*         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT)         
+//* *==============================================================* *          
+//* *===========================================* CSIQSENU(C1BMXNDM) *          
+//* *==============================================================* *          
+//PROCESSI EXEC PGM=IEBUPDTE,PARM=NEW,COND=(12,LE,NDVRSHIP)                     
+//SYSPRINT DD  SYSOUT=*                                                         
+//SYSUT2   DD  DISP=(NEW,CATLG),UNIT=&T@DISK,                                   
+//*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE,             
+//             DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE,                
+//             SPACE=(CYL,(1,1,25)),                                            
+//             DCB=(RECFM=FB,LRECL=80)                                          
+//SYSUT1   DD  DUMMY                                                            
+//SYSIN    DD  DISP=SHR,                                                        
+//             DSN=&I@PRFX..&I@QUAL..CSIQOPTN(#PS#NDM)                          
+//* *==============================================================* *          
+//PROCESSP EXEC PGM=IEBUPDTE,PARM=MOD,COND=(12,LE,NDVRSHIP)                     
+//SYSPRINT DD  SYSOUT=*                                                         
+//SYSUT1   DD  DISP=OLD,                                                        
+//             DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE                 
+//*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
+//SYSUT2   DD  DISP=OLD,                                                        
+//             DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE                 
+//*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
+//SYSIN    DD  DSN=&&&&XNWC,DISP=(OLD,PASS)                                     
+//* *==============================================================* *          
+//PRTXNWCP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//SYSUT1   DD DSN=&&&&XNWC,DISP=(OLD,PASS)                                      
+//SYSUT2   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//* *==============================================================* *          
+//PRTXSUB  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//SYSUT1   DD *                                                                 
+  SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                             
+//         DD DISP=OLD,                                                         
+//         DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT)             
+//SYSUT2   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//* *==============================================================* *          
+//&VNBXSTP EXEC PGM=IEFBR14,REGION=2048K,COND=(12,LE,NDVRSHIP)                  
+//* *==============================================================* *          
+//SUBMITD  EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)                                
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD *                                                                 
+ DELETE &VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT) NONVSAM         

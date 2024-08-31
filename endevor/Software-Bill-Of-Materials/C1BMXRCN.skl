@@ -1,0 +1,266 @@
+)CM  PACKAGE SHIPMENT BATCH JCL - CONFIRMATION - ISPSLIB(C1BMXRCN)              
+)CM                                                                             
+)CM  THIS SKELETON IS USED TO CONFIRM THE EXECUTION OF THE IEBCOPY JOB AT       
+)CM  THE REMOTE SITE (COPY STAGING DATASETS TO PRODUCTION SATASETS).  IT        
+)CM  IS INCLUDED IN SKELETON ISPSLIB(C1BMXJOB).                                 
+)CM                                                                             
+)CM  THIS SKELETON IS READ BY THE SHIPMENT STAGING UTILITY AND IS USED          
+)CM  TO BUILD PART OF THE REMOTE JOB WHICH COPIES STAGING DATASETS INTO         
+)CM  THEIR RESPECTIVE PRODUCTION DATASETS.  THERE ARE TWO IEBGENER STEPS        
+)CM  WHICH WRITE JCL TO THE INTERNAL READER.  BASED ON CONDITION CODES,         
+)CM  ONLY ONE OF THE GENER STEPS WILL EXECUTE.  THE JOB STREAM WHICH IS         
+)CM  GENERED INTO THE INTERNAL READER WILL EXECUTE AT THE HOST AND CAUSE        
+)CM  THE SHIPMENT RECORD TO BE UPDATED.                                         
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.  HOWEVER, IT CAN BE           
+)CM  MODIFIED TO GIVE MORE SPECIFIC INFORMATION ABOUT THE RESULTS OF            
+)CM  THE COPYING PROCESS (CF. ADMINISTRATORS GUIDE - "SHIPMENT                  
+)CM  TRACKING AND CONFIRMATION").                                               
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM                                                                             
+)CM REXX XMETHOD XNODE                                                          
+)CM   TRACE R                                                                   
+)CM   SAY 'XMETHOD==> 'XMETHOD                                                  
+)CM   SAY 'XNODE  ==> 'XNODE                                                    
+)CM ENDREXX                                                                     
+//* *----------------------------------------------* ISPSLIB(C1BMXRCN) *        
+//*                                                                             
+//* *==================================================================*        
+//* *  INSTREAM DATASET CONTAINING REMOTE CONFIRMATION JCL                      
+//* *==================================================================*        
+//*                                                                             
+//VERIFYOK IF  (^ABEND AND                                                      
+//             SBOMVRFY.RC = 0 AND                                              
+//             CHKHASH.RC = 0) THEN                                             
+//*                                                                             
+//CONFCOPY EXEC PGM=IEBGENER                                                    
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
+)IM C1BMXHJC                                                                    
+//CONFEXEC EXEC PGM=NDVRC1,                                                     
+//   PARM='&VNBCPARM,CONF,RCPY,EX,****,$DEST_ID'                                
+)IM C1BMXLIB OPT                                                                
+//**********************************************************************        
+//*  MOVE PACKAGE' SBOM IN ENDEVOR ADMIN ENVIRONMENT                   *        
+//**********************************************************************        
+//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LE),                           
+//  PARM='C1BM3000'                                                             
+)IM C1BMXLIB                                                                    
+//**********************************************************************        
+//*             SORT WORK FILES                                        *        
+//**********************************************************************        
+//SORTWK01 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
+//SORTWK02 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
+//SORTWK03 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
+//C1TPDD01 DD UNIT=3390,SPACE=(CYL,5),                                          
+//            DCB=(RECFM=VB,LRECL=260)                                          
+//C1TPDD02 DD UNIT=3390,SPACE=(CYL,5),                                          
+//            DCB=(RECFM=VB,LRECL=260)                                          
+//**********************************************************************        
+//*  OUTPUT DATA SETS                                                  *        
+//**********************************************************************        
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//C1PRINT  DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=133)                                
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSOUT   DD SYSOUT=*                                                          
+//**********************************************************************        
+//*  REQUEST DATA SET                                                  *        
+//**********************************************************************        
+//BSTIPT01 DD *                                                                 
+  SET STOPRC 16 .                                                               
+  MOVE ELEMENT '&VPHPKGID'                                                      
+    FROM                                                                        
+      ENVIRONMENT 'ADM' SYSTEM 'ADMMY' SUBSYSTEM 'PACKAGES'                     
+      TYPE 'SBOM' STAGE NUMBER 1                                                
+    OPTIONS CCID 'PKGSBOM' COMMENTS "ADD NEW PACKAGE SBOM"                      
+      WITH HISTORY                                                              
+  .                                                                             
+//* *----------------------------------------------* C1BMXRCN (CONT.)  *        
+$$                                                                              
+)IF &XMETHOD = LOCAL THEN )DO                                                   
+//SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
+)ENDDO                                                                          
+)ELSE )DO                                                                       
+)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
+//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDDO                                                                          
+)IF &XMETHOD EQ XCOM THEN )DO                                                   
+//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
+//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDDO                                                                          
+)IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
+//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
+//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDDO                                                                          
+)ENDDO                                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//*                                                                             
+//VERIFYOK ELSE                                                                 
+//*                                                                             
+//CONFABND EXEC PGM=IEBGENER                                                    
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
+)IM C1BMXHJC                                                                    
+//ABNDEXEC EXEC PGM=NDVRC1,                                                     
+//  PARM='&VNBCPARM,CONF,RCPY,AB,****,$DEST_ID'                                 
+//*                                                                             
+)IM C1BMXLIB OPT                                                                
+//* *----------------------------------------------* C1BMXRCN (CONT.)  *        
+$$                                                                              
+)IF &XMETHOD = LOCAL THEN )DO                                                   
+//SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
+)ENDDO                                                                          
+)ELSE )DO                                                                       
+)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
+//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDDO                                                                          
+)IF &XMETHOD EQ XCOM THEN )DO                                                   
+//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
+//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDDO                                                                          
+)IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
+//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
+//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDDO                                                                          
+)ENDDO                                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//*                                                                             
+//VERIFYOK ENDIF                                                                
+//*                                                                             
+)IF &XMETHOD NE LOCAL THEN )DO                                                  
+)SET LOCALIP = &Z                                                               
+)REXX LOCALIP                                                                   
+ call socket 'initialize','rsclient' /* initilize ip connexion */               
+                                                                                
+ addr = socket('gethostid') /* retrieve ip addr                */               
+                                                                                
+ parse var addr rt ipadd    /* parse rt = return code ipadd ip address*/        
+ /* say 'ipaddress: 'ipadd */                                                   
+ LOCALIP = ipadd                                                                
+ return                                                                         
+)ENDREXX                                                                        
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  Transmission method selected FTP                                           
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
+//* *----------------------------------------------* ISPSLIB(#NFTPRCN) *        
+//*                                                                             
+//* *==================================================================*        
+//* *  FTP CONFIRMATION JCL TO HOST LPAR                                        
+//* *==================================================================*        
+//*                                                                             
+//SUBFTP01 EXEC PGM=FTP,COND=((0,GT),EVEN)                                      
+//ABNLIGNR DD DUMMY                                                             
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSABEND DD SYSOUT=*                                                          
+//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
+//SYSOUT   DD SYSOUT=*                                                          
+//OUTPUT   DD SYSOUT=*                                                          
+//CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                   
+//INPUT    DD *                                                                 
+&LOCALIP                                                                        
+SITE FILETYPE=JES                                                               
+PUT //DD:CONFJCL                                                                
+STOP                                                                            
+QUIT                                                                            
+)ENDDO                                                                          
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  Transmission method selected XCOM                                          
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)IF &XMETHOD EQ XCOM THEN )DO                                                   
+//C1BMXCOM EXEC PGM=XCOMJOB,                                                    
+//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
+//STEPLIB  DD DISP=SHR,DSN=DE25.XCOM.R120.RUN.CBXGLOAD                          
+//         DD DISP=SHR,                                                         
+//            DSN=CEE.SCEERUN                                                   
+//XCOMCNTL DD DISP=SHR,                                                         
+//            DSN=DE25.XCOM.R120.RUN.CBXGPARM                                   
+//**********************************************************************        
+//*SYSTCPD  DD DISP=SHR,                                                        
+//*            DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
+//*XCOMGLOB DD DISP=SHR,                                                        
+//*            DSN=SHARE.XCOM.XCOMGLOB                                          
+//*XCOMREST DD DISP=SHR,                                                        
+//*            DSN=SHARE.XCOM.XCOMREST                                          
+//XCOMPRNT DD SYSOUT=*                            * IEBCOPY MSGS                
+//SYSPRINT DD SYSOUT=*                            * TCP/IP MSGS                 
+//SYSTERM  DD SYSOUT=*                            * TCP/IP MSGS                 
+//**********************************************************************        
+//*LCLDS01  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                  
+//SYSIN01  DD *,SYMBOLS=JCLONLY                                                 
+TYPE=SEND                                                                       
+ID=CONFRMT                                                                      
+HOLDCOUNT=0                                                                     
+XTCNET=CONFRMT                                                                  
+XTCJOB=J0001AR                                                                  
+XTCGOODREL=J0001DEL                                                             
+USERID=&&USER                                                                   
+FILETYPE=JOB                                                                    
+LFILE=&&USER..D&&DATE..T&&TIME..CONFJCL                                         
+FILEOPT=CREATE                                                                  
+IPNAME=&LOCALIP                                                                 
+IPPORT=08044                                                                    
+UNIT=SYSDA                                                                      
+)ENDDO                                                                          
+)IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
+//* *==============================================================* *          
+//CRTCMDF  EXEC PGM=IEFBR14,COND=(12,LE,NDVRSHIP)                               
+//CMDFILE  DD  DISP=(NEW,CATLG),UNIT=&T@DISK,                                   
+//             DSN=&&USER..D&&DATE..T&&TIME..CONNCMD.FILE,                      
+//             SPACE=(CYL,(1,1,25)),                                            
+//             DCB=(RECFM=FB,LRECL=80)                                          
+//* *==============================================================* *          
+//PROCESSP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//SYSPRINT DD  DUMMY                                                            
+//SYSIN    DD  DUMMY                                                            
+//SYSUT2   DD  DISP=OLD,                                                        
+//             DSN=&&USER..D&&DATE..T&&TIME..CONNCMD.FILE(SUBRMTJ)              
+//SYSUT1   DD  *,SYMBOLS=JCLONLY                                                
+SUBRMTJ  PROCESS SNODE=TCPNAME=&LOCALIP                                         
+STEPNWDM RUN JOB (SNODE DSN=&&USER..D&&DATE..T&&TIME..CONFJCL)          )       
+//* *==============================================================* *          
+//&VNBXSTP EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)                  
+//STEPLIB  DD  DISP=SHR,                   NDM LOAD MODULES                     
+//             DSN=&I@PRFX..NDM.LINKLIB                                         
+//DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP                      
+//             DSN=&I@PRFX..NDM.NETMAP                                          
+//DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET                  
+//             DSN=&I@PRFX..NDM.MSG                                             
+//DMPUBLIB DD  DISP=SHR,                                                        
+//             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
+//SYSPRINT DD  SYSOUT=*    ******************************************           
+//NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *           
+//DMPRINT  DD  SYSOUT=*    ******************************************           
+//SYSUDUMP DD  SYSOUT=*                                                         
+//SYMDUMP  DD DUMMY                                                             
+//SYSIN    DD  *                                                                
+  SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                             
+      SUBMIT PROC=SUBRMTJ                                               00000010
+//* *==============================================================* *          
+)ENDDO                                                                          
+)ENDDO                                                                          

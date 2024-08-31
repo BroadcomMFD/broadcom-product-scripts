@@ -1,0 +1,41 @@
+)CM  PACKAGE SHIPMENT BATCH JCL -  LOCAL TRANSFERS - CSIQSENU(C1BMXLOC)         
+)CM                                                                             
+)CM  THIS SKELETON IS USED TO TRANSFER HOST STAGING DATASETS WHICH EXIST        
+)CM  ON SHARED DASD TO PRODUCTION DATASETS WHICH MAY OR MAY NOT EXIST ON        
+)CM  SHARED DASD.  THE JOB EXECUTES TSO IN BATCH AND THE INPUT (SYSTSIN)        
+)CM  CONTAINS A SUBMIT COMMAND TO RUN AHJOB.                                    
+)CM                                                                             
+)CM //COPYSTMT EXEC PGM=IEBGENER                                                
+)CM //SYSUT1   DD DSN=&&CHJOBDSN,DISP=(OLD,PASS)                                
+)CM //SYSUT2   DD SYSOUT=*,DCB=(RECFM=FB,LRECL=80)                              
+)CM //SYSPRINT DD SYSOUT=*                                                      
+)CM //SYSIN    DD DUMMY                                                         
+)CM //*                                                                         
+)IM C1BMXSBD                                                                    
+//*#####################################################################        
+//*                                                                             
+//* Tailor AHJOB                                                                
+//*                                                                             
+//*#####################################################################        
+//*E1       EXPORT SYMLIST=(*)                                                  
+//*S1       SET DATE=&&LYYMMDD                                                  
+//*S2       SET TIME=&&LHHMMSS                                                  
+//*S3       SET USER=&&SYSUID                                                   
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//XLCC     DD DSN=&&&&XLCC,DISP=(OLD,PASS)                                      
+//AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
+    MODAHJOB     +                                                              
+      &VPHPKGID  +                                                              
+      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
+//* *==================================================================*        
+//* *===============================================* CSIQSENU(C1BMXLOC)        
+//* *==================================================================*        
+//*                                                                             
+//&VNBXSTP EXEC PGM=IKJEFT01,COND=(12,LE,NDVRSHIP)                              
+//SYSTSIN  DD DSN=&&&&XLCC,DISP=(OLD,PASS)                                      
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSOUT   DD SYSOUT=*                                                          

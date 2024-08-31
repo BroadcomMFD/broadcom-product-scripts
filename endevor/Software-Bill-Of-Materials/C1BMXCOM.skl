@@ -1,0 +1,138 @@
+)CM  PACKAGE SHIPMENT BATCH JCL -  XCOM FOR MVS - ISPSLIB(C1BMXCOM)             
+)CM                                                                             
+)CM  THIS SKELETON CONTAINS XCOM JCL.  THE &&XXCC DATASET WAS BUILT             
+)CM  BY THE PACKAGE SHIPMENT UTILITY AND CONTAINS COMMANDS TO TRANSFER          
+)CM  THE STAGING DATASETS TO THE REMOTE SITE(S).                                
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  TAILORING INSTRUCTIONS:                                                    
+)CM                                                                             
+)CM  1.  MODIFY THE "STEPLIB" AND "XCOMCNTL"                                    
+)CM      DSNAMES USING SITE SPECIFIC PREFIX, QUALIFIER, AND NAME.               
+)CM                                                                             
+)CM      "&I@PRFX..XCOM" IS THE PREFIX/QUALIFIER OF THE XCOM LIBRARIES.         
+)CM                                                                             
+)CM  2.  MODIFY THE DFLTAB=XCOMDFLT PARAMETER, IF NECESSARY.                    
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)REXX VNBSQDSP XNODE                                                            
+   TRACE Off                                                                    
+   SA= '&VNBSQDSP> 'VNBSQDSP                                                    
+   SA= 'XNODE  ==> 'XNODE                                                       
+)ENDREXX                                                                        
+)IM C1BMXSBD                                                                    
+//* *==============================================* ISPSLIB(C1BMXCOM) *        
+//*#####################################################################        
+//*                                                                             
+//* Tailor AHJOB                                                                
+//*                                                                             
+//*#####################################################################        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//XXCC     DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
+//AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
+    MODAHJOB     +                                                              
+      &VPHPKGID  +                                                              
+      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
+//*#####################################################################        
+//*                                                                             
+//* Transmit SBOM to REMOTE SYSTEM                                              
+//*                                                                             
+//*#####################################################################        
+//C1BMXCOM EXEC PGM=XCOMJOB,                                                    
+//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
+//STEPLIB  DD DISP=SHR,DSN=SHARE.XCOM.CBXGLOAD                                  
+//         DD DISP=SHR,                                                         
+//            DSN=CEE.SCEERUN                                                   
+//XCOMCNTL DD DISP=SHR,                                                         
+//            DSN=SHARE.XCOM.R120.CBXGPARM                                      
+//**********************************************************************        
+//SYSTCPD  DD  DISP=SHR,                                                        
+//             DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
+//XCOMGLOB DD  DISP=SHR,                                                        
+//             DSN=SHARE.XCOM.XCOMGLOB                                          
+//XCOMREST DD  DISP=SHR,                                                        
+//             DSN=SHARE.XCOM.XCOMREST                                          
+//XCOMPRNT DD  SYSOUT=*                            * IEBCOPY MSGS               
+//SYSPRINT DD  SYSOUT=*                            * TCP/IP MSGS                
+//SYSTERM  DD  SYSOUT=*                            * TCP/IP MSGS                
+//**********************************************************************        
+//SYSIN01  DD *,SYMBOLS=JCLONLY                                                 
+IPNAME=&VDDXIPNM                                                                
+IPPORT=&VDDXIPPT                                                                
+TYPE=SEND                                                                       
+USERID=GONJO08                                                                  
+DROPSESS=YES                                                                    
+FILEOPT=CREATE                                                                  
+CKPT=0                                                                          
+CODE=BINARY                                                                     
+FILETYPE=FILE                                                                   
+LFILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json                       
+FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json                        
+/*                                                                              
+//*#####################################################################        
+//*                                                                             
+//* XCOM COMANND EXECUTION                                                      
+//*                                                                             
+//*#####################################################################        
+//COMMANDI EXEC PGM=IEBUPDTE,PARM=NEW,COND=(12,LE,NDVRSHIP)                     
+//SYSPRINT DD  SYSOUT=*                                                         
+//SYSUT2   DD  DISP=(NEW,CATLG),UNIT=SYSDA,                                     
+//             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE,             
+//             SPACE=(TRK,(5,1,45)),                                            
+//             DCB=(RECFM=FB,LRECL=80)                                          
+//SYSUT1   DD  DUMMY                                                            
+//SYSIN    DD  DISP=SHR,                                                        
+//             DSN=&I@PRFX..&I@QUAL..CSIQOPTN(#PS#XCOM)                         
+//* *================================================================* *        
+//COMMANDP EXEC PGM=IEBUPDTE,PARM=MOD,COND=(12,LE,NDVRSHIP)                     
+//SYSPRINT DD  SYSOUT=*                                                         
+//SYSUT1   DD  DISP=SHR,                                                        
+//             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE              
+//SYSUT2   DD  DISP=SHR,                                                        
+//             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE              
+//SYSIN    DD  DSN=&&&&XXCC,DISP=(OLD,PASS)                                     
+//* *================================================================* *        
+//PRTXXCC  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//SYSUT1   DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
+//SYSUT2   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//*                                                                             
+//PRTCNTL  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//SYSUT1   DD DISP=SHR,                                                         
+//         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
+//SYSUT2   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//*                                                                             
+//* *================================================================* *        
+//&VNBXSTP EXEC PGM=XCOMJOB,COND=(12,LE,NDVRSHIP),                              
+//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
+//STEPLIB  DD DISP=SHR,DSN=&I@PRFX..XCOM.CBXGLOAD                               
+//         DD DISP=SHR,                                                         
+//            DSN=CEE.SCEERUN                                                   
+//XCOMCNTL DD DISP=SHR,                                                         
+//            DSN=&I@PRFX..XCOM.R120.CBXGPARM                                   
+//**********************************************************************        
+//SYSTCPD  DD  DISP=SHR,                                                        
+//             DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
+//XCOMGLOB DD  DISP=SHR,                                                        
+//             DSN=&I@PRFX..XCOM.XCOMGLOB                                       
+//XCOMREST DD  DISP=SHR,                                                        
+//             DSN=&I@PRFX..XCOM.XCOMREST                                       
+//XCOMPRNT DD  SYSOUT=*                            * IEBCOPY MSGS               
+//SYSPRINT DD  SYSOUT=*                             * TCP/IP MSGS               
+//SYSTERM  DD  SYSOUT=*                            * TCP/IP MSGS                
+//************************************************************                  
+//SYSIN01  DD DISP=SHR,                                                         
+//         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
+//* *================================================================* *        
+//CONTROLD EXEC PGM=IDCAMS                                                      
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD *                                                                 
+ DELETE &VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)                

@@ -1,0 +1,136 @@
+)CM  PACKAGE SHIPMENT BATCH JCL - CONFIRMATION - ISPSLIB(C1BMXRCN)              
+)CM                                                                             
+)CM  THIS SKELETON IS USED TO CONFIRM THE EXECUTION OF THE IEBCOPY JOB AT       
+)CM  THE REMOTE SITE (COPY STAGING DATASETS TO PRODUCTION SATASETS).  IT        
+)CM  IS INCLUDED IN SKELETON ISPSLIB(C1BMXJOB).                                 
+)CM                                                                             
+)CM  THIS SKELETON IS READ BY THE SHIPMENT STAGING UTILITY AND IS USED          
+)CM  TO BUILD PART OF THE REMOTE JOB WHICH COPIES STAGING DATASETS INTO         
+)CM  THEIR RESPECTIVE PRODUCTION DATASETS.  THERE ARE TWO IEBGENER STEPS        
+)CM  WHICH WRITE JCL TO THE INTERNAL READER.  BASED ON CONDITION CODES,         
+)CM  ONLY ONE OF THE GENER STEPS WILL EXECUTE.  THE JOB STREAM WHICH IS         
+)CM  GENERED INTO THE INTERNAL READER WILL EXECUTE AT THE HOST AND CAUSE        
+)CM  THE SHIPMENT RECORD TO BE UPDATED.                                         
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.  HOWEVER, IT CAN BE           
+)CM  MODIFIED TO GIVE MORE SPECIFIC INFORMATION ABOUT THE RESULTS OF            
+)CM  THE COPYING PROCESS (CF. ADMINISTRATORS GUIDE - "SHIPMENT                  
+)CM  TRACKING AND CONFIRMATION").                                               
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM                                                                             
+//* *--------------------------------------------* ISPSLIB(C1BMXRCN) *          
+//*                                                                             
+//* *================================================================*          
+//* *  INSTREAM DATASET CONTAINING REMOTE CONFIRMATION JCL                      
+//* *================================================================*          
+//*                                                                             
+//CONFCOPY EXEC PGM=IEBGENER,COND=(0,NE,CHKHASH)  THE REMOTE SITE               
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
+)IM C1BMXHJC                                                                    
+//CONFEXEC EXEC PGM=NDVRC1,                                                     
+//   PARM='&VNBCPARM,CONF,RCPY,EX,****,$DEST_ID'                                
+)IM C1BMXLIB OPT                                                                
+//*********************************************************************         
+//*  MOVE PACKAGE' SBOM IN ENDEVOR ADMIN ENVIRONMENT                  *         
+//*********************************************************************         
+//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LE),                           
+//  PARM='C1BM3000'                                                             
+)IM C1BMXLIB                                                                    
+//*********************************************************************         
+//*             SORT WORK FILES                                       *         
+//*********************************************************************         
+//SORTWK01 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
+//SORTWK02 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
+//SORTWK03 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
+//C1TPDD01 DD UNIT=3390,SPACE=(CYL,5),                                          
+//            DCB=(RECFM=VB,LRECL=260)                                          
+//C1TPDD02 DD UNIT=3390,SPACE=(CYL,5),                                          
+//            DCB=(RECFM=VB,LRECL=260)                                          
+//*********************************************************************         
+//*  OUTPUT DATA SETS                                                 *         
+//*********************************************************************         
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//C1PRINT  DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=133)                                
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSOUT   DD SYSOUT=*                                                          
+//*********************************************************************         
+//*  REQUEST DATA SET                                                 *         
+//*********************************************************************         
+//BSTIPT01 DD *                                                                 
+SET STOPRC 16 .                                                                 
+MOVE ELEMENT '&VPHPKGID'                                                        
+  FROM                                                                          
+    ENVIRONMENT 'ADM' SYSTEM 'ADMMY' SUBSYSTEM 'PACKAGES'                       
+    TYPE 'SBOM' STAGE NUMBER 1                                                  
+  OPTIONS CCID 'PKGSBOM' COMMENTS "ADD NEW PACKAGE SBOM"                        
+    WITH HISTORY                                                                
+ .                                                                              
+//* *--------------------------------------------* C1BMXRCN (CONT.)  *          
+$$                                                                              
+)REXX &VNBXSTP &VNBSQDSP                                                        
+  TRACE OFF                                                                     
+  SA= '&VNBXSTP: '&VNBXSTP                                                      
+  SA= '&VNBSQDSP '&VNBSQDSP                                                     
+)ENDREXX                                                                        
+)SET DEST1 = &DESTID                                                            
+)SET DEST2 = &NODENAME                                                          
+)SET DEST3 = &VNBXSTP                                                           
+)SEL &VNBXSTP = C1BMXLOC                                                        
+//SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
+)ENDSEL                                                                         
+)SEL &VNBXSTP NE C1BMXLOC                                                       
+//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDSEL                                                                         
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//*                                                                             
+//CONFABND EXEC PGM=IEBGENER,COND=((0,EQ,CHKHASH),EVEN)                         
+//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
+)IM C1BMXHJC                                                                    
+//ABNDEXEC EXEC PGM=NDVRC1,                                                     
+//  PARM='&VNBCPARM,CONF,RCPY,AB,****,$DEST_ID'                                 
+//*                                                                             
+)IM C1BMXLIB OPT                                                                
+//* *--------------------------------------------* C1BMXRCN (CONT.)  *          
+$$                                                                              
+)SEL &VNBXSTP = C1BMXLOC                                                        
+//SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
+)ENDSEL                                                                         
+)SEL &VNBXSTP NE C1BMXLOC                                                       
+//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
+//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
+//         DCB=(LRECL=80,DSORG=PS)                                              
+)ENDSEL                                                                         
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+)SEL &VNBXSTP NE C1BMXLOC                                                       
+//* *--------------------------------------------* ISPSLIB(#NFTPRCN) *          
+//*                                                                             
+//* *================================================================*          
+//* *  FTP CONFIRMATION JCL TO HOST LPAR                                        
+//* *================================================================*          
+//*                                                                             
+//SUBFTP01 EXEC PGM=FTP,COND=(4,LT)                        #PSN                 
+//ABNLIGNR DD DUMMY                                                             
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSABEND DD SYSOUT=*                                                          
+//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
+//SYSOUT   DD SYSOUT=*                                                          
+//OUTPUT   DD SYSOUT=*                                                          
+//CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                   
+//INPUT    DD *                                                                 
+10.175.81.102                                                                   
+SITE FILETYPE=JES                                                               
+PUT //DD:CONFJCL                                                                
+STOP                                                                            
+QUIT                                                                            
+)ENDSEL                                                                         

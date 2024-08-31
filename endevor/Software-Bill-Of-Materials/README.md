@@ -1,10 +1,10 @@
 # Software Bill Of Materials 
 
-
+The items in this folder support the blog [Adding SBOM Generation and Hash Validation to Endevor Package Ship Facility](https://medium.com/modern-mainframe/adding-sbom-generation-and-hash-validation-to-endevor-package-ship-facility-3183f5354212) .
 
 ## SBOM Shipping Approach 
 
-- No manual steps are required. New steps are Automated and run under the Alt-ID
+- Once installed, no manual steps are required. New steps are Automated and run under the Alt-ID
 - SBOM signed at HOST System
 - SBOM signature validation at Remote System. A signature verification failure will halt shipment delivery.  
 - A hash-value comparison will halt shipment delivery if a discrepancy is found at the remote LPAR
