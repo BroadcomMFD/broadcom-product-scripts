@@ -1,0 +1,22 @@
+)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)          
+)CM                                                                             
+)CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT            
+)CM  TO C1BMX000.                                                               
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.                               
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+&VNBSQDSP                                                                       
+)REXX VNBSQDSP PKGLIST                                                          
+   SA= 'VALOR PKGLIST: 'PKGLIST                                                 
+   IF PKGLIST = 'PKGLIST' THEN DO                                               
+     PKGLIST = VNBSQDSP                                                         
+    END                                                                         
+   ELSE DO                                                                      
+     PKGLIST  = PKGLIST  || '@' || VNBSQDSP                                     
+    END                                                                         
+   SA= 'PKGLIST:  ==> 'PKGLIST                                                  
+)ENDREXX                                                                        

@@ -1,4 +1,5 @@
 /* REXX */                                                                      
+trace off                                                                       
                                                                                 
 parse arg pkgID ,                                                               
           signedSBOMfile                                                        
@@ -39,22 +40,9 @@ if allocRc <> 0 then do
   return allocRC                                                                
 End                                                                             
                                                                                 
-/* "execio * diskr REXXMOD (stem rexxmod. finis"                                
-say '--------------BEGIN------------------'                                     
-do i=1 to rexxmod.0                                                             
-  say rexxmod.i                                                                 
-end                                                                             
-say '--------------END------------------'                                       
-                                                                                
-"execio" rexxmod.0 "diskw AHJOBIMG (STEM rexxmod. finis"                        
-                                                                                
-return */                                                                       
-newahjob. = ''                                                                  
-trace r                                                                         
 "execio * diskr ahjob (stem ahjob. finis"                                       
                                                                                 
 do i = 1 to ahjob.0                                                             
-                                                                                
                                                                                 
   select                                                                        
                                                                                 
@@ -62,8 +50,7 @@ do i = 1 to ahjob.0
                                                                                 
        parse var ahjob.i head '@@PKGID@@' Tail                                  
        ahjob.i = Head ||strip(pkgID)||Tail                                      
-       say '*eye* 'ahjob.i                                                      
-       newahjob.i = substr(ahjob.i,1,80)                                        
+       queue substr(ahjob.i,1,80)                                               
                                                                                 
     end                                                                         
                                                                                 
@@ -71,29 +58,19 @@ do i = 1 to ahjob.0
                                                                                 
        parse var ahjob.i head '@@signedSBOMfile@@' Tail                         
        ahjob.i = Head ||strip(signedSBOMfile)||Tail                             
-       say '*eye* 'ahjob.i                                                      
-       newahjob.i = substr(ahjob.i,1,80)                                        
+       queue substr(ahjob.i,1,80)                                               
                                                                                 
     end                                                                         
                                                                                 
     otherwise                                                                   
-      say '*eye* 'ahjob.i                                                       
-      newahjob.i = substr(ahjob.i,1,80)                                         
+      queue substr(ahjob.i,1,80)                                                
                                                                                 
   end /* select */                                                              
                                                                                 
-  say 'Length of ahjob.'i': 'LENGTH(ahjob.i)                                    
                                                                                 
 end /* i = 1 to ahjob.0  */                                                     
                                                                                 
-newahjob.0 = i - 1                                                              
-                                                                                
-"execio * diskw ahjob (stem newahjob. finis"                                    
-                                                                                
-say 'elementos encolados despues del write: 'newahjob.0                         
-                                                                                
-"execio * diskw ahjobimg (stem newahjob. finis"                                 
-                                                                                
+"execio" queued() "diskw ahjob (finis"                                          
                                                                                 
 Return 0                                                                        
                                                                                 

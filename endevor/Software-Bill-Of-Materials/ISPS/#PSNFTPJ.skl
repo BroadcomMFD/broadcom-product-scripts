@@ -1,0 +1,20 @@
+//*----PACKAGE SHIPMENT JOB #2 --    ------------------------ #PSNFTPJ          
+@REM ****************************************************** #PSNFTPJ ***        
+@REM *    CONTENTS: ENDEVOR/MVS - JCL TO TRANSMIT DATASET                       
+@REM * TRANSMITTER: NETVIEW FILE TRANSFER PROGRAM (FTP)                         
+@REM *     PURPOSE: TRANSMIT A PARTITIONED OR SEQUENTIAL DATASET                
+@REM *              NOTE THAT ONLY ONE "FUNCTION=ADD" (TRANSMISSION)            
+@REM *              CAN BE PERFORMED PER EXECUTION OF THIS JOBSTEP              
+@REM *******************************************************************        
+//*---------------------------------------------------------- #PSNFTPJ          
+//* EXECUTE FTP COMMANDS ------------------------------------ #PSNFTPJ          
+//*---------------------------------------------------------- #PSNFTPJ          
+//FTP      EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),             #PSNFTPJ          
+//         REGION=2048K,TIME=800                              #PSNFTPJ          
+//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
+//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSUDUMP  DD SYSOUT=Q                                                         
+//OUTPUT   DD SYSOUT=*                                        #PSNFTPJ          
+//SYSIN    DD *                                               #PSNFTPJ          

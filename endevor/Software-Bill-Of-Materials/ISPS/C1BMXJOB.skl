@@ -109,7 +109,7 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
 //            UNIT=&T@DISK                                                      
 //C1BMXXCM DD DISP=SHR,                                                         
-//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP                                     
+//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP.SBOM                                
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
@@ -122,7 +122,7 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
 //            UNIT=&T@DISK                                                      
 //C1BMXFTM DD DISP=SHR,                                                         
-//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP                                     
+//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP.SBOM                                
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
@@ -183,7 +183,7 @@
 //* ********************************************************************        
 //*                                                                             
 //C1BMXMDL DD DISP=SHR,                                                         
-//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP                                     
+//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP.SBOM                                
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
