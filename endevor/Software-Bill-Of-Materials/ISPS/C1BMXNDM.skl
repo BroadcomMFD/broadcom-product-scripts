@@ -28,7 +28,7 @@
 //* Tailor AHJOB                                                                
 //*                                                                             
 //*#####################################################################        
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXNDM             
 //SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
 //XXCC     DD DSN=&&&&XNWC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
@@ -85,13 +85,13 @@
 //*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
 //SYSIN    DD  DSN=&&&&XNWC,DISP=(OLD,PASS)                                     
 //* *==============================================================* *          
-//PRTXNWCP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PRTXNWCP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXNDM             
 //SYSUT1   DD DSN=&&&&XNWC,DISP=(OLD,PASS)                                      
 //SYSUT2   DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSIN    DD DUMMY                                                             
 //* *==============================================================* *          
-//PRTXSUB  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PRTXSUB  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXNDM             
 //SYSUT1   DD *                                                                 
   SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                             
 //         DD DISP=OLD,                                                         
@@ -102,7 +102,7 @@
 //* *==============================================================* *          
 //&VNBXSTP EXEC PGM=IEFBR14,REGION=2048K,COND=(12,LE,NDVRSHIP)                  
 //* *==============================================================* *          
-//SUBMITD  EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)                                
+//SUBMITD  EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)           C1BMXNDM             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSIN    DD *                                                                 
  DELETE &VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT) NONVSAM         

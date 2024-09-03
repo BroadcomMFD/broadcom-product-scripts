@@ -15,7 +15,7 @@
 )CM                                                                             
 //* *----------------------------------------------* ISPSLIB(C1BMXHCN) *        
 //*                                                                             
-//CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                       C1BMXHCN         
+//CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                   C1BMXHCN             
 //    PARM='&VNBCPARM,CONF,HXMT,EX,****,&VNBCDEST'                              
 //*                                                                             
 //C1BMXDTM DD DSN=&&&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                   
@@ -29,7 +29,7 @@
 //* *----------------------------------------------------------------* *        
 //* *----------------------------------------------------------------* *        
 //*                                                                             
-//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,             C1BMXHCN         
+//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,         C1BMXHCN             
 //   PARM='&VNBCPARM,CONF,HXMT,AB,****,********'                                
 //*                                                                             
 //C1BMXDTM DD DSN=&&&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                   

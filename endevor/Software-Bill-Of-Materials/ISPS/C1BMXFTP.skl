@@ -25,7 +25,7 @@
 //* Tailor AHJOB                                                                
 //*                                                                             
 //*#####################################################################        
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXFTP             
 //SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
 //XFTC     DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
@@ -41,7 +41,7 @@
 //*  FTP SBOM file to Remote LPAR                                               
 //*                                                                             
 //*#####################################################################        
-//FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),                               
+//FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          C1BMXFTP             
 //         REGION=2048K,TIME=800                                                
 //NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
@@ -59,8 +59,8 @@ PUT /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //*  FTP validation script to remote                                            
 //*                                                                             
 //*#####################################################################        
-//FTPSBOM  EXEC PGM=IEFBR14                                                     
-//*FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),                              
+//FTPSBOM  EXEC PGM=IEFBR14                                C1BMXFTP             
+//*FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),         C1BMXFTP             
 //*         REGION=2048K,TIME=800                                               
 //NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
@@ -81,7 +81,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 //*                                                                             
 //*#####################################################################        
 //*                                                                             
-//&VNBXSTP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//&VNBXSTP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXFTP             
 //SYSUT1   DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
 //SYSPRINT DD SYSOUT=*                                                          

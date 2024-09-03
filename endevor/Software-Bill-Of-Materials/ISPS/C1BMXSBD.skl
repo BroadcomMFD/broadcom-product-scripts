@@ -14,7 +14,7 @@
 //*S2       SET TIME=&LHHMMSS                                                   
 //*S3       SET USER=&SYSUID                                                    
 //*S4       SET PKGID=&VPHPKGID                                                 
-//LSTPKGID EXEC PGM=NDVRC1,                                                     
+//LSTPKGID EXEC PGM=NDVRC1,                                C1BMXSBD             
 //         PARM='CONCALL,DDN:CONLIB,BC1PCSV0'                                   
 )IM C1BMXLIB                                                                    
 //CSVIPT01 DD *,SYMBOLS=JCLONLY                                                 
@@ -50,7 +50,7 @@
 //* Generate Source Output COmponents and Ship data sets components             
 //*                                                                             
 //*#####################################################################        
-//CMPNTGEN EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CMPNTGEN EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXSBD             
 )IM C1BMXLIB                                                                    
 //**********************************************************************        
 //*  REXX DATA SETS                                                    *        
@@ -141,7 +141,7 @@
 //* COPY CSVs AND COMPONENT LISTING TO USS IN ASCII FORMAT                      
 //*                                                                             
 //*#####################################################################        
-//ASCIIOUT EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)                           
+//ASCIIOUT EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)      C1BMXSBD             
 //SYSTSPRT DD SYSOUT=*                                                          
 //*                                                                             
 //LSTPKIN  DD DISP=(OLD,DELETE),DSN=&&&&LSTPKGID                                
@@ -170,7 +170,7 @@ OCOPY INDD(LSTCMIN) OUTDD(LSTCMOUT) TEXT CONVERT((BPXFX311)) FROM1047
 //*  GENERATE PACKAGE SBOM FROM FILES                                           
 //*                                                                             
 //*#####################################################################        
-//SBOMZGEN EXEC PGM=BPXBATCH,REGION=0M,COND=(4,LT)                              
+//SBOMZGEN EXEC PGM=BPXBATCH,REGION=0M,COND=(4,LT)         C1BMXSBD             
 //EN$TRXIT DD  SYSOUT=*                                                         
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
@@ -203,7 +203,7 @@ sbomz endevor sbom
 //* SBOM SIGN                                                                   
 //*                                                                             
 //*#####################################################################        
-//SBOMSIGN EXEC PGM=BPXBATCH,REGION=0M                                          
+//SBOMSIGN EXEC PGM=BPXBATCH,REGION=0M                     C1BMXSBD             
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD DUMMY                                                             
 //STDERR   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
@@ -222,7 +222,7 @@ $HOME/sbom/ship_sbom_pvt.key
 //* STDOUT and STDERR to HFS files.                                             
 //*                                                                             
 //*#####################################################################        
-//SBMEBCDI EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)                           
+//SBMEBCDI EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)      C1BMXSBD             
 //SYSTSPRT DD SYSOUT=*                                                          
 //HFSOUT   DD PATHMODE=SIRWXU,                                                  
 // PATH='/tmp/&&USER_D&&DATE_T&&TIME..&VPHPKGID_sbom.json'                      
@@ -249,7 +249,7 @@ OCOPY INDD(HFSERRS) OUTDD(STDERRLS) TEXT CONVERT((BPXFX311)) TO1047
 //*  ADD SBOM TO ENDEVOR ADMIN ENVIRONMENT                   *                  
 //*                                                                             
 //*#####################################################################        
-//NDVRADD  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),                           
+//NDVRADD  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),      C1BMXSBD             
 //  PARM='C1BM3000'                                                             
 )IM C1BMXLIB                                                                    
 //**********************************************************************        

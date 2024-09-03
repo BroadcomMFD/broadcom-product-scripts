@@ -28,7 +28,7 @@
 //* SBOM Signature validation                                                   
 //*                                                                             
 //*#####################################################################        
-//SBOMVRFY EXEC PGM=BPXBATCH,REGION=0M                                          
+//SBOMVRFY EXEC PGM=BPXBATCH,REGION=0M                     #RJICPY1             
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
 // PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._sbom.out',                           
@@ -73,7 +73,7 @@ OCOPY INDD(SBOMASC)  OUTDD(SBOMEBC) TEXT CONVERT((BPXFX311)) TO1047
 //* TEMP STEP to VALIDATE COPY and TRANSLATION                                  
 //*                                                                             
 //*#####################################################################        
-//PROCESSP EXEC PGM=IEBGENER,COND=(0,LT)                                        
+//PROCESSP EXEC PGM=IEBGENER,COND=(0,LT)                   #RJICPY1             
 //SYSPRINT DD  DUMMY                                                            
 //SYSIN    DD  DUMMY                                                            
 //SYSUT2   DD  SYSOUT=*                                                         
@@ -83,7 +83,7 @@ OCOPY INDD(SBOMASC)  OUTDD(SBOMEBC) TEXT CONVERT((BPXFX311)) TO1047
 //* GET STAGING DATA SETS HASHES FROM SBOM                                      
 //*                                                                             
 //*#####################################################################        
-//GETHASH  EXEC PGM=IKJEFT01,COND=(0,NE),REGION=0M                              
+//GETHASH  EXEC PGM=IKJEFT01,COND=(0,NE),REGION=0M         #RJICPY1             
 //*STEPLIB  DD DISP=SHR,DSN=REXX.SEAGLPA                                        
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
@@ -114,7 +114,7 @@ HASHSBOM
 //* VALIDATE SBOM HASHES AGAINST REMOTE STAGING DATA SETS HASHES                
 //*                                                                             
 //*#####################################################################        
-//CHKHASH  EXEC PGM=BPXBATCH,COND=(0,NE)                                        
+//CHKHASH  EXEC PGM=BPXBATCH,COND=(0,NE)                   #RJICPY1             
 //STDOUT   DD SYSOUT=*                                                          
 //STDERR   DD SYSOUT=*                                                          
 //STDPARM  DD *,SYMBOLS=JCLONLY                                                 
@@ -128,7 +128,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* COPY OF STAGING DATA SETS TO PRODUCTION DATA SETS                           
 //*                                                                             
 //*#####################################################################        
-//JS01     EXEC PGM=IEBCOPY,COND=(0,NE)                        #RJICPY1         
+//JS01     EXEC PGM=IEBCOPY,COND=(0,NE)                    #RJICPY1             
 //SYSPRINT DD   SYSOUT=*                                                        
 @INCLUDE=U                                                                      
 @ENDIF                                                                          
@@ -150,7 +150,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* DELETE STAGING DATS SETS                                                    
 //*                                                                             
 //*#####################################################################        
-//JS02     EXEC PGM=IDCAMS,COND=(0,NE)                         #RJICPY1         
+//JS02     EXEC PGM=IDCAMS,COND=(0,NE)                     #RJICPY1             
 //SYSPRINT DD   SYSOUT=*                                                        
 @ENDIF                                                                          
 @SECTION=05   <=======================================================          
@@ -178,7 +178,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //*                                                                             
 //*#####################################################################        
 //*                                                                             
-//BPXBAT   EXEC PGM=BPXBATCH,COND=(0,NE)                       #RJICPY1         
+//BPXBAT   EXEC PGM=BPXBATCH,COND=(0,NE)                   #RJICPY1             
 //STDOUT   DD   SYSOUT=*                                                        
 //STDERR   DD   SYSOUT=*                                                        
 //STDPARM  DD   DISP=SHR,                                                       
@@ -192,7 +192,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* DELETE USS FILES                                                            
 //*                                                                             
 //*#####################################################################        
-//JS03     EXEC PGM=IDCAMS,COND=(0,NE)                         #RJICPY1         
+//JS03     EXEC PGM=IDCAMS,COND=(0,NE)                     #RJICPY1             
 //SYSPRINT DD   SYSOUT=*                                                        
 //SYSIN    DD   *                                                               
 @ENDIF                                                                          

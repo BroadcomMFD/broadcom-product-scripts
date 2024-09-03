@@ -87,7 +87,7 @@
 //* ENDEVOR PACKAGE SHIPMENT UTILITY                                            
 //*                                                                             
 //*#####################################################################        
-//NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),                           
+//NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),      C1BMXJOB             
 //         PARM='&VNBCPARM SHIP &ZPREFIX '                                      
 //*                                                                             
 )IM C1BMXLIB                                                                    

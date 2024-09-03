@@ -11,7 +11,7 @@
 //*  NODE NAME           &NODENAME                                              
 //*  *******************************************************************        
 //*---------------------------------------------------------- #PSNFTPE          
-//SUBFTP01 EXEC PGM=FTP,COND=(4,LT)                                             
+//SUBFTP01 EXEC PGM=FTP,COND=(4,LT)                        #PSNFTPE             
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          

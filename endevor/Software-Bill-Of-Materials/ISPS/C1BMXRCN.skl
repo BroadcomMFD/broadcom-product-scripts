@@ -37,16 +37,16 @@
 //             SBOMVRFY.RC = 0 AND                                              
 //             CHKHASH.RC = 0) THEN                                             
 //*                                                                             
-//CONFCOPY EXEC PGM=IEBGENER                                                    
+//CONFCOPY EXEC PGM=IEBGENER                               C1BMXRCN             
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
 )IM C1BMXHJC                                                                    
-//CONFEXEC EXEC PGM=NDVRC1,                                                     
+//CONFEXEC EXEC PGM=NDVRC1,                                C1BMXRCN             
 //   PARM='&VNBCPARM,CONF,RCPY,EX,****,$DEST_ID'                                
 )IM C1BMXLIB OPT                                                                
 //**********************************************************************        
 //*  MOVE PACKAGE' SBOM IN ENDEVOR ADMIN ENVIRONMENT                   *        
 //**********************************************************************        
-//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LE),                           
+//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LE),      C1BMXRCN             
 //  PARM='C1BM3000'                                                             
 )IM C1BMXLIB                                                                    
 //**********************************************************************        
@@ -109,10 +109,10 @@ $$
 //*                                                                             
 //VERIFYOK ELSE                                                                 
 //*                                                                             
-//CONFABND EXEC PGM=IEBGENER                                                    
+//CONFABND EXEC PGM=IEBGENER                               C1BMXRCN             
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
 )IM C1BMXHJC                                                                    
-//ABNDEXEC EXEC PGM=NDVRC1,                                                     
+//ABNDEXEC EXEC PGM=NDVRC1,                                C1BMXRCN             
 //  PARM='&VNBCPARM,CONF,RCPY,AB,****,$DEST_ID'                                 
 //*                                                                             
 )IM C1BMXLIB OPT                                                                
@@ -170,7 +170,7 @@ $$
 //* *  FTP CONFIRMATION JCL TO HOST LPAR                                        
 //* *==================================================================*        
 //*                                                                             
-//SUBFTP01 EXEC PGM=FTP,COND=((0,GT),EVEN)                                      
+//SUBFTP01 EXEC PGM=FTP,COND=((0,GT),EVEN)                 C1BMXRCN             
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          
@@ -193,7 +193,7 @@ QUIT
 )CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
 )CM                                                                             
 )IF &XMETHOD EQ XCOM THEN )DO                                                   
-//C1BMXCOM EXEC PGM=XCOMJOB,                                                    
+//C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXRCN             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=DE25.XCOM.R120.RUN.CBXGLOAD                          
 //         DD DISP=SHR,                                                         
@@ -229,13 +229,13 @@ UNIT=SYSDA
 )ENDDO                                                                          
 )IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
 //* *==============================================================* *          
-//CRTCMDF  EXEC PGM=IEFBR14,COND=(12,LE,NDVRSHIP)                               
+//CRTCMDF  EXEC PGM=IEFBR14,COND=(12,LE,NDVRSHIP)          C1BMXRCN             
 //CMDFILE  DD  DISP=(NEW,CATLG),UNIT=&T@DISK,                                   
 //             DSN=&&USER..D&&DATE..T&&TIME..CONNCMD.FILE,                      
 //             SPACE=(CYL,(1,1,25)),                                            
 //             DCB=(RECFM=FB,LRECL=80)                                          
 //* *==============================================================* *          
-//PROCESSP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PROCESSP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXRCN             
 //SYSPRINT DD  DUMMY                                                            
 //SYSIN    DD  DUMMY                                                            
 //SYSUT2   DD  DISP=OLD,                                                        

@@ -9,7 +9,7 @@
 //*---------------------------------------------------------- #PSNFTPJ          
 //* EXECUTE FTP COMMANDS ------------------------------------ #PSNFTPJ          
 //*---------------------------------------------------------- #PSNFTPJ          
-//FTP      EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),             #PSNFTPJ          
+//FTP      EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          #PSNFTPJ             
 //         REGION=2048K,TIME=800                              #PSNFTPJ          
 //*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
 //NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      

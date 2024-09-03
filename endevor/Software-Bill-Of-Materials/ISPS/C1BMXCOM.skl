@@ -28,7 +28,7 @@
 //* Tailor AHJOB                                                                
 //*                                                                             
 //*#####################################################################        
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXCOM             
 //SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
 //XXCC     DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
@@ -43,7 +43,7 @@
 //* Transmit SBOM to REMOTE SYSTEM                                              
 //*                                                                             
 //*#####################################################################        
-//C1BMXCOM EXEC PGM=XCOMJOB,                                                    
+//C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXCOM             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=SHARE.XCOM.CBXGLOAD                                  
 //         DD DISP=SHR,                                                         
@@ -97,13 +97,13 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE              
 //SYSIN    DD  DSN=&&&&XXCC,DISP=(OLD,PASS)                                     
 //* *================================================================* *        
-//PRTXXCC  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PRTXXCC  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXCOM             
 //SYSUT1   DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
 //SYSUT2   DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSIN    DD DUMMY                                                             
 //*                                                                             
-//PRTCNTL  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PRTCNTL  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXCOM             
 //SYSUT1   DD DISP=SHR,                                                         
 //         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
 //SYSUT2   DD SYSOUT=*                                                          
@@ -111,7 +111,7 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //SYSIN    DD DUMMY                                                             
 //*                                                                             
 //* *================================================================* *        
-//&VNBXSTP EXEC PGM=XCOMJOB,COND=(12,LE,NDVRSHIP),                              
+//&VNBXSTP EXEC PGM=XCOMJOB,COND=(12,LE,NDVRSHIP),         C1BMXCOM             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=&I@PRFX..XCOM.CBXGLOAD                               
 //         DD DISP=SHR,                                                         
@@ -132,7 +132,7 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //SYSIN01  DD DISP=SHR,                                                         
 //         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
 //* *================================================================* *        
-//CONTROLD EXEC PGM=IDCAMS                                                      
+//CONTROLD EXEC PGM=IDCAMS                                 C1BMXCOM             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSIN    DD *                                                                 
  DELETE &VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)                
