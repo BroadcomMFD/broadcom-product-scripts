@@ -2,7 +2,7 @@
 This repository houses sample scripts for use cases involving Broadcom Products.
 
 # Using
-Sample scripts for each product are located in the directory that shares its name. For example, ACF2 LI Script samples are in the [LI](LI) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
+Sample scripts for each product are located in the directory that shares its name. For example, ACF2 LI Script samples are in the [LI](../LI) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
 
 # Folders
 1. SDACFUID - SDACFUID REXX example code.  SDACFUID will process the output from IBM SDSF conversion utility ISFACR into ACF2 Commands with UID, placing the output into a dataset, allowing scrolling (PF7/8), review, and editing as needed.
