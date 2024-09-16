@@ -1,0 +1,181 @@
+@REM ****************************************************** #PSXCOMS ***        
+@REM *    CONTENTS: ENDEVOR/MVS - TRANSMIT SEQUENTIAL DATASETS                  
+@REM * TRANSMITTER: CA-XCOM                                                     
+@REM *     PURPOSE: CREATE CONTROL CARDS TO TRANSMIT THE SEQUENTIALS            
+@REM *******************************************************************        
+@REM                                                                            
+*                                                                               
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+@IF &NODENAME                                                                   
+LU=&NODENAME                                                                    
+@ENDIF                                                                          
+@IF &IPNAME                                                                     
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+@ENDIF                                                                          
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+@IF &RVOLSER                                                                    
+VOL=&RVOLSER                                                                    
+@ENDIF                                                                          
+LFILE=&AHREFDSN                                                                 
+FILE=&ARREFDSN                                                                  
+*                                                                               
+@IF &CHJOBDSN                                                                   
+@IFAND &NODENAME                                                                
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+LU=&NODENAME                                                                    
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&CHJOBDSN                                                                 
+FILE=&CRJOBDSN                                                                  
+@ENDIF                                                                          
+@IF &CHJOBDSN                                                                   
+@IFAND &IPNAME                                                                  
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&CHJOBDSN                                                                 
+FILE=&CRJOBDSN                                                                  
+@ENDIF                                                                          
+*                                                                               
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+@IF &NODENAME                                                                   
+LU=&NODENAME                                                                    
+@ENDIF                                                                          
+@IF &IPNAME                                                                     
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+@ENDIF                                                                          
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+@IF &RVOLSER                                                                    
+VOL=&RVOLSER                                                                    
+@ENDIF                                                                          
+LFILE=&AHJOBDSN                                                                 
+FILE=&ARJOBDSN                                                                  
+*                                                                               
+@IF &AHUCDDSN                                                                   
+@IFAND &NODENAME                                                                
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+LU=&NODENAME                                                                    
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&AHUCDDSN                                                                 
+FILE=&ARUCDDSN                                                                  
+@ENDIF                                                                          
+*                                                                               
+@IF &AHUCDDSN                                                                   
+@IFAND &IPNAME                                                                  
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&AHUCDDSN                                                                 
+FILE=&ARUCDDSN                                                                  
+@ENDIF                                                                          
+*                                                                               
+@IF &CHUCDDSN                                                                   
+@IFAND &NODENAME                                                                
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+LU=&NODENAME                                                                    
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&CHUCDDSN                                                                 
+FILE=&CRUCDDSN                                                                  
+@ENDIF                                                                          
+*                                                                               
+@IF &CHUCDDSN                                                                   
+@IFAND &IPNAME                                                                  
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&CHUCDDSN                                                                 
+FILE=&CRUCDDSN                                                                  
+@ENDIF                                                                          
+*                                                                               
+@IF &AHPAXDSN                                                                   
+@IFAND &NODENAME                                                                
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+LU=&NODENAME                                                                    
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&AHPAXDSN                                                                 
+FILE=&ARPAXDSN                                                                  
+@ENDIF                                                                          
+*                                                                               
+@IF &AHPAXDSN                                                                   
+@IFAND &IPNAME                                                                  
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCGOODDECR=J&D4.AR                                                             
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+UNIT=&RUNIT                                                                     
+HOLD=NO                                                                         
+LFILE=&AHPAXDSN                                                                 
+FILE=&ARPAXDSN                                                                  
+@ENDIF                                                                          

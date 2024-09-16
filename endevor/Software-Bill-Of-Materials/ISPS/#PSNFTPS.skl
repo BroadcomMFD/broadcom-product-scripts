@@ -1,0 +1,50 @@
+@REM *******************************************************************        
+@REM *                                                                          
+@REM * (C) 1987,2005 COMPUTER ASSOCIATES INTERNATIONAL, INC.                    
+@REM *                                                                          
+@REM * NAME: #PSNFTPS                                                           
+@REM *                                                                          
+@REM *    CONTENTS: ENDEVOR/MVS - TRANSMIT SEQUENTIAL DATASET                   
+@REM * TRANSMITTER: NETVIEW FILE TRANSFER PROGRAM (FTP)                         
+@REM *     PURPOSE: CONTAINS ALL EXCEPT THE SFILEID AND RFILEID.                
+@REM *              NOTE THAT LAST STATEMENT HAS A CONTINUATION MARK.           
+@REM *              IT IS EXPECTED THAT MEMBERS THAT @INCLUDE=S WILL            
+@REM *              PROVIDE THE FILEID'S AFTER THE INCLUSION.                   
+@REM *                                                                          
+@REM * NOTE: IF YOU DO NOT SPECIFY VALUES FOR THE DCB AND/OR SPACE              
+@REM *       PARAMETERS, FTP USES DEFAULT VALUES THAT CORRESPOND TO             
+@REM *       THE CHARACTERISTS OF THE SENDING DATA SET.                         
+@REM *                                                                          
+@REM *******************************************************************        
+@REM * PARAMETERS PROVIDED ARE FOR NETVIEW FILE TRANSFER PROGRAM V2             
+@REM *******************************************************************        
+@REM                                                                            
+@REM FUNCTION=ADD XMODE=TO,RMTLU=&NODENAME -                                    
+@REM              SFILEORG=PS,RFILEORG=PS -                                     
+@REM              RSTATOPT=MUSTNOTEXIST -                                       
+@REM              RRECFM=FB,RLRECL=80,RBLKSIZE=0 -                              
+@REM              RSPCUNIT=TRK,RSPCPRIM=10,RSPCSEC=10 -                         
+@REM              RUNIT=&UNIT -                                                 
+@REM              WAIT=YES,WAITTIME=10 -                                        
+@IF &RVOLSER                                                                    
+@REM              RVOLSER=&RVOLSER -                                            
+@ENDIF                                                                          
+@REM          SFILEID='&HOST_DSN' -     <== OCCURS IN #PSNFTP6                  
+@REM          RFILEID='&REMOTE_DSN'     <== OCCURS IN #PSNFTP6                  
+@REM                                                                            
+@REM *******************************************************************        
+@REM * COMMENTED OUT PARAMETERS BELOW ARE PROVIDED FOR:                         
+@REM *    NETVIEW FILE TRANSFER PROGRAM V1                                      
+@REM *******************************************************************        
+@REM FUNCTION=ADD XMODE=TO,SFTYPE=PS,RFTYPE=PS,WAIT=YES -                       
+@REM          REMNODE=&NODENAME -                                               
+@REM          RTDISP=CAT,RSPCUNIT=TRK -                                         
+@REM          RRECFM=FB -                                                       
+@REM          RLRECL=80 -                                                       
+@REM          RBLKSIZE=3120 -                                                   
+@REM          RSPCPRIM=10 -                                                     
+@REM          RSPCSEC=10 -                                                      
+@REM          RUNIT=&UNIT -                                                     
+&NODENAME                                                                       
+MODE B                                                                          
+EBCDIC                                                                          

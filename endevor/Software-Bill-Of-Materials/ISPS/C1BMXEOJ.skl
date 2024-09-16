@@ -1,0 +1,11 @@
+)CM  PACKAGE SHIPMENT BATCH JCL -  END OF JOB JOBSTEP - ISPSLIB(C1BMXEOJ)       
+)CM                                                                             
+)CM  THIS SKELETON CAN BE CUSTOMIZED TO EXECUTE JOBSTEP(S) AFTER THE STAGING    
+)CM  AND TRANSMISSION METHOD DEPENDENT JOBSTEPS.  THE ACTUAL TRANSMISSION OF    
+)CM  OF THE STAGING DATASETS HAS PROBABLY NOT COMPLETED WHEN THIS JOBSTEP       
+)CM  EXECUTES.  THE DISTRIBUTED VERSION OF THIS SKELETON CONTAINS ONLY A        
+)CM  COMMENT CARD.                                                              
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+//* ISPSLIB(C1BMXEOJ) - END OF JOB                                              

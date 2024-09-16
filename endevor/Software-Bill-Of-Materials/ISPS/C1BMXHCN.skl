@@ -1,0 +1,39 @@
+)CM  PACKAGE SHIPMENT BATCH JCL - STAGING STEP - ISPSLIB(C1BMXHCN)              
+)CM                                                                             
+)CM  THIS SKELETON CONFIRMS THE EXECUTION OF A FILE TRANSMISSION                
+)CM  STEP AT THE HOST END.                                                      
+)CM                                                                             
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+)CM                                                                             
+)CM  TAILORING INSTRUCTIONS:                                                    
+)CM                                                                             
+)CM  INSURE THAT THE CONDITION CODE ON THE "CONFEXEC" STEP MATCHES THE          
+)CM  CONDITION CODE IN THE PRECEEDING FILE TRANSMISSION STEP.  THIS             
+)CM  SKELETON CAN BE MODIFIED TO GIVE MORE SPECIFIC INFORMATION ABOUT           
+)CM  THE RESULTS OF THE FILE TRANSMISSION STEP (CF. ADMINISTRATORS              
+)CM  GUIDE - SHIPMENT TRACKING AND CONFIRMATION).                               
+)CM                                                                             
+//* *----------------------------------------------* ISPSLIB(C1BMXHCN) *        
+//*                                                                             
+//CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                   C1BMXHCN             
+//    PARM='&VNBCPARM,CONF,HXMT,EX,****,&VNBCDEST'                              
+//*                                                                             
+//C1BMXDTM DD DSN=&&&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                   
+//            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
+//            UNIT=&T@DISK                                                      
+//*                                                                             
+)IM C1BMXLIB OPT                                                                
+//* *----------------------------------------------* C1BMXHCN (CONT.)  *        
+//* *----------------------------------------------------------------* *        
+//* *----------------------------------------------------------------* *        
+//* *----------------------------------------------------------------* *        
+//* *----------------------------------------------------------------* *        
+//*                                                                             
+//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,         C1BMXHCN             
+//   PARM='&VNBCPARM,CONF,HXMT,AB,****,********'                                
+//*                                                                             
+//C1BMXDTM DD DSN=&&&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                   
+//            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
+//            UNIT=&T@DISK                                                      
+//*                                                                             
+)IM C1BMXLIB OPT                                                                

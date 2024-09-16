@@ -1,0 +1,39 @@
+@REM ****************************************************** #RJICPY2 ***        
+@REM *    CONTENTS: ENDEVOR/MVS - START PROCESSING A PDS TO BE SHIPPED          
+@REM *     PURPOSE: (SEE #RJICPY1 FOR DETAILS)                                  
+@REM *******************************************************************        
+@REM *                                                                          
+@REM *  P002868 CORRECT DUPLICATE DD NAMES.                                     
+@REM *  P003154 INCLUDE COPYMOD                                                 
+@REM *                                                                          
+@SECTION=00   <=======================================================          
+@IF &RDDN                                                                       
+@IFAND &TDSN                                                                    
+  HASH&F4 &FDSN                                                                 
+           &TDSN                                                                
+           &RDSN                                                                
+@ENDIF                                                                          
+@SECTION=02   <=======================================================          
+@IF &RDDN                                                                       
+@IFAND &TDSN                                                                    
+//&TDDN  DD  DISP=SHR,  REMOTE STAGING DATA SET                                 
+//         DSN=&TDSN                                                            
+//&RDDN  DD  DISP=SHR,  REMOTE TARGET DATA SET                                  
+//         DSN=&RDSN                                                            
+@ENDIF                                                                          
+@SECTION=03   <=======================================================          
+@IF &RDDN                                                                       
+@IFAND &TDSN                                                                    
+@REM COPY      INDD=((&TDDN,R)),OUTDD=&RDDN                                     
+@INCLUDE=#RJICPYL                              P003154                          
+@ENDIF                                                                          
+@SECTION=04   <=======================================================          
+@IF &ANY2DELETE                                                                 
+@IFAND &RDDN                                                                    
+//&RDDN  DD  DISP=SHR,  REMOTE PRODUCTION DATA SET                              
+//         DSN=&RDSN                                                            
+@ENDIF                                                                          
+@SECTION=07   <=======================================================          
+@IF RDISP=DELETE                                                                
+@INCLUDE=#RJIDVRD                                                               
+@ENDIF                                                                          
