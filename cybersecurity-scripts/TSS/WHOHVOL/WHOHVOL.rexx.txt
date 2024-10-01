@@ -11,7 +11,7 @@
 /*                                                                   */
 /* syntax:  TSO WHOHVOL                                              */
 /*                                                                   */
-/* idea, written and coded by Steve Hosie                            */
+/*                                                                   */
 /*                                                                   */
 /* Version 1.0 October 2024                                          */
 /*                                                                   */
