@@ -1,0 +1,72 @@
+/*REXX ***************************************************************/
+/*                                                                   */
+/* Purpose:  TSS provdies commands to list ownership of VOLUME       */
+/* resources (TSS WHOOWNS VOLUME(*)) and also provides commands to   */
+/* view who has access to specific owned volumes.                    */
+/*                                                                   */
+/*  Challenge:  Provide single report showing all of who has access  */
+/*  to volume level resources without having to edit the output of   */
+/*  TSS WHOOWNS VOLUME(*) and manually building TSS WHOHAS VOLUME    */
+/*  for each volume owned/defined within TSS.                        */
+/*                                                                   */
+/* syntax:  TSO WHOHVOL                                              */
+/*                                                                   */
+/*                                                                   */
+/*                                                                   */
+/* Version 1.0 October 2024                                          */
+/*                                                                   */
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.TSS.TEMP.'last_qual'.'p1
+udsn = strip(udsn)
+ddname = "A"current_seconds
+DSN = USERID() || ".TSS." || cmd || "." || last_qual
+UNIT = "UNIT(SYSDA)"
+SPC = "TRACKS SPACE(50,50)"
+"FREE F("ddname")"
+"DELETE" DSN
+
+if sysdsn("'"DSN"'") = OK then
+  "alloc f("ddname") da('"DSN"') shr reu"
+else
+  "alloc f("ddname") da('"DSN"') NEW SP(50 50)
+   TR DSORG(PS) RECFM(F B) LRECL(133)"
+
+
+"ISPEXEC VGET (DATA) PROFILE"
+X=OUTTRAP('REC.')
+"ISPEXEC VPUT (DATA) PROFILE"
+    "TSS WHOOWNS VOLUME(*)"
+j = 1
+x = 1
+do i=x to rec.0
+if substr(rec.i,1,8) = 'TSS0318E' then
+ do
+   say cmd '   ' rec.i
+   exit
+ end
+if substr(rec.i,1,8) = '        ' then nop
+if substr(rec.i,1,8) = 'TSS0300I' then nop
+else
+  do
+      "ISPEXEC VGET (DATA) PROFILE"
+      X=OUTTRAP('whovol.')
+      "ISPEXEC VPUT (DATA) PROFILE"
+      volume_var = strip(substr(rec.i,24,8))
+      'TSS WHOHAS VOLUME('volume_var')'
+      do y=1 to whovol.0
+          new.j = whovol.y
+          j = j + 1
+      end
+  end
+end
+j = j - 1
+"EXECIO" j "DISKW "ddname" (STEM new. FINIS"
+
+"ISPEXEC EDIT DATASET('"DSN"')"
+
+"FREE F("ddname")"
+address tso "DELETE '"dsn"'"
