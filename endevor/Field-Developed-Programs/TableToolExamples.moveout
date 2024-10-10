@@ -1,0 +1,1665 @@
+./  ADD  NAME=@README                     
+These items come from the Endevor GitHub at 
+https://github.com/BroadcomMFD/broadcom-product-scripts 
+------------------------------------------------------- 
+These are jcl          : CLEANOVR CSVALENV CSVALTYP EXAMPL#1 EXAMPL#2 EXAMPL#3 EXAMPL#4 EXAMPL#5 EXAMPL#6 EXAMPL#7 EXAMPL#8 EXAMPL1A EXAMPL1B EXAMPL2$ EXAMPL2A EXAMPL2B EXAMPL2P EXAMPL2R LISTDSNS PKGEMNTR 
+./  ADD  NAME=CLEANOVR                
+//IBMUSERO JOB (0000),'Dan Walther',CLASS=A,MSGCLASS=Z,MSGLEVEL=(1,1),          
+//         NOTIFY=&SYSUID,REGION=0M                                             
+//*-------------------------------------------------------------------*         
+//*--Report processor group Overrides --------------------------------*         
+//*-------------------------------------------------------------------*         
+//*  Output:  YOURSITE.NDVR.TEAM.DEFINES(CLEANOVR)                              
+//*-------------------------------------------------------------------          
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)                                       
+//*-------------------------------------------------------------------          
+//*   STEP 1 -- EXECUTE CSV UTILITY                                             
+//STEP1    EXEC PGM=NDVRC1,                                                     
+//         PARM='CONCALL,DDN:CONLIB,BC1PCSV0' (EXEC FROM NON-AUTH LIB)          
+//   INCLUDE MEMBER=STEPLIB     <- Endevor STEPLIB+CONLIB                       
+//CSVIPT01 DD *                                                                 
+  LIST PROCESSOR GROUP '*'                                                      
+     FROM ENVIRONMENT '*'    SYSTEM '*'  TYPE '*'  STAGE '*'                    
+     OPTIONS NOSEARCH                                                           
+     TO   FILE 'APIEXTR' .                                                      
+//APIEXTR  DD DSN=&&APIEXTR,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=18000,DSORG=PS),                       
+//      DISP=(MOD,PASS),UNIT=3390,                                              
+//      SPACE=(CYL,(10,10),RLSE)                                                
+//CSVMSGS1 DD SYSOUT=*                                                          
+//C1MSGSA  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSUDUMP DD SYSOUT=*                                                          
+//*---------------------------------------------------------------------        
+//STEP2 EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                       
+//TABLE    DD DSN=&&APIEXTR,DISP=(OLD,PASS)                                     
+//OPTIONS  DD  *                                                                
+  If Substr(SYM_OVRD,1,1) = ' '   then $SkipRow = 'Y'                           
+  asterisk = ' '                                                                
+  If PROC_GRP_NAME = 'DONTUSE1'   then asterisk = '*'                           
+//MODEL    DD *                                                                 
+*Now: &UPDT_USRID on &UPDT_DATE / &SYM_OVRD ='&SYM_OVRD_VALUE'                  
+&asterisk  DELETE PROCESSOR SYMBOL                                              
+&asterisk    FROM ENVIRONMENT '&ENV_NAME'                                       
+&asterisk      SYSTEM '&SYS_NAME' TYPE '&TYPE_NAME' STAGE ID &STG_ID            
+&asterisk      PROCESSOR GROUP &PROC_GRP_NAME PROCESSOR TYPE &PROC_TYPE         
+&asterisk      SYMBOL = (&SYM_OVRD)                                             
+&asterisk      .                                                                
+//   INCLUDE MEMBER=CSIQCLS0    <- Endevor CSIQCLS0                             
+//SYSTSPRT DD  SYSOUT=*                                                         
+//SYSPRINT DD SYSOUT=*                                                          
+//TBLOUT   DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.DEFINES(CLEANOVR)                 
+//*---------------------------------------------------------------------        
+                                                                                
+          
+./  ADD  NAME=CSVALENV                
+//IBMUSERI JOB (0000),'EXAMPL2A',CLASS=B,PRTY=6,                                
+//  MSGCLASS=3,REGION=7M,NOTIFY=&SYSUID                                         
+/*JOBPARM  SYSAFF=*                                                             
+//*--------------------------------------------------------------               
+// JCLLIB  ORDER=(IBMUSER.JCL.CSV)                                              
+//*-------------------------------------------------------------------          
+//*   CONVERT ENVIRONMENT INFO INTO REXX STEM ARRAY DATA                        
+//*   VIT902.JCL.CSV(CSVALENV)                                                  
+//*-------------------------------------------------------------------          
+//*   STEP 1 -- EXECUTE CSV UTILITY                                             
+//*-------------------------------------------------------------------          
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//   INCLUDE MEMBER=STEPLIB                                                     
+//BSTIPT01 DD *                                                                 
+LIST ENVIRONMENT                                                                
+'*'                                                                             
+TO DDNAME 'EXTRACTS'                                                            
+OPTIONS   RETURN ALL.                                                           
+//EXTRACTS DD DSN=&&EXTRACTS,                                                   
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(NEW,PASS),                                                        
+//      SPACE=(CYL,(5,1),RLSE)                                                  
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K                                        
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&EXTRACTS,DISP=(OLD,PASS)                                   
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//ENV#RPT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                              
+//TABLE    DD  DSN=&&EXTRACTS,DISP=(OLD,DELETE)                                 
+//PARMLIST DD  *                                                                
+NOTHING  TBLOUT  OPTIONS0 0                                                     
+MODEL    TBLOUT  OPTIONS  A                                                     
+LISTENVS TBLOUT  NOTHING  1                                                     
+//   INCLUDE MEMBER=SYSEXEC                                                     
+//MODEL    DD  *    < BUILD REXX COMMANDS THAT TELL THE STORY                   
+ENV_TITLE.&ENV_NAME = '&TITLE'                                                  
+//LISTENVS DD  *    < BUILD REXX COMMANDS THAT TELL THE STORY                   
+LISTENVS = '&LISTENVS'                                                          
+//NOTHING  DD DUMMY                               CONTROL STATEMENTS            
+//OPTIONS0 DD *                                   CONTROL STATEMENTS            
+LISTENVS = ''                                                                   
+//OPTIONS  DD *                                   CONTROL STATEMENTS            
+TITLE = STRIP(TRANSLATE(TITLE,"'",'"'))                                         
+IF WORDPOS(ENV_NAME,LISTENVS) = 0 THEN, +                                       
+LISTENVS = STRIP(LISTENVS) ENV_NAME                                             
+//SYSTSPRT DD SYSOUT=*                                                          
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=CSVALTYP                
+//VIT902B JOB (0000),                                                   JOB00133
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+//*   Report TYPE definition information                                        
+//*   VIT902.JCL.CSV(CSVALTYP)                                                  
+//*-------------------------------------------------------------------          
+//*   STEP 1 -- EXECUTE CSV UTILITY                                             
+//*-------------------------------------------------------------------          
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD DISP=SHR,DSN=CAIEDUC.NDVR.V181.CSIQAUTU                           
+//         DD DISP=SHR,DSN=CAIEDUC.NDVR.V181.CSIQAUTH                           
+//         DD DISP=SHR,DSN=CAIEDUC.NDVR.V181.CSIQLOAD                           
+//CONLIB   DD DISP=SHR,DSN=CAIEDUC.NDVR.V181.CSIQLOAD                           
+//BSTIPT01 DD *                                                                 
+LIST TYPE '*'                                                                   
+     FROM ENVIRONMENT '*' STAGE '*'                                             
+          SYSTEM 'FINANCE'                                                      
+     TO DDNAME 'EXTRACTS'                                                       
+     OPTIONS   RETURN ALL.                                                      
+//EXTRACTS DD DSN=&&EXTRACTS,                                                   
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(NEW,PASS),                                                        
+//      SPACE=(CYL,(5,10),RLSE)                                                 
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K                                        
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&EXTRACTS,DISP=(OLD,PASS)                                   
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//SBS#RPT EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                     
+//TABLE    DD  DSN=&&EXTRACTS,DISP=(OLD,DELETE)                                 
+//SYSEXEC  DD DISP=SHR,DSN=CAIEDUC.NDVR.V181.CSIQCLS0                           
+//MODEL    DD  *    < Format TYPE information for TBLOUT                        
+  &ENV_NAME &SYS_NAME &TYPE_NAME                                                
+       &UPDT_DATE &UPDT_TIME &UPDT_USRID                                        
+//NOTHING  DD DUMMY                               CONTROL STATEMENTS            
+//OPTIONS  DD *                                   CONTROL STATEMENTS            
+  TITLE = Strip(Translate(TITLE,"'",'"'))                                       
+  If STG_# /= '1' then $SkipRow = 'Y'                                           
+//SYSTSPRT DD SYSOUT=*                                                          
+//TBLOUT   DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+                                                                                
+          
+./  ADD  NAME=EXAMPL#1                
+//IBMUSER1 JOB (0000),                                                          
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*--------------------------------------------------------------               
+//*- To Report and delete very old elements from Test -----------               
+//*--------------------------------------------------------------               
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to locate inventory                         
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//BSTIPT01 DD *                                                                 
+LIST ELEMENT '*'                                                                
+     FROM ENVIRONMENT  SMPLTEST  SYSTEM  '*' SUBSYSTEM '*'                      
+          TYPE  '*'                                                             
+          STAGE NUMBER '*'                                                      
+     DATA BASIC                                                                 
+     TO DDNAME 'CSVOUTPT'                                                       
+     OPTIONS NOSEARCH   RETURN FIRST .                                          
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the API call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K,COND=(4,EQ,STEP1)                      
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//*                                                                             
+//TAILOR EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                      
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//OPTIONS  DD *                                                                 
+  DaysAgo = 240         /* Number of days for cutoff */                         
+  BaseDate = DATE('B')  /* Today in Base format */                              
+  UpdateDate = Substr(UPDT_DATE,1,4) || Substr(UPDT_DATE,6,2)                   
+  UpdateDate = UpdateDate || Substr(UPDT_DATE,9,2)                              
+  If DATATYPE(UpdateDate) /= 'NUM' then $SkipRow = 'Y'                          
+  BaseOld  = DATE(B,UpdateDate,S)  /* Convert Upd date to Base fmt */           
+  ElementAge = BaseDate - BaseOld  /* Determine how many days ago  */           
+  If TYPE_NAME /= 'JAVA' & ElementAge < DaysAgo then $SkipRow = 'Y'             
+//SYSEXEC DD DSN=&SYSEXEC,DISP=SHR                                              
+//SYSTSPRT DD  SYSOUT=*                                                         
+//MODEL    DD  *                                                                
+** &FULL_ELM_NAME &SYS_NAME &SBS_NAME &TYPE_NAME &SIGNOUT_ID                    
+*    &UPDT_DATE &UPDT_TIME (&ElementAge Days ago)                               
+  DELETE ELEMENT &FULL_ELM_NAME                                                 
+         FROM ENVIRONMENT &ENV_NAME                                             
+              SYSTEM &SYS_NAME SUBSYSTEM &SBS_NAME                              
+              TYPE &TYPE_NAME STAGE &STG_ID .                                   
+//TBLOUT    DD SYSOUT=*                                                         
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSIN     DD DUMMY                                                            
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=EXAMPL#2                
+//IBMUSER2 JOB (0000),                                                          
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*--------------------------------------------------------------               
+//*- To Report Packages created over nnn days ago     -----------               
+//*--------------------------------------------------------------               
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to gather Package information               
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//BSTIPT01 DD *                                                                 
+LIST PACKAGE ID '*'                                                             
+     WHERE DATE TYPE CR IS OLDER THAN 20 DAYS                                   
+     TO DDNAME 'CSVOUTPT' .                                                     
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the API call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K,COND=(4,EQ,STEP1)                      
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//PARMLIST DD *                                                                 
+  MODEL   TBLOUT  OPTION0  0                                                    
+  MODEL   TBLOUT  OPTIONS  A                                                    
+//HEADING  DD *                                                                 
+* Package--------- Status----- CreateDate UpdateDate CreatorId- PackageAge      
+//*-+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+//MODEL    DD *                                                                 
+&DetailLine                                                                     
+//OPTION0  DD *                                                                 
+  LinesPerPage = 15                                                             
+  LineCount = LinesPerPage + 1                                                  
+  DaysAgo = 60          /* Number of days for cutoff */                         
+//OPTIONS  DD *                                                                 
+* Bypass processing for Table header                                            
+  If $row# < 1 then $SkipRow = 'Y'                                              
+* Calculate age of Package creation                                             
+  BaseDate = DATE('B')  /* Today in Base format */                              
+  UpdateDate = Substr(UPDT_DATE,1,4) || Substr(UPDT_DATE,6,2)                   
+  UpdateDate = UpdateDate || Substr(UPDT_DATE,9,2)                              
+  If DATATYPE(UpdateDate) /= 'NUM' then $SkipRow = 'Y'                          
+  BaseOld  = DATE(B,UpdateDate,S)  /* Convert Upd date to Base fmt */           
+  PackageAge = BaseDate - BaseOld  /* Determine how many days ago  */           
+  If PackageAge < DaysAgo then $SkipRow = 'Y'  /* Skip if recent */             
+* Build report detail line ....                                                 
+  DetailLine = Copies(' ',120);                                                 
+  DetailLine = Overlay(PKG_ID,DetailLine,03)                                    
+  DetailLine = Overlay(STATUS,DetailLine,20)                                    
+  DetailLine = Overlay(CREATE_DATE,DetailLine,32)                               
+  DetailLine = Overlay(UPDT_DATE,DetailLine,43)                                 
+  DetailLine = Overlay(CREATE_USRID,DetailLine,54)                              
+  DetailLine = Overlay(PackageAge,DetailLine,65)                                
+* Determine whether it is time for page heading                                 
+  LineCount = LineCount + 1                                                     
+  If LineCount > LinesPerPage then x = BuildFromMODEL(HEADING)                  
+  If LineCount > LinesPerPage then LineCount = 1                                
+//SYSEXEC DD DSN=&SYSEXEC,DISP=SHR                                              
+//SYSTSPRT DD  SYSOUT=*                                                         
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSIN     DD DUMMY                                                            
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=EXAMPL#3                
+//IBMUSER3 JOB (0000),                                                          
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*--------------------------------------------------------------               
+//*- Add members of a PDS into Endevor                -----------               
+//*--------------------------------------------------------------               
+//*-------------------------------------------------------------------          
+//*   STEP 1 - Get a list of members in the dataset                             
+//*-------------------------------------------------------------------          
+//STEP01   EXEC PGM=IKJEFT1B                                                    
+//SYSTSIN   DD *                                                                
+ LISTDS 'IBMUSER.ENDEVOR.SOURCE' MEMBERS                                        
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSTSPRT  DD DSN=&&MBRLIST,DISP=(,PASS),                                      
+//     SPACE=(CYL,(1,1)),UNIT=SYSDA,                                            
+//     LRECL=120,RECFM=FB,BLKSIZE=0                                             
+//*                                                                             
+//*--------------------------------------------------------------------*        
+//*   STEP 2 -- Update Rexx Stem array for each member                          
+//*--------------------------------------------------------------------*        
+//STEP02 EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                      
+//TABLE    DD DSN=&&MBRLIST,DISP=(OLD,DELETE)                                   
+//POSITION DD  *                                                                
+  Member  3 10                                                                  
+//MODEL    DD  *                                                                
+  FoundMember.&Member = 'Y'                                                     
+//OPTIONS  DD *                                                                 
+  If $row#  < 8 then CSVoption = ' '                                            
+  If $row#  < 8 then $SkipRow = 'Y'  /* Skip if recent */                       
+  Member = Strip(Member)                                                        
+  firstchar = Substr(Member,1,1)                                                
+  if firstchar < 'A' | firstchar > 'Z' then $SkipRow = 'Y'                      
+  If $row#  > 8 then CSVoption = 'NOCSV'                                        
+//SYSEXEC  DD DSN=&SYSEXEC,DISP=SHR                                             
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//SYSPRINT DD SYSOUT=*                                                          
+//TBLOUT   DD DSN=&&STEMARRY,DISP=(MOD,PASS),                                   
+//         SPACE=(CYL,(1,1)),UNIT=SYSDA,                                        
+//         LRECL=80,RECFM=FB,BLKSIZE=0                                          
+//*                                                                             
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the Stem array settings                                    
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K                                        
+//SYSPRINT DD SYSOUT=*                           MESSAGES                       
+//SYSUT1   DD DSN=&&STEMARRY,DISP=(OLD,PASS)                                    
+//SYSUT2   DD SYSOUT=*                           OUTPUT FILE                    
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------*        
+//*   STEP 3 -- Execute CSV Utility to locate inventory                         
+//*--------------------------------------------------------------------*        
+//STEP03   EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//BSTIPT01 DD *                                                                 
+  LIST ELEMENT '*'     FROM ENVIRONMENT SMPLPROD STAGE P                        
+       SYSTEM '*'  SUBSYSTEM '*'  TYPE "*"                                      
+       OPTIONS NOSEARCH TO FILE CSVOUTPT .                                      
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the API call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K                                        
+//SYSPRINT DD SYSOUT=*                           MESSAGES                       
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2   DD SYSOUT=*                           OUTPUT FILE                    
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//*                                                                             
+//STEP04 EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//PARMLIST DD  *                                                                
+  NOTHING  NOTHING  STEMARRY  0                                                 
+  MODEL    TBLOUT   OPTIONS   A                                                 
+//STEMARRY DD *    < Build Stem Array FoundMember.                              
+  FoundMember.        = 'N'                                                     
+//         DD DSN=&&STEMARRY,DISP=(OLD,DELETE)                                  
+//NOTHING  DD DUMMY                                                             
+//MODEL    DD  *                                                                
+** &ELM_NAME &SYS_NAME &SBS_NAME &TYPE_NAME &SIGNOUT_ID                         
+  ADD ELEMENT &ELM_NAME                                                         
+         TO   ENVIRONMENT SMPLTEST                                              
+              SYSTEM &SYS_NAME SUBSYSTEM &SBS_NAME                              
+              TYPE &TYPE_NAME.                                                  
+//OPTIONS  DD *                                                                 
+  ELM_NAME = Strip(ELM_NAME)                                                    
+  If FoundMember.ELM_NAME /= 'Y' then $SkipRow = 'Y'                            
+//SYSEXEC DD DSN=&SYSEXEC,DISP=SHR                                              
+//SYSTSPRT DD  SYSOUT=*                                                         
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSIN     DD DUMMY                                                            
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=EXAMPL#4                
+//IBMUSER4 JOB (0000),                                                  JOB04207
+//    'ENDEVOR BATCH',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//    NOTIFY=&SYSUID                                                            
+//*-------------------------------------------------------------------*         
+//*-- Execute PDM to update elements out of sync. --------------------*         
+//*-- Outputs:  IBMUSER.ENDEVOR.WIPFILE           --------------------*         
+//*-------------------------------------------------------------------*         
+// SET SYSEXEC=SYS1.EXEC                                                        
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*-------------------------------------------------------------------*         
+//PDM#001  EXEC PGM=NDVRC1,                                                     
+//             DYNAMNBR=1500,                                                   
+//             REGION=4096K,                                                    
+//             PARM='C1BM3000'                                                  
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//CONLIB   DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD DSN=&&C1MSGS2,DISP=(NEW,PASS),                                    
+//            UNIT=SYSDA,SPACE=(TRK,(5,5)),                                     
+//            DCB=(RECFM=FB,LRECL=120,BLKSIZE=0)                                
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//SYSOUT   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//BSTIPT01 DD *                                                                 
+  VALIDATE ELEMENT "*"                                                          
+    FROM ENVIRONMENT "SMPLTEST"                                                 
+         SYSTEM "*" SUBSYSTEM "*"                                               
+         TYPE "*" STAGE "T"                                                     
+    .                                                                           
+//*-------------------------------------------------------------------*         
+//*                                                                             
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K                                        
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&C1MSGS2,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//PDM#002 EXEC PGM=IRXJCL,PARM='ENBPIU00 M 0008'                                
+//SYSEXEC  DD DSN=&SYSEXEC,DISP=SHR                                             
+//TABLE    DD DSN=&&C1MSGS2,DISP=(OLD,DELETE)                                   
+//POSITION DD  *                                                                
+  NDVRrc   40 43                                                                
+  Element  22 29                                                                
+  Environ  47 54                                                                
+  System   61 68                                                                
+  SubSys   71 78                                                                
+  Type     83 90                                                                
+  Stage    94 94                                                                
+//MODEL    DD  *                                                                
+ LIST ELEMENT &Element FROM ENVIRONMENT &Environ STAGE &Stage                   
+      SYSTEM '&System'  SUBSYSTEM '&SubSys'  TYPE "&Type"                       
+      OPTIONS NOSEARCH TO FILE APIEXTR  .                                       
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//OPTIONS  DD DUMMY                                                             
+//TBLOUT   DD  DSN=&&CSVLISTS,DISP=(NEW,PASS),                                  
+//             UNIT=SYSDA,SPACE=(TRK,(1,1)),                                    
+//             DCB=(RECFM=FB,LRECL=080,BLKSIZE=08000)                           
+//*--------------------------------------------------------------------*        
+//*   STEP 2 -- EXECUTE CSV UTILITY                                             
+//*--------------------------------------------------------------------*        
+//PDM#003  EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//CONLIB   DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//BSTIPT01 DD  DSN=&&CSVLISTS,DISP=(OLD,DELETE)                                 
+//APIEXTR  DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(TRK,(5,1),RLSE)                                                  
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K                                        
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//PDM#004 EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                     
+//SYSEXEC  DD DSN=&SYSEXEC,DISP=SHR                                             
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//MODEL    DD DISP=SHR,DSN=IBMUSER.MODELS(PDM#ELM)                              
+//OPTIONS  DD *                                                                 
+  jobchar = Substr(ELM NAME,1,1)    /* First char of element name */            
+  jobchar = 'P'                     /* for PDM                    */            
+  Userid = USERID()                                                             
+  $delimiter = '/'                                                              
+//SYSTSPRT DD  SYSOUT=*                                                         
+//TBLOUTX  DD  SYSOUT=*                                                         
+//TBLOUT   DD  SYSOUT=(A,INTRDR)                                                
+//*-------------------------------------------------------------------*         
+                                                                                
+          
+./  ADD  NAME=EXAMPL#5                
+//IBMUSER5 JOB (0000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,                     
+//      REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID                                     
+//*--------------------------------------------------------------------         
+//*- Report the total Track consumption of a list of datasets ---------         
+//*- in a list created from a saved TSO 3.4 list.             ---------         
+//*- Also identify and delete old datasets      .             ---------         
+//*- (RC=0004 is OK)                                          ---------         
+//*--------------------------------------------------------------------         
+//  SET TABLE=IBMUSER.NDVR.DATASETS         <- Saved 3.4 data                   
+//  SET TABLE=IBMUSER.PUBLIC.DATASETS       <- Saved 3.4 data                   
+//  SET SYSEXEC=SYS1.EXEC                   <- Rexx library                     
+//  SET SYSEXEC=CAPRD.NDVR.EMER.CATSNDVR.CSIQCLS0                               
+//*--------------------------------------------------------------------         
+//TEST001  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                             
+//TABLE    DD DISP=SHR,DSN=&TABLE                                               
+//PARMLIST DD *                                                                 
+  NOTHING NOTHING  OPTIONS0 0                                                   
+  MODEL1  TBLOUT1  OPTIONS1 A                                                   
+  MODEL2  TBLOUT2  OPTIONS2 A                                                   
+//POSITION DD *                                                                 
+  Dataset     01 44                                                             
+  Dsorg       53 54                                                             
+  Tracks      80 88                                                             
+  CreateDate 108 117                                                            
+  AccessDate 130 139                                                            
+//OPTIONS0 DD *                                                                 
+  $StripData = 'N' ;       /* Preserve spaces */                                
+  BaseDate = DATE('B')  /* Today in Base format */                              
+  DaysAgo = 240         /* Number of days for cutoff */                         
+  Total=0  /* Initialize variable */                                            
+//OPTIONS1 DD *                                                                 
+* Determine how old is the dataset                                              
+  Parse Var CreateDate yr '/' mo '/' da                                         
+  date = yr || mo || da                                                         
+  If DATATYPE(date) /= 'NUM' then $SkipRow = 'Y'                                
+  BaseOld  = DATE(B,date,S)  /* Convert Upd date to Base fmt */                 
+  ElementAge = BaseDate - BaseOld  /* Determine how many days ago  */           
+  ElementAge = Right(ElementAge,4,'0') /* For fixed width */                    
+  If ElementAge < DaysAgo then $SpitRow = 'Y'  /* Skip if recent */             
+//OPTIONS2 DD *                                                                 
+* Calculate a running count of Tracks consumed                                  
+  If $row#<1 then $SkipRow = 'Y'                                                
+  If DATATYPE(Tracks) /= 'NUM' Then $SkipRow = 'Y'                              
+  Total = Total + Tracks                                                        
+  Total = Right(Total,8,'0')   /* For fixed width */                            
+  Tracks = Right(Tracks,6,'0') /* For fixed width */                            
+  If Total > 1000 then $my_rc = 2                                               
+  If Total > 5000 then $my_rc = 4                                               
+//MODEL1   DD *                                                                 
+&Dataset  Date=&CreateDate DaysOld=&ElementAge                                  
+//MODEL2   DD *                                                                 
+&Dataset Total=&Total Tracks=&Tracks                                            
+//TBLOUT1  DD SYSOUT=*                                                          
+//SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC                                             
+//TBLOUT2  DD SYSOUT=*                                                          
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//DISPLAYS DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//*--------------------------------------------------------------------         
+                                                                                
+          
+./  ADD  NAME=EXAMPL#6                
+//IBMUSER5 JOB (0000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,                     
+//      REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID                                     
+//*--------------------------------------------------------------------         
+//*- SYS1.EXEC(ALLOLIKE)                                                        
+//*--------------------------------------------------------------------         
+//  SET DSNLIST=IBMUSER.MYLIST.DATASETS     <-                                  
+//  SET DSNLIST=IBMUSER.CAPRD.DATASETS      <-                                  
+//  SET DSNLIST=IBMUSER.TESTING.DATASETS    <-                                  
+//  SET SYSEXEC=SYS1.EXEC                   <-                                  
+//*--------------------------------------------------------------------         
+//*- IBMUSER.JCL(EXAMPL#5) --------------------------------------------         
+//*--------------------------------------------------------------------         
+//BUILDS   EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                             
+//SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC                                             
+//TABLE    DD DISP=SHR,DSN=&DSNLIST                                             
+//PARMLIST DD *                                                                 
+  MODEL1  TBLOUT1  OPTIONS  180                                                 
+  MODEL2  TBLOUT2  OPTIONS  180                                                 
+  MODEL3  TBLOUT3  OPTIONS  180                                                 
+//MODEL1   DD *                                                                 
+  ALLOC F(INDD) +                                                               
+        DA('&Dataset') SHR REUSE                                                
+  ALLOC F(OUTDD) +                                                              
+        DA('&Dataset.NEW') +                                                    
+        NEW LIKE ('&Dataset') +                                                 
+        DSNTYPE(LIBRARY)                                                        
+  CALL *(IEBCOPY)                                                               
+  FREE  F(INDD)                                                                 
+  FREE  F(OUTDD)                                                                
+//MODEL2   DD *                                                                 
+  RENAME '&Dataset' +                                                           
+         '&Dataset.OLD'                                                         
+  RENAME '&Dataset.NEW' +                                                       
+         '&Dataset'                                                             
+//MODEL3   DD *                                                                 
+  DELETE '&Dataset.OLD'                                                         
+//OPTIONS  DD *                                                                 
+  If Dsorg /= 'PO'  then $SkipRow = 'Y'                                         
+//POSITION DD *                                                                 
+  Dataset     01 44                                                             
+  Dsorg       53 56                                                             
+  Tracks      80 88                                                             
+  CreateDate 108 117                                                            
+  AccessDate 130 139                                                            
+//SYSTSPRT DD SYSOUT=*                                                          
+//NOTUSED  DD DATA,DLM=QQ                                                       
+//TBLOUT1  DD SYSOUT=*                                                          
+//TBLOUT2  DD SYSOUT=*                                                          
+//TBLOUT3  DD SYSOUT=*                                                          
+//                                                                              
+QQ                                                                              
+//TBLOUT1  DD DSN=&&TBLOUT1,DISP=(NEW,PASS),                                    
+//         SPACE=(CYL,(1,1)),UNIT=SYSDA,                                        
+//         LRECL=80,RECFM=FB,BLKSIZE=0                                          
+//TBLOUT2  DD DSN=&&TBLOUT2,DISP=(NEW,PASS),                                    
+//         SPACE=(CYL,(1,1)),UNIT=SYSDA,                                        
+//         LRECL=80,RECFM=FB,BLKSIZE=0                                          
+//TBLOUT3  DD DSN=&&TBLOUT3,DISP=(NEW,PASS),                                    
+//         SPACE=(CYL,(1,1)),UNIT=SYSDA,                                        
+//         LRECL=80,RECFM=FB,BLKSIZE=0                                          
+//*--------------------------------------------------------------------         
+//ALLOCS   EXEC PGM=IKJEFT1B                                                    
+//SYSTSIN  DD DSN=&&TBLOUT1,DISP=(OLD,DELETE)                                   
+//SYSIN     DD *                                                                
+  COPY INDD=INDD,OUTDD=OUTDD                                                    
+//SYSUT2  DD  UNIT=SYSDA,SPACE=(CYL,(90,90))                                    
+//SYSUT3  DD  UNIT=SYSDA,SPACE=(CYL,(90,90))                                    
+//SYSUT4  DD  UNIT=SYSDA,SPACE=(CYL,(90,90))                                    
+//SYSUT5  DD  UNIT=SYSDA,SPACE=(CYL,(90,90))                                    
+//SYSUT6  DD  UNIT=SYSDA,SPACE=(CYL,(90,90))                                    
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//RENAMES  EXEC PGM=IKJEFT1B                                                    
+//SYSTSIN  DD DSN=&&TBLOUT2,DISP=(OLD,DELETE)                                   
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//DELETES  EXEC PGM=IKJEFT1B                                                    
+//SYSTSIN  DD DSN=&&TBLOUT3,DISP=(OLD,DELETE)                                   
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//                                                                              
+//TEST001  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                             
+//SYSEXEC  DD DISP=SHR,DSN=&SYSEXEC                                             
+//TABLE    DD DISP=SHR,DSN=IBMUSER.DSNLIST.DATASETS                             
+//PARMLIST DD *                                                                 
+  NOTHING NOTHING  OPTIONS0 0                                                   
+  MODEL1  TBLOUT1  OPTIONS1 A                                                   
+  MODEL2  TBLOUT2  OPTIONS2 A                                                   
+//POSITION DD *                                                                 
+  Dataset     01 44                                                             
+  Dsorg       53 54                                                             
+  Tracks      80 88                                                             
+  CreateDate 108 117                                                            
+  AccessDate 130 139                                                            
+//OPTIONS0 DD *                                                                 
+  $StripData = 'N' ;       /* Preserve spaces */                                
+  BaseDate = DATE('B')  /* Today in Base format */                              
+  DaysAgo = 240         /* Number of days for cutoff */                         
+  Total=0  /* Initialize variable */                                            
+//OPTIONS1 DD *                                                                 
+* Determine how old is the dataset                                              
+  Parse Var CreateDate yr '/' mo '/' da                                         
+  date = yr || mo || da                                                         
+  If DATATYPE(date) /= 'NUM' then $SkipRow = 'Y'                                
+  BaseOld  = DATE(B,date,S)  /* Convert Upd date to Base fmt */                 
+  ElementAge = BaseDate - BaseOld  /* Determine how many days ago  */           
+  ElementAge = Right(ElementAge,4,'0') /* For fixed width */                    
+  If ElementAge < DaysAgo then $SpitRow = 'Y'  /* Skip if recent */             
+//OPTIONS2 DD *                                                                 
+* Calculate a running count of Tracks consumed                                  
+  If $row#<1 then $SkipRow = 'Y'                                                
+  If DATATYPE(Tracks) /= 'NUM' Then $SkipRow = 'Y'                              
+  Total = Total + Tracks                                                        
+  Total = Right(Total,6,'0')   /* For fixed width */                            
+  Tracks = Right(Tracks,6,'0') /* For fixed width */                            
+  If Total > 1000 then $my_rc = 2                                               
+  If Total > 5000 then $my_rc = 4                                               
+//MODEL1   DD *                                                                 
+&Dataset  Date=&CreateDate DaysOld=&ElementAge                                  
+//MODEL2   DD *                                                                 
+&Dataset Total=&Total Tracks=&Tracks                                            
+//TBLOUT1  DD SYSOUT=*                                                          
+//TBLOUT2  DD SYSOUT=*                                                          
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//DISPLAYS DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//*--------------------------------------------------------------------         
+                                                                                
+          
+./  ADD  NAME=EXAMPL#7                
+                                                                                
+          
+./  ADD  NAME=EXAMPL#8                
+//IBMUSERE JOB (0000),                                                  00010000
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      00030000
+//      NOTIFY=&SYSUID                                                  00040000
+//*-------------------------------------------------------------------  00050000
+//  SET WORKLIB=IBMUSER.PARMS                                           00060000
+//  SET CSIQCLS0=CAPRD.NDVR.PROD.CATSNDVR.CSIQCLS0                      00070000
+//  SET NDVR#HLQ=CAPRD.NDVR.V180CA06                                    00080000
+//*-------------------------------------------------------------------  00090000
+//*   Report processor usage                                            00100000
+//*   Outputs:                                                          00110000
+//*     &WORKLIB(PRC#ENV1)    IBMUSER.PARMS(PRC#ENV1)                   00120000
+//*     &WORKLIB(PRC#ENV2)    IBMUSER.PARMS(PRC#ENV2)                   00130000
+//*     &WORKLIB(PRC#GRPS)    IBMUSER.PARMS(PRC#GRPS)                   00140000
+//*     &WORKLIB(PROCUSED)    IBMUSER.PARMS(PROCUSED)                   00150000
+//*     &WORKLIB(NOTUSED))    IBMUSER.PARMS(NOTUSED))                   00160000
+//*-------------------------------------------------------------------  00170000
+//*   STEP 1 -- EXECUTE CSV UTILITY to Gather Environment info          00180000
+//*-------------------------------------------------------------------  00190000
+//STEP1   EXEC PGM=NDVRC1,REGION=4M,                                    00200000
+//         PARM='BC1PCSV0'                                              00210000
+//STEPLIB  DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQAUTU            SCMM@LIB     00220000
+//         DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQAUTH            SCMM@LIB     00230000
+//         DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQLOAD            SCMM@LIB     00240000
+//CONLIB   DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQLOAD            SCMM@LIB     00250000
+//BSTIPT01 DD *                                                         00260000
+LIST ENVIRONMENT                                                        00270000
+'*'                                                                     00280000
+     TO DDNAME 'EXTRACTS'                                               00290000
+     OPTIONS   RETURN ALL.                                              00300000
+//EXTRACTS DD DSN=&&EXTRACTS,                                           00310000
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                00320000
+//      DISP=(NEW,PASS),                                                00330000
+//      SPACE=(TRK,(5,1),RLSE)                                          00340000
+//C1MSGS1  DD SYSOUT=*                                                  00350000
+//BSTERR   DD SYSOUT=*                                                  00360000
+//*------                                                               00370000
+//WORKLIB  DD DSN=&WORKLIB,                                             00380000
+//      DCB=(RECFM=FB,LRECL=080,BLKSIZE=0,DSORG=PO),                    00390000
+//      DISP=(MOD,CATLG,KEEP),DSNTYPE=LIBRARY,                          00400000
+//      SPACE=(TRK,(5,5),RLSE)                                          00410000
+//*-------------------------------------------------------------------- 00420000
+//*------ Reformat Envionments into CSV requests for Procesor Grp info- 00430000
+//*-------------------------------------------------------------------- 00440000
+//STEP1A  EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                             00450000
+//TABLE    DD  DSN=&&EXTRACTS,DISP=(OLD,DELETE)                         00460000
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0                                    00470000
+//MODEL1   DD *                                                         00480000
+    LIST PROCESSOR GROUP '*'                                            00490000
+      FROM ENVIRONMENT '&ENV_NAME' STAGE '*'                            00500000
+           SYSTEM '*' TYPE '*'                                          00510000
+         OPTIONS NOSEARCH RETURN ALL TO FILE CSVEXTR  .                 00520000
+//MODEL2   DD *                                                         00530000
+LIST ELEMENT                                                            00540000
+'*'                                                                     00550000
+     FROM ENVIRONMENT  &ENV_NAME SYSTEM  '*' SUBSYSTEM '*'              00560000
+          TYPE  'PROCESS'                                               00570000
+          STAGE NUMBER '*'                                              00580000
+     TO DDNAME 'LISTELMS'                                               00590000
+     OPTIONS   SEARCH   RETURN FIRST PATH PHYSICAL .                    00600000
+//OPTIONS  DD *                                   CONTROL STATEMENTS    00610000
+  $NumberModelsAndTblouts= 2                                            00620000
+//SYSTSPRT DD SYSOUT=*                                                  00630000
+//TBLOUT1  DD DISP=SHR,DSN=&WORKLIB(PRC#ENV1)                           00640000
+//TBLOUT2  DD DISP=SHR,DSN=&WORKLIB(PRC#ENV2)                           00650000
+//*                                                                     00660000
+//*-------------------------------------------------------------------  00670000
+//*   STEP 2 -- EXECUTE CSV UTILITY to collect processor group info     00680000
+//*-------------------------------------------------------------------  00690000
+//STEP2   EXEC PGM=NDVRC1,REGION=4M,                                    00700000
+//         PARM='BC1PCSV0'                                              00710000
+//STEPLIB  DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQAUTU            SCMM@LIB     00720000
+//         DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQAUTH            SCMM@LIB     00730000
+//         DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQLOAD            SCMM@LIB     00740000
+//CONLIB   DD  DISP=SHR,DSN=&NDVR#HLQ..CSIQLOAD            SCMM@LIB     00750000
+//BSTIPT01 DD DISP=SHR,DSN=&WORKLIB(PRC#ENV1)                           00760000
+//CSVEXTR  DD DSN=&&CSVFILE,                                            00770000
+//      DCB=(RECFM=VB,LRECL=4092,BLKSIZE=4096,DSORG=PS),                00780000
+//      DISP=(MOD,PASS),                                                00790000
+//      SPACE=(TRK,(5,5),RLSE)                                          00800000
+//C1MSGS1  DD SYSOUT=*                                                  00810000
+//BSTERR   DD SYSOUT=*                                                  00820000
+//*-------------------------------------------------------------------- 00830000
+//*------ Analyze Processor Group CSV data                              00840000
+//*-------------------------------------------------------------------- 00850000
+//STEP2A  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                      00860000
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                          00870000
+//PARMLIST DD *                                                         00880000
+  NOTHING   NOTHING   OPTIONS0 0                                        00890000
+  NOTHING   NOTHING   OPTIONS1 A                                        00900000
+  HEADING   TBLOUT1   NOTHING  1                                        00910000
+  MODEL     TBLOUT2   OPTIONS2 A                                        00920000
+  IAMUSED   PROCUSED  OPTIONS3 A                                        00930000
+//HEADING  DD *                                                         00940000
+*Processr Environ- S System-- Type---- PrcGrp-- ProcType                00950000
+//MODEL    DD *                                                         00960000
+ &PROC_NAME &ENV_NAME &STG_ID &SYS_NAME &TYPE_NAME &PROC_GRP_NAME &PROC_00970000
+//OPTIONS0 DD *                                   CONTROL STATEMENTS    00980000
+  Processor. = ''                                                       00990000
+  ProcessorUsed. = 'N'                                                  01000000
+  $nomessages = 'Y'            /* Bypass messages Y/N        */         01010000
+//OPTIONS1 DD *                                   CONTROL STATEMENTS    01020000
+  if PROC_NAME = '*NOPROC*' Then $SkipRow = 'Y'                         01030000
+  entry= ENV_NAME SYS_NAME TYPE_NAME STG_ID PROC_TYPE PROC_GRP_NAME     01040000
+  entry = Translate(entry,'_',' ')                                      01050000
+  PROC_NAME = Strip(PROC_NAME) ;                                        01060000
+  If Wordpos(entry,Processor.PROC_NAME) = 0 then, +                     01070000
+     Processor.PROC_NAME = Processor.PROC_NAME entry ;                  01080000
+  ProcessorUsed.PROC_NAME = 'Y'                                         01090000
+  $SkipRow = 'Y'                                                        01100000
+//IAMUSED  DD *                                   CONTROL STATEMENTS    01110000
+  ProcessorUsed.&PROC_NAME = 'Y'                                        01120000
+//PROCUSED DD DISP=SHR,DSN=&WORKLIB(PROCUSED)                           01130000
+//NOTHING  DD DUMMY                               CONTROL STATEMENTS    01140000
+//OPTIONS2 DD *                                   CONTROL STATEMENTS    01150000
+  PROC_NAME = Strip(PROC_NAME) ;                                        01160000
+  if PROC_NAME = '*NOPROC*' Then $SkipRow = 'Y'                         01170000
+  ProcessorEntries  = Processor.PROC_NAME ;                             01180000
+  Processor.PROC_NAME = '' ;                                            01190000
+  If ProcessorEntries = '' then $SkipRow = 'Y'                          01200000
+  PROC_NAME      = Left(PROC_NAME,8) ;                                  01210000
+  Do ent# = 1 to Words(ProcessorEntries); +                             01220000
+     entry= Word(ProcessorEntries,ent#) ; +                             01230000
+     entry = Translate(entry,' ','_') ; +                               01240000
+     ENV_NAME       = Left(Word(entry,1),8); +                          01250000
+     SYS_NAME       = Left(Word(entry,2),8); +                          01260000
+     TYPE_NAME      = Left(Word(entry,3),8); +                          01270000
+     STG_ID         = Left(Word(entry,4),1); +                          01280000
+     PROC_TYPE      = Left(Word(entry,5),8); +                          01290000
+     PROC_GRP_NAME  = Left(Word(entry,6),8); +                          01300000
+     x = BuildFromModel(MODEL); +                                       01310000
+     Processor.PROC_NAME  = '' ;+                                       01320000
+  End;                                                                  01330000
+  $SkipRow = 'Y'                                                        01340000
+//OPTIONS3 DD *                                   CONTROL STATEMENTS    01350000
+  PROC_NAME = Strip(PROC_NAME);                                         01360000
+  If PROC_NAME = '*NOPROC*' then $SkipRow = 'Y' ;                       01370000
+  IsProcessorUsed = ProcessorUsed.PROC_NAME                             01380000
+  If IsProcessorUsed = 'Y' then x = BuildFromModel(IAMUSED)             01390000
+  ProcessorUsed.PROC_NAME = 'done'                                      01400000
+  $SkipRow = 'Y'                                                        01410000
+//SYSTSPRT DD SYSOUT=*                                                  01420000
+//NOTHING  DD DUMMY                               CONTROL STATEMENTS    01430000
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0                                    01440000
+//TBLOUT1  DD  DSN=&&TBLOUT1,DISP=(NEW,PASS),                           01450000
+//             UNIT=SYSALLDA,SPACE=(CYL,(1,5),RLSE),                    01460000
+//             DCB=(RECFM=FB,LRECL=080,BLKSIZE=0,DSORG=PS)              01470000
+//TBLOUT2  DD  DSN=&&TBLOUT2,DISP=(NEW,PASS),                           01480000
+//             UNIT=SYSALLDA,SPACE=(CYL,(1,5),RLSE),                    01490000
+//             DCB=(RECFM=FB,LRECL=080,BLKSIZE=0,DSORG=PS)              01500000
+//********************************************************************* 01510000
+//*    SORT DATA                                                      * 01520000
+//********************************************************************* 01530000
+//SORT    EXEC PGM=SORT                                                 01540000
+//SYSPRT   DD SYSOUT=*                                                  01550000
+//SYSPRINT DD SYSOUT=*                                                  01560000
+//SYSOUT   DD SYSOUT=*                                                  01570000
+//SORTIN   DD DSN=&&TBLOUT2,DISP=(OLD,PASS,DELETE)                      01580000
+//SORTOUT  DD DSN=&&TBLOUT2A,DISP=(NEW,PASS),                           01590000
+//            UNIT=SYSALLDA,SPACE=(CYL,(1,5),RLSE),                     01600000
+//            DCB=(RECFM=FB,LRECL=080,BLKSIZE=0,DSORG=PS)               01610000
+//SYSIN    DD *                                                         01620000
+ SORT FIELDS=(01,80,CH,A)                                               01630000
+//*                                                                     01640000
+//*-------------------------------------------------------------------- 01650000
+//SAVEMBR EXEC PGM=IEBGENER,REGION=1024K                                01660000
+//SYSPRINT DD SYSOUT=*                           MESSAGES               01670000
+//SYSUT1   DD DSN=&&TBLOUT1,DISP=(OLD,PASS,DELETE)                      01680000
+//         DD DSN=&&TBLOUT2A,DISP=(OLD,PASS,DELETE)                     01690000
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS    01700000
+//SYSUDUMP DD SYSOUT=*                                                  01710000
+//SYSUT2   DD DISP=SHR,DSN=&WORKLIB(PRC#GRPS)                           01720000
+//*                                                                     01730000
+//*-------------------------------------------------------------------- 01740000
+//*------ Report UnUsed processors.                                     01750000
+//*-------------------------------------------------------------------  01760000
+//*   STEP 3 -- EXECUTE CSV UTILITY                                     01770000
+//*-------------------------------------------------------------------  01780000
+//STEP3   EXEC PGM=NDVRC1,REGION=4M,                                    01790000
+//         PARM='BC1PCSV0'                                              01800000
+//STEPLIB  DD DISP=SHR,DSN=&NDVR#HLQ..CSIQAUTU                          01810000
+//         DD DISP=SHR,DSN=&NDVR#HLQ..CSIQAUTH                          01820000
+//         DD DISP=SHR,DSN=&NDVR#HLQ..CSIQLOAD                          01830000
+//BSTIPT01 DD DISP=SHR,DSN=&WORKLIB(PRC#ENV2)                           01840000
+//LISTELMS DD DSN=&&LISTELMS,                                           01850000
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                01860000
+//      DISP=(MOD,PASS),                                                01870000
+//      SPACE=(CYL,(5,5),RLSE)                                          01880000
+//C1MSGS1  DD SYSOUT=*                                                  01890000
+//BSTERR   DD SYSOUT=*                                                  01900000
+//*-------------------------------------------------------------------- 01910000
+//*------ Report UnUsed processors.                                     01920000
+//*-------------------------------------------------------------------- 01930000
+//STEP3A  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                      01940000
+//TABLE    DD DSN=&&LISTELMS,DISP=(OLD,DELETE)                          01950000
+//PARMLIST DD *                                                         01960000
+  NOTHING   NOTHING   OPTIONS0 0                                        01970000
+  HEADING   NOTUSED   PROCUSED 1                                        01980000
+  MODEL     NOTUSED   OPTIONS2 A                                        01990000
+//OPTIONS0 DD *                                                         02000000
+  ProcessorUsed. = 'N'                                                  02010000
+  $nomessages = 'Y'            /* Bypass messages Y/N        */         02020000
+//PROCUSED DD DISP=SHR,DSN=&WORKLIB(PROCUSED)                           02030000
+//HEADING  DD *                                                         02040000
+*Element- Environ- System-- SubSystm Type---- St Msg------              02050000
+//MODEL    DD *                                                         02060000
+ &ELM_NAME &ENV_NAME &SYS_NAME &SBS_NAME &TYPE_NAME  &STG_ID not used   02070000
+//OPTIONS2 DD *                                   CONTROL STATEMENTS    02080000
+  element  = Strip(ELM_NAME)                                            02090000
+  If Words(element) > 1 then $SkipRow = 'Y'                             02100000
+  IsProcessorUsed = ProcessorUsed.element                               02110000
+  If IsProcessorUsed /= 'N' then $SkipRow = 'Y'                         02120000
+  ProcessorUsed.element  = 'done'                                       02130000
+* Format outputs                                                        02140000
+  ELM_NAME   = Left(ELM_NAME,8)                                         02150000
+  ENV_NAME   = Left(ENV_NAME,8)                                         02160000
+  SYS_NAME   = Left(SYS_NAME,8)                                         02170000
+  SBS_NAME   = Left(SBS_NAME,8)                                         02180000
+  TYPE_NAME  = Left(TYPE_NAME,8)                                        02190000
+//SYSTSPRT DD SYSOUT=*                                                  02200000
+//NOTHING  DD DUMMY                               CONTROL STATEMENTS    02210000
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0                                    02220000
+//TBLOUT   DD SYSOUT=*                                                  02230000
+//NOTUSED  DD DISP=SHR,DSN=&WORKLIB(NOTUSED)                            02240000
+//*-------------------------------------------------------------------- 02250000
+                                                                                
+          
+./  ADD  NAME=EXAMPL1A                
+//EXAMPL1A JOB (0000),'ENDEVOR JOB',MSGLEVEL=(1,1),                     JOB0    
+//         CLASS=B,REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID                          
+//*--------------------------------------------------------------------*        
+//*- Report Elements in DEV signed out to one userid                            
+//*--------------------------------------------------------------------*        
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)                                       
+//RUNCSV   EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//   INCLUDE MEMBER=STEPLIB                                                     
+//BSTIPT01 DD *                                                                 
+LIST ELEMENT '*'                                                                
+     FROM ENVIRONMENT PRD SYSTEM '*' SUBSYSTEM '*'                              
+          TYPE  '*' STAGE NUMBER 2                                              
+     DATA ALL   TO DDNAME 'CSVOUTPT'                                            
+     OPTIONS NOSEARCH.                                                          
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=800,BLKSIZE=8000,DSORG=PS),                         
+//      DISP=(MOD,PASS),UNIT=3390,                                              
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*-Report -----------------------------------------------------------          
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                      
+//OPTIONS  DD *                                                                 
+  $Table_Type = "CSV"                                                           
+  If ELM_LAST_LL_USRID /= 'NSIMEON'  then $SkipRow = 'Y'                        
+//MODEL    DD  *                                                                
+ &ELM_LAST_LL_USRID (ELM_LAST_LL_USRID)  Element = &ELM_NAME                    
+   System/Subsys/Type = &SYS_NAME/&SBS_NAME/&TYPE_NAME/                         
+     ELM_LAST_LL_DATE=&ELM_LAST_LL_DATE @ &ELM_LAST_LL_TIME                     
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSEXEC  DD DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQCLS0                         
+//TBLOUT    DD SYSOUT=*                                                         
+                                                                                
+          
+./  ADD  NAME=EXAMPL1B                
+//EXAMPL1B JOB (0000),'ENDEVOR JOB',MSGLEVEL=(1,1),                     JOB0    
+//         CLASS=B,REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID                          
+//*--------------------------------------------------------------------*        
+//*- Report Elements in DEV, flagging those in parallel development             
+//*--------------------------------------------------------------------*        
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)                                       
+//RUNCSV   EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//   INCLUDE MEMBER=STEPLIB                                                     
+//BSTIPT01 DD *,SYMBOLS=JCLONLY     <- Permits JCL variables here               
+LIST ELEMENT '*'                                                                
+     FROM ENVIRONMENT DEV SYSTEM '*' SUBSYSTEM '*'                              
+          TYPE  '*' STAGE NUMBER 2                                              
+     DATA BASIC TO DDNAME 'CSVOUTPT'                                            
+     OPTIONS NOSEARCH NOCSV.                                                    
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=800,BLKSIZE=8000,DSORG=PS),                         
+//      DISP=(MOD,PASS),UNIT=3390,                                              
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*****Sort data by ele, typ, sys, sub  **************************              
+//SORT    EXEC PGM=SORT                                                         
+//SYSPRT   DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSOUT   DD SYSOUT=*                                                          
+//SORTIN   DD DSN=&&CSVFILE,DISP=(OLD,DELETE)                                   
+//SORTOUT  DD DSN=&&CSVFILE2,                                                   
+//      DCB=(RECFM=FB,LRECL=800,BLKSIZE=8000,DSORG=PS),                         
+//      DISP=(MOD,PASS),UNIT=3390,                                              
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//SYSIN    DD *  / sort by ele, typ, sys, sub                                   
+ SORT FIELDS=(39,08,CH,A,49,08,CH,A,23,16,CH,A)                                 
+//*-Report -----------------------------------------------------------          
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 A'                                      
+//POSITION DD *                                                                 
+  System      23 30                                                             
+  Subsys      31 38                                                             
+  Element     39 46                                                             
+  Type        49 56                                                             
+  Userid      95 102                                                            
+  Date        79 86                                                             
+//OPTIONS  DD *                                                                 
+  $StripData = 'N'                                                              
+  If $row# = 1 then x = BuildFromMODEL(HEADING)                                 
+  entry = Element Type                                                          
+  dup = '   '                                                                   
+  if entry = lastentry then dup ='***'                                          
+  lastentry = entry                                                             
+//HEADING  DD  *                                                                
+         --- Elements in the DEV Environment ---                                
+Element- Type---- Dup System-- Subsys-- --Date-- Signout                        
+//MODEL    DD  *                                                                
+&Element &Type &dup &System &Subsys &Date &Userid                               
+//TABLE    DD  DSN=&&CSVFILE2,DISP=(OLD,DELETE)                                 
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSEXEC  DD DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQCLS0                         
+//TBLOUT    DD SYSOUT=*                                                         
+                                                                                
+          
+./  ADD  NAME=EXAMPL2$                
+//IBMUSER2 JOB (0000),                                                          
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*--------------------------------------------------------------               
+//*- To Report Packages created over nnn days ago     -----------               
+//*--------------------------------------------------------------               
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to gather Package information               
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//BSTIPT01 DD *                                                                 
+LIST PACKAGE ID '*'                                                             
+     WHERE DATE TYPE CR IS OLDER THAN 20 DAYS                                   
+     TO DDNAME 'CSVOUTPT'                                                       
+     OPTIONS NOCSV.                                                             
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the API call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K,COND=(4,EQ,STEP1)                      
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//POSITION DD *                                                                 
+  ALPKG_RS_PKGID        13      28                                              
+  ALPKG_RS_SITE         29      29                                              
+  ALPKG_RS_COMMENT      30      79                                              
+  ALPKG_RS_PKG_TYPE     80      89                                              
+  ALPKG_RS_STAT        116     127                                              
+  ALPKG_RS_CRD         155     161                                              
+  ALPKG_RS_CRU         167     174                                              
+  ALPKG_RS_MOD         175     181                                              
+//PARMLIST DD *                                                                 
+  MODEL   TBLOUT  OPTION0  0                                                    
+  MODEL   TBLOUT  OPTIONS  A                                                    
+//HEADING  DD *                                                                 
+* Package--------- Status----- CreateDate UpdateDate CreatorId- PackageAge      
+//*-+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+//MODEL    DD *                                                                 
+&DetailLine                                                                     
+//OPTION0  DD *                                                                 
+  LinesPerPage = 15                                                             
+  LineCount = LinesPerPage + 1                                                  
+  DaysAgo = 10          /* Number of days for cutoff */                         
+  Months='JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'                      
+//OPTIONS  DD *                                                                 
+* Bypass processing for Table header                                            
+  If $row# < 1 then $SkipRow = 'Y'                                              
+* Calculate age of Package creation                                             
+                                                                                
+  BaseDate = DATE('B')  /* Today in Base format */                              
+  year       = Substr(ALPKG_RS_MOD,6,2)                                         
+  If DATATYPE(year) /= 'NUM' then $SkipRow = 'Y'                                
+  if year <  50 then UpdateDate='20'year                                        
+  if year >= 50 then UpdateDate='19'year                                        
+  Say 'UpdateDate =' UpdateDate ALPKG_RS_PKGID                                  
+  month      = Substr(ALPKG_RS_MOD,3,3)                                         
+  month#     = WordPos(month,Months)                                            
+  month#     = Right(month#,2,'0')                                              
+  Say 'UpdateDate =' UpdateDate ALPKG_RS_PKGID                                  
+  UpdateDate = UpdateDate || month#                                             
+  UpdateDate = UpdateDate || Substr(ALPKG_RS_MOD,1,2)                           
+  Say 'UpdateDate =' UpdateDate ALPKG_RS_PKGID                                  
+  BaseOld  = DATE(B,UpdateDate,S)  /* Convert Upd date to Base fmt */           
+                                                                                
+  PackageAge = BaseDate - BaseOld  /* Determine how many days ago  */           
+  If PackageAge < DaysAgo then $SkipRow = 'Y'  /* Skip if recent */             
+* Build report detail line ....                                                 
+  DetailLine = Copies(' ',120);                                                 
+  DetailLine = Overlay(ALPKG_RS_PKG_TYPE,DetailLine,03)                         
+  DetailLine = Overlay(ALPKG_RS_STAT,DetailLine,20)                             
+  DetailLine = Overlay(ALPKG_RS_CRD,DetailLine,32)                              
+  DetailLine = Overlay(ALPKG_RS_MOD,DetailLine,43)                              
+  DetailLine = Overlay(ALPKG_RS_CRU,DetailLine,54)                              
+  DetailLine = Overlay(PackageAge,DetailLine,65)                                
+* Determine whether it is time for page heading                                 
+  LineCount = LineCount + 1                                                     
+  If LineCount > LinesPerPage then x = BuildFromMODEL(HEADING)                  
+  If LineCount > LinesPerPage then LineCount = 1                                
+//SYSEXEC DD DSN=&SYSEXEC,DISP=SHR                                              
+//SYSTSPRT DD  SYSOUT=*                                                         
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSIN     DD DUMMY                                                            
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=EXAMPL2A                
+//EXAMPL2A JOB (0000),                                                  JOB0    
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+//*- To Report Element changes within  a date range   -----------               
+//*-------------------------------------------------------------------          
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)                                       
+//   EXPORT SYMLIST=(*)           <- make JCL symbols available                 
+//   SET STRTDATE='280 DAYS AGO'  <- Specify date or # Days ago                 
+//   SET STOPDATE=2999/12/30      <- Specify stop/end date                      
+//   SET ENVIRON=PRD              <- Specify Environment                        
+//   SET SYSTEM=*                 <- Specify System                             
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to gather Element information               
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//   INCLUDE MEMBER=STEPLIB                                                     
+//BSTIPT01 DD *,SYMBOLS=JCLONLY     <- Permits JCL variables here               
+LIST ELEMENT '*'                                                                
+     FROM ENVIRONMENT &ENVIRON SYSTEM &SYSTEM SUBSYSTEM '*'                     
+          TYPE  '*'                                                             
+          STAGE NUMBER 2                                                        
+     DATA ALL                                                                   
+     TO DDNAME 'CSVOUTPT'                                                       
+     OPTIONS NOSEARCH .                                                         
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),UNIT=3390,                                              
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*-------------------------------------------------------------------*         
+//*-(To Report Element Move dates, then change to MOVE CSV parms)               
+//*-------------------------------------------------------------------*         
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//PARMLIST DD *                                                                 
+  HEADING  REPORT   SETUP     1                                                 
+  MODEL    REPORT   OPTIONS   A                                                 
+//SETUP    DD *,SYMBOLS=JCLONLY     <- Permits JCL variables here               
+  StartDate = '&STRTDATE'                                                       
+  StopDate  = '&STOPDATE'                                                       
+  today = DATE('S')                                                             
+  TodaysDate =  +                                                               
+    Substr(today,1,4)'/'||Substr(today,5,2)'/' || +                             
+    Substr(today,7);                                                            
+  If StopDate > TodaysDate then StopDate = TodaysDate ;                         
+  If Words(StartDate) = 3 then, +                                               
+     Do; daysago = Word(StartDate,1) ; BaseDate = DATE('B'); +                  
+     NumDate = BaseDate - daysago; NewDate = DATE(S,NumDate,B); +               
+     StartDate = +                                                              
+       Substr(NewDate,1,4)'/'||Substr(NewDate,5,2)'/' || +                      
+       Substr(NewDate,7); +                                                     
+     End                                                                        
+  HeadingText= 'ENV_NAME  ELM_NAME  SYS_NAME  SBS_NAME  TYPE_NAME'              
+  HeadingText= HeadingText 'Date------ Time------- Userid '                     
+  HeadingText= HeadingText 'Package--------'                                    
+//OPTIONS  DD *                                                                 
+  If ELM_LAST_LL_DATE < StartDate then $SkipRow = 'Y'                           
+  If ELM_LAST_LL_DATE > StopDate then $SkipRow = 'Y'                            
+  ENV_NAME   = Left(ENV_NAME,09)                                                
+  ELM_NAME   = Left(ELM_NAME,09)                                                
+  SYS_NAME   = Left(SYS_NAME,09)                                                
+  SBS_NAME   = Left(SBS_NAME,09)                                                
+  TYPE_NAME  = Left(TYPE_NAME,09)                                               
+  Details=ELM_LAST_LL_DATE ELM_LAST_LL_TIME ELM_LAST_LL_USRID                   
+  Details=Details PKG_ID_@O@                                                    
+//   INCLUDE MEMBER=SYSEXEC                                                     
+//SYSTSPRT DD SYSOUT=*                                                          
+//HEADING  DD  *                                                                
+  *** Report of Element Changes &StartDate thru &StopDate ******                
+&HeadingText                                                                    
+//MODEL    DD  *                                                                
+&ENV_NAME &ELM_NAME &SYS_NAME &SBS_NAME &TYPE_NAME &Details                     
+//REPORT    DD SYSOUT=*                                                         
+                                                                                
+          
+./  ADD  NAME=EXAMPL2B                
+//IBMUSERI JOB (0000),'EXAMPL2B',CLASS=B,PRTY=6,                                
+//  MSGCLASS=3,REGION=7M,NOTIFY=&SYSUID                                         
+/*JOBPARM  SYSAFF=*                                                             
+//*--------------------------------------------------------------               
+// JCLLIB  ORDER=(IBMUSER.JCL.CSV)                                              
+//*--                                                                           
+//*- To Report Element changes within  a date span    -----------               
+//*--------------------------------------------------------------               
+//   EXPORT SYMLIST=(*)           <- make JCL symbols available                 
+//*---                                                                          
+//   SET STRTDATE=2020/01/01      <- Specify date or # Days ago                 
+//   SET STRTDATE='365 DAYS AGO'  <- Specify date or # Days ago                 
+//*---                                                                          
+//   SET STOPDATE=2029/12/30      <- Specify stop/end data                      
+//*---                                                                          
+//   SET ENVIRON=DEV              <- Specify stop/end data                      
+//   SET SYSTEM=ESCMSNDV          <- Specify stop/end data                      
+//*-------------------------------------------------------------------          
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to gather Element information               
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//*---------  your Steplib ....                                                 
+//   INCLUDE MEMBER=STEPLIB                                                     
+//*---------                                                                    
+//BSTIPT01 DD *,SYMBOLS=JCLONLY     <- Permits JCL variables here               
+LIST ELEMENT '*'                                                                
+     FROM ENVIRONMENT &ENVIRON SYSTEM &SYSTEM SUBSYSTEM '*'                     
+          TYPE  '*'                                                             
+          STAGE NUMBER 2                                                        
+     DATA ALL                                                                   
+     TO DDNAME 'CSVOUTPT'                                                       
+     OPTIONS NOSEARCH .                                                         
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),UNIT=3390,                                              
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the CSV call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K,COND=(0,LE)                            
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------*         
+//*-(To Report Element Move dates, then change to MOVE CSV parms)               
+//*-------------------------------------------------------------------*         
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//PARMLIST DD *                                                                 
+  HEADING  REPORT   SETUP     1                                                 
+  MODEL    REPORT   OPTIONS   A                                                 
+//SETUP    DD *,SYMBOLS=JCLONLY     <- Permits JCL variables here               
+  StartDate = '&STRTDATE'                                                       
+  StopDate  = '&STOPDATE'                                                       
+  today = DATE('S')                                                             
+  TodaysDate =  +                                                               
+    Substr(today,1,4)'/'||Substr(today,5,2)'/' || +                             
+    Substr(today,7);                                                            
+  If StopDate > TodaysDate then StopDate = TodaysDate ;                         
+  If Words(StartDate) = 3 then, +                                               
+     Do; daysago = Word(StartDate,1) ; BaseDate = DATE('B'); +                  
+     NumDate = BaseDate - daysago; NewDate = DATE(S,NumDate,B); +               
+     StartDate = +                                                              
+       Substr(NewDate,1,4)'/'||Substr(NewDate,5,2)'/' || +                      
+       Substr(NewDate,7); +                                                     
+     End                                                                        
+//OPTIONS  DD *                                                                 
+* If ELM_LAST_LL_DATE < StartDate then $SkipRow = 'Y'                           
+* If ELM_LAST_LL_DATE > StopDate then $SkipRow = 'Y'                            
+  If MOVE_DATE < StartDate then $SkipRow = 'Y'                                  
+  If MOVE_DATE > StopDate  then $SkipRow = 'Y'                                  
+  ENV_NAME   = Left(ENV_NAME,09)                                                
+  ELM_NAME   = Left(ELM_NAME,09)                                                
+  SYS_NAME   = Left(SYS_NAME,09)                                                
+  SBS_NAME   = Left(SBS_NAME,09)                                                
+  TYPE_NAME  = Left(TYPE_NAME,09)                                               
+  Details = MOVE_DATE MOVE_TIME MOVE_USRID                                      
+* Details = ELM_LAST_LL_DATE ELM_LAST_LL_TIME ELM_LAST_LL_USRID                 
+//*--                                                                           
+//   INCLUDE MEMBER=SYSEXEC                                                     
+//*--                                                                           
+//NOTHING  DD DUMMY                                                             
+//SYSTSPRT DD SYSOUT=*                                                          
+//HEADING  DD  *                                                                
+  *** Report of Elements Moved  &StartDate thru &StopDate ******                
+ENV_NAME  ELM_NAME  SYS_NAME  SBS_NAME  TYPE_NAME Date------ Time-----   Userid 
+//MODEL    DD  *                                                                
+&ENV_NAME &ELM_NAME &SYS_NAME &SBS_NAME &TYPE_NAME &Details                     
+//REPORT    DD SYSOUT=*                                                         
+                                                                                
+          
+./  ADD  NAME=EXAMPL2P                
+//IBMUSERA JOB (0000),                                                  JOB01236
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*--------------------------------------------------------------               
+//*- To Report Packages created over nnn days ago     -----------               
+//*--------------------------------------------------------------               
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to gather Package information               
+//*--------------------------------------------------------------------*        
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='BC1PCSV0'                                                      
+//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
+//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//BSTIPT01 DD *                                                                 
+LIST PACKAGE ID '*'                                                             
+     WHERE DATE TYPE CR IS OLDER THAN 20 DAYS                                   
+     TO DDNAME 'CSVOUTPT' .                                                     
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//CSVOUTPT DD DSN=&&CSVFILE,                                                    
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(MOD,PASS),                                                        
+//      SPACE=(CYL,(5,5),RLSE)                                                  
+//*--------------------------------------------------------------------         
+//*   SHOWME -- Show the API call  results                                      
+//*--------------------------------------------------------------------         
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K,COND=(4,EQ,STEP1)                      
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE,DISP=(OLD,PASS)                                    
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
+//PARMLIST DD *                                                                 
+  HEADING TBLOUT  OPTIONS  1                                                    
+  MODEL   TBLOUT  OPTIONS  A                                                    
+//HEADING  DD *                                                                 
+ Package--------- Status-----                                                   
+   \CreateDate UpdateDate CreatorId- Description------------------------        
+//MODEL    DD *                                                                 
+ &PKG_ID &STATUS                                                                
+    &CREATE_DATE &UPDT_DATE &CREATE_USRID    *** &DESCRIPTION ***               
+//OPTIONS  DD DUMMY                                                             
+//SYSEXEC  DD DSN=&SYSEXEC,DISP=SHR                                             
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSIN    DD DUMMY                                                             
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=EXAMPL2R                
+//IBMUSER2 JOB (0000),                                                          
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//*-------------------------------------------------------------------          
+// SET CSVFILE=IBMUSER.PHONS.CSVFILE.#2                                         
+// SET CSVFILE=IBMUSER.PHONS.CSVFILE.#3                                         
+// SET CSVFILE=IBMUSER.PHONS.CSVFILE.#4                                         
+// SET CSVFILE=IBMUSER.PHONS.CSVFILE                                            
+// SET SYSEXEC=IBMUSER.REXX                                                     
+// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+//*--------------------------------------------------------------               
+//*- To Report Packages created over nnn days ago     -----------               
+//*--------------------------------------------------------------------*        
+//*   STEP 1 -- Execute CSV Utility to gather Package information               
+//*--------------------------------------------------------------------*        
+//REPORT EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                               
+//TABLE    DD  DSN=&CSVFILE,DISP=SHR                                            
+//PARMLIST DD *                                                                 
+  MODEL   TBLOUT  OPTION0  0                                                    
+  MODEL   TBLOUT  OPTIONS  A                                                    
+//HEADING  DD *                                                                 
+* Package--------- Status----- CreateDate UpdateDate CreatorId- PackageAge      
+//*-+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+//MODEL    DD *                                                                 
+&DetailLine                                                                     
+//OPTION0  DD *                                                                 
+  LinesPerPage = 15                                                             
+  LineCount = LinesPerPage + 1                                                  
+  DaysAgo = 60          /* Number of days for cutoff */                         
+//OPTIONS  DD *                                                                 
+* Bypass processing for Table header                                            
+  If $row# < 1 then $SkipRow = 'Y'                                              
+* Calculate age of Package creation                                             
+  BaseDate = DATE('B')  /* Today in Base format */                              
+  UpdateDate = Substr(UPDT_DATE,1,4) || Substr(UPDT_DATE,6,2)                   
+  UpdateDate = UpdateDate || Substr(UPDT_DATE,9,2)                              
+  If DATATYPE(UpdateDate) /= 'NUM' then $SkipRow = 'Y'                          
+  BaseOld  = DATE(B,UpdateDate,S)  /* Convert Upd date to Base fmt */           
+  PackageAge = BaseDate - BaseOld  /* Determine how many days ago  */           
+  If PackageAge < DaysAgo then $SkipRow = 'Y'  /* Skip if recent */             
+* Build report detail line ....                                                 
+  DetailLine = Copies(' ',120);                                                 
+  DetailLine = Overlay(PKG_ID,DetailLine,03)                                    
+  DetailLine = Overlay(STATUS,DetailLine,20)                                    
+  DetailLine = Overlay(CREATE_DATE,DetailLine,32)                               
+  DetailLine = Overlay(UPDT_DATE,DetailLine,43)                                 
+  DetailLine = Overlay(CREATE_USRID,DetailLine,54)                              
+  DetailLine = Overlay(PackageAge,DetailLine,65)                                
+* Determine whether it is time for page heading                                 
+  LineCount = LineCount + 1                                                     
+  If LineCount > LinesPerPage then x = BuildFromMODEL(HEADING)                  
+  If LineCount > LinesPerPage then LineCount = 1                                
+//SYSEXEC DD DSN=&SYSEXEC,DISP=SHR                                              
+//SYSTSPRT DD  SYSOUT=*                                                         
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSIN     DD DUMMY                                                            
+//TBLOUT   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+                                                                                
+          
+./  ADD  NAME=LISTDSNS                
+//IBMUSERI JOB (0000),                                                          
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
+//      NOTIFY=&SYSUID                                                          
+//**=================================================================**         
+//LISTDSNS EXEC PGM=IDCAMS                                                      
+//SYSIN    DD  *                                                                
+ LISTCAT LEVEL('YOURSITE.NDVR.TEAM') NAME                                       
+//STEPLIB  DD DISP=SHR,DSN=SYS1.LINKLIB                                         
+//AMSDUMP  DD SYSOUT=*                                                          
+//SYSPRINT  DD DSN=&&LISTCAT,DISP=(,PASS),                                      
+//     SPACE=(CYL,(1,1)),UNIT=SYSDA,                                            
+//     LRECL=120,RECFM=FB,BLKSIZE=0                                             
+//**=================================================================**         
+//LISTDSI EXEC PGM=IKJEFT1B,PARM='ENBPIU00 A '                                  
+//POSITION  DD *                                                                
+  NonVSAM  2 8                                                                  
+  Dataset 18 61                                                                 
+//OPTIONS   DD *                                                                
+  If $row# = 1 then x =BuildFromMODEL(HEADING)                                  
+  If NonVSAM /= 'NONVSAM' then $SkipRow = 'Y'                                   
+  x = LISTDSI("'"Dataset"'" DIRECTORY RECALL SMSINFO)                           
+  DSN       = Left(Dataset,44)                                                  
+  ThisDSORG = Right(SYSDSORG,3)                                                 
+  ThisRECFM = Right(SYSRECFM,3)                                                 
+  ThisLRECL = Right(SYSLRECL,5)                                                 
+  ThisBLKSZ = Right(SYSBLKSIZE,5)                                               
+  ThisMembs = Right(SYSMEMBERS,6)                                               
+//HEADING   DD *                                                                
+Dataset------------------------------------ DSorg Fmt Recz Blksz  Mmbrs         
+//MODEL     DD *                                                                
+&DSN &ThisDSORG &ThisRECFM &ThisLRECL &ThisBLKSZ &ThisMembs                     
+//TABLE     DD DSN=&&LISTCAT,DISP=(OLD,DELETE)                                  
+//SYSEXEC  DD DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQCLS0                         
+//SYSTSIN   DD DUMMY                                                            
+//SYSTSPRT  DD SYSOUT=*                                                         
+//TBLOUT    DD SYSOUT=*                                                         
+                                                                                
+          
+./  ADD  NAME=PKGEMNTR                
+//IBMUSERT JOB (0000),                                                          
+//         CLASS=A,MSGCLASS=X,REGION=4M,NOTIFY=&SYSUID                          
+//*==================================================================*          
+//*- To run the Package Monitory report                   -------               
+//*--------------------------------------------------------------               
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL.CSV)                                   
+//*==================================================================*          
+//   EXPORT SYMLIST=(*)           <- make JCL symbols available                 
+//*** STEP 1 -- EXECUTE CSV UTILITY to find APPROVED and EXEC packages          
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         PARM='CONCALL,DDN:CONLIB,BC1PCSV0' (EXEC FROM NON-AUTH LIB)          
+//   INCLUDE MEMBER=STEPLIB                                                     
+//CSVIPT01 DD *                                                                 
+ LIST PACKAGE ID '*'                                                            
+    WHERE STATUS = (APPROVED, EXECUTED, INAPPROVAL)                             
+          OPTIONS QUALIFIER QUOTE                                               
+          TO FILE APIEXTR .                                                     
+//APIEXTR DD DSN=&&APIPKGE,                                                     
+//        DCB=(DSORG=PS,RECFM=VB,LRECL=4092),                                   
+//        DISP=(MOD,PASS,DELETE),UNIT=3390,                                     
+//        SPACE=(CYL,(5,5),RLSE)                                                
+//CSVMSGS1 DD SYSOUT=*                                                          
+//DISPLAYS DD DUMMY                                                             
+//C1MSGSA DD SYSOUT=*                                                           
+//BSTERR  DD SYSOUT=*                                                           
+//SYMDUMP DD DUMMY                                                              
+//SYSUDUMP DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+//* Identify Packages to monitor                                                
+//*   build additional package CSV utility commands for shipment rqsts          
+//*-------------------------------------------------------------------          
+//STEP3    EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                             
+//TABLE    DD DSN=&&APIPKGE,DISP=(OLD,PASS)                                     
+//   INCLUDE MEMBER=CSIQCLS0                                                    
+//PARMLIST DD  *                                                                
+  MODELHD  TBLOUT1 SELECTS  1                                                   
+  MODEL1   TBLOUT1 OPTIONS1 A                                                   
+  MODEL2   TBLOUT2 OPTIONS2 A                                                   
+//MODELHD  DD *                                                                 
+*Note-----  Package--------- Date------ Time- Dest Env- Status-----             
+//SELECTS  DD *                                                                 
+  $Table_Type = "CSV"                                                           
+  $StripData = 'N' ;                                                            
+  DESTTABLusers='FCFE FCAE FCMA FCOG SWEF'                                      
+  tday= DATE(S)                                                                 
+  today = Substr(tday,1,4)'/'Substr(tday,5,2)'/'Substr(tday,7)                  
+  BaseDate = DATE('B')                                                          
+  NewBase  = BaseDate - 1;                                                      
+  yester = DATE(S,NewBase,B)                                                    
+  yestrday = Substr(yester,1,4)'/'Substr(yester,5,2)'/'Substr(yester,7)         
+  NewBase  = BaseDate + 1;                                                      
+  tomorw = DATE(S,NewBase,B)                                                    
+  tomorrow = Substr(tomorw,1,4)'/'Substr(tomorw,5,2)'/'Substr(tomorw,7)         
+  Say 'tomorrow='tomorrow                                                       
+* for the second set of outputs                                                 
+  ShipCount = 0                                                                 
+  myOptions = ' '                                                               
+  $my_rc = 4                                                                    
+//OPTIONS1 DD *                                                                 
+ if $row# < 1 then $SkipRow='Y'                                                 
+ keeper = 'n'                                                                   
+ Dest = '    '                                                                  
+ PkgPrfx=Substr(PKG_ID,1,4)                                                     
+ If WordPos(PkgPrfx,DESTTABLusers)>0 then Dest = 'Dest'                         
+*If PROM_TGT_STGID = 'P' then keeper='Prod'                                     
+ date=WINDOW_START_DATE                                                         
+ time=WINDOW_START_TIME                                                         
+ If STATUS='EXECUTED' then date=EXEC_BEGIN_DATE                                 
+ If STATUS='EXECUTED' then time=EXEC_BEGIN_TIME                                 
+ If date = today then keeper='Today'                                            
+ If date = yestrday then keeper='yesterday'                                     
+ If date = tomorrow then keeper='tomorrow '                                     
+ If date > tomorrow then keeper='future   '                                     
+ PROM_TGT_ENV = Left(PROM_TGT_ENV,4)                                            
+*If PROM_TGT_ENV='    ' then PROM_TGT_ENV=Substr(NOTE8,8,4)                     
+ If keeper = 'n' then $SkipRow = 'Y'                                            
+ $my_rc = 0                                                                     
+ STATUS = Left(STATUS,14)                                                       
+ keeper = left(keeper,10)                                                       
+ MyKeeper.PKG_ID = keeper                                                       
+ PKG_ID = Left(PKG_ID,16)                                                       
+//OPTIONS2 DD *                                                                 
+ if $row# < 1 then $SkipRow='Y'                                                 
+ If MyKeeper.PKG_ID = 'n' then $SkipRow='Y'                                     
+ ShipCount = ShipCount + 1                                                      
+ PKG_ID = Left(PKG_ID,16)                                                       
+//MODEL1   DD *                                                                 
+ &keeper &PKG_ID &date &time &Dest &PROM_TGT_ENV &STATUS                        
+//MODEL2   DD *                                                                 
+  LIST PACKAGE SHIP                                                             
+    FROM PACKAGE '&PKG_ID'                                                      
+    OPTIONS &myOptions                                                          
+    TO FILE APISHIP .                                                           
+//SYSPRINT DD SYSOUT=*                                                          
+//NOTHING  DD DUMMY                                                             
+//SYSTSPRT DD SYSOUT=*                                                          
+//TBLOUT1  DD DSN=&&LISTPKGS,                                                   
+//         DCB=(DSORG=PS,RECFM=FB,LRECL=80),                                    
+//         DISP=(NEW,PASS),UNIT=3390,                                           
+//         SPACE=(TRK,(5,5),RLSE)                                               
+//TBLOUT2  DD DSN=&&CSVALSHP,                                                   
+//         DCB=(DSORG=PS,RECFM=FB,LRECL=80),                                    
+//         DISP=(NEW,PASS),UNIT=3390,                                           
+//         SPACE=(TRK,(5,5),RLSE)                                               
+//*-------------------------------------------------------------------          
+//*   EXECUTE CSV UTILITY to capture package Shipment data                      
+//*             for packages identified/selected in prev step                   
+//*-------------------------------------------------------------------          
+//STEP4    EXEC PGM=NDVRC1,REGION=4M,                                           
+//         COND=(0,NE,STEP3),                                                   
+//         PARM='CONCALL,DDN:CONLIB,BC1PCSV0' (EXEC FROM NON-AUTH LIB)          
+//CSVIPT01 DD DSN=&&CSVALSHP,DISP=(OLD,DELETE)                                  
+//   INCLUDE MEMBER=STEPLIB                                                     
+//APISHIP  DD DSN=&&APISHIP,                                                    
+//         DCB=(DSORG=PS,RECFM=VB,LRECL=4092),                                  
+//         DISP=(MOD,PASS,DELETE),UNIT=3390,                                    
+//         SPACE=(CYL,(5,5),RLSE)                                               
+//*   EXECUTION MESSAGES (CSV LOG MESSAGES)                                     
+//CSVMSGS1 DD SYSOUT=*                                                          
+//*   EXECUTION MESSAGES (API LOG MESSAGES)                                     
+//C1MSGSA  DD SYSOUT=*                                                          
+//*   ERROR FILE                                                                
+//BSTERR   DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//DISPLAYS DD DUMMY                                                             
+//SYSUDUMP DD SYSOUT=*                                                          
+//*---------------------------------------------------------------------        
+//*--  Save Shipment info in a format for next step                             
+//*---------------------------------------------------------------------        
+//STEP6    EXEC PGM=IRXJCL,PARM='ENBPIU00 A',                                   
+//         COND=(0,NE,STEP3)                                                    
+//TABLE    DD DSN=&&APISHIP,DISP=(OLD,DELETE)                                   
+//   INCLUDE MEMBER=CSIQCLS0                                                    
+//OPTIONS  DD *                                                                 
+  $Table_Type = "CSV"                                                           
+//MODEL    DD *                                                                 
+  Shipment.&PKG_ID = "&DEST_ID &RMT_MOVE_RC"                                    
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSTSPRT DD SYSOUT=*                                                          
+//TBLOUT   DD DSN=&&SHIPDATA,                                                   
+//         DCB=(DSORG=PS,RECFM=FB,LRECL=80),                                    
+//         DISP=(NEW,PASS),UNIT=3390,                                           
+//         SPACE=(TRK,(1,1),RLSE)                                               
+//*---------------------------------------------------------------------        
+//*--  Write report from all collected data                                     
+//*---------------------------------------------------------------------        
+//STEP7    EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST',                            
+//         COND=(0,NE,STEP3)                                                    
+//TABLE    DD DSN=&&LISTPKGS,DISP=(OLD,DELETE)                                  
+//   INCLUDE MEMBER=CSIQCLS0                                                    
+//SYSTSPRT DD  SYSOUT=*                                                         
+//PARMLIST DD  *                                                                
+  NOTHING  NOTHING SELECTS  0                                                   
+  MODEL    REPORT  SHIPDATA 0                                                   
+  HEADINGS REPORT  HEADINGS 1                                                   
+  MODEL    REPORT  DETAILS  A                                                   
+//SELECTS  DD  *                                                                
+  Shipment. = ' '                                                               
+//SHIPDATA DD DSN=&&SHIPDATA,DISP=(OLD,DELETE)                                  
+//MODELSEL DD  *                                                                
+** Selection Date range &StrDte - &EndDte                                       
+//HEADINGS DD  *                                                                
+*Note----- Package--------- Date------ Time- Status----- Shipment               
+//DETAILS  DD  *                                                                
+  $StripData = 'N' ;                                                            
+*                                                                               
+  Dest = Left(Dest,4)                                                           
+  Env = Left(Env,4)                                                             
+  Shipment = Shipment.Package                                                   
+  Package = Left(Package,16)                                                    
+//MODEL    DD *                                                                 
+ &Note &Package &Date &Time &Status &Shipment                                   
+//SYSPRINT DD SYSOUT=*                                                          
+//REPORT   DD SYSOUT=*                                                          
+                                                                                
+          
