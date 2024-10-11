@@ -15,7 +15,7 @@
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          
-//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
 //*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
 //SYSOUT   DD SYSOUT=*                                                          
 //*UTPUT    DD SYSOUT=*                                                         
