@@ -22,7 +22,7 @@
 //*S2       SET TIME=&&LHHMMSS                                                  
 //*S3       SET USER=&&SYSUID                                                   
 //CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXLOC             
-//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE                                  
 //XLCC     DD DSN=&&&&XLCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
 //SYSTSPRT DD SYSOUT=*                                                          

@@ -147,42 +147,42 @@ end /* Select */
   Alocation Check                                                               
 */                                                                              
                                                                                 
-if ^ExistDDname('LISTPKGA') Then Do                                             
+if \ExistDDname('LISTPKGA') Then Do                                             
   Say 'CMPGEN01E DDname LISTPKGA is not allocated.'                             
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('COMPTEMP') Then Do                                             
+if \ExistDDname('COMPTEMP') Then Do                                             
   Say 'CMPGEN01E DDname COMPTEMP is not allocated.'                             
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('COMPNTS') Then Do                                              
+if \ExistDDname('COMPNTS') Then Do                                              
   Say 'CMPGEN01E DDname COMPNTS is not allocated.'                              
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('GENFILES') Then Do                                             
+if \ExistDDname('GENFILES') Then Do                                             
   Say 'CMPGEN01E DDname GENFILES is not allocated.'                             
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('BOUTLST') Then Do                                              
+if \ExistDDname('BOUTLST') Then Do                                              
   Say 'CMPGEN02E DDname BOUTLST is not allocated.'                              
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('C1MSGS1') Then Do                                              
+if \ExistDDname('C1MSGS1') Then Do                                              
   Say 'CMPGEN02E DDname C1MSGS1 is not allocated.'                              
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('bstipt01') Then Do                                             
+if \ExistDDname('bstipt01') Then Do                                             
   Say 'CMPGEN02E DDname bstipt01 is not allocated.'                             
   Return 8                                                                      
 End                                                                             
                                                                                 
-if ^ExistDDname('ahjobdsn') Then Do                                             
+if \ExistDDname('ahjobdsn') Then Do                                             
   Say 'CMPGEN02E DDname ahjobdsn is not allocated.'                             
   Return 8                                                                      
 End                                                                             
@@ -311,7 +311,7 @@ do i = 1 to total
 End /* do i = 1 to total */                                                     
                                                                                 
 /* Validate for Components in any elements included in the Pkg */               
-if ^CompFound Then DO                                                           
+if \CompFound Then DO                                                           
                                                                                 
   queue '**********************************************************'            
   queue '**                                                      **'            

@@ -26,7 +26,7 @@
 //*                                                                             
 //*#####################################################################        
 //CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXFTP             
-//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE                                  
 //XFTC     DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
 //SYSTSPRT DD SYSOUT=*                                                          
@@ -43,7 +43,7 @@
 //*#####################################################################        
 //FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          C1BMXFTP             
 //         REGION=2048K,TIME=800                                                
-//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSUDUMP DD SYSOUT=Q                                                          
@@ -62,7 +62,7 @@ PUT /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //FTPSBOM  EXEC PGM=IEFBR14                                C1BMXFTP             
 //*FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),         C1BMXFTP             
 //*         REGION=2048K,TIME=800                                               
-//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSUDUMP DD SYSOUT=Q                                                          
@@ -73,7 +73,7 @@ BINARY
 cd /tmp                                                                         
 mk &VPHPKGID                                                                    
 cd &VPHPKGID                                                                    
-PUT /u/users/gonjo08/rexxobj/HASHSBOM                                           
+PUT /u/users/IBMUSER/rexxobj/HASHSBOM                                           
 /*                                                                              
 //*#####################################################################        
 //*                                                                             

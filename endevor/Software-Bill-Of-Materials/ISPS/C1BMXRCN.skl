@@ -1,228 +1,127 @@
-)CM  PACKAGE SHIPMENT BATCH JCL - CONFIRMATION - ISPSLIB(C1BMXRCN)
-)CM
-)CM  THIS SKELETON IS USED TO CONFIRM THE EXECUTION OF THE IEBCOPY JOB AT
-)CM  THE REMOTE SITE (COPY STAGING DATASETS TO PRODUCTION SATASETS).  IT
-)CM  IS INCLUDED IN SKELETON ISPSLIB(C1BMXJOB).
-)CM
-)CM  THIS SKELETON IS READ BY THE SHIPMENT STAGING UTILITY AND IS USED
-)CM  TO BUILD PART OF THE REMOTE JOB WHICH COPIES STAGING DATASETS INTO
-)CM  THEIR RESPECTIVE PRODUCTION DATASETS.  THERE ARE TWO IEBGENER STEPS
-)CM  WHICH WRITE JCL TO THE INTERNAL READER.  BASED ON CONDITION CODES,
-)CM  ONLY ONE OF THE GENER STEPS WILL EXECUTE.  THE JOB STREAM WHICH IS
-)CM  GENERED INTO THE INTERNAL READER WILL EXECUTE AT THE HOST AND CAUSE
-)CM  THE SHIPMENT RECORD TO BE UPDATED.
-)CM
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-)CM
-)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.  HOWEVER, IT CAN BE
-)CM  MODIFIED TO GIVE MORE SPECIFIC INFORMATION ABOUT THE RESULTS OF
-)CM  THE COPYING PROCESS (CF. ADMINISTRATORS GUIDE - "SHIPMENT
-)CM  TRACKING AND CONFIRMATION").
-)CM
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-)CM
-)CM
-)CM REXX XMETHOD XNODE
-)CM   TRACE R
-)CM   SAY 'XMETHOD==> 'XMETHOD
-)CM   SAY 'XNODE  ==> 'XNODE
-)CM ENDREXX
-//* *----------------------------------------------* ISPSLIB(C1BMXRCN) *
-//*
-//* *==================================================================*
-//* *  INSTREAM DATASET CONTAINING REMOTE CONFIRMATION JCL
-//* *==================================================================*
-//*
-//VERIFYOK IF  (¬ABEND AND
-//             SBOMVRFY.RC = 0 AND
-//             CHKHASH.RC = 0) THEN
-//*
-//CONFCOPY EXEC PGM=IEBGENER                               C1BMXRCN
-//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
-)IM C1BMXHJC
-)IF &XMETHOD = NETWORK_DM THEN )DO
-/*ROUTE XEQ DEV
-)ENDDO
-//CONFEXEC EXEC PGM=NDVRC1,                                C1BMXRCN
-//   PARM='&VNBCPARM,CONF,RCPY,EX,****,$DEST_ID'
-)IM C1BMXLIB OPT
-//**********************************************************************
-//*  MOVE PACKAGE' SBOM IN ENDEVOR ADMIN ENVIRONMENT                   *
-//**********************************************************************
-//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LE),      C1BMXRCN
-//  PARM='C1BM3000'
-)IM C1BMXLIB
-//**********************************************************************
-//*             SORT WORK FILES                                        *
-//**********************************************************************
-//SORTWK01 DD UNIT=3390,SPACE=(CYL,(1,2))
-//SORTWK02 DD UNIT=3390,SPACE=(CYL,(1,2))
-//SORTWK03 DD UNIT=3390,SPACE=(CYL,(1,2))
-//C1TPDD01 DD UNIT=3390,SPACE=(CYL,5),
-//            DCB=(RECFM=VB,LRECL=260)
-//C1TPDD02 DD UNIT=3390,SPACE=(CYL,5),
-//            DCB=(RECFM=VB,LRECL=260)
-//**********************************************************************
-//*  OUTPUT DATA SETS                                                  *
-//**********************************************************************
-//C1MSGS1  DD SYSOUT=*
-//C1MSGS2  DD SYSOUT=*
-//C1PRINT  DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=133)
-//SYSUDUMP DD SYSOUT=*
-//SYMDUMP  DD DUMMY
-//SYSOUT   DD SYSOUT=*
-//**********************************************************************
-//*  REQUEST DATA SET                                                  *
-//**********************************************************************
-//BSTIPT01 DD *
-  SET STOPRC 16 .
-  MOVE ELEMENT '&VPHPKGID'
-    FROM
-      ENVIRONMENT  'ADM'
-      SYSTEM       'SSC'
-      SUBSYSTEM    'PACKAGES'
-      TYPE         'SBOM'
-      STAGE NUMBER 1
-    OPTIONS CCID 'PKGSBOM'
-            COMMENTS "MOVE PACKAGE &VPHPKGID SBOM"
-            WITH HISTORY
-  .
-//* *----------------------------------------------* C1BMXRCN (CONT.)  *
-$$
-)IF &XMETHOD = LOCAL | &XMETHOD = NETWORK_DM THEN )DO
-//SYSUT2   DD SYSOUT=(A,INTRDR)
-)ENDDO
-)ELSE )DO
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO
-//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),
-//         DCB=(LRECL=80,DSORG=PS)
-)ENDDO
-)IF &XMETHOD EQ XCOM THEN )DO
-//SYSUT2   DD DISP=(NEW,CATLG,DELETE),
-//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),
-//         DCB=(LRECL=80,DSORG=PS)
-)ENDDO
-)ENDDO
-//SYSPRINT DD SYSOUT=*
-//SYSIN    DD DUMMY
-//*
-//VERIFYOK ELSE
-//*
-//CONFABND EXEC PGM=IEBGENER                               C1BMXRCN
-//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST
-)IM C1BMXHJC
-)IF &XMETHOD = NETWORK_DM THEN )DO
-/*ROUTE XEQ DEV
-)ENDDO
-//ABNDEXEC EXEC PGM=NDVRC1,                                C1BMXRCN
-//  PARM='&VNBCPARM,CONF,RCPY,AB,****,$DEST_ID'
-//*
-)IM C1BMXLIB OPT
-//* *----------------------------------------------* C1BMXRCN (CONT.)  *
-$$
-)IF &XMETHOD = LOCAL | &XMETHOD = NETWORK_DM THEN )DO
-//SYSUT2   DD SYSOUT=(A,INTRDR)
-)ENDDO
-)ELSE )DO
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO
-//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),
-//         DCB=(LRECL=80,DSORG=PS)
-)ENDDO
-)IF &XMETHOD EQ XCOM THEN )DO
-//SYSUT2   DD DISP=(NEW,CATLG,DELETE),
-//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),
-//         DCB=(LRECL=80,DSORG=PS)
-)ENDDO
-)ENDDO
-//SYSPRINT DD SYSOUT=*
-//SYSIN    DD DUMMY
-//*
-//VERIFYOK ENDIF
-//*
-)IF &XMETHOD NE LOCAL && &XMETHOD NE NETWORK_DM THEN )DO
-)SET LOCALIP = &Z
-)REXX LOCALIP
- call socket 'initialize','rsclient' /* initilize ip connexion */
-
- addr = socket('gethostid') /* retrieve ip addr                */
-
- parse var addr rt ipadd    /* parse rt = return code ipadd ip address*/
- /* say 'ipaddress: 'ipadd */
- LOCALIP = ipadd
- return
-)ENDREXX
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-)CM
-)CM  Transmission method selected FTP
-)CM
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-)CM
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO
-//* *----------------------------------------------* ISPSLIB(#NFTPRCN) *
-//*
-//* *==================================================================*
-//* *  FTP CONFIRMATION JCL TO HOST LPAR
-//* *==================================================================*
-//*
-//SUBFTP01 EXEC PGM=FTP,COND=((0,GT),EVEN)                 C1BMXRCN
-//ABNLIGNR DD DUMMY
-//SYSPRINT DD SYSOUT=*
-//SYSABEND DD SYSOUT=*
-//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)
-//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)
-//SYSOUT   DD SYSOUT=*
-//OUTPUT   DD SYSOUT=*
-//CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL
-//INPUT    DD *
-&LOCALIP
-SITE FILETYPE=JES
-PUT //DD:CONFJCL
-STOP
-QUIT
-)ENDDO
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-)CM
-)CM  Transmission method selected XCOM
-)CM
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-)CM
-)IF &XMETHOD EQ XCOM THEN )DO
-//C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXRCN
-//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')
-//STEPLIB  DD DISP=SHR,DSN=DE25.XCOM.R120.RUN.CBXGLOAD
-//         DD DISP=SHR,
-//            DSN=CEE.SCEERUN
-//XCOMCNTL DD DISP=SHR,
-//            DSN=DE25.XCOM.R120.RUN.CBXGPARM
-//**********************************************************************
-//*SYSTCPD  DD DISP=SHR,
-//*            DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)
-//*XCOMGLOB DD DISP=SHR,
-//*            DSN=SHARE.XCOM.XCOMGLOB
-//*XCOMREST DD DISP=SHR,
-//*            DSN=SHARE.XCOM.XCOMREST
-//XCOMPRNT DD SYSOUT=*                            * IEBCOPY MSGS
-//SYSPRINT DD SYSOUT=*                            * TCP/IP MSGS
-//SYSTERM  DD SYSOUT=*                            * TCP/IP MSGS
-//**********************************************************************
-//*LCLDS01  DD DISP=(OLD,DELETE),DSN=&&CONFJCL
-//SYSIN01  DD *,SYMBOLS=JCLONLY
-TYPE=SEND
-ID=CONFRMT
-HOLDCOUNT=0
-XTCNET=CONFRMT
-XTCJOB=J0001AR
-XTCGOODREL=J0001DEL
-USERID=&&USER
-FILETYPE=JOB
-LFILE=&&USER..D&&DATE..T&&TIME..CONFJCL
-FILEOPT=CREATE
-IPNAME=&LOCALIP
-IPPORT=08044
-UNIT=SYSDA
-)ENDDO
-)ENDDO
+REM   In Windows, execute this command file to collect all Package              
+@ECHO OFF                                                                       
+ECHO ./  ADD  NAME=@README                     > ShippingSBOM.moveout           
+These items come from the Endevor GitHub at                                     
+  https://github.com/BroadcomMFD/broadcom-product-scripts                       
+ECHO These are asm          : C1LSTBKO >> ShippingSBOM.moveout                  
+ECHO These are rex/CSIQCLS0 : CMPNTGEN MODAHJOB >> ShippingSBOM.moveout         
+ECHO These are skl/CSIQSENU : #NFTPRCN #PSNFTP1 #PSNFTP6 #PSNFTPE #PSNFTPJ #PSNF
+ #RJNDVRB #RJNDVRS C1BMXCOM C1BMXEOJ C1BMXFTP #PSNWDMT #PSNWDM8 C1BMXNDM C1BMXHC
+ECHO ./  ADD  NAME=C1LSTBKO                >> ShippingSBOM.moveout              
+TYPE ASM\C1LSTBKO.asm   >> ShippingSBOM.moveout                                 
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=CMPNTGEN                >> ShippingSBOM.moveout              
+TYPE REXX\CMPNTGEN.rex   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=MODAHJOB                >> ShippingSBOM.moveout              
+TYPE REXX\MODAHJOB.rex   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#NFTPRCN                >> ShippingSBOM.moveout              
+TYPE ISPS\#NFTPRCN.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNFTP1                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNFTP1.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNFTP6                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNFTP6.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNFTPE                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNFTPE.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNFTPJ                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNFTPJ.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNFTPP                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNFTPP.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNFTPS                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNFTPS.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSXCOME                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSXCOME.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSXCOMP                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSXCOMP.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSXCOMS                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSXCOMS.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJ0                >> ShippingSBOM.moveout                  
+TYPE ISPS\#RJ0.skl   >> ShippingSBOM.moveout                                    
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJFCPY1                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJFCPY1.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJFCPY2                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJFCPY2.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJICPY1                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJICPY1.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJICPY2                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJICPY2.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJICPYL                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJICPYL.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJICPYU                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJICPYU.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJNDVRA                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJNDVRA.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJNDVRA                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJNDVRA.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJNDVRB                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJNDVRB.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#RJNDVRS                >> ShippingSBOM.moveout              
+TYPE ISPS\#RJNDVRS.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXCOM                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXCOM.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXEOJ                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXEOJ.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXFTP                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXFTP.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNWDMT                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNWDMT.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=#PSNWDM8                >> ShippingSBOM.moveout              
+TYPE ISPS\#PSNWDM8.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXNDM                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXNDM.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXHCN                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXHCN.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXIN                >> ShippingSBOM.moveout               
+TYPE ISPS\C1BMXIN.skl   >> ShippingSBOM.moveout                                 
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXJOB                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXJOB.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXLIB                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXLIB.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXLOC                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXLOC.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXRCN                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXRCN.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=C1BMXSBD                >> ShippingSBOM.moveout              
+TYPE ISPS\C1BMXSBD.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=HASHSBOM                >> ShippingSBOM.moveout              
+TYPE ISPS\HASHSBOM.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+ECHO ./  ADD  NAME=SCMM@REX                >> ShippingSBOM.moveout              
+TYPE ISPS\SCMM@REX.skl   >> ShippingSBOM.moveout                                
+ECHO.          >> ShippingSBOM.moveout                                          
+REM                                                                             

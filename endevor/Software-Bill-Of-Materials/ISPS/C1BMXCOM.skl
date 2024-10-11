@@ -29,7 +29,7 @@
 //*                                                                             
 //*#####################################################################        
 //CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXCOM             
-//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE                                  
 //XXCC     DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
 //SYSTSPRT DD SYSOUT=*                                                          
@@ -65,7 +65,7 @@
 IPNAME=&VDDXIPNM                                                                
 IPPORT=&VDDXIPPT                                                                
 TYPE=SEND                                                                       
-USERID=GONJO08                                                                  
+USERID=IBMUSER                                                                  
 DROPSESS=YES                                                                    
 FILEOPT=CREATE                                                                  
 CKPT=0                                                                          
