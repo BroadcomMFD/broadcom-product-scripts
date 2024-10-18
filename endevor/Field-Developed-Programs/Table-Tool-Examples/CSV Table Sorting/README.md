@@ -23,6 +23,8 @@ This solution described here is offered at this time with these restrictions:
 
 Note that the TBL#SORT step captures the CSV file heading, and writes it to SORTOUT. When the DFSORT step runs, it is necessary that the DISP=MOD be used with SORTOUT to append the sorted data to the heading.
 
+The solution is valid for DFSORT. Let me know if you would like to help in the development of a solution for another Sort utility.
+
 Please contact joseph.walter@broadcom.com if you have any questions or issues.
 
 
