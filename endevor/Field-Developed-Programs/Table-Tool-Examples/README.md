@@ -20,7 +20,9 @@ A collection of JCL and processor members that demonstrate the use of Table Tool
    - EXAMPL2B  To Report Elements Moved within a date span                  
    - EXAMPL2P  To Report Packages created over nnn days ago (using CSV data)                                  
    - LISTDSNS  From a Dataset mask, lists dataset names and attributes
-   - PKGEMNTR  To run the Package Monitor report                             
+   - PKGEMNTR  To run the Package Monitor report    
+   
+   The **Table-Tool-CSV-Sorting** folder contains items that allow you to SORT CSV data prior to a Table Tool Execution                         
 
 
 
