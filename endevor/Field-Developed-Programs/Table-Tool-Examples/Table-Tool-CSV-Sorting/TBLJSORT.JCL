@@ -1,4 +1,4 @@
-//IBMUSER JOB (0000),'Your-NAme',CLASS=A,PRTY=6,
+//IBMUSER JOB (0000),'Your-Name',CLASS=A,PRTY=6,
 //  MSGCLASS=X,USER=&SYSUID,REGION=7M,NOTIFY=&SYSUID
 //*-------------------------------------------------------------------*
 //*- Two Examples for Generating and Sorting ENDEVOR CSV data, -------*
