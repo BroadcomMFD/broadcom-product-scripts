@@ -3,6 +3,7 @@ REM   In Windows, execute this command file to collect all Package
 ECHO ./  ADD  NAME=@README                     > PackageBuilder.moveout
 ECHO These are rex/CSIQCLS0 : Moveout Package PKGELES PkgMaint >> PackageBuilder.moveout
 ECHO These are pnl/CSIQPENU : PACKAGEP PKGESEL2 PKGESELS PMAINTPN >> PackageBuilder.moveout
+ECHO These are asm          : LOADTABL >> PackageBuilder.moveout
 ECHO These are ispfmsg/CSIQMENU : CIUU02 >> PackageBuilder.moveout
 ECHO ./  ADD  NAME=Moveout                >> PackageBuilder.moveout
 TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\Moveout.rex   >> PackageBuilder.moveout
@@ -11,7 +12,7 @@ ECHO ./  ADD  NAME=Package                >> PackageBuilder.moveout
 TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\Package.rex   >> PackageBuilder.moveout
 ECHO.          >> PackageBuilder.moveout
 ECHO ./  ADD  NAME=PKGELES                >> PackageBuilder.moveout
-TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\Package.rex   >> PackageBuilder.moveout
+TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\PKGELES.rex   >> PackageBuilder.moveout
 ECHO.          >> PackageBuilder.moveout
 ECHO ./  ADD  NAME=PACKAGEP                >> PackageBuilder.moveout
 TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\PACKAGEP.pnl   >> PackageBuilder.moveout
@@ -21,6 +22,9 @@ TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\PKGESEL2.pnl   >> PackageBuilder.mov
 ECHO.          >> PackageBuilder.moveout
 ECHO ./  ADD  NAME=PKGESELS                >> PackageBuilder.moveout
 TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\PKGESELS.pnl   >> PackageBuilder.moveout
+ECHO.          >> PackageBuilder.moveout
+ECHO ./  ADD  NAME=LOADTABL                >> PackageBuilder.moveout
+TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\LOADTABL.asm   >> PackageBuilder.moveout
 ECHO.          >> PackageBuilder.moveout
 ECHO ./  ADD  NAME=PkgMaint                >> PackageBuilder.moveout
 TYPE ISPF-tools-for-Quick-Edit-and-Endevor\\PkgMaint.rex   >> PackageBuilder.moveout
