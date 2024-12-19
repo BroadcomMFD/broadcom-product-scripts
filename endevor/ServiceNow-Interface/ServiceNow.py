@@ -36,8 +36,3 @@ elif "number" in nÝ0¨.keys():
 else:                                         
     print("error - not found")                 
                                                                        
-
-
-
-
-
