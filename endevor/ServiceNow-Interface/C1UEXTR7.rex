@@ -28,14 +28,14 @@
    /* Values to be set for your site......                     */
    /* For package REVIEW  (APPROVE/DENY).....                  */
    /*   Enter location of Approver Group sequencing   ...      */
-   ApproverGroupSequence= 'SYSDE32.NDVR.PARMLIB(APPROVER)'
+   ApproverGroupSequence= 'YOURSITE.NDVR.PARMLIB(APPROVER)'
 
    /* Do you want all CAST actions to be peformed in Batch?    */
-   Force_CAST_in_Batch = 'N' ; /*  Y/N   */
    Force_CAST_in_Batch = 'Y' ; /*  Y/N   */
+   Force_CAST_in_Batch = 'N' ; /*  Y/N   */
 
    /* If wanting to limit the use of this exit, uncomment...        */
-   If USERID() /= 'WALJO11' then exit
+   If USERID() /= 'IBMUSER' then exit
 
    /* If wanting to send email, use these variables with            */
    /* designated maximum lengths. The Rexx will put them            */
@@ -146,9 +146,9 @@ ManageEmails:
    /* Initializaztion and Example statements                        */
    /*****************************************************************/
    MySMTP_Message =,
-       'SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX(C1UEXTR7)'
+       'YOURSITE.YOUR.NDVR.NODES1.CLSTREXX(C1UEXTR7)'
    MySMTP_Subject = 'Please Approve Package' PECB_PACKAGE_ID
-   MySMTP_From = Left('SYSDE32 your testing Endevor',50)
+   MySMTP_From = Left('YOURSITE your testing Endevor',50)
    MySMTP_textline.1  = 'Package' PECB_PACKAGE_ID,
                            ' has been CAST and is ready for APPROVAL.'
    MySMTP_textline.2  = 'Your Review and approval of package',
@@ -198,7 +198,7 @@ Validate_PackageID:
              " RECFM(F,B) TRACKS ",
              " NEW UNCATALOG REUSE ";
    Notnow =,
-      "ALLOC DD(STDOUT) DA('WALJO11.STDOUT') OLD REUSE "
+      "ALLOC DD(STDOUT) DA('IBMUSER.STDOUT') OLD REUSE "
 
    CALL BPXWDYN ,
       "ALLOC DD(STDERR) LRECL(200) BLKSIZE(20000) SPACE(5,5) ",
@@ -489,7 +489,7 @@ SubmitBatchCAST:
 
    /* For CASTing a package in Batch                           */
    /*   Build a JCL model, and name its location here....      */
-   CastPackageModel = 'SYSDE32.NDVR.TEAM.MODELS(CASTPKGE)'
+   CastPackageModel = 'YOURSITE.NDVR.TEAM.MODELS(CASTPKGE)'
      /* Name a work dataset to be created then deleted...        */
    CastPackageJCL   = USERID()".C1UEXTR7.SUBMIT"
 
