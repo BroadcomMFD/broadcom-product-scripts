@@ -7,7 +7,8 @@ This collection provides two opportunities to introduce automation for package a
 
 If both are included then for example, the final approval given to a package would kick off an immediate package execution, and when completed the submissions of package shipments to 3 destinations would immediately follow.
 
-Package Automation has been around since 2006, and can run on any release of Endevor. Whether a package action is performed manually, by a zowe command, a sweep job, or any other means, the Package Automation actions remain the same.
+Package Automation has been around for many years, and can run on any release of Endevor. 
+Whether a package action is performed manually, by a zowe command, a sweep job, the Endevor web interface, or any other means, the Package Automation follow-up actions remain the same.
 
 ## Package Automation on Multiple Endevor images
 
@@ -15,11 +16,19 @@ Some Endevor administrators have responsibility for multiple Endevor images, whe
 
 On each Lpar where portions of this collection will run:
 
- - Place all the REXX items into a new or existing library of your choice. 
+ - Place the REXX items into a new or existing library of your choice. 
  - Enter the name the library into the Exit program you choose
      - C1UEXT07 for Automated Executions and Shipments 
      - C1UEXSHP for Automated Shipments only 
- - The WHEREIAM.rex member is not a part of the configuration, but is intended to help identify names you should use as @site member names. Execute the WHEREIAM.rex (as is) to determine the name to assign to a copy of the @site member. Then tailor the content to reflect values for the Lpar. For example, if you intend to execute the collection on Lpars named SYS1 and SYS7, then WHEREIAM.rex will instruct you to create members @SYS1 and @SYS7 respectively. The names you use for the Rules and Trigger files must entered into the @SYS1 and @SYS7 members. Additionally the names of the libraries and members you use as "MODELS" must be entered.
+ - The WHEREIAM.rex member is not a part of the configuration, 
+ but is intended to help identify names you should use as @site member names. 
+ Execute the WHEREIAM.rex (as is) to determine the new name to give to the member currently named @site. 
+ Then tailor the content to reflect values for the Lpar. 
+
+    For example, if you intend to execute the collection on Lpars named SYS1 and SYS7, 
+  then WHEREIAM.rex will instruct you to create members @SYS1 and @SYS7 respectively. 
+  The names you use for the Rules and Trigger files must entered into the @SYS1 and @SYS7 members. 
+  Additionally the names of the libraries and members you use as "MODELS" must be entered.
 
 ## Automate Package Executions
 
