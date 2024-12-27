@@ -33,14 +33,27 @@
    MySRC2Library = FHLQ'.CSIQSRC2'                                              
    /* JOB INFO FOR ALTERNATE ID & CONVERSION JOBS*/                             
    JnmPfx        = userid() /* default job name prefix */                       
-   AltIDAcctCode = '55800000'                                                   
-   AltIDJobClass = 'B'                                                          
+   AltIDAcctCode = '00000000'                                                   
+   AltIDJobClass = 'A'                                                          
    AltIDMsgClass = 'X'                                                          
                                                                                 
-/* Bundle Switch Area  */                                                       
-   PackageBundle = 'N'                                                          
-   ParallelDevelopmentBundle = 'N'                                              
-   QuickEditBundle = 'N'                                                        
+/************************************************************/                  
+/* Required for the Package Functions bundle :   */                             
+   SchedulingPackageShipBundle = 'Y'  ;/* Auto/Sched Shipping */                
+   MyHomeAddress  = '?????' ; /* Use HOMETEST for ip address */                 
+   /* If SchedulingPackageShipBundle, list Transmission methods  */             
+   TransmissionMethods = 'NETVIEW_FTP LOCAL   '                                 
+   /* If SchedulingPackageShipBundle, list Shipment Models (JCL) */             
+   TransmissionModels  = 'SHIP#FTP    SHIPLOCL'                                 
+                                                                                
+   /* Select one of the following - Usually 'Rules' */                          
+   ShipSchedulingMethod = 'One  '     ;/* 1  Destination  */                    
+   ShipSchedulingMethod = 'None '     ;/* No Shipping     */                    
+   ShipSchedulingMethod = 'Notes'     ;/* Use PKG Notes   */                    
+   ShipSchedulingMethod = 'Rules'     ;/* Rules / Notes   */                    
+   /* Verify the name of the Trigger File - must be allocated */                
+   TriggerFileName = AHLQ'.SHIPMENT.TRIGGER'                                    
+                                                                                
                                                                                 
 /************************************************************/                  
 /***************************************************************/               

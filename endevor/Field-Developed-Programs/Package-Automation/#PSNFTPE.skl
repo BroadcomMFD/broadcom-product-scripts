@@ -1,0 +1,43 @@
+@REM **********************************************************
+@REM ************************************************* #PSNFTPE
+@REM *    CONTENTS: ENDEVOR/MVS - REMOTE EXECUTION OF THE AHJOB
+@REM * TRANSMITTER: NETVIEW FILE TRANSFER PROGRAM
+@REM *     PURPOSE: SUBMIT ARJOB DATASET FOR EXECUTION VIA TSO
+@REM *              AT THE REMOTE SITE.
+@REM **********************************************************
+//*  ******************************************************************
+//*  FRD JOBSTEP JCL TO SUBMIT JCL REMOTELY USING FTP
+//*  ENDEVOR DESTINATION &VNBLSDST
+//*  NODE NAME           &NODENAME
+//*  ******************************************************************
+//*================================================================
+//*  ******************************************************************
+//SUBFTP01 EXEC PGM=FTP,COND=(4,LT)                        #PSNFTPE
+//ABNLIGNR  DD DUMMY
+//SYSPRINT  DD SYSOUT=*
+//SYSABEND  DD SYSOUT=*
+//NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)
+//SYSOUT    DD SYSOUT=*
+//*UTPUT    DD SYSOUT=*
+//OUTPUT   DD DSN=&&FTPOUT,
+//            DISP=(,PASS),SPACE=(TRK,(1,0)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PS),
+//            UNIT=SYSALLDA
+//INPUT     DD *
+&NODENAME
+SITE FILETYPE=JES
+ PUT '&AHJOBDSN'
+STOP
+QUIT
+/*
+//*----------------------------------------------------------
+//FTPSCAN EXEC PGM=IRXJCL,COND=(8,LE),                     #PSNFTPE
+//        PARM='UPDTTGGR &DESTID #PSNFTPE &PACKAGE'
+//SYSEXEC   DD DSN=YOURSITE.YOUR.NDVR.NODES1.CLSTREXX,
+//             DISP=SHR
+//          DD DSN=YOUR.NDVR.CSIQCLS0,
+//             DISP=SHR
+//FTPOUT   DD DSN=&&FTPOUT,DISP=(OLD,DELETE)
+//OUTPUT   DD SYSOUT=*                                     #PSNFTPE
+//SYSTSPRT DD SYSOUT=*
+//*----------------------------------------------------------

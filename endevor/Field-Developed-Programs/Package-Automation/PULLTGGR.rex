@@ -174,9 +174,11 @@
       if Length(Typrun) > 0 then,                                               
          Typrun = ',TYPRUN='Typrun                                              
                                                                                 
+/*                                                                              
       Notify      = Strip(Substr($tablerec.trg#,Notifypos,8)) ;                 
       if Length(Notify) < 2 then,                                               
          Notify = '&SYSUID'                                                     
+*/                                                                              
                                                                                 
       seconds = '000001' /* Wait 1 second before submitting next*/              
       Call WaitAwhile ;                                                         
@@ -206,7 +208,7 @@
          pos= $Starting_$position.$headingVariable                              
          If Substr(Jobnbr,1,1) > ' ' then,                                      
             $tablerec.trg# = ,                                                  
-               Overlay(Jobnbr,$tablerec.trg#,Jobnumberpos);                     
+               Overlay(Jobnbr,$tablerec.trg#,Jobnumbpos);                       
          End                                                                    
       Else,                                                                     
          $tablerec.trg# = Overlay("?",$tablerec.trg#,Stpos) ;                   

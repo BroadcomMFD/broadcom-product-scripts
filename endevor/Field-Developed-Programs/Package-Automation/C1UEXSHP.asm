@@ -315,9 +315,9 @@ MAINRTRN DS    0H
 ALLOREXX DC    X'0060'     length in hex                                        
          DC    CL18'ALLOC DD(SYSEXEC) '                                         
 *  Enter your REXX dataset name and length here \                               
-*        DC    CL28'DA(CADEMO.BUNDLE.PACKAGE)'                                  
+*        DC    CL28'DA(YOURSITE.NDVR.REXX)'                                     
          DC    CL30'DA(YOURSITE.NDVR.TEAM.REXX)'                                
-*        DC    CL28'DA(SYS1.EXEC)'                                              
+*        DC    CL28'DA(SYS?.EXEC)'                                              
 *  Enter your REXX dataset name and length here /                               
          DC    CL42' SHR REUSE'                                                 
 *        DC    CL40'----+----1----+----2----+----3----+----4                    

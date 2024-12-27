@@ -133,7 +133,7 @@
         Executed. Use APIALSUM_For_Package_Target_Info                          
 */                                                                              
                                                                                 
-   Call APIALSUM_For_Package_Target_Info ;                                      
+   Call CSV_to_List_Package_Actions ;                                           
                                                                                 
    sa = pkgEnvironment pkgStage                                                 
                                                                                 
@@ -198,7 +198,7 @@ CreateNewTriggerEntry:
                                                                                 
    If TraceRc = 1 then Say 'CreateNewTriggerEntry+            '                 
    If TraceRc = 1 then Trace r                                                  
-   Jobnumber = '  ';                                                            
+   Jobnumb   = '  ';                                                            
 /* Time = TIME()                                                                
    Time = Substr(Time,1,2) || Substr(Time,4,2) */                               
    Time = rulTime ;                                                             

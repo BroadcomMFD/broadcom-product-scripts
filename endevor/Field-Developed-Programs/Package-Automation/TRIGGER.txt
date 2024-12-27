@@ -1,1 +1,1 @@
-*St Package--------- System-- Destination Date---- Time Jobname- Jobnumber Typru
+*St Package--------- System-- Destination Date---- Time Jobname- Jobnumb- Typrun

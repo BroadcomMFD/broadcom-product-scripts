@@ -16,6 +16,7 @@
 //* MY DESTNAME = &Destination                                                  
 //* MY FROMNODE = &SENDNODE                                                     
 //* MY PACKAGE = &Package                                                       
+//  SET PACKAGE='&Package'                                                      
 //* MY VNBCPARM = C1BMX000,&Date8,&Time8                                        
 //* DESTVAR1    = 'DESTVAR1'                                                    
 //* DESTVAR2    = 'DESTVAR2'                                                    
@@ -173,6 +174,7 @@
 //* MY DESTNAME = &Destination                                                  
 //* MY FROMNODE = &SENDNODE                                                     
 //* MY PACKAGE = &Package                                                       
+//  SET PACKAGE='&Package'                                                      
 //* MY VNBCPARM = C1BMX000,&Date8,&Time8                                        
 //*--------------------------------------------------------SHIP#FTP             
 ##                                                                              
@@ -307,7 +309,7 @@
 //* *================================================================*          
 //* *  INSTREAM DATASET CONTAINING REMOTE CONFIRMATION JCL                      
 //* *================================================================*          
-//WHATNTFY IF (RC > 7) THEN                                                     
+//WHATNTFY IF (RC > 8) THEN                                                     
 //*                                                                             
 //CONFGT12 EXEC PGM=IEBGENER                               SHIP#FTP             
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
@@ -320,6 +322,7 @@
 //* MY DESTNAME = &Destination                                                  
 //* MY FROMNODE = &SENDNODE                                                     
 //* MY PACKAGE = &Package                                                       
+//  SET PACKAGE='&Package'                                                      
 //* MY VNBCPARM = C1BMX000,&Date8,&Time8                                        
 //*--------------------------------------------------------SHIP#FTP             
 //CONFCOPY EXEC PGM=NDVRC1,                                SHIP#FTP             
@@ -382,6 +385,7 @@ $$
 //* MY DESTNAME = &Destination                                                  
 //* MY FROMNODE = &SENDNODE                                                     
 //* MY PACKAGE = &Package                                                       
+//  SET PACKAGE='&Package'                                                      
 //* MY VNBCPARM = C1BMX000,&Date8,&Time8                                        
 //*--------------------------------------------------------SHIP#FTP             
 //CONFCOPY EXEC PGM=NDVRC1,                                SHIP#FTP             

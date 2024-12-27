@@ -43,7 +43,7 @@
                                                                                 
    ARG Destination Calltype Package ;                                           
                                                                                 
-   Jobnumber = '' ;     /* replace if one is found */                           
+   Jobnumb = '' ;       /* replace if one is found */                           
                                                                                 
    If Calltype = '#PSNFTPE' then,                                               
       Do                                                                        
@@ -52,7 +52,7 @@
       Call ScanFTPOutput ;                                                      
       If MyRC > 0 then Exit(MyRC) ;                                             
                                                                                 
-      If Jobnumber = '' then Exit(MyRC) ;                                       
+      If Jobnumb = '' then Exit(MyRC) ;                                         
       End /* If Calltype = '#PSNFTPE' */                                        
                                                                                 
    If Calltype = 'NDMSCAN'  then,                                               
@@ -62,7 +62,7 @@
       Call ScanNDMOutput ;                                                      
       If MyRC > 0 then Exit(MyRC) ;                                             
                                                                                 
-      If Jobnumber = '' then Exit(MyRC) ;                                       
+      If Jobnumb = '' then Exit(MyRC) ;                                         
       End /* If Calltype = '#PSNFTPE' */                                        
                                                                                 
    Call AllocateTriggerForUpdate ;                                              
@@ -105,7 +105,7 @@ ScanFTPOutput:
    /* 250-It is known to JES as JOB32058 */                                     
       if w3='known' & w4='to' & w5='JES' & w6='as' then,                        
          Do                                                                     
-         Jobnumber = w7;                                                        
+         Jobnumb = w7;                                                          
          MyRC= 0 ;                                                              
          Leave ;                                                                
          End                                                                    
@@ -131,7 +131,7 @@ ScanNDMOutput:
       /* SUBMITTED PROCESS NUMBER 00068958 */                                   
       if w2='SUBMITTED' & w3='PROCESS' & w4='NUMBER' then,                      
          Do                                                                     
-         Jobnumber = Word(ndm@,5)                                               
+         Jobnumb = Word(ndm@,5)                                                 
          MyRC= 0 ;                                                              
          Leave ;                                                                
          End                                                                    
@@ -182,7 +182,7 @@ UpdateTriggerEntry:
       If Calltype = '#PSNFTPE' | Calltype = 'NDMSCAN' then,                     
          Do                                                                     
          /* Update Job number */                                                
-         $tablerec.t# = Overlay(Jobnumber' ',$tablerec.t#,Jobnumberpos)         
+         $tablerec.t# = Overlay(Jobnumb' ',$tablerec.t#,Jobnumbpos)             
          /* Update status     */                                                
          $tablerec.t# = Overlay('S',$tablerec.t#,Stpos)                         
          End;                                                                   
@@ -191,8 +191,8 @@ UpdateTriggerEntry:
       WeHaveAnUpdate = 'Y'                                                      
       msg='Updating ...                ',                                       
            Left(Package,16) Left(Destination,08)                                
-      If Jobnumber /= '' then msg = msg,                                        
-           ' Submitted job' Jobnumber                                           
+      If Jobnumb /= '' then msg = msg,                                          
+           ' Submitted job' Jobnumb                                             
       Say msg ;                                                                 
       Leave ;                                                                   
    End /*  Do t# = 1 to $tablerec. */                                           

@@ -521,13 +521,13 @@
            MOVE SPACES TO ALLOC-TEXT.                                           
                                                                                 
            STRING 'ALLOC DD(REXFILE7) ',                                        
-             'DA(YOURSITE.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'          
+             'DA(YOURSITE.NDVR.REXX) SHR REUSE'                                 
                   DELIMITED BY SIZE                                             
              INTO ALLOC-TEXT                                                    
            END-STRING .                                                         
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .                                 
            STRING 'ALLOC DD(SYSEXEC) ',                                         
-             'DA(YOURSITE.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX) SHR REUSE'          
+             'DA(YOURSITE.NDVR.REXX) SHR REUSE'                                 
                   DELIMITED BY SIZE                                             
              INTO ALLOC-TEXT                                                    
            END-STRING.                                                          
