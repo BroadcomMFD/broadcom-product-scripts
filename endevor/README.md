@@ -19,7 +19,7 @@ There are three automated package shipping methods presented in this GitHub. All
 #### Package Automation (exit driven)
 This [sample repository](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Package-Automation) contains artifacts described in the [Package Automation - what are you waiting for?](https://community.broadcom.com/blogs/joseph-walther/2023/07/11/package-automation-what-are-you-waiting-for?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2) blog on the Endevor community website. The objects are used to initiate automated package shipments from actions performed in Endevor, triggered by an Endevor package exit. 
 
-The objects may also trigger automated package executions.
+Package Automation also my trigger package executions.
 
 #### Shipments for a Single-Destination (zowe)
 This [sample repository](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-a-Single-Destination) contains artifacts described in the [Automate Endevor Package Shipments with Zowe CLI](https://medium.com/zowe/automate-ca-endevor-package-shipments-with-zowe-cli-e15feb61745a) blog on Medium.  The objects are used to initiate package shipments from zowe for an Endevor image that has only one Shipment destination.  The installation steps are fewer and simpler than those necessary for Shipments-for-Multiple-Destinations.
