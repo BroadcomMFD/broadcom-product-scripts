@@ -1,14 +1,14 @@
-# Shipments for Multiple Destinations
-This procedure allows zowe commands to execute Endevor package shipments. For example:
+# Zowe Shipments for Multiple Destinations
+This procedure supports zowe commands to execute Endevor package shipments. For example:
 
 `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
     
-The procedure is a more robust alternative to a simpler version, used when there is only one Endevor package shipment destination. 
+The procedure is a more robust alternative to a simpler zowe version, used when there is only one Endevor package shipment destination. 
 
 Both procedures utilize mainframe REXX programs running under z/OSMF.
 Endevor web services is not required. As a result, these routines may operate on Endevor releases 16.0 and forward.
 
-There are two significant differences in this robust solution compared to the simple version:
+There are two significant differences in this zowe robust solution compared to the simple zowe version:
 1) The site must maintain a table of expected package shipments. See the SHIPRULE.example. 
 2) Automated updates to a "Trigger" file, support Package Shipment scheduling and logging. 
 
@@ -81,3 +81,42 @@ Setup steps for the REXX-based objects for zowe package shipment automation:
 Note:
 
 Shipments are submitted from entries placed automatically onto the "Trigger" file. You can manually update the "Trigger" file to request package shipments. If you create a `SHIPRULE` that designates a future shipment, then you can use the `PULLTGGR` program within a step of a typical sweep job to submit package shipments in a timely manner, similar to the way package execution jobs are submitted. 
+
+## Find items at the these locations:
+
+**item**               Location
+
+**@siteMult.rex** - endevor\Shipments-for-Multiple-Destinations + endevor\Field-Developed-Programs\Package-Automation
+
+**BILDTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**IZUFNDVR.jcl**  - endevor\Shipments-for-a-Single-Destination
+
+**PKGESHIP.rex**  - endevor\Shipments-for-a-Single-Destination 
+
+**PULLTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation 
+
+**SHIP#FTP.skl**  - endevor\Field-Developed-Programs\Package-Automation
+
+**other models**  - endevor\Field-Developed-Programs\Package-Automation
+
+**SHIPRULE**      - endevor\Shipments-for-Multiple-Destinations  + endevor\Field-Developed-Programs\Package-Automation
+
+**TBLUNLOD.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**Trigger**       - endevor\Shipments-for-Multiple-Destinations + endevor\Field-Developed-Programs\Package-Automation
+
+**UPDTTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHERE@M1.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHEREAMI.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**JCLCOMMT.rex**  - endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor
+
+
+
+
+
+
+

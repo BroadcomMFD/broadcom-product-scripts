@@ -194,3 +194,10 @@ Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR
 Engaging a "callable REXX" service may also be performed from other REXX programs, such as an Endevor REXX exit or from REXX zowe executions.
 
 One final note about about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
+
+
+## Find items at the these locations:
+
+**item Location**
+
+JCLCOMMT.rex  -          endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor

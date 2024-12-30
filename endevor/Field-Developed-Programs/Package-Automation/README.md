@@ -87,3 +87,42 @@ On each Lpar where this collection will run:
 4. Create one or more package shipping "MODEL" members. Submit a 1-time manual package shipment for each file transmission method you use. Then, capture the manually submitted JCL (first job only) and tailor it using one of the models (SHIPLOCL, SHIP#FTP, SHIPMODL) in this collection as a guide. The three examples show how specific values are to be replaced with mixed-case variable names. Specify the names you give to your "MODEL" members as values for the **TransmissionModels** in your (renamed) @site member. Place each "MODEL" member into the library named as your **MySEN2Library**.
 5. The use of the **#PSNFTPE** member is completely optional. File transmission tools will tell you the job number for remotely-submitted jobs. This member is coded to find the job number for an FTP submission, and to place it onto the TriggerFile. If you elect to not use the member, then your TriggerFile will not contain job numbers for remote jobs. 
 6. Older versions of this collection depended on assembler API programs. If you find you need or prefer an API program, find the source in the **API-Assembler-Examples** folder.
+
+### Notes on commenting Package Automation members
+
+It is highly recommended that each .skl and "MODEL" member you use be commented. 
+The edit macro named JCLCOMMT.rex can apply recommended comments onto anything that looks like JCL.
+You can find the code for JCLCOMMT.rex in the [ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) folder.
+
+The commnenting will allow you to reveiew your package shipping (and other) jobs, and know the element or member name that contains the lines of JCL.
+
+## Find items at the these locations:
+
+**item**               Location
+
+**@site.rex** -  endevor\Field-Developed-Programs\Package-Automation
+
+**BILDTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**PKGESHIP.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**PULLTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation 
+
+**SHIP#FTP.skl**  - endevor\Field-Developed-Programs\Package-Automation
+
+**other models**  - endevor\Field-Developed-Programs\Package-Automation
+
+**SHIPRULE**      - endevor\Field-Developed-Programs\Package-Automation
+
+**TBLUNLOD.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**Trigger**       - endevor\Shipments-for-Multiple-Destinations + endevor\Field-Developed-Programs\Package-Automation
+
+**UPDTTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHERE@M1.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHEREAMI.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**JCLCOMMT.rex**  - endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor
+

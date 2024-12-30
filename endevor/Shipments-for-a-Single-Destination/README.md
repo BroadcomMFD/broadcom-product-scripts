@@ -40,4 +40,37 @@ Setup steps for the REXX-based objects for zowe package shipment automation:
     -   Enter the dataset name of the tailored JCL into the `Lpar-named-REXX` as the `MySEN2Library`. 
     -   Enter the member name of the tailored JCL into the `Lpar-named-REXX` as the `ModelMember`.
         
-    f)  Execute your zowe command, for example: `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
+    f)  Execute your zowe command, for example: `zowe zo-tso issue command "PKGESHIP 'name-of-package'"`
+
+
+## Find items at the these locations:
+
+**item**               Location
+
+**@site.rex**   - endevor\Shipments-for-Single-Destinations 
+
+**BILDTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**IZUFNDVR.jcl**  - endevor\Shipments-for-a-Single-Destination
+
+**PKGESHIP.rex**  - endevor\Shipments-for-a-Single-Destination 
+
+**PULLTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation 
+
+**SHIP#FTP.skl**  - endevor\Field-Developed-Programs\Package-Automation
+
+**other models**  - endevor\Field-Developed-Programs\Package-Automation
+
+**SHIPRULE**      - endevor\Shipments-for-Multiple-Destinations  + endevor\Field-Developed-Programs\Package-Automation
+
+**TBLUNLOD.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**Trigger**       - endevor\Shipments-for-Multiple-Destinations + endevor\Field-Developed-Programs\Package-Automation
+
+**UPDTTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHERE@M1.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHEREAMI.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**JCLCOMMT.rex**  - endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor
