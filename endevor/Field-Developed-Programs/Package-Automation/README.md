@@ -2,30 +2,43 @@
 
 This collection provides two opportunities to introduce automation for package actions:
 
-  - Automate Package Executions as soon as the package status changes to "APPROVED", and the time falls within the Execution window
-  - Automate Package Shipments as soon as the package status changes to "EXECUTED", and your "Rules" of package shipments indicate that the package should be Shipped.
+  - Automate Package Executions as soon as the package status changes to "APPROVED", and the Execution window is open.
+  - Automate Package Shipments as soon as the package status changes to "EXECUTED", and your "Rules" for package shipments indicate that the package should be Shipped to one or more destinations.
 
-If both are included then for example, the final approval given to a package would kick off an immediate package execution, and when completed the submissions of package shipments to 3 destinations would immediately follow.
+If both actions are automated, then (for example) the final approval given to a package would kick off a package execution, and followed immediately by package shipments to multiple destinations.
 
-Package Automation has been around since 2006, and can run on any release of Endevor. Whether a package action is performed manually, by a zowe command, a sweep job, or any other means, the Package Automation actions remain the same.
+Whether a triggering action is performed manually, by a zowe command, a sweep job, the Endevor web interface, or any other means, the Package Automation follow-up actions, based on an Endevor exit, remain consistently the same.
 
 ## Package Automation on Multiple Endevor images
 
-Some Endevor administrators have responsibility for multiple Endevor images, where details like job card information and dataaset names differ from one to the next. To accommodate multiple images, the members listed below are provided to contain image-specific detail and to allow the remainder of the items to remain unchanged.
+Some Endevor administrators have responsibility for multiple Endevor images, where details like the life cycle map, job card information and dataaset names differ from one image to the next. 
+To manage the variations from multiple images, the instructions and members listed below are provided, and allow the majority of remaining items to be left unchanged.
 
 On each Lpar where portions of this collection will run:
 
- - Place all the REXX items into a new or existing library of your choice. 
- - Enter the name the library into the Exit program you choose
+ - Place the REXX items into a new or existing library of your choice. 
+ - Enter the name the REXX library into the Exit program you choose to use
      - C1UEXT07 for Automated Executions and Shipments 
      - C1UEXSHP for Automated Shipments only 
- - The WHEREIAM.rex member is not a part of the configuration, but is intended to help identify names you should use as @site member names. Execute the WHEREIAM.rex (as is) to determine the name to assign to a copy of the @site member. Then tailor the content to reflect values for the Lpar. For example, if you intend to execute the collection on Lpars named SYS1 and SYS7, then WHEREIAM.rex will instruct you to create members @SYS1 and @SYS7 respectively. The names you use for the Rules and Trigger files must entered into the @SYS1 and @SYS7 members. Additionally the names of the libraries and members you use as "MODELS" must be entered.
+ - The WHEREIAM.rex member is not a part of the configuration, 
+ but is provided to help identify names you should use as @site member names. 
+ Execute the WHEREIAM.rex (as is) to determine the name to give to the member currently named @site. 
+ Then tailor the content to reflect values for the Lpar. 
 
+    For example, if you intend to execute the collection on Lpars named SYS1 and SYS7, 
+  then WHEREIAM.rex will instruct you to create members @SYS1 and @SYS7 respectively. 
+  The names you use for the Rules and Trigger files (and other values) must entered into the @SYS1 and @SYS7 members. 
+  
 ## Automate Package Executions
 
- When an action changes the package Status value to "APPROVED", either a CAST or REVIEW action was performed. The next step for the package is to EXECUTE the package, but normally a delay postpones the execution until an EXECUTE action is requested. At sites where a "Sweep" job is used, the execution may wait minutes or hours until the next "Sweep" job runs. Then the package execution will be submitted concurrently with executions of other packages that were also waiting. Package Automation spreads out the submissions of package executions and eliminates the waiting. It submits a package execution as soon as the package Status is APPROVED. Since the year 2005, many Endevor sites have been using this feature of Package Automation.
-
- Members that contribute to this feature include:
+ When a package Status changes to "APPROVED", either a CAST or REVIEW action was performed. 
+ The next logical step is to EXECUTE the package.
+ Relying on a "Sweep" job, or manual submission leads to delays or possible neglect. 
+ 
+ A "Sweep" job may submit multiple package executions concurrently, causing them to compete with each other for resources. 
+ Package Automation submits executions at the time of the Cast or Approval, spreading out the resource consumption over a larger period of time.  
+ 
+ Members that contribute to the Automated Package Executions feature include:
    - C1UEXT07.cob
    - PKGEEXEC.tbl
    - PKGEXECT.rex
@@ -40,31 +53,76 @@ If you want to automate Executions only and to turn off the Automated Shipment f
 
 ## Automate Package Shipments
 
-When a package completes its Execution, the next step for the package might be one or more package shipments. This second feature of Package Automation automatically submits zero to many package shipments, based on the package content, or the package name. No longer is the manual use of panel actions required.
+When a package completes Executiing, the next logical step for the package might be the submission of package shipments. 
+This second feature of Package Automation automatically submits zero to many package shipments, based on the package content. 
+No human intervention, including the manual navigation through the package shipment panels, is required.
 
-Immediately after a package Execution, the content of the package is compared with a table of "Rules". The comparison prepares zero to many destinations and shipments to be submitted immediately or scheduled for a later time. 
+The Shipping feature of Package Automation is activated immediately after a package Execution. 
+The content of the package is compared to a table of "Rules". 
+Each match with the table identifies a destination for a package shipment, which can be submitted immediately, or be delayed (scheduled) for a later time as designated by the "Rules".  
 
-The only requirement is that manual package shipments be already configured.  
 
 ### Items for Automated Shipping
 
-Most items for this feature require no changes during installation. Not every item in this collection is necessary at your site. Some items are available as choices for what works best for you. For example:
+Most items for this feature require no changes during installation.
+Moreover, not every item in this collection is necessary at your site. 
+Many items are provided for your convenience, and can be installed depending on what works best for you. 
 
- - The C1UEXT07 program performs both Automated functions - Executions and Shipments. In case you want to automate shipping only, there are two additional exit programs within the collection named C1UEXSHP. However, you need only one of them. One is written in assembler and the other in COBOL. Choose the one that works best for you. If for example, your Endevor run time libraries are not PDS-E or you have not yet migrated to latest version of COBOL, you may elect to use the assembler version.
 
- - These routines were originally constructed prior to the availability of Endevor's CSV utility. Several of the REXX routines contain both API sections and CSV sections. If you do not use any of the API sections, then the corresponding assembler API programs are not necessary for you.
+For example, the C1UEXT07 program performs both Automated functions - Executions and Shipments. 
+ In case you want to automate shipping only, there are two additional exit programs within the collection named C1UEXSHP. 
+ However, you need only one of them. 
+ One is written in assembler and the other in COBOL. 
+ Choose the one that works best for you. 
+ If for example, your Endevor run time libraries are not PDS-E or you have not yet migrated to latest version of COBOL, you may elect to use the assembler version.
  
- - Three package shipping "MODELS" are provided in this collection as examples for your models. After submitting and capturing each unique kind of your own package shipment job(s), you can tailor them using the models as a guide.
 
 ### Installation steps for Automated Shipping
 
 On each Lpar where this collection will run:
 
-1. Place all the REXX items into a new or existing library of your choice. 
-2. Determine which version of the exit you want to run. In the source code of your choice, enter the name of the REXX library you selected in step 1. You may also choose to install the program with the default package exit name, C1UEXT07.
-3. Tailor a Rules file to reflect your choices for package content and shipment destinations. Record the Rules file dataset name in the renamed @site member. By default package shipments are submitted immediately after a package execution. You may choose to force delays in package shipments by coding values in the Date and Time fields. If you do, then a SWEEP job will be responsible for submitting delayed package shipments. Schedule the SWEEP job to run on a frequency that is appropriate for you. If you already have a SWEEP job for executing packages, you may need only the last step from the example SWEEPJOB member to initiate package shipments.
-4. Upload (or copy) the Trigger file as a sequential file, and record the name in the renamed @site member. Only the heading on each Trigger file is necessary.
-5. From the JCL submitted for your manual shipments, create a "MODEL" for each unique kind or shipment. For example you may have local shipments and remote XCOM shipments.
-6. Find Assembler API program source, APIALSUM for example, in the **API-Assembler-Examples** folder.
+1. Perform the steps listed in the **Package Automation on Multiple Endevor images** section.  
+2. Tailor a Rules file to reflect your choices for package content and shipment destinations. Record the Rules file dataset name in the renamed @site member. By default package shipments are submitted immediately after a package execution. You may choose to force delays in package shipments by coding values in the Date and Time fields. If you do, then a SWEEP job will be responsible for submitting delayed package shipments. Schedule the SWEEP job to run on a frequency that is appropriate for you. If you already have a SWEEP job for executing packages, you may need only the last step from the example SWEEPJOB member to initiate package shipments.
+3. Create the Trigger file as a sequential file, and record the file name as the **TriggerFileName** in the renamed @site member. Only the heading on the Trigger file is necessary, but keep the mixed-case format, and make the record length be at least 80 characters.
+4. Create one or more package shipping "MODEL" members. Submit a 1-time manual package shipment for each file transmission method you use. Then, capture the manually submitted JCL (first job only) and tailor it using one of the models (SHIPLOCL, SHIP#FTP, SHIPMODL) in this collection as a guide. The three examples show how specific values are to be replaced with mixed-case variable names. Specify the names you give to your "MODEL" members as values for the **TransmissionModels** in your (renamed) @site member. Place each "MODEL" member into the library named as your **MySEN2Library**.
+5. The use of the **#PSNFTPE** member is completely optional. File transmission tools will tell you the job number for remotely-submitted jobs. This member is coded to find the job number for an FTP submission, and to place it onto the TriggerFile. If you elect to not use the member, then your TriggerFile will not contain job numbers for remote jobs. 
+6. Older versions of this collection depended on assembler API programs. If you find you need or prefer an API program, find the source in the **API-Assembler-Examples** folder.
 
-The COBOL and Assembler modules you select to use, must be generated using your Endevor release CSIQOPTN and CSIQLOAD libraries as input, and typically output to your CSIQAUTU library. 
+### Notes on commenting Package Automation members
+
+It is highly recommended that each .skl and "MODEL" member you use be commented. 
+The edit macro named JCLCOMMT.rex can apply recommended comments onto anything that looks like JCL.
+You can find the code for JCLCOMMT.rex in the [ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) folder.
+
+The commnenting will allow you to reveiew your package shipping (and other) jobs, and know the element or member name that contains the lines of JCL.
+
+## Find items at the these locations:
+
+**item**               Location
+
+**@site.rex** -  endevor\Field-Developed-Programs\Package-Automation
+
+**BILDTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**PKGESHIP.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**PULLTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation 
+
+**SHIP#FTP.skl**  - endevor\Field-Developed-Programs\Package-Automation
+
+**other models**  - endevor\Field-Developed-Programs\Package-Automation
+
+**SHIPRULE**      - endevor\Field-Developed-Programs\Package-Automation
+
+**TBLUNLOD.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**Trigger**       - endevor\Shipments-for-Multiple-Destinations + endevor\Field-Developed-Programs\Package-Automation
+
+**UPDTTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHERE@M1.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**WHEREAMI.rex**  - endevor\Field-Developed-Programs\Package-Automation
+
+**JCLCOMMT.rex**  - endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor
+

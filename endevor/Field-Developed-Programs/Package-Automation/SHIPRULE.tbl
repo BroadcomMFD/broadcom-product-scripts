@@ -1,7 +1,12 @@
-*Environment Stage System-- Subsys-- Destination St Jobname-  Date Time  Typrun  Notify----- 
- DEV         *     FINANCE  REMOTEST TST32       _  RMTEMD32  +0   0000                      
-*QAS         9     FINANCE  *        MTS21       _  SENDTS21  +0   0000  HOLD                
- PRD         2     *        *        MTS32       _  PRODMD32  +0   0000                      
- PRD         2     *        *        MD57#       _  PRODMD57  +0   0000                      
- ADMIN       1     CATSNDVR *        MC66A       _  D32#MC66  +0   0000                      
- ADMIN       1     CATSNDVR *        MC32A       _  D32#MC32  +0   0000                      
+*Environment Stage System-- Subsys-- Destination St Jobname-  Date Time  Typrun 
+ DEV         *     FINANCE  REMOTEST TST32       _  RMTEDEV2  +0   0000         
+*QAS         9     FINANCE  *        TSO21       _  SENDTS21  +0   0000  HOLD   
+ DEV         *     DESEIPOC *        TST32       _  RMTEDEV2  +0   0000         
+*QAS         Q     FINANCE  *        STE32       _  QAS2DEV2  +0   0000         
+*QAS         Q     FINANCE  *        DEV6FIN     _  QAS2DEV2  +0   0000         
+ PRD         2     *        *        STE32       _  PRODDEV2  +0   0000         
+ PRD         2     *        *        DEV6FIN     _  PRODDEV2  +0   0000         
+*PRD         2     *        *        DEV7#       _  PRODDEV7  +0   0000         
+ ADMIN       1     ADMINSYS *        DEV6A       _  D32#DEV6  +0   0000         
+ ADMIN       1     ADMINSYS *        DEVRSVW     _  D32#DEVR  +0   0000         
+ ADMIN       1     ADMINSYS *        DEVCA       _  D32#DEVC  +0   0000         

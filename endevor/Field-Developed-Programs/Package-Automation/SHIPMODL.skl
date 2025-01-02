@@ -1,12 +1,12 @@
-//&Jobname  JOB (55800000),
+//&Jobname  JOB (0000),                                                         
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      SHIPMODL
-//      NOTIFY=&Notify,TYPRUN=SCAN
-//*     NOTIFY=&Notify/&TYPRUN
+//      NOTIFY=&Notify,TYPRUN=SCAN                                              
+//*     NOTIFY=&Notify/&TYPRUN                                                  
 //*-------------------------------------------------------------------  SHIPMODL
 //*----.....ENDEVOR.MODELS(SHIPMODL)----------------------------------  SHIPMODL
-//  SET PACKAGE=&Package
-//  SET DEST=&Destination
-//  SET HLQ=&userid.SHIP.&Destination
+//  SET PACKAGE=&Package                                                        
+//  SET DEST=&Destination                                                       
+//  SET HLQ=IBMUSER.SHIP.&Destination                                           
 //  SET AUTHLIB1=CADEMO.ENDV.RUN.CSIQAUTU                               SHIPMODL
 //  SET AUTHLIB2=CADEMO.ENDV.RUN.CSIQAUTH                               SHIPMODL
 //  SET   CONLIB=CADEMO.ENDV.RUN.CSIQLOAD                               SHIPMODL
@@ -15,14 +15,14 @@
 //* *==============================================================* *  SHIPMODL
 //* *==============================================================* *  SHIPMODL
 //NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,REGION=4096K,                  SHIPMODL
-//         PARM='C1BMX000,&Date8,&Time8 SHIP &Userid'
+//         PARM='C1BMX000,&Date8,&Time8 SHIP &Userid'                           
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=&AUTHLIB1
-//         DD DISP=SHR,DSN=&AUTHLIB2
-//CONLIB   DD DISP=SHR,DSN=&CONLIB
+//STEPLIB  DD DISP=SHR,DSN=&AUTHLIB1                                            
+//         DD DISP=SHR,DSN=&AUTHLIB2                                            
+//CONLIB   DD DISP=SHR,DSN=&CONLIB                                              
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
@@ -39,11 +39,11 @@
 //* *  XCOM MODEL CONTROL CARD DATASET                                  SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXXCC DD DSN=&&XXCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//C1BMXXCC DD DSN=&&XXCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),                    
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //C1BMXXCM DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
@@ -51,22 +51,22 @@
 //* *  LOCAL MODEL CONTROL CARD DATASET                                 SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXLCC DD DSN=&&XLCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//C1BMXLCC DD DSN=&&XLCC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),                    
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //C1BMXLCM DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  BULK DATA TRANSFER  U_S_I_N_G  J_E_S  - GENERATED JCL DATASET    SHIPMODL
 //* *  BULK DATA TRANSFER MODEL JCL DATASET                             SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXB1C DD DSN=&&XB1C,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//C1BMXB1C DD DSN=&&XB1C,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),                    
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //C1BMXB1M DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
@@ -74,46 +74,46 @@
 //* *  BULK DATA TRANSFER MODEL CONTROL CARD DATASET                    SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXBDC DD DSN=&&XBDC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//C1BMXBDC DD DSN=&&XBDC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),                    
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //C1BMXBDM DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  NETVIEW FTP "ADD TO TRANSMISSION QUEUE" DATASET AND INTERNAL RDR SHIPMODL
 //* *  NETVIEW FTP MODEL CONTROL CARD DATASET                           SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXFTC DD DSN=&&XFTC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//C1BMXFTC DD DSN=&&XFTC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),                    
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //C1BMXFTM DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  NETWORK DATA MOVER COPY/RUN COMMAND DATASETS                     SHIPMODL
 //* *  NETWORK DATA MOVER MODEL CONTROL CARD DATASET                    SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXNWC DD DSN=&&XNWC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),
+//C1BMXNWC DD DSN=&&XNWC,DISP=(NEW,PASS),SPACE=(TRK,(2,10)),                    
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //C1BMXNWM DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  PDS CONTAINING REMOTE IEBCOPY AND IDCAMS JOBSTEP MEMBERS         SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
 //C1BMXRJC DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&ISPSLIB
+//            DSN=&ISPSLIB                                                      
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  SHIPMENT DATE/TIME READ BY INLINE HOST CONFIRMATION STEP         SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXDTM DD DSN=&&XDTM,DISP=(NEW,PASS),SPACE=(TRK,(1,0)),
+//C1BMXDTM DD DSN=&&XDTM,DISP=(NEW,PASS),SPACE=(TRK,(1,0)),                     
 //            DCB=(RECFM=FB,Lf CL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //*                                                                     SHIPMODL
@@ -121,7 +121,7 @@
 //* *  HOST STAGING DATASET DELETION STATEMENTS (IDCAMS)                SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
-//C1BMXDEL DD DSN=&&HDEL,DISP=(NEW,PASS),SPACE=(TRK,(10,10)),
+//C1BMXDEL DD DSN=&&HDEL,DISP=(NEW,PASS),SPACE=(TRK,(10,10)),                   
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //*                                                                     SHIPMODL
@@ -130,17 +130,17 @@
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
 //C1BMXMDL DD DISP=SHR,                                                 SHIPMODL
-//            DSN=&SOURCE
+//            DSN=&SOURCE                                                       
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  JCL SEGMENTS TO CREATE GROUP SYMBOLICS FOR MODELLING             SHIPMODL
 //* ******************************************************************  SHIPMODL
 //*                                                                     SHIPMODL
 //C1BMXHJC DD DATA,DLM=##                                               SHIPMODL
-//&Jobname JOB (55800000),
+//&Jobname JOB (0000),                                                          
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      SHIPMODL
-//      NOTIFY=&Userid
-##
+//      NOTIFY=&Userid                                                          
+##                                                                              
 //*                                                                     SHIPMODL
 //* *--------------------------------------------* C1BMXJOB (CONT.)  *  SHIPMODL
 //*                                                                     SHIPMODL
@@ -152,18 +152,18 @@
 //* *--------------------------------------------------------------* *  SHIPMODL
 //*                                                                     SHIPMODL
 //CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                                SHIPMODL
-//    PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,EX,****,$DEST_ID'
+//    PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,EX,****,$DEST_ID'                  
 //*                                                                     SHIPMODL
-//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                     
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB                  SHIPMODL
-//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB                       SHIPMODL
-//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB                        SHIPMODL
+//STEPLIB  DD DISP=SHR,DSN=YOUR.SIQ126S1.USER.AUTHLIB                  SHIPMODL 
+//         DD DISP=SHR,DSN=YOUR.SIQ126S1.AUTHLIB                       SHIPMODL 
+//CONLIB   DD DISP=SHR,DSN=YOUR.SIQ126S1.CONLIB                        SHIPMODL 
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
@@ -175,23 +175,23 @@
 //* *--------------------------------------------------------------* *  SHIPMODL
 //*                                                                     SHIPMODL
 //CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,                      SHIPMODL
-//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,AB,****,********'
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,AB,****,********'                   
 //*                                                                     SHIPMODL
-//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                     
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB                  SHIPMODL
-//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB                       SHIPMODL
-//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB                        SHIPMODL
+//STEPLIB  DD DISP=SHR,DSN=YOUR.SIQ126S1.USER.AUTHLIB                  SHIPMODL 
+//         DD DISP=SHR,DSN=YOUR.SIQ126S1.AUTHLIB                       SHIPMODL 
+//CONLIB   DD DISP=SHR,DSN=YOUR.SIQ126S1.CONLIB                        SHIPMODL 
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
 //C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES ********* SHIPMODL
-##
+##                                                                              
 //*                                                                     SHIPMODL
 //* *--------------------------------------------* C1BMXJOB (CONT.)  *  SHIPMODL
 //*                                                                     SHIPMODL
@@ -204,51 +204,51 @@
 //*                                                                     SHIPMODL
 //CONFCOPY EXEC PGM=IEBGENER           EXECUTED AT THE REMOTE SITE      SHIPMODL
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST         SHIPMODL
-//&Jobname JOB (55800000),
+//&Jobname JOB (0000),                                                          
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      SHIPMODL
-//      NOTIFY=&Userid
+//      NOTIFY=&Userid                                                          
 //CONFEXEC EXEC PGM=NDVRC1,                                             SHIPMODL
-//   PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,EX,****,$DEST_ID'
+//   PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,EX,****,$DEST_ID'                   
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB                  SHIPMODL
-//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB                       SHIPMODL
-//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB                        SHIPMODL
+//STEPLIB  DD DISP=SHR,DSN=YOUR.SIQ126S1.USER.AUTHLIB                  SHIPMODL 
+//         DD DISP=SHR,DSN=YOUR.SIQ126S1.AUTHLIB                       SHIPMODL 
+//CONLIB   DD DISP=SHR,DSN=YOUR.SIQ126S1.CONLIB                        SHIPMODL 
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
 //C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES ********* SHIPMODL
 //* *--------------------------------------------* C1BMXRCN (CONT.)  *  SHIPMODL
-$$
+$$                                                                              
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                         SHIPMODL
 //SYSPRINT DD SYSOUT=*                                                  SHIPMODL
 //SYSIN    DD DUMMY                                                     SHIPMODL
 //*                                                                     SHIPMODL
 //CONFABND EXEC PGM=IEBGENER,COND=ONLY EXECUTED AT THE REMOTE SITE      SHIPMODL
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST         SHIPMODL
-//&Jobname JOB (55800000),
+//&Jobname JOB (0000),                                                          
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      SHIPMODL
-//      NOTIFY=&Userid
+//      NOTIFY=&Userid                                                          
 //ABNDEXEC EXEC PGM=NDVRC1,                                             SHIPMODL
-//  PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,AB,****,$DEST_ID'
+//  PARM='C1BMX000,&Date8,&Time8,CONF,RCPY,AB,****,$DEST_ID'                    
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB                  SHIPMODL
-//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB                       SHIPMODL
-//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB                        SHIPMODL
+//STEPLIB  DD DISP=SHR,DSN=YOUR.SIQ126S1.USER.AUTHLIB                  SHIPMODL 
+//         DD DISP=SHR,DSN=YOUR.SIQ126S1.AUTHLIB                       SHIPMODL 
+//CONLIB   DD DISP=SHR,DSN=YOUR.SIQ126S1.CONLIB                        SHIPMODL 
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
 //C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES ********* SHIPMODL
 //* *--------------------------------------------* C1BMXRCN (CONT.)  *  SHIPMODL
-$$
+$$                                                                              
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                         SHIPMODL
 //SYSPRINT DD SYSOUT=*                                                  SHIPMODL
 //SYSIN    DD DUMMY                                                     SHIPMODL
-##
+##                                                                              
 //*                                                                     SHIPMODL
 //* *--------------------------------------------* C1BMXJOB (CONT.)  *  SHIPMODL
 //*                                                                     SHIPMODL
@@ -256,14 +256,14 @@ $$
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB                  SHIPMODL
-//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB                       SHIPMODL
-//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB                        SHIPMODL
+//STEPLIB  DD DISP=SHR,DSN=YOUR.SIQ126S1.USER.AUTHLIB                  SHIPMODL 
+//         DD DISP=SHR,DSN=YOUR.SIQ126S1.AUTHLIB                       SHIPMODL 
+//CONLIB   DD DISP=SHR,DSN=YOUR.SIQ126S1.CONLIB                        SHIPMODL 
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
 //C1BMXLOG DD SYSOUT=*     *** MESSAGES, ERRORS, RETURN CODES ********* SHIPMODL
-##
+##                                                                              
 //*                                                                     SHIPMODL
 //* *--------------------------------------------* C1BMXJOB (CONT.)  *  SHIPMODL
 //*                                                                     SHIPMODL
@@ -275,7 +275,7 @@ $$
 //* ISPSLIB MEMBER C1BMXIN IS INCLUDED AFTER IT AS THE INSTREAM DATA.   SHIPMODL
 //*                                                                     SHIPMODL
 //C1BMXIN  DD *  *-------------------------------* ISPSLIB(C1BMXIN)  *  SHIPMODL
-SHIP PACKAGE '&Package' TO DESTINATION &Destination &ShipOption .
+SHIP PACKAGE '&Package' TO DESTINATION &Destination &ShipOption .               
 //* *============================================* ISPSLIB(C1BMXLOC) *  SHIPMODL
 //* *==============================================================* *  SHIPMODL
 //* *==============================================================* *  SHIPMODL
@@ -283,7 +283,7 @@ SHIP PACKAGE '&Package' TO DESTINATION &Destination &ShipOption .
 //* *==============================================================* *  SHIPMODL
 //*                                                                     SHIPMODL
 //C1BMXLOC EXEC PGM=IKJEFT01,COND=(12,LE,NDVRSHIP)                      SHIPMODL
-//SYSTSIN   DD DSN=&&XLCC,DISP=(OLD,PASS)
+//SYSTSIN   DD DSN=&&XLCC,DISP=(OLD,PASS)                                       
 //SYSTSPRT  DD SYSOUT=*                                                 SHIPMODL
 //SYSOUT    DD SYSOUT=*                                                 SHIPMODL
 //* *--------------------------------------------* ISPSLIB(C1BMXHCN) *  SHIPMODL
@@ -293,18 +293,18 @@ SHIP PACKAGE '&Package' TO DESTINATION &Destination &ShipOption .
 //* *--------------------------------------------------------------* *  SHIPMODL
 //*                                                                     SHIPMODL
 //CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                                SHIPMODL
-//    PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,EX,****,***L****'
+//    PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,EX,****,***L****'                  
 //*                                                                     SHIPMODL
-//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                     
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=&AUTHLIB1
-//         DD DISP=SHR,DSN=&AUTHLIB2
-//CONLIB   DD DISP=SHR,DSN=&CONLIB
+//STEPLIB  DD DISP=SHR,DSN=&AUTHLIB1                                            
+//         DD DISP=SHR,DSN=&AUTHLIB2                                            
+//CONLIB   DD DISP=SHR,DSN=&CONLIB                                              
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
@@ -316,18 +316,18 @@ SHIP PACKAGE '&Package' TO DESTINATION &Destination &ShipOption .
 //* *--------------------------------------------------------------* *  SHIPMODL
 //*                                                                     SHIPMODL
 //CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,                      SHIPMODL
-//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,AB,****,********'
+//   PARM='C1BMX000,&Date8,&Time8,CONF,HXMT,AB,****,********'                   
 //*                                                                     SHIPMODL
-//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),
+//C1BMXDTM DD DSN=&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                     
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                         SHIPMODL
 //            UNIT=3390                                                 SHIPMODL
 //*                                                                     SHIPMODL
 //* ******************************************************************  SHIPMODL
 //* *  STEPLIB, CONLIB, MESSAGE LOG AND ABEND DATASETS                  SHIPMODL
 //* ******************************************************************  SHIPMODL
-//STEPLIB  DD DISP=SHR,DSN=&AUTHLIB1
-//         DD DISP=SHR,DSN=&AUTHLIB2
-//CONLIB   DD DISP=SHR,DSN=&CONLIB
+//STEPLIB  DD DISP=SHR,DSN=&AUTHLIB1                                            
+//         DD DISP=SHR,DSN=&AUTHLIB2                                            
+//CONLIB   DD DISP=SHR,DSN=&CONLIB                                              
 //*                                                                     SHIPMODL
 //SYSUDUMP DD SYSOUT=*     *** DUMP TO SYSOUT ************************* SHIPMODL
 //SYMDUMP  DD DUMMY                                                     SHIPMODL
