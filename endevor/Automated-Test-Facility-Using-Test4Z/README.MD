@@ -8,7 +8,7 @@ See [Test4Z techdocs documentation](https://techdocs.broadcom.com/us/en/ca-mainf
 
 
 
-Two testing methods are provided in this soltion:
+For the two Test4Z methods there are two testing methods provided in this solution:
 
 1. Items that can help your site to take a first step toward integrating Test4Z with Endevor. These items initiate batch Test4Z actions from the [Quick-Edit User Extension points](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/using/quick-edit-option/quick-edit-user-extension-points.html). With these, you may prepare Test4Z objects to use with the second method. See the **Quick-Edit-User-Extension-Points** subfolder for items of this method. The .rex, .pnl and .skl items must be placed into REXX, ISPF panel alnd ISPF skeleton libraries accordingly. 
 
