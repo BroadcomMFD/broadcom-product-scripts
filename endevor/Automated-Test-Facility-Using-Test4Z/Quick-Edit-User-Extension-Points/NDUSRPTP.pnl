@@ -1,0 +1,27 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ ^ TYPE(INPUT) CAPS(OFF) JUST(ASIS) PAD(' ')                                    
+ _ TYPE(INPUT) CAPS(ON)  JUST(ASIS) PADC(USER)                                  
+ ` TYPE(TEXT) SKIP(ON)                                                          
+  › TYPE(OUTPUT) INTENS(LOW) CAPS(OFF)                                          
+  { TYPE(PT)                /* Panel Title */                                   
+  } TYPE(NT)                /* Normal Text */                                   
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+)BODY WINDOW(65,15) CMD()                                                       
+}             {Test4Z Endevor Submit a Replay job}              }               
+}                                                               }               
+}Element     ......›EEVETKEL  `                                 }               
+}Description ......›USERDESC                                 `  }               
+}                                                               }               
+}Load  Lib   ......^LOADLIB                                  `  }               
+}NDVR ZLdata ......^T4ZLDATA                                 `  }               
+                    \Retrieved into this dataset                                
+}Review JCL? ......^Z`                                          }               
+}                                                               }               
+}ENV:›EEVETKEN}SYS:›EEVETKSY`}SUB:›EEVETKSB`}TYP:›EEVETKTY`    }                
+}                                                               }               
+}Enter criteria for a batch TEST4Z 'Replay' submission.         }               
+)INIT                                                                           
+ .ZVARS='(SHOWJCL)'                                                             
+ .CURSOR = SHOWJCL                                                              
+)PROC                                                                           
+)END                                                                            
