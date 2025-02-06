@@ -1,11 +1,10 @@
 /* REXX - User Routine Sample to submit a TEST4Z Unit Test.                     
    Kick off a Test4Z job                                                        
 */                                                                              
-Trace OFf                                                                       
                                                                                 
 CALL BPXWDYN "INFO FI(NDUSRXTU) INRTDSN(DSNVAR) INRDSNT(myDSNT)"                
 if RESULT = 0 then Testing = 'Y'                                                
-If Testing = 'Y' then Trace Off                                                 
+If Testing = 'Y' then Trace ?R                                                  
                                                                                 
 /* Enter your Site selected values here */                                      
  T4ZLibraryPrefix = USERID()                                                    
@@ -17,7 +16,6 @@ PassName = strip(PassParm,,"'")           /* holds the varialbe names, remove */
 ADDRESS ISPEXEC "VGET ("PASSNAME") SHARED"/* ANY QUOTES AND GET THESE NAMES   */
 interpret 'ALLVALS = 'PassName            /* use interpret to expand the names*/
 ADDRESS ISPEXEC "VGET ("ALLVALS") SHARED" /* and get those values */            
-ADDRESS ISPEXEC "VGET (MYJCLLIB)  PROFILE"                                      
 USERDESC = EEVBCOM                        /* ...description */                  
 USERDAT1 = SUBSTR(EEVEUSRD,01,40)         /* The EEVEUSRD is 80 bytes, tailor */
 USERDAT2 = SUBSTR(EEVEUSRD,41,40)         /* this bit to split it into chunks */
@@ -54,16 +52,6 @@ do
    ADDRESS ISPEXEC "SETMSG MSG(ENDE046E)" /* Request cancelled                */
    exit 0                                 /* and get out (no changes)         */
 end                                                                             
-                                                                                
- /* Look in MYJCLLIB to see if the element has a member     */                  
- thisT4ZJcl = MYJCLLIB"("EEVETKEL")"                                            
- DSNCHECK = SYSDSN("'"thisT4ZJcl"'") ;                                          
- IF DSNCHECK /= 'OK' then,                                                      
-    Do                                                                          
-    Say "NDUSRXTU- Expecting a member named" EEVETKEL "in" MYJCLLIB '.'         
-    Say "NDUSRXTU- Not finding one and cannot submit a TEST4Z job. "            
-    Exit(8)                                                                     
-    End                                                                         
                                                                                 
 ADDRESS ISPEXEC "REMPOP"                  /* Remove the popup                 */
 ADDRESS ISPEXEC "VGET (USERDAT1 USERDAT2",  /* Get the values again           */

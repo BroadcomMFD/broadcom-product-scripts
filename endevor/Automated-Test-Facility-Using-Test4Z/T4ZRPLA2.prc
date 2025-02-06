@@ -52,8 +52,8 @@ RELATE ELEMENT &C1ELEMENT
 //TABLE    DD *                                                                 
 * Any                                                                           
   *                                                                             
-//SYSEXEC  DD DISP=SHR,DSN=BST.WEBUI.V190.USERCLS0                              
-//         DD DISP=SHR,DSN=BST.WEBUI.V190.CSIQCLS0                              
+//SYSEXEC  DD DISP=SHR,DSN=Your.NDVR.V1##.USERCLS0                              
+//         DD DISP=SHR,DSN=Your.NDVR.V1##.CSIQCLS0                              
 //OPTIONS  DD *  Bump jobcard and fetch Accounting code                         
   whoAmI = USERID()                                                             
 * Accounting value fetch may not be necessary at your site                      
@@ -70,8 +70,8 @@ RELATE ELEMENT &C1ELEMENT
 //RUNTEST  EXEC PGM=ZTESTEXE      **runs as submitted job  T4ZRPLA2             
 //STEPLIB  DD DISP=SHR,DSN=BST.ENDEVOR.DEVC.CT4ZLOAD                            
 //         DD DISP=SHR,DSN=&LOADLIB                                             
-//*        DD DISP=SHR,DSN=BST.T4ZPOC3.V190.STG1.LOADLIB                        
-//*        DD DISP=SHR,DSN=BST.T4ZPOC3.V190.STG1.T4ZLOAD                        
+//*        DD DISP=SHR,DSN=YOUR.V190.STG1.LOADLIB                               
+//*        DD DISP=SHR,DSN=YOUR.V190.STG1.T4ZLOAD                               
 //ZLDATA   DD DSN=&T4ZLDATA,                                                    
 //         DISP=SHR                                                             
 //ZLOPTS   DD *                                                                 
@@ -102,7 +102,7 @@ QQ
 //          COND=((4,LT),(1,NE,T4ZOPTNS),(4,LT,T4ZPLA#1)),                      
 //   PARM='SUBMITST &T4ZHLQTM..&C1ELEMENT..REPLAY 10 01'                        
 //*  PARM='SUBMITST <SubmitJCL> <NumberWaits> <SecondsPerWait>'                 
-//SYSEXEC  DD DISP=SHR,DSN=BST.WEBUI.V190.USERCLS0                              
+//SYSEXEC  DD DISP=SHR,DSN=Your.NDVR.V1##.USERCLS0                              
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSTSIN  DD DUMMY                                                             
 //**********************************************************************        

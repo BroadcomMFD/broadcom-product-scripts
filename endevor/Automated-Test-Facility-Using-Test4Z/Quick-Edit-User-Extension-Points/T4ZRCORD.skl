@@ -29,7 +29,7 @@
 //**JCL from &EEVETKEL \\\\\\ --- Include the JCL step for this pgm ---*        
 //   INCLUDE MEMBER=&EEVETKEL                                                   
 //**JCL from &EEVETKEL ////// --- Include the JCL step for this pgm ---*        
-//STEPLIB  DD DISP=SHR,DSN=YOUR.DEVC.CT4ZLOAD                                   
+//STEPLIB  DD DISP=SHR,DSN=BST.ENDEVOR.DEVC.CT4ZLOAD                            
 //         DD DISP=SHR,DSN=&LOADLIB                                             
 //*        DD DISP=SHR,DSN=YOUR.V190.STG1.LOADLIB                               
 //         DD DISP=SHR,DSN=YOUR.V190.STG1.T4ZLOAD                               

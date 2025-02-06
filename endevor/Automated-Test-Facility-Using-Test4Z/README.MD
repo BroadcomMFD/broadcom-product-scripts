@@ -13,13 +13,9 @@ See the two modes of testing described in [Testing Modes](https://techdocs.broad
 This folder provides for two Endevor methods for executing the Test4Z modes:
 
 1. [Quick-Edit User Extension points](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/using/quick-edit-option/quick-edit-user-extension-points.html). 
- These items can help you get started at your site toward integrating Test4Z with Endevor. You might start with this method, before migrating to the second method. See the **Quick-Edit-User-Extension-Points** subfolder for items of this method. The .rex, .pnl and .skl items must be placed into REXX, ISPF panel alnd ISPF skeleton libraries accordingly. 
-
+See the content of the **Quick-Edit-User-Extension-Points** folder for details.
 
 2. [Endevor processors](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/processors.html).   Items that can automate the running of tests run from your Endevor processor(s). Test4Z objects can be automatically engaged by your Endevor Generate and Move processors. Tests may pass or fail, and the condition is made to reflect onto the element status in Endevor. Items using the .prc extension are processor Incluides. You can include them within your existing processors. If your configuration does not support the use of processor includes, then copy the content of the .prc items into your processors. If you are interested in seeing more about the use of processor Includes, see [Panvalet-Like Includes](https://community.broadcom.com/viewdocument/panvalet-like-includes?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2&tab=librarydocuments) .
-
-
-Set the value of the **MYJCLLIB** variable to a dataset name that contains JCL-snippets for Test4Z recording. See the **Example Record and Replay JCL** discussion in the [Record and Replay](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0/administrating/record-replay-and-verification-processing.html) documentation.  **MYJCLLIB** can be an output library for a JCL-like type, or a dataset where testers can edit directly. Configuring the dataset to be an Endevor output is a better choice, but not required.
 
 You may double-click on the batch file named Test4Z.bat, to create a ".moveout" file. Then upload the ".moveout" file to place all items from this folder onto your mainframe. 
 
@@ -36,6 +32,15 @@ The Test4Z Testing Modes are described [here](https://techdocs.broadcom.com/us/e
 
 
 - **Unit Test** processing may be executed using the Quick-Edit User Extensions and/or by automating its execution by a processor.  [Unit Test Processing](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0/administrating/unit-test-processing.html)
+
+# Why is there So Much REXX
+
+REXX can run almost anywhere on the mainframe. The IBM feature for [Using IRXJCL to execute an in-stream REXX exec](https://www.ibm.com/docs/en/zos/2.5.0?topic=routine-using-irxjcl-execute-in-stream-rexx-exec) has empowered this solution in several ways:
+
+- REXX can run in skeleton-based submitted jobs - without having to be placed into separate REXX libraries.
+- In-stream REXX works quite well within processors, empowering them to make dynamic decisions based on Endevor processor symbols and other information.
+- REXX runs comfortably in Table Tool steps 
+- The REXX code in this solution is stable, and does not need any adjustments at your site.
 
 
 # Endevor Types
