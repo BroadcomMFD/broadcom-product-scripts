@@ -9,13 +9,13 @@ The .rex, .pnl and .skl items must be placed into REXX, ISPF panel alnd ISPF ske
 
 If you are not already using Quick-Edit User Extensions, here is how you may engage the feature:
 
-In your CSIQSRC(ENCOPTBL) turn on the QE user routines with this option
+In your CSIQSRC(ENCOPTBL) turn on the QE user routines with this option:
 
->   CD18102_QE_USER_ROUTINES=ON  
+    CD18102_QE_USER_ROUTINES=ON  
 
 In your CSIQSRC(ENDICNFG) turn off the "Hide" option: 
 
-> UI_OPT_HIDE_NDUSRX=N        
+    UI_OPT_HIDE_NDUSRX=N        
 
 ## Considerations for the Test4Z Record action
 
