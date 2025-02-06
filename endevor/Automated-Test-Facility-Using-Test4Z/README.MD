@@ -35,24 +35,24 @@ The Test4Z Testing Modes are described [here](https://techdocs.broadcom.com/us/e
 
 ## SUCCESS / WARNING / FAILURE
 
-An assessment of the completed Test is made automatically to make it easier for you to know the results. One of the outputs will be given, as done in this example job output: 
+An assessment of the completed Test is made automatically to make it easier for you to know the results. One of the outputs will be given, as shown in this example job output: 
 
->-------------------------------------------------------------------------------
->Cmd      DDname   Stepname Procstep Status     Cpys  TotLines OutClass Prty    
->________ JESMSGLG JES2              HELD          1        30 X         144   
->________ JESJCL   JES2              HELD          1        32 X         144   
->________ JESYSMSG JES2              HELD          1       615 X         144   
->________ C1MSGS1  $$$$$$@           HELD          1      1132 X         144   
->________ C1MSGS2  $$$$$$@           HELD          1         8 X         144   
->________ SYSUT2   $$$$$$@           HELD          1         2 X         144   
->________ MSGOUT1  $$$$$$@           HELD          1        36 X         144   
->________ MSGOUT2  $$$$$$@           HELD          1         8 X         144   
->________ SYSTSPRT $$$$$$@           HELD          1         1 X         144   
->________ SYSTSPRT $$$$$$@           HELD          1         4 X         144   
->________ ZLMSG    $$$$$$@           HELD          1       652 X         144   
->________ SUCCESS  $$$$$$@           QUEUED        1         2 A         144   
->
->********************************* End of Data *********************************
+    -------------------------------------------------------------------------------
+    Cmd      DDname   Stepname Procstep Status     Cpys  TotLines OutClass Prty    
+    ________ JESMSGLG JES2              HELD          1        30 X         144   
+    ________ JESJCL   JES2              HELD          1        32 X         144   
+    ________ JESYSMSG JES2              HELD          1       615 X         144   
+    ________ C1MSGS1  $$$$$$@           HELD          1      1132 X         144   
+    ________ C1MSGS2  $$$$$$@           HELD          1         8 X         144   
+    ________ SYSUT2   $$$$$$@           HELD          1         2 X         144   
+    ________ MSGOUT1  $$$$$$@           HELD          1        36 X         144   
+    ________ MSGOUT2  $$$$$$@           HELD          1         8 X         144   
+    ________ SYSTSPRT $$$$$$@           HELD          1         1 X         144   
+    ________ SYSTSPRT $$$$$$@           HELD          1         4 X         144   
+    ________ ZLMSG    $$$$$$@           HELD          1       652 X         144   
+    ________ SUCCESS  $$$$$$@           QUEUED        1         2 A         144   
+    
+  
 
 ## Why is there So Much REXX
 
