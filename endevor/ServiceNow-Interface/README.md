@@ -3,6 +3,8 @@
 ## Overview
 Items in this folder are example Endevor objects for interfacing with ServiceNow. This interface assumes that the automated activity begins in Endevor. 
 
+## What is Already Covered and Not Here
+
 An alternative interface, not supported by items in this folder, begins with ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
 
 - [Endevor Package Integration with ServiceNow
@@ -14,8 +16,7 @@ An alternative interface, not supported by items in this folder, begins with Ser
 
 ## What is in this folder
 
-There is more than one way....   surprised? 
-You can choose a method most compatible to your skills and site requirements. Each method is located within sub-folders in this section.
+For Endevor to query ServiceNow, there are multiple choices. They give you the opportunity to choose a method most compatible to your skills and site requirements. Each method is located within sub-folders in this section.
 
 - **COBOL+REXX+WebEnablementToolkit** - contains items that leverage [IBM's Web Enablement Toolkit](https://www.ibm.com/docs/en/zos/3.1.0?topic=languages-zos-client-web-enablement-toolkit), avoiding any dependencies on off-host and Open Source items.
 
