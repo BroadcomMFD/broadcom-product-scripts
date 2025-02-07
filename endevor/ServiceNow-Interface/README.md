@@ -3,7 +3,7 @@
 ## Overview
 Items in this folder are example Endevor objects for interfacing with ServiceNow. This interface assumes that the automated activity begins in Endevor. 
 
-## What is Already Covered and Not Here
+## What is Already Covered But Not Here
 
 An alternative interface, not supported by items in this folder, begins with ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
 
