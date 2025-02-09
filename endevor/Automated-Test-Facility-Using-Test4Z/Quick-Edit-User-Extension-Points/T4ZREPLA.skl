@@ -83,7 +83,7 @@
 //*   STEP 2 -- Execute TEST4Z program                                          
 //*--------------------------------------------------------------------*        
 //T4ZRPLAY EXEC PGM=ZTESTEXE    ** Run the T4Z Replay**    T4ZREPLA             
-//STEPLIB  DD DISP=SHR,DSN=BST.ENDEVOR.DEVC.CT4ZLOAD                            
+//STEPLIB  DD DISP=SHR,DSN=Your.TEST4Z.CT4ZLOAD                                 
 //         DD DISP=SHR,DSN=&LOADLIB                                             
 //*        DD DISP=SHR,DSN=YOUR.V190.STG1.LOADLIB                               
 //         DD DISP=SHR,DSN=YOUR.V190.STG1.T4ZLOAD                               

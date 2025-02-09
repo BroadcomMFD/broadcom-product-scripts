@@ -68,7 +68,7 @@ RELATE ELEMENT &C1ELEMENT
 //  SET T4ZLDATA=&T4ZLDATA                                                      
 //*----------------------------------------------------------                   
 //RUNTEST  EXEC PGM=ZTESTEXE      **runs as submitted job  T4ZRPLA2             
-//STEPLIB  DD DISP=SHR,DSN=BST.ENDEVOR.DEVC.CT4ZLOAD                            
+//STEPLIB  DD DISP=SHR,DSN=Your.TEST4Z.CT4ZLOAD                                 
 //         DD DISP=SHR,DSN=&LOADLIB                                             
 //*        DD DISP=SHR,DSN=YOUR.V190.STG1.LOADLIB                               
 //*        DD DISP=SHR,DSN=YOUR.V190.STG1.T4ZLOAD                               
