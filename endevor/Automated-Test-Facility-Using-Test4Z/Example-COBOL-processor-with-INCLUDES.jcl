@@ -41,12 +41,6 @@
 //            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),                                
 //            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)                      
 //********************************************************************          
-//* SEND SOURCE TO SONARQUBE FOR SCAN                                           
-//*********************************************************************         
-//  IF (&C1USERID = 'ibmuser') THEN                                             
-       ++INCLUDE SQSCANER  Scan for code issues                                 
-//  ENDIF                                                                       
-//********************************************************************          
 //* READ SOURCE AND EXPAND INCLUDES                                             
 //*********************************************************************         
 //CONWRITE EXEC PGM=CONWRITE,COND=(0,LT),MAXRC=0,          GC1COB               
