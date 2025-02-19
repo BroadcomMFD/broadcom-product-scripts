@@ -1,6 +1,14 @@
 # Table-Tool-Examples
 
-A collection of JCL and processor members that demonstrate the use of Table Tool. Many of these were produced as a result of requests from the [Endevor Community website](https://community.broadcom.com/mainframesoftware/communities/communityhomeblogs?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2).
+A collection of JCL and processor members that demonstrate the use of Table Tool. 
+If you are new to Table Tool see these links for more information:
+
+- [Techdocs Documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/table-tool.html)
+- [Programming results without writing any code](https://www.youtube.com/watch?v=41tPGWpxm3s)
+- [Community Website Table Tool Examples Library ](https://community.broadcom.com/viewdocument/table-tool-examples-2020-june?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2&tab=librarydocuments)
+
+
+Examples in this folder include:
 
    - CLEANOVR  Report processor group Overrides                              
    - CSVALENV  Convert ENVIRONMENT info into REXX stem array data            
