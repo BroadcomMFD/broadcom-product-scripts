@@ -103,7 +103,7 @@ If a certain destination requires special processing, a destination specific mem
     @INCLUDE=suffix                             Required Inclusion of Hierarchical Member
     @INCLUDE=(suffix)                           Optional Inclusion of Hierarchical Member
 
-### PROC and JCL inclustions
+### PROC and JCL inclusions
 
 Consider also using a JES include, where an included member name includes the destination name, and the member itself resides in a library at the Destination site. The member may reside in a PROC library, or a library named by your JCLLIB ORDER statement. For Example:
 
