@@ -66,6 +66,7 @@ Package Shipping variables are made available early in the shipment process. If 
 
 See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as examples for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to leverage additional variables whose values are applicable to only one host or sending site.
 
+
 ### Skeleton / Model / Script example members for commenting
 
 Members in this folder that help with commenting include:
@@ -77,6 +78,42 @@ The example tailors the content of C1BMXFTC, which is the job submitted for Netv
 __#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
 
 The edit maccro __JCLCOMMNT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter JCLCOMMT on the Command line.
+
+## Member Inclusions
+
+Members in the CSIQSENU library(s) use the standard ISPF Skeleton method - )IM name - for including other skeletons. 
+
+Members of the CSIQOPTN library(s) and remote JCL PROCs and snippets may also include other members.
+
+### For members of the CSIQOPTN library(s):
+
+Within a member of a CSIQOPTN library, you can include other members, using this syntax.
+
+    @INCLUDE=member_name      -   Required Inclusion of Specific Member
+    @INCLUDE=(member-name)    -   Optional Inclusion of Specific Member
+
+Inclusion can also be based on the presence of a member in a 3 tiered hierarchy of members. The hierarchy consists of a destination specific member, a transmission method specific member, and a non-specific member. The member names consist of a root and a one character suffix (alphabetic or national character).
+
+    Destination Specific Members:          ddddddd.suffix     where "ddddddd" is a Destination 
+    Transmission Method Specific:          #PSxxxx.suffix     where "xxxx" is a transmission method mnumonic
+    Non-Specific Members:                  #PSNDVR.suffix
+
+If a certain destination requires special processing, a destination specific member(s) can be created which will generate control statements for that destination only.
+
+    @INCLUDE=suffix                             Required Inclusion of Hierarchical Member
+    @INCLUDE=(suffix)                           Optional Inclusion of Hierarchical Member
+
+### PROC and JCL inclustions
+
+Consider also using a JES include, where an included member name includes the destination name, and the member itself resides in a library at the Destination site. The member may reside in a PROC library, or a library named by your JCLLIB ORDER statement. For Example:
+
+    //*==================================================================*
+    // JCLLIB  ORDER=(MY.REMOTE.JCL)                              
+    //*==================================================================*
+
+    //  INCLUDE MEMBER=#&DESTID       JES include from MY.REMOTE.JCL      
+
+
 
 ## Tips and Techniques
 
