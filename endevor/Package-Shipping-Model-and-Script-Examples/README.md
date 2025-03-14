@@ -3,8 +3,6 @@
 There are a few challenges when working with Endevor's package shipping. 
 One Package shipment can submit up to 4 jobs, depending on the transmission tool used. If you are shipping to and from multiple sites, there are some things you can do to make it easier to track job outputs to the site names and packages that spawned them.
 
-Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping.
-
 Items in this folder may help with these challenges, and to complement the material found in [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie). Included are: 
 
  - Items to comment your package shipping jobs - a first step in keeping track of package shipping objects
@@ -12,19 +10,19 @@ Items in this folder may help with these challenges, and to complement the mater
 
  ## Setting up Package Shipments
 
- These are recommended steps for setting up 
+ Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping. Here are some recommended steps for setting up Package Shipments: 
 
  - Check the RJCLROOT value on your Defaults table. Techdoc says...
  
     "The generation of the remote copy and delete job stream is controlled by the C1DEFLTS specification for RJCLROOT keyword. RJCLROOT specifies the member root for the package ship remote JCL model."
 
-- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into an override library, separate from the Endevor product library. Then, make sure your override libraary(s) are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a CSIQOPTN, or a CSIQSENU library, you may concatenate your override library above it. See also the **Tips and Techniques** section below.
+- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into an override library, separate from the Endevor product library. Then, make sure your override library(s) are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a CSIQOPTN, or a CSIQSENU library, you may concatenate your override library above it. See also the **Tips and Techniques** section below for more.
 
-- Comment the members you modify.
+- Comment the members you modify, so that when you are viewing package shipment jobs, you will be able to easily find the contributing objects that created them. 
 
 ## Commenting Package Shipment Jobs
 
-Generous commenting of your package shipping objects helps you to connect jobs to their originations. Remote and confirmation jobs might be commented this way, giving you backward pointers to the origin of each package shipment.
+Generous commenting of your package shipping objects helps you to connect jobs to their originations. Remote and confirmation jobs might be commented this way (after variable substitution), giving you backward pointers to the origin of each package shipment.
  
     //SHIPJOBR  JOB (123000),'FROM DEV1',CLASS=A,PRTY=6,               
     //  MSGCLASS=X,REGION=0M                                              
@@ -37,7 +35,7 @@ Generous commenting of your package shipping objects helps you to connect jobs t
     //* RmotLibs  := SHIP.RMOT.D240506.T091612.SOMWHER 
     //* *==============================================================* *
 
-Job steps may be commented this way to name the package shipment object that contributed the step to the JCL:
+Comment your Job steps to name the package shipment object that contributed the step to the JCL:
 
 
     Command ===>                                                  Scroll ===> CSR 
@@ -73,8 +71,7 @@ Package Shipping variables are made available early in the shipment process. If 
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
 
-See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as examples for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to leverage additional variables whose values are applicable to only one host or sending site.
-
+See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as examples for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to capture additional variables whose values can be applied across your contributing shipping objects. 
 
 ### Skeleton / Model / Script example members for commenting
 
