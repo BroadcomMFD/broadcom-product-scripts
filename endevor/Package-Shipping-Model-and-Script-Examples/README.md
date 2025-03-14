@@ -1,10 +1,7 @@
 # Package Shipping Model and Script examples 
 
-There are many challenges when working with Endevor's package shipping.
-
-One Package shipment can submit up to 4 jobs, depending on the transmission tool used. If you are shipping to and from multiple sites, it becomes difficult to track the site names and packages to the job outputs.
-
-There are many parts to the package shipping process. It can be confusing to know where to insert the new code you want to include.
+There are a few challenges when working with Endevor's package shipping. 
+One Package shipment can submit up to 4 jobs, depending on the transmission tool used. If you are shipping to and from multiple sites, there are some things you can do to make it easier to track job outputs to the site names and packages that spawned them.
 
 Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping.
 
@@ -12,6 +9,18 @@ Items in this folder may help with these challenges, and to complement the mater
 
  - Items to comment your package shipping jobs - a first step in keeping track of package shipping objects
  - Miscellaneous tips and techniques
+
+ ## Setting up Package Shipments
+
+ These are recommended steps for setting up 
+
+ - Check the RJCLROOT value on your Defaults table. Techdoc says...
+ 
+    "The generation of the remote copy and delete job stream is controlled by the C1DEFLTS specification for RJCLROOT keyword. RJCLROOT specifies the member root for the package ship remote JCL model."
+
+- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into an override library, separate from the Endevor product library. Then, make sure your override libraary(s) are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a CSIQOPTN, or a CSIQSENU library, you may concatenate your override library above it. See also the **Tips and Techniques** section below.
+
+- Comment the members you modify.
 
 ## Commenting Package Shipment Jobs
 
@@ -120,7 +129,7 @@ Consider also using a JES include, where an included member name includes the de
 Miscellaneous tips and techniques for package shipping are given here.
 
 
-### Preparing a library for your Shipping software members
+### Preparing an Overrice library for your Shipping software members
 
 By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are Endevor output libraries. **C1BMXJOB.skl** is the member that names your Override libraries. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
 ). The **C1BMXJOB.skl** member in this folder gives an example, naming three "override" libraries. Any one of which may contain your modified objects.
