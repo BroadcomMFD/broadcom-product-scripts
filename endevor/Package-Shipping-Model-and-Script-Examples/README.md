@@ -16,7 +16,7 @@ Items in this folder may help with these challenges, and to complement the mater
  
     "The generation of the remote copy and delete job stream is controlled by the C1DEFLTS specification for RJCLROOT keyword. RJCLROOT specifies the member root for the package ship remote JCL model."
 
-- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into an override library, separate from the Endevor product library. Then, make sure your override library(s) are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a CSIQOPTN, or a CSIQSENU library, you may concatenate your override library above it. See also the **Tips and Techniques** section below for more.
+- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into an override library, separate from the Endevor product library. Then, make sure your override library(s) are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a CSIQOPTN, or a CSIQSENU library, you may concatenate your override library above the one that is there. See also the **Tips and Techniques** section below for more.
 
 - Comment the members you modify, so that when you are viewing package shipment jobs, you will be able to easily find the contributing objects that created them. 
 
@@ -73,9 +73,9 @@ Package Shipping variables are made available early in the shipment process. If 
 
 See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as examples for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to capture additional variables whose values can be applied across your contributing shipping objects. 
 
-### Skeleton / Model / Script example members for commenting
+### Skeleton / Model / Capture and re-use of shipping variables
 
-Members in this folder that help with commenting include:
+Members in this folder show how you can capture values for shipping variables and re-use them. 
 
 __C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
 
