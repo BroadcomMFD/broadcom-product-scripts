@@ -18,7 +18,7 @@ Items in this folder may help with these challenges, and to complement the mater
  
     "The generation of the remote copy and delete job stream is controlled by the C1DEFLTS specification for RJCLROOT keyword. RJCLROOT specifies the member root for the package ship remote JCL model."
 
-- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into an override library, separate from the Endevor product library. Then, make sure your override library(s) are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a CSIQOPTN, or a CSIQSENU library, you may concatenate your override library above the one that is there. See also the **Tips and Techniques** section below for more.
+- If you modify any of the CSIQSENU or CSIQOPTN members, consider placing them into one or two override libraries, separate from the Endevor product libraries. Then, make sure your override libraries are concatenated in your C1BMXJOB, or whatever equivalent you are using. Where you see a reference to a CSIQOPTN or a CSIQSENU library, concatenate an override library above the one that is there. See also the **Tips and Techniques** section below for more.
 
 - Comment the members you modify, so that when you are viewing package shipment jobs, you will be able to easily find the contributing objects that created them. 
 
@@ -63,7 +63,7 @@ Comment your Job steps to name the package shipment object that contributed the 
 
 Where QBOXB, C1BMXRCN are package shipping members and/or elements in your Endevor Admin area.
 
-Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use them within the shipping objects to better comment, and to enhance functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
+Package Shipping variables are made available early in the shipment process. If you capture them at the appropriate time you can use them within the remaining shipping objects to better comment, and to enhance functionality. Objects in this folder serve as examples in capturing and leveraging variables such as those listed here.
 
 - VDDHSPFX  - Host staging dataset name prefix                       
 - VDDRSPFX  - Remote staging dataset name prefix                       
@@ -85,11 +85,11 @@ The example tailors the content of C1BMXFTC, which is the job submitted for Netv
 
 __#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
 
-The edit maccro __JCLCOMMNT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter JCLCOMMT on the Command line.
+The edit maccro __JCLCOMMT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter JCLCOMMT on the Command line.
 
 ## Member Inclusions
 
-Members in the CSIQSENU library(s) use the standard ISPF Skeleton method - )IM name - for including other skeletons. 
+Members in the CSIQSENU library(s) use the standard ISPF Skeleton method - )IM name - for including other skeleton members. 
 
 Members of the CSIQOPTN library(s) and remote JCL PROCs and snippets may also include other members.
 
@@ -103,7 +103,7 @@ Within a member of a CSIQOPTN library, you can include other members, using this
 Inclusion can also be based on the presence of a member in a 3 tiered hierarchy of members. The hierarchy consists of a destination specific member, a transmission method specific member, and a non-specific member. The member names consist of a root and a one character suffix (alphabetic or national character).
 
     Destination Specific Members:          ddddddd.suffix     where "ddddddd" is a Destination 
-    Transmission Method Specific:          #PSxxxx.suffix     where "xxxx" is a transmission method mnumonic
+    Transmission Method Specific:          #PSxxxx.suffix     where "xxxx" is a transmission method mnemonic
     Non-Specific Members:                  #PSNDVR.suffix
 
 If a certain destination requires special processing, a destination specific member(s) can be created which will generate control statements for that destination only.
@@ -113,7 +113,7 @@ If a certain destination requires special processing, a destination specific mem
 
 ### PROC and JCL inclusions
 
-Consider also using a JES include, where an included member name includes the destination name, and the member itself resides in a library at the Destination site. The member may reside in a PROC library, or a library named by your JCLLIB ORDER statement. For Example:
+It might be usefui to consider using a JES include, where an included member name includes the destination name, and the member itself resides in a library at the Destination site. The member may reside in a PROC library, or a library named by your JCLLIB ORDER statement. For Example:
 
     //*==================================================================*
     // JCLLIB  ORDER=(MY.REMOTE.JCL)                              
