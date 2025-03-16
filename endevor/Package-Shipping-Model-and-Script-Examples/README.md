@@ -5,10 +5,12 @@ One Package shipment can submit up to 4 jobs, depending on the transmission tool
 
 Items in this folder may help with these challenges, and to complement the material found in [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie). Included are: 
 
+ - Reminders for Setting up Package Shipments
  - Items to comment your package shipping jobs - a first step in keeping track of package shipping objects
+ - Member inclusions
  - Miscellaneous tips and techniques
 
- ## Setting up Package Shipments
+ ## Reminders for Setting up Package Shipments
 
  Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping. Here are some recommended steps for setting up Package Shipments: 
 
@@ -79,7 +81,7 @@ Members in this folder show how you can capture values for shipping variables an
 
 __C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
 
-The example tailors the content of C1BMXFTC, which is the job submitted for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility.
+The example tailors the content of C1BMXFTC, which is the job submitted for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility. You will need to tailor it slightly if you are using another transmission tool.
 
 __#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
 
