@@ -128,16 +128,16 @@ It might be usefui to consider using a JES include, where an included member nam
 Miscellaneous tips and techniques for package shipping are given here.
 
 
-### Preparing an Overrice library for your Shipping software members
+### Preparing an Override library for your Shipping software members
 
-By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are Endevor output libraries. **C1BMXJOB.skl** is the member that names your Override libraries. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
-). The **C1BMXJOB.skl** member in this folder gives an example, naming three "override" libraries. Any one of which may contain your modified objects.
+By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are managed in your admin area of Endevor. Within **C1BMXJOB.skl**, name your Override libraries. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
+). An example **C1BMXJOB.skl** member in found in this folder, and gives an example, naming three "override" libraries. Any one of which may contain your modified objects.
 
     DBOX.OVER1.ENDEVOR.ISPS
     DBOX.OVER2.ENDEVOR.ISPS
     DBOX.PROD.ISPS
 
-It is not necessary to separate CSIQOPTN members from CSIQSENU members. You can choose to place override members into one library, regardless of their original locations. However, it is strongly recommended, that you comment them generously with their names in the comments.
+Within an Override library, it is not necessary to separate CSIQOPTN members from CSIQSENU members. You may elect to place override members into one library, regardless of their original locations. However, it is strongly recommended, that you comment them generously with their names in the comments.
 
 ### Using your Transmission tool for the Confirmation job
 
@@ -178,17 +178,16 @@ Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
     QUIT                                                                  
     //***--------------------------------------------* C1BMXRCN (CONT.)  *
 
-Notice that the &RMOTHLQ, &DATE6 and &TIME6 variables are among those captured by the TAILOR step within C1BMXIN.
+Notice that the &RMOTHLQ, &DATE6 and &TIME6 variables are among those captured or created by the TAILOR step within C1BMXIN.
 
 ### IEBPTPCH 
 
-IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. The utility can perform various tasks, including copying members from a partitioned dataset (PDS) into a sequential dataset (PS). If you have shipped members of a datset that contain commands, such as DB2 Binds or CICS newcopies, then IEBPTPCH is useful for writing all the shipped members into a sequential file for subsequent processing.
-
+IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. Our examples show using IEBPTPCH to write all members of a "Staging" dataset into a single outpu. It is useful for shipped objects, such as DB2 Binds or CICS newcopies. Then the output is further processed in subsequent step in the shipping job. 
 See the __#RJNDVRA__ member example.
  
 ### Multiple Endevors
 
-If you are running multiple Endevors, it would be unreasonable to expect that dataset names and jobcard values (for example) be the same on all of them. A more reasonable expectation is to allow each Endevor (or Lpar) to use its own dataset names, jobcard values and other site-specific variations.
+If you are running multiple Endevors, it would be unreasonable to expect that dataset names and jobcard values (for example) be the same on all of them. A more reasonable expectation is to allow each Endevor (or Lpar) to use its own dataset names, jobcard values and other image-specific variations.
 
 If **DBOX** is the name of an Lpar, then **@DBOX** is the name of a "callable Rexx" service, providing site-specific information for just that Lpar. Other Lpars can have their own "callable Rexx" services too. Then, the necessary differences from one Endevor to the next can be managed in "callable Rexx" service routines, and not managed in the common code. The example **C1BMXIN.skl**, paired with the **@DBOX** member, shows how this can be done.
 
@@ -245,4 +244,5 @@ One final note about about the CSIQCLS0 variable. The variable is created brand 
 
 **item Location**
 
-JCLCOMMT.rex  -          endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor
+Find JCLCOMMT.rex here   -          [endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Shipping-Model-and-Script-Examples-update/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex
+)
