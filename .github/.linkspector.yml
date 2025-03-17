@@ -2,4 +2,5 @@ dirs:
   - .
 useGitIgnore: true
 ignorePatterns:
-  - pattern: '^https://example.com/skip/.*$'
+  - pattern: '^https://example.com/.*$'
+  - pattern: '^http://example.com/.*$'
