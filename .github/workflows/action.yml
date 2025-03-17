@@ -3,7 +3,7 @@ name: Check Markdown links
 on: push
 
 jobs:
-  Check links:
+  Check-links:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
