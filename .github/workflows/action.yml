@@ -9,4 +9,6 @@ jobs:
     - uses: actions/checkout@master
     - uses: umbrelladocs/action-linkspector@de84085e0f51452a470558693d7d308fbb2fa261
       with:
+        config_file: .github/linters/.linkspector.yml
         fail_on_error: true
+        filter_mode: nofilter
