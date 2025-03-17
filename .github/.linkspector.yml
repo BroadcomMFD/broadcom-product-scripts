@@ -1,3 +1,5 @@
 dirs:
   - .
 useGitIgnore: true
+ignorePatterns:
+  - pattern: '^https://example.com/skip/.*$'
