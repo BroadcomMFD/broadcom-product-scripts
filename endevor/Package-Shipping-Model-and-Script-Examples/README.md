@@ -73,19 +73,27 @@ Package Shipping variables are made available early in the shipment process. If 
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
 
-See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as examples for capturing package shipment variables.  Paired with the **@DBOX** member, **C1BMXIN** is able to capture additional variables whose values can be applied across your contributing shipping objects. 
+See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables. This code determines the name, like **@DBOX**, that contains image-specific settings.
+
+     WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;   
+
+The combination of the **@DBOX** and **C1BMXIN** members gives you the ability to capture shipping-time variables that you can use across your  shipping objects. See more in the topic on **Multiple Endevors**.
+
 
 ### Skeleton / Model / Capture and re-use of shipping variables
 
 Members in this folder show how you can capture values for shipping variables and re-use them. 
 
-__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the C1BMXIN member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the **C1BMXIN** member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
 
-The example tailors the content of C1BMXFTC, which is the job submitted for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility. You will need to tailor it slightly if you are using another transmission tool.
+The example tailors the content of C1BMXFTC, which Endevor builds for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility. You will need to tailor outputs for the transmission tool you are using.
 
 __#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
 
-The edit maccro __JCLCOMMT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter JCLCOMMT on the Command line.
+The edit maccro __JCLCOMMT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter **JCLCOMMT** on the Command line.  
+
+Find JCLCOMMT.rex here - [ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Shipping-Model-and-Script-Examples-update/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex
+)
 
 ## Member Inclusions
 
@@ -240,9 +248,3 @@ Engaging a "callable REXX" service may also be performed from other REXX program
 One final note about about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
 
 
-## Find items at the these locations:
-
-**item Location**
-
-Find JCLCOMMT.rex here   -          [endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Shipping-Model-and-Script-Examples-update/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex
-)
