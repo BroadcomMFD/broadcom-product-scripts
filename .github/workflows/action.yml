@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
+    - uses: umbrelladocs/action-linkspector@de84085e0f51452a470558693d7d308fbb2fa261
       with:
-        base-branch: 'main'
-        check-modified-files-only: 'yes'
+        fail_on_error: true
