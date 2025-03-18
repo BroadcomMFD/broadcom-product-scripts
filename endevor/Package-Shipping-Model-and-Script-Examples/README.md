@@ -89,8 +89,7 @@ __#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
 
 The edit macro __JCLCOMMT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter **JCLCOMMT** on the Command line.  
 
-Find JCLCOMMT.rex here - [ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Shipping-Model-and-Script-Examples-update/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex
-)
+Find JCLCOMMT.rex here - [ISPF-tools-for-Quick-Edit-and-Endevor](/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex)
 
 ## Member Inclusions
 
