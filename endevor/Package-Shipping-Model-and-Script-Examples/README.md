@@ -118,7 +118,7 @@ If a certain destination requires special processing, a destination specific mem
 
 ### PROC and JCL inclusions
 
-It might be usefui to consider using a JES include, where an included member name includes the destination name, and the member itself resides in a library at the Destination site. The member may reside in a PROC library, or a library named by your JCLLIB ORDER statement. For Example:
+It might be useful to consider using a JES include, where an included member name includes the destination name, and the member itself resides in a library at the Destination site. The member may reside in a PROC library, or a library named by your JCLLIB ORDER statement. For Example:
 
     //*==================================================================*
     // JCLLIB  ORDER=(MY.REMOTE.JCL)                              
@@ -186,7 +186,7 @@ Notice that the &RMOTHLQ, &DATE6 and &TIME6 variables are among those captured o
 
 ### IEBPTPCH 
 
-IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. Our examples show using IEBPTPCH to write all members of a "Staging" dataset into a single output file. It is useful for shipped objects such as DB2 Binds or CICS newcopies. Then, the output is further processed in subsequent step in the shipping job. 
+IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. Our examples show using IEBPTPCH to write all members of a "Staging" dataset into a single output file. It is useful for shipped objects such as DB2 Binds or CICS newcopies. Then, the output is further processed in subsequent steps in the shipping job. 
 See the __#RJNDVRA__ member example.
  
 ### Multiple Endevors
