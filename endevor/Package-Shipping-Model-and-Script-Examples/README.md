@@ -73,10 +73,7 @@ Package Shipping variables are made available early in the shipment process. If 
 - VNB6TIME  - Six character shipping Time                            
 - VPHPKGID  - Package ID                                             
 
-See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables. This code determines the name, like **@DBOX**, that contains image-specific settings.
-
-     WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;   
-
+See the **)REXX** and **)ENDREXX** blocks within the **C1BMXIN** member as an example for capturing package shipment variables. 
 The combination of the **@DBOX** and **C1BMXIN** members gives you the ability to capture shipping-time variables that you can use across your  shipping objects. See more in the topic on **Multiple Endevors**.
 
 
@@ -139,17 +136,16 @@ Miscellaneous tips and techniques for package shipping are given here.
 ### Preparing an Override library for your Shipping software members
 
 By default, Endevor builds package shipping JCL from members of the CSIQOPTN and CSIQSENU libraries. You do not need to place your modified objects into these libraries. Instead, you can create one or more "Override" libraries, and place your modified members into them. Ideally, these libraries are managed in your admin area of Endevor. Within **C1BMXJOB.skl**, name your Override libraries. See the topic on the Override library in [Package Shipping Demystified](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie
-). An example **C1BMXJOB.skl** member in found in this folder, and gives an example, naming three "override" libraries. Any one of which may contain your modified objects.
+). Member **C1BMXJOB.skl** gives an example by naming three "override" libraries. Any one of which may contain your modified objects.
 
     DBOX.OVER1.ENDEVOR.ISPS
     DBOX.OVER2.ENDEVOR.ISPS
     DBOX.PROD.ISPS
 
-Within an Override library, it is not necessary to separate CSIQOPTN members from CSIQSENU members. You may elect to place override members into one library, regardless of their original locations. However, it is strongly recommended, that you comment them generously with their names in the comments.
 
 ### Using your Transmission tool for the Confirmation job
 
-The last package shipping job is the "Notification" job. It returns back to the host the overall status of a single package shipment. See the **C1BMXRCN** reference in the  [Shipment Tracking and Confirmation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/package-administration/package-ship-facility/build-track-and-confirm-package-shipments/shipment-tracking-and-confirmation.html)  documentation. Package Shipping assumes an IEBGENER can write the Notification JCL to the internal reader to submit the job on the Host system. In many cases a "ROUTE XEQ" statement on the jobcard can route the job submission onto the host system. However, at some sites it is necessary to replace the IEBGENER with a file transmission to submit the Notification job. You can leverage captured variables and submit the Notification job onto the host system, using this IBM FTP example:
+The last package shipping job is the "Notification" job. It returns back to the host the overall status of a single package shipment. See the **C1BMXRCN** reference in the  [Shipment Tracking and Confirmation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/package-administration/package-ship-facility/build-track-and-confirm-package-shipments/shipment-tracking-and-confirmation.html)  documentation. Package Shipping assumes an IEBGENER can write the Notification JCL to the internal reader to submit the job on the Host system. In many cases a "ROUTE XEQ" statement on the jobcard is all that is necessary. However at some sites, the IEBGENER must be replaced with a file transmission step to submit the Notification job. You can submit the Notification job onto the host system, using this IBM FTP example:
 
 
 Here is an example of using IBM's FTP within the C1BMXRCN skeleton member.
@@ -190,14 +186,14 @@ Notice that the &RMOTHLQ, &DATE6 and &TIME6 variables are among those captured o
 
 ### IEBPTPCH 
 
-IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. Our examples show using IEBPTPCH to write all members of a "Staging" dataset into a single outpu. It is useful for shipped objects, such as DB2 Binds or CICS newcopies. Then the output is further processed in subsequent step in the shipping job. 
+IEBPTPCH is an IBM utility program that is used to print or punch records from a sequential or partitioned dataset. Our examples show using IEBPTPCH to write all members of a "Staging" dataset into a single output file. It is useful for shipped objects such as DB2 Binds or CICS newcopies. Then, the output is further processed in subsequent step in the shipping job. 
 See the __#RJNDVRA__ member example.
  
 ### Multiple Endevors
 
-If you are running multiple Endevors, it would be unreasonable to expect that dataset names and jobcard values (for example) be the same on all of them. A more reasonable expectation is to allow each Endevor (or Lpar) to use its own dataset names, jobcard values and other image-specific variations.
+If you are running multiple Endevors, it would be unreasonable to expect that dataset names and jobcard values (for example) be the same on all of them. A more realistic expectation is for each Endevor (or Lpar) to use its own dataset names, jobcard values and other image-specific variations.
 
-If **DBOX** is the name of an Lpar, then **@DBOX** is the name of a "callable Rexx" service, providing site-specific information for just that Lpar. Other Lpars can have their own "callable Rexx" services too. Then, the necessary differences from one Endevor to the next can be managed in "callable Rexx" service routines, and not managed in the common code. The example **C1BMXIN.skl**, paired with the **@DBOX** member, shows how this can be done.
+If **DBOX** is the name of an Lpar, then **@DBOX** is the name of a "callable Rexx" service, providing image-specific information for just that Lpar. Other Lpars can have their own "callable Rexx" services too. Then, the necessary differences from one Endevor to the next can be managed in "callable Rexx" service routines, and not managed in the common code. The example **C1BMXIN.skl**, paired with the **@DBOX** member, shows how this is done.
 
 A "callable Rexx" service can be engaged anywhere REXX is run. One of the places is  within an ISPF skeleton. Member **C1BMXIN.skl** references a CSIQCLS0 library whose name might differ from one Lpar to the next. When running on the DBOX Lpar, it calls **@DBOX** for the value of **MyCLS0Library** and assigns the returned dataset name to a new variable named **CSIQCLS0**. Then, the **&CSIQCLS0** variable will be replaced with the datset name whenever it is found.
 
@@ -246,5 +242,3 @@ Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR
 Engaging a "callable REXX" service may also be performed from other REXX programs, such as an Endevor REXX exit or from REXX zowe executions.
 
 One final note about about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
-
-
