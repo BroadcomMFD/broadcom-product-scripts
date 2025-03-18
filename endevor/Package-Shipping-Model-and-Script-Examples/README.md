@@ -12,7 +12,7 @@ Items in this folder may help with these challenges, and to complement the mater
 
  ## Reminders for Setting up Package Shipments
 
- Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN libary use a syntax that is unique to package shipping. Here are some recommended steps for setting up Package Shipments: 
+ Objects from the Endevor CSIQSENU library are standard [IBM File Tailoring Skeletons](https://www.ibm.com/docs/en/zos/3.1.0?topic=reference-defining-file-tailoring-skeletons), whereas objects from Endevor's CSIQOPTN library use a syntax that is unique to package shipping. Here are some recommended steps for setting up Package Shipments: 
 
  - Check the RJCLROOT value on your Defaults table. Techdoc says...
  
@@ -87,7 +87,7 @@ The example tailors the content of C1BMXFTC, which Endevor builds for Netview FT
 
 __#RJICPY1.skl__ is a version of the #RJICPY1 showing commented steps.
 
-The edit maccro __JCLCOMMT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter **JCLCOMMT** on the Command line.  
+The edit macro __JCLCOMMT__ can help insert comments for a member or element that contains JCL. While editing an element or member, enter **JCLCOMMT** on the Command line.  
 
 Find JCLCOMMT.rex here - [ISPF-tools-for-Quick-Edit-and-Endevor](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Shipping-Model-and-Script-Examples-update/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex
 )
@@ -241,4 +241,4 @@ Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR
 
 Engaging a "callable REXX" service may also be performed from other REXX programs, such as an Endevor REXX exit or from REXX zowe executions.
 
-One final note about about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
+One final note about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
