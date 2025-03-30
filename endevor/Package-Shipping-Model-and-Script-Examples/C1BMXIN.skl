@@ -3,12 +3,15 @@
   TRACE Off
   WHEREAMI = 'C1BMXIN'
   HOSTHLQ = Strip(VDDHSPFX)
+  If HOSTHLQ = '' then HOSTHLQ = USERID()
   RMOTHLQ = Strip(VDDRSPFX)
+  If RMOTHLQ = '' then RMOTHLQ = USERID()
   SHIPPER = USERID()
   SYSUID  = USERID()
   SENDNODE =  SYSVAR(SYSNODE)
 )ENDREXX
 )CM ----------
+)CM ----------  Get Package, Destination and pkg/Bko values
 )REXX VNBSQDSP PKGID DESTIN TYPRUN OUTRBAK VDDXNODE NODENAME
   TRACE Off
   WHEREAMI = 'C1BMXIN'
@@ -18,8 +21,47 @@
   IF TYPERUN = 'TYPRUN' THEN TYPRUN = ''
   OUTRBAK = STRIP(STRIP(TAIL,'T','.'))
   NODENAME = Strip(VDDXNODE)
+  NODENAME = REXALDST(DESTIN)
 )ENDREXX
 )CM ----------
+)CM ----------  Get Transmission method, Host and Remote HLQ values
+)REXX DESTIN HOSTHLQ RMOTHLQ XMITMETH
+  Trace Off
+  WHEREAMI = 'C1BMXIN'
+
+  CALL BPXWDYN "ALLOC DD(BSTIPT01) ",
+        "LRECL(0080) BLKSIZE(0800) SPACE(5,5) ",
+        "RECFM(F,B) TRACKS NEW UNCATALOG REUSE ";
+  Queue "LIST DESTINATION" DESTIN "TO FILE CSVALDST ",
+        "OPTIONS NOCSV ."
+  "EXECIO 1 DISKW BSTIPT01 (Finis"
+
+  CALL BPXWDYN "ALLOC DD(CSVALDST) ",
+       " LRECL(1800) BLKSIZE(3600) SPACE(5,5) DSORG(PS) ",
+       " RECFM(F,B) TRACKS NEW UNCATALOG REUSE ";
+  CALL BPXWDYN "ALLOC DD(BSTERR) LRECL(133) BLKSIZE(13300) ",
+          " DSORG(PS) SPACE(1,1) RECFM(F,B) TRACKS ",
+          " NEW UNCATALOG REUSE ";
+  CALL BPXWDYN "ALLOC DD(C1MSGS1) LRECL(133) BLKSIZE(13300) ",
+          " DSORG(PS) SPACE(1,1) RECFM(F,B) TRACKS ",
+          " NEW UNCATALOG REUSE ";
+
+  ADDRESS LINK 'BC1PCSV0'   ;  /* Call CSV utility  */
+
+  "EXECIO * DISKR CSVALDST ( Stem apiDestinations. FINIS"
+
+  CALL BPXWDYN "FREE DD(BSTIPT01) "
+  CALL BPXWDYN "FREE DD(CSVALDST) "
+  CALL BPXWDYN "FREE DD(BSTERR) "
+  CALL BPXWDYN "FREE DD(C1MSGS1)"
+  If apiDestinations.0  = 0 then EXIT(12)
+  Destination= Strip(Substr(apiDestinations.1,013,07))
+  HOSTHLQ = Strip(Substr(apiDestinations.1,079,14))
+  RMOTHLQ = Strip(Substr(apiDestinations.1,113,14))
+  XMITMETH   = Strip(Substr(apiDestinations.1,051,11))
+)ENDREXX
+)CM ----------
+)CM ----------  Get Date and Time variables from VNBCPARM
 )REXX  VNBCPARM DATE6 TIME6 DATE8 TIME8 NEXTJOB
   TRACE Off
   WHEREAMI = 'C1BMXIN'
@@ -32,26 +74,27 @@
 )CM ---------- This section shows accessing Site-Specific variables
 )CM ----------      Longer variable names must be assigned to
 )CM ----------      valid 8-byte ISPF variable names
-)REXX  CSIQCLS0 ORDERDSN                            
-  TRACE ?R                                          
-  WHERE = 'C1BMXIN Get local variables '            
-  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;   
-                                                    
-  interpret 'Call' WhereIam "'MyCLS0Library'"       
-  CSIQCLS0  = Result                                
-  interpret 'Call' WhereIam "'AltIDOrderfile'"      
-  ORDERDSN  = Result                                
-)ENDREXX                                            
-)CM ---------- This section only applies to DE32
-)REXX PKGID C1SUBSYS
-  /* code for DE32 shipping only */
+)REXX  CSIQCLS0 ORDERDSN
+  TRACE OFF
+  WHERE = 'C1BMXIN Get local variables '
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
+
+  interpret 'Call' WhereIam "'MyCLS0Library'"
+  CSIQCLS0  = Result
+  interpret 'Call' WhereIam "'AltIDOrderfile'"
+  ORDERDSN  = Result
+
+)ENDREXX
+)CM ---------- This section only applies to a Broadcom demo system
+)REXX PKGID MYSUBSYS
+  /* code for Broadcom demo system shipping only */
   TRACE Off
-  WHERE = 'C1BMXIN DE32 only code '
+  WHERE = 'C1BMXIN DEV2 only code '
   PkgInfo  = GETSYRSB(PKGID) ; /* get sys/sub from pkg name*/
   If Words(PkgInfo) = 2 then,
-     C1SUBSYS = Word(PkgInfo,1); /* get sys/sub from pkg name*/
+     MYSUBSYS = Word(PkgInfo,1); /* get sys/sub from pkg name*/
   Else,
-     C1SUBSYS = 'NA'
+     MYSUBSYS = 'NA'
 )ENDREXX
 )CM  PKGID SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
 )CM
@@ -66,17 +109,20 @@
 )CM
 &VNBSQDSP
 //* *==============================================================* *
+//* *==============================================================* *
 //* *= Substitute variables in the Remote JCL       ===============* *
 //* *==============================================================* *
 //TAILOR   EXEC PGM=IRXJCL,PARM='ENBPIU00 A',              C1BMXIN
 //         COND=(4,LT)
-//TABLE    DD *      Replaces variable values in listed MODEL DDName
+//TABLE    DD *      If necessary replace these for your xmit method
 * MODEL    TBLOUT
   AHJOB    AHJOB
   C1BMXFTC C1BMXFTC
 //C1BMXFTC DD DSN=&&XFTC,DISP=(OLD,PASS)
 //AHJOB    DD DSN=&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN..AHJOB,
-//         DISP=SHR
+//            DISP=(MOD,CATLG,KEEP),
+//            SPACE=(CYL,(5,5)),UNIT=3390,
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120,DSORG=PO)
 //OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
   Destin   = '&DESTIN'
   Package  = '&PKGID'
@@ -86,11 +132,19 @@
   TIME6    = '&TIME6'
   SHIPPER  = '&SHIPPER'
   NODENAME = '&NODENAME'
-  HOSTLIBS = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN'
+  HOSTHLQ  = '&HOSTHLQ'
   RMOTHLQ  = '&RMOTHLQ'
+  XMITMETH = '&XMITMETH'
+  Say 'XMITMETH='    XMITMETH
+  HOSTLIBS = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN'
   RMOTLIBS = '&RMOTHLQ..D&DATE6..T&TIME6..&DESTIN'
   Say 'HOSTLIBS='HOSTLIBS ; Say 'RMOTLIBS='RMOTLIBS
+* DEV2 only
+  C1SUBSYS = '&MYSUBSYS'
 //SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//APIMSG   DD SYSOUT=*
+//BSTAPI   DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
 //SHOWME   DD SYSOUT=*
 //SYSTSPRT DD SYSOUT=*
 //* *===================================================== C1BMXIN / *

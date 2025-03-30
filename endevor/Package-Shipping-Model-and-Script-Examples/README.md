@@ -81,7 +81,18 @@ The combination of the **@DBOX** and **C1BMXIN** members gives you the ability t
 
 Members in this folder show how you can capture values for shipping variables and re-use them. 
 
-__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the **C1BMXIN** member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. When C1BMXIN is referenced during the initiation of a package shipment, many of the variables related to the shipment are briefly available. Within the C1BMXIN member you will find a reference to the VNBSQDSP variable - SHIP statement itself whcih names the package, the destinaion the PKG/BACKOUT value. Other package shipping varibles are also briefly available, whcih you can use in the shipment skeleton and CSIQOPTN members to improve the commenting and to increase functionality.
+
+This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the **C1BMXIN** member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
+
+Within the C1BMXIN example, you will find **)REXX** and **)ENDREXX** pairs that capture values for variables included on the **)REXX** statement. You can delete sections you do not need. For example, if do not need to capture the Transmission Method, then you can delete lines, starting with this line,
+
+    )REXX DESTIN HOSTHLQ RMOTHLQ XMITMETH
+to the line that contains this text
+
+    )ENDREXX 
+
+For variables captured, the example C1BMXIN uses Table Tool to replace values for those variables that you may have placed in your CSIQSENU and CSIQOPTN members.
 
 The example tailors the content of C1BMXFTC, which Endevor builds for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility. You will need to tailor outputs for the transmission tool you are using.
 
