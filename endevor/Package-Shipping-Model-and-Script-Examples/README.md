@@ -137,6 +137,14 @@ It might be useful to consider using a JES include, where an included member nam
     //  INCLUDE MEMBER=#&DESTID       JES include from MY.REMOTE.JCL      
 
 
+## Shipping "Delete Behind" actions
+
+If you ship from Endevor locations in the middle of your map, and you want package shipments to replicate remote "delete behind" actions - to match what your processors are doing locally - consider members DELBHIND and DELETMBR. 
+
+You can include or copy DELBHIND into your Move processor to create "delete behind transactions", based on your elements component list. Tailor the last step to identify which members and datasets from the component list you want to delete. Tailoring might also be necessary to adjust remote dataset names that differ from those listed in the component list. The "transactions" can be shipped to destinations where cleanup needs to occur.
+
+If you place DELETMBR at each destination where needed, it can delete the members from the datasets identified in each "delete behind transaction". If the targeted member is already missing from the dataset, no action is done.
+
 
 ## Tips and Techniques
 
@@ -252,3 +260,7 @@ Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR
 Engaging a "callable REXX" service may also be performed from other REXX programs, such as an Endevor REXX exit or from REXX zowe executions.
 
 One final note about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
+
+### More from the Package Automation Folder
+
+Find more examples and information on package Shipping in the [Package Automation folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Package-Automation)    
