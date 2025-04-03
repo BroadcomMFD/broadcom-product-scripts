@@ -1,15 +1,5 @@
 )CM Capture Package shipping variables for JCL substitutions
-)REXX HOSTHLQ VDDHSPFX RMOTHLQ VDDRSPFX SHIPPER SYSUID SENDNODE
-  TRACE Off
-  WHEREAMI = 'C1BMXIN'
-  HOSTHLQ = Strip(VDDHSPFX)
-  If HOSTHLQ = '' then HOSTHLQ = USERID()
-  RMOTHLQ = Strip(VDDRSPFX)
-  If RMOTHLQ = '' then RMOTHLQ = USERID()
-  SHIPPER = USERID()
-  SYSUID  = USERID()
-  SENDNODE =  SYSVAR(SYSNODE)
-)ENDREXX
+)CM Choose which )REXX ... )ENDREXX sections work for you
 )CM ----------
 )CM ----------  Get Package, Destination and pkg/Bko values
 )REXX VNBSQDSP PKGID DESTIN TYPRUN OUTRBAK VDDXNODE NODENAME
@@ -24,45 +14,8 @@
   NODENAME = REXALDST(DESTIN)
 )ENDREXX
 )CM ----------
-)CM ----------  Get Transmission method, Host and Remote HLQ values
-)REXX DESTIN HOSTHLQ RMOTHLQ XMITMETH
-  Trace Off
-  WHEREAMI = 'C1BMXIN'
-
-  CALL BPXWDYN "ALLOC DD(BSTIPT01) ",
-        "LRECL(0080) BLKSIZE(0800) SPACE(5,5) ",
-        "RECFM(F,B) TRACKS NEW UNCATALOG REUSE ";
-  Queue "LIST DESTINATION" DESTIN "TO FILE CSVALDST ",
-        "OPTIONS NOCSV ."
-  "EXECIO 1 DISKW BSTIPT01 (Finis"
-
-  CALL BPXWDYN "ALLOC DD(CSVALDST) ",
-       " LRECL(1800) BLKSIZE(3600) SPACE(5,5) DSORG(PS) ",
-       " RECFM(F,B) TRACKS NEW UNCATALOG REUSE ";
-  CALL BPXWDYN "ALLOC DD(BSTERR) LRECL(133) BLKSIZE(13300) ",
-          " DSORG(PS) SPACE(1,1) RECFM(F,B) TRACKS ",
-          " NEW UNCATALOG REUSE ";
-  CALL BPXWDYN "ALLOC DD(C1MSGS1) LRECL(133) BLKSIZE(13300) ",
-          " DSORG(PS) SPACE(1,1) RECFM(F,B) TRACKS ",
-          " NEW UNCATALOG REUSE ";
-
-  ADDRESS LINK 'BC1PCSV0'   ;  /* Call CSV utility  */
-
-  "EXECIO * DISKR CSVALDST ( Stem apiDestinations. FINIS"
-
-  CALL BPXWDYN "FREE DD(BSTIPT01) "
-  CALL BPXWDYN "FREE DD(CSVALDST) "
-  CALL BPXWDYN "FREE DD(BSTERR) "
-  CALL BPXWDYN "FREE DD(C1MSGS1)"
-  If apiDestinations.0  = 0 then EXIT(12)
-  Destination= Strip(Substr(apiDestinations.1,013,07))
-  HOSTHLQ = Strip(Substr(apiDestinations.1,079,14))
-  RMOTHLQ = Strip(Substr(apiDestinations.1,113,14))
-  XMITMETH   = Strip(Substr(apiDestinations.1,051,11))
-)ENDREXX
-)CM ----------
 )CM ----------  Get Date and Time variables from VNBCPARM
-)REXX  VNBCPARM DATE6 TIME6 DATE8 TIME8 NEXTJOB
+)REXX  VNBCPARM DATE6 TIME6 DATE8 TIME8 NEXTJOB SHIPPER SYSUID SENDNODE
   TRACE Off
   WHEREAMI = 'C1BMXIN'
   NEXTJOB  = SUBMITER || '@'
@@ -70,6 +23,19 @@
   DATE6 = Substr(DATE8,3)
   TIME8 = Strip(TIME8)
   TIME6 = Substr(TIME8,1,6)
+  SHIPPER = USERID()
+  SYSUID  = USERID()
+  SENDNODE =  SYSVAR(SYSNODE)
+)ENDREXX
+)CM ----------
+)CM ----------  HOSTHLQ and RMOTHLQ from VDDHSPFX and VDDRSPFX
+)CM ----------  You may elect to hard-code these values, or
+)CM ----------  to use the CSVCALL step below. Only 1 method is needed.
+)REXX HOSTHLQ VDDHSPFX RMOTHLQ VDDRSPFX
+  TRACE ?r
+  WHEREAMI = 'C1BMXIN'
+  HOSTHLQ = Strip(VDDHSPFX)
+  RMOTHLQ = Strip(VDDRSPFX)
 )ENDREXX
 )CM ---------- This section shows accessing Site-Specific variables
 )CM ----------      Longer variable names must be assigned to
@@ -109,6 +75,21 @@
 )CM
 &VNBSQDSP
 //* *==============================================================* *
+)SEL &HOSTHLQ EQ &Z
+//* *==============================================================* *
+//*     CALL CSV to get HOSTHLQ, RMOTHLQ and XMITMETH values       **
+//* *==============================================================* *
+//CSVCALL  EXEC PGM=NDVRC1,PARM='BC1PCSV0'
+)IM C1BMXLIB
+//BSTIPT01 DD *
+    LIST DESTINATION &DESTIN TO FILE CSVPKGE OPTIONS NOCSV .
+//C1MSGS1  DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//CSVPKGE  DD DSN=&&&&CSVFILE,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+)ENDSEL &HOSTHLQ EQ &Z
+//* *==============================================================* *
 //* *==============================================================* *
 //* *= Substitute variables in the Remote JCL       ===============* *
 //* *==============================================================* *
@@ -118,10 +99,29 @@
 * MODEL    TBLOUT
   AHJOB    AHJOB
   C1BMXFTC C1BMXFTC
-//C1BMXFTC DD DSN=&&XFTC,DISP=(OLD,PASS)
+//C1BMXFTC DD DSN=&&&&XFTC,DISP=(OLD,PASS)
+)SEL &HOSTHLQ EQ &Z
+//APILIST  DD DSN=&&&&CSVFILE,DISP=(OLD,DELETE)
 //OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
-  AHJOB = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN..AHJOB'
+* Get Destination information from CSVCALL step above
+  "EXECIO * DISKR APILIST ( Stem apiDestinations. FINIS"
+  If apiDestinations.0  = 0 then EXIT(12)
+  Destination= Strip(Substr(apiDestinations.1,013,07))
+  HOSTHLQ = Strip(Substr(apiDestinations.1,079,14))
+  RMOTHLQ = Strip(Substr(apiDestinations.1,113,14))
+  XMITMETH   = Strip(Substr(apiDestinations.1,051,11))
+  Say 'HOSTHLQ=' HOSTHLQ '  RMOTHLQ=' RMOTHLQ
+  Say 'XMITMETH=' XMITMETH
+)ENDSEL &HOSTHLQ EQ &Z
+)SEL &HOSTHLQ NE &Z
+//OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
+  HOSTHLQ = '&HOSTHLQ'
+  RMOTHLQ = '&RMOTHLQ'
+)ENDSEL &HOSTHLQ NE &Z
+* Allocate AHJOB for input and output
+  AHJOB = HOSTHLQ'.D&DATE6..T&TIME6..&DESTIN..AHJOB'
   CALL BPXWDYN "ALLOC DD(AHJOB) DA("AHJOB") SHR REUSE"
+* Other collected variables.....
   Destin   = '&DESTIN'
   Package  = '&PKGID'
   OUTRBAK  = '&OUTRBAK'
@@ -130,13 +130,9 @@
   TIME6    = '&TIME6'
   SHIPPER  = '&SHIPPER'
   NODENAME = '&NODENAME'
-  HOSTHLQ  = '&HOSTHLQ'
-  RMOTHLQ  = '&RMOTHLQ'
-  XMITMETH = '&XMITMETH'
-  Say 'XMITMETH='    XMITMETH
-  HOSTLIBS = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN'
-  RMOTLIBS = '&RMOTHLQ..D&DATE6..T&TIME6..&DESTIN'
-  Say 'HOSTLIBS='HOSTLIBS ; Say 'RMOTLIBS='RMOTLIBS
+  HOSTLIBS = HOSTHLQ'.D&DATE6..T&TIME6..&DESTIN'
+  RMOTLIBS = RMOTHLQ'.D&DATE6..T&TIME6..&DESTIN'
+* Say 'HOSTLIBS='HOSTLIBS ; Say 'RMOTLIBS='RMOTLIBS
 * DEV2 only
   C1SUBSYS = '&MYSUBSYS'
 //SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
