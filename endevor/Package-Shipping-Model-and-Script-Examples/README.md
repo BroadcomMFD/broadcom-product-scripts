@@ -81,7 +81,18 @@ The combination of the **@DBOX** and **C1BMXIN** members gives you the ability t
 
 Members in this folder show how you can capture values for shipping variables and re-use them. 
 
-__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the **C1BMXIN** member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
+__C1BMXIN.skl__  is a version of the C1BMXIN skeleton found in your CSIQSENU library. When C1BMXIN is referenced during the initiation of a package shipment, many of the variables related to the shipment are briefly available. Within the C1BMXIN member you will find a reference to the VNBSQDSP variable - SHIP statement itself whcih names the package, the destinaion the PKG/BACKOUT value. Other package shipping varibles are also briefly available, whcih you can use in the shipment skeleton and CSIQOPTN members to improve the commenting and to increase functionality.
+
+This version captures values for some of the package shipping variables, and makes it possible for them to be available in your shipping JCL. Shipments for all transmission methods use the **C1BMXIN** member. The example uses Table Tool in a step named TAILOR to capture and expand variables for subsequent shipping jobs. 
+
+Within the C1BMXIN example, you will find **)REXX** and **)ENDREXX** pairs that capture values for variables included on the **)REXX** statement. You can delete sections you do not need. For example, if do not need to capture the Transmission Method, then you can delete lines, starting with this line,
+
+    )REXX DESTIN HOSTHLQ RMOTHLQ XMITMETH
+to the line that contains this text
+
+    )ENDREXX 
+
+For variables captured, the example C1BMXIN uses Table Tool to replace values for those variables that you may have placed in your CSIQSENU and CSIQOPTN members.
 
 The example tailors the content of C1BMXFTC, which Endevor builds for Netview FTP (or IBM FTP) commands. The inclusion or exclusion of the C1BMXFTC references in your version might depend on your transmission utility. You will need to tailor outputs for the transmission tool you are using.
 
@@ -125,6 +136,14 @@ It might be useful to consider using a JES include, where an included member nam
 
     //  INCLUDE MEMBER=#&DESTID       JES include from MY.REMOTE.JCL      
 
+
+## Shipping "Delete Behind" actions
+
+If you ship from Endevor locations in the middle of your map, and you want package shipments to replicate remote "delete behind" actions - to match what your processors are doing locally - consider members DELBHIND and DELETMBR. 
+
+You can include or copy DELBHIND into your Move processor to create "delete behind transactions", based on your elements component list. Tailor the last step to identify which members and datasets from the component list you want to delete. Tailoring might also be necessary to adjust remote dataset names that differ from those listed in the component list. The "transactions" can be shipped to destinations where cleanup needs to occur.
+
+If you place DELETMBR at each destination where needed, it can delete the members from the datasets identified in each "delete behind transaction". If the targeted member is already missing from the dataset, no action is done.
 
 
 ## Tips and Techniques
@@ -241,3 +260,7 @@ Lines 13 and 14 show the REXX code identifying where it is running. The **MVSVAR
 Engaging a "callable REXX" service may also be performed from other REXX programs, such as an Endevor REXX exit or from REXX zowe executions.
 
 One final note about the CSIQCLS0 variable. The variable is created brand new in the REXX portion of the C1BMXIN skeleton, and is used as an ISPF variable later on the TAILOR step. You can make variables like CSIQCLS0 be both an ISPF variable and a Table Tool variable, if it is included in the OPTIONS of the TAILOR step.
+
+### More from the Package Automation Folder
+
+Find more examples and information on package Shipping in the [Package Automation folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Package-Automation)    
