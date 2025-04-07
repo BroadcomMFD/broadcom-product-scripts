@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "noEmit": true,
+    "lib": [
+      "ESNEXT"
+    ],
+    "strict": true,
+    "noImplicitAny": true
+  }
+}
