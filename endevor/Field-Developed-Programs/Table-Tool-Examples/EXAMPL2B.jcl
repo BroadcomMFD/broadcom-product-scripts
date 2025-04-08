@@ -4,7 +4,7 @@
 //*--------------------------------------------------------------               
 // JCLLIB  ORDER=(IBMUSER.JCL.CSV)                                              
 //*--                                                                           
-//*- To Report Elements moved within  a date span    -----------                
+//*- To Report Element changes within  a date span    -----------               
 //*--------------------------------------------------------------               
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available                 
 //*---                                                                          
