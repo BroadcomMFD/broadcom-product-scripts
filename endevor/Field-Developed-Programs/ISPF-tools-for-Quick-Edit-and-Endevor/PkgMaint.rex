@@ -23,7 +23,7 @@
 /*  4 = table is open in SHARED NOWRITE mode in this logical screen*/
 /*  5 = table is open in SHARED WRITE mode in this logical screen. */
 /*                                                                 */
-     IF STATUS2 /= 2 THEN,
+     IF STATUS2 /= 2 & STATUS2 /= 3 & STATUS2 /= 4 then,
         do
         say "Must invoke PMAINT from a ",
             "Package list Screen (C1SP0200)" ;
