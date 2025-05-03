@@ -3,7 +3,7 @@
 //      NOTIFY=&SYSUID
 //*-Convert YAML to REXX                 -----------------------------*
 //*-JCL: YOURSITE.NDVR.TEAM.JCL(YAML2REX) -----------------------------*
-//*-Output:  SYSTSPRT
+//*-Output:  SYSTSPRT -----------------------------*
 //*-------------------------------------------------------------------*
 //  SET MEMBER=ACTP0003
 //  SET MEMBER=ACTP0001
@@ -14,8 +14,7 @@
 //*--------
 //  SET YAML=YOURSITE.NDVR.TEAM.YAML
 //*-------------------------------------------------------------------*
-//*-- Convert YAML to REXX                           -----------------*
-//*   output: YOURSITE.NDVR.TEAM.REXX150
+//*-- Convert YAML to REXX               -----------------------------*
 //*-------------------------------------------------------------------*
 //SAVEMBR EXEC PGM=IRXJCL,PARM='ENBPIU00 1'
 //OPTIONS  DD *
