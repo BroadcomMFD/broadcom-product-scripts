@@ -36,6 +36,11 @@ A processor REXX program that simulates the DB2 Masking method for Binds, used b
 
 A processor and its REXX parser that can perform syntax checking on OPTIONS elements.
 
+## YAML2REX
+
+ YAML2REX.rex is a utility that can convert (simple) YAML statements into usable REXX. You can allow YAML files to become data for your automated processing.  Use the YAML2REX.jcl member to see what the conversion does to your YAML files.
+
+Practical applications using REXX converted from YAML can be found in the **Dyname-Syslib** members, and others on this GitHub.
 
 ## Dynamic-Syslib
 
@@ -49,4 +54,4 @@ These are REXX subroutines which are used by other FDP solutions:
  - OPTVALDT processes OPTIONS statements to ensure values are numeric or properly quoted
  - TXTRPLCE is a generic Search and Replace utility
  - JCLRPLCE is like TXTRPLCE, but provides precise JCL change instructions, where jobcard and/or Stepname.DDname references point to specific locations within a JCL for changes and inserts.
- - YAML2REX is converts many YAML constructs into usable REXX. The conversion might result in REXX stem arrays, so that when accompanied by appropriate Do Loops, various actions are automated.
+ - YAML2REX is converts many YAML constructs into usable REXX. The conversion results in REXX stem arrays, so that when accompanied by appropriate Do Loops, various actions are automated.
