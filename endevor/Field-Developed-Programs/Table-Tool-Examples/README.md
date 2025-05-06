@@ -1,6 +1,8 @@
 # Table-Tool-Examples
 
 A collection of JCL and processor members that demonstrate the use of Table Tool. 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
 If you are new to Table Tool see these links for more information:
 
 - [Techdocs Documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/table-tool.html)
@@ -40,7 +42,7 @@ Examples in this folder include:
       * DB2MASK$ rexx to build DB2 bindcards - masking utility used by the DB2 bindcard utility
       * REX1LINE rexx to put processor group CSV data on one line - utility used by the processor group utiliites
       * REXMERGE rexx to merge CSV list element with CSV list processor group - utility used by the processor group utiliites
-      * YAML2REX rexx to reformat YAML syntax to REXX - conversion utility used by the DB2 YAML bindcard utility
+      * YAML2REX rexx to reformat YAML syntax to REXX - conversion utility used by the DB2 YAML bindcard utility. Find the source code for {YAML2REXX here}(https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex)
    
    The **Table-Tool-CSV-Sorting** folder contains items that allow you to SORT CSV data prior to a Table Tool Execution                         
 
