@@ -1,7 +1,9 @@
 # Field-Developed-Programs
 
 "Field Developed Program" (FDP) is a term used to refer to programs that were created to address specific needs or requirements of customers. These were constructed by your trusted Broadcom Services team and have been implemented at multiple Endevor customer sites.
-They are tested, secure and available for your use.
+
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
 
 ## New to GitHub ? ## 
 
