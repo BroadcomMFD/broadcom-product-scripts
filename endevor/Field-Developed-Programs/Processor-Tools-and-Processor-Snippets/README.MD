@@ -2,6 +2,9 @@
 
 At this location are found Endevor processor utilities and snippets of example processor code. For the sake of highlighting and syntax checking, processors and processor snippets are given the .jcl extension.
 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 ## VALUECHK
 
 This processor utility complements the use of CONPARMX within your processors. The input instructions for CONPARMX are typically called PARMS or OPTIONS, and may be extended to contain statements that are processed by VALUECHK, and not CONPARMX. Statements of this kind adhere to a format such as:
