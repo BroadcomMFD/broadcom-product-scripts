@@ -1,5 +1,8 @@
 # Automated Testing in Endevor with Test4Z
 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 ## Introduction
 
 Items in this folder can be used to introduce and automate testing in Endevor, running the kinds of test supported by Test4Z. 
