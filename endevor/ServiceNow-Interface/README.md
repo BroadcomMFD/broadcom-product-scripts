@@ -1,6 +1,7 @@
 # ServiceNow interface to Endevor
 
-Items in this folder show example Endevor exit code that interfaces with ServiceNow. This interface assumes that the automated activity begins in Endevor. 
+Items in this folder show example Endevor exit code that interfaces with ServiceNow. This interface assumes that the automated activity begins in Endevor. These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
 
 An alternative interface begins with ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
 

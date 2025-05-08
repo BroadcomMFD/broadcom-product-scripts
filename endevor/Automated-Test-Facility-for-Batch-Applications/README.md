@@ -1,5 +1,8 @@
 # Automated Test Facility for Batch Applications
 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 This procedure allows Endevor processors to automate the tailoring, submission and evaluation of Batch application tests. Tests are triggered automatically by the Move or Generate actions of elements of any element type. For example, you may initiate automated tests when a COBOL program is Moved or Generated at a certain stage of Endevor. The test will locate, tailor, submit and evaluate results for one or more JCL elements whose names appear in the "OPTIONS" content of the COBOL program. 
 
 The use of "OPTIONS" is not a new concept to Endevor. Typically, they are objects that provide detailed instructions to the CONPARMX steps of an Endevor processor. To implement this procedure, it is not necessary that you be familiar with the use of OPTIONS or with the CONPARMX utility. Example OPTIONS and processors are provided with this procedure. However, if you would like to know more about the use of OPTIONS in an Endevor processor, see [this doc](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/18-1/administrating/processors/processor-utilities.html#concept.dita_f657792fe5b63ba8cd9304095175664793517854_CONPARMXUtility).

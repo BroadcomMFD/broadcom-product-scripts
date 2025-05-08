@@ -1,4 +1,8 @@
 # Zowe Shipments for Multiple Destinations
+
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 This procedure supports zowe commands to execute Endevor package shipments. For example:
 
 `zowe zos-tso issue command "PKGESHIP 'name-of-package'"`
