@@ -1,0 +1,18 @@
+/*    REXX                                                          */
+/*    Find Native Stored Procedure qualifier & name                 */
+   Arg WhatDD
+
+   "EXECIO * DISKR" WhatDD "( Stem Table. finis"
+   do # = 1 to Table.0
+      A = Table.#
+      B = pos('CREATE PROCEDURE ',A)
+      if B > 0 then do
+         C = pos('.',A)
+         C = C + 1
+         Value = substr(A,C,32)
+         Value = 'SPName ="' || Value || '"'
+         Say 'DB2SNAME:' Value
+         queue Value
+         exit
+      end
+   end

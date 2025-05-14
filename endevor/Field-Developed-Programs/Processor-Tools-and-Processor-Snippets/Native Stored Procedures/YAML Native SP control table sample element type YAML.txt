@@ -1,0 +1,56 @@
+# DB2 for ACEP at various Endevor Deploy to Test locations
+  FINANCE:
+     ATST :
+        DB2_Subsytem_ID           : 'D12A'
+        Bind_Owner_Target_Pattern : '*'
+        Plan_Name_Target_Pattern  : '*A'
+        Bind_Qualifier_Target_Pat : '*_0A'
+        Schema_Target_Pattern     : 'IBMUSER'
+     BTST :
+        DB2_Subsytem_ID           : 'D12A'
+        Bind_Owner_Target_Pattern : 'BBADBA'
+        Plan_Name_Target_Pattern  : '*B'
+        Bind_Qualifier_Target_Pat : '*_0B'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CTST :
+        DB2_Subsytem_ID           : 'D12A'
+        Bind_Owner_Target_Pattern : '*'
+        Plan_Name_Target_Pattern  : '*C'
+        Bind_Qualifier_Target_Pat : '*_0C'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CICSAL01:
+        DB2_Subsytem_ID           : 'D01G'
+        Bind_Owner_Target_Pattern : 'ACEDBA'
+        Plan_Name_Target_Pattern  : '*1'
+        Bind_Qualifier_Target_Pat : '*_01'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CICSAL02:
+        DB2_Subsytem_ID           : 'D01G'
+        Bind_Owner_Target_Pattern : 'ACEDBA'
+        Plan_Name_Target_Pattern  : '*2'
+        Bind_Qualifier_Target_Pat : '*_02'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CICSAL03:
+        DB2_Subsytem_ID           : 'D03G'
+        Bind_Owner_Target_Pattern : 'ACEDBA'
+        Plan_Name_Target_Pattern  : '*5'
+        Bind_Qualifier_Target_Pat : '*_05'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CICSAL06:
+        DB2_Subsytem_ID           : 'D01G'
+        Bind_Owner_Target_Pattern : 'ACEDBA'
+        Plan_Name_Target_Pattern  : '*3'
+        Bind_Qualifier_Target_Pat : '*_03'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CICSAL07:
+        DB2_Subsytem_ID           : 'D01G'
+        Bind_Owner_Target_Pattern : 'ACEDBA'
+        Plan_Name_Target_Pattern  : '*4'
+        Bind_Qualifier_Target_Pat : '*_04'
+        Schema_Target_Pattern     : 'IBMUSER'
+     CICSAL51:
+        DB2_Subsytem_ID           : 'D03G'
+        Bind_Owner_Target_Pattern : 'ACEDBA'
+        Plan_Name_Target_Pattern  : '*6'
+        Bind_Qualifier_Target_Pat : '*_06'
+        Schema_Target_Pattern     : 'IBMUSER'
