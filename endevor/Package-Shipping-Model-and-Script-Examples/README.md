@@ -3,6 +3,9 @@
 There are a few challenges when working with Endevor's package shipping. 
 One Package shipment can submit up to 4 jobs, depending on the transmission tool used. If you are shipping to and from multiple sites, there are some things you can do to make it easier to track job outputs to the site names and packages that spawned them.
 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 Items in this folder may help with these challenges, and to complement the material found in [Shipping and Post Ship Scripts demysfied](https://community.broadcom.com/blogs/joseph-walther/2023/11/27/package-shipping-and-post-ship-scripts-de-mystifie). Included are: 
 
  - Reminders for Setting up Package Shipments
