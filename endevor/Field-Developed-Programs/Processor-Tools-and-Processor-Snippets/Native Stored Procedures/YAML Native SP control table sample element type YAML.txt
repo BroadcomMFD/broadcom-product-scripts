@@ -1,4 +1,4 @@
-# DB2 for ACEP at various Endevor Deploy to Test locations
+# DB2 for system FINANCE at Endevor's Deploy For Test locations (ATST, BTST, etc.)
   FINANCE:
      ATST :
         DB2_Subsytem_ID           : 'D12A'
