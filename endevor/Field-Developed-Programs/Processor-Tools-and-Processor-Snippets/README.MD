@@ -2,6 +2,9 @@
 
 At this location are found Endevor processor utilities and snippets of example processor code. For the sake of highlighting and syntax checking, processors and processor snippets are given the .jcl extension.
 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 ## VALUECHK
 
 This processor utility complements the use of CONPARMX within your processors. The input instructions for CONPARMX are typically called PARMS or OPTIONS, and may be extended to contain statements that are processed by VALUECHK, and not CONPARMX. Statements of this kind adhere to a format such as:
@@ -36,6 +39,11 @@ A processor REXX program that simulates the DB2 Masking method for Binds, used b
 
 A processor and its REXX parser that can perform syntax checking on OPTIONS elements.
 
+## YAML2REX
+
+ YAML2REX.rex is a utility that can convert (simple) YAML statements into usable REXX. You can allow YAML files to become data for your automated processing.  Use the YAML2REX.jcl member to see what the conversion does to your YAML files.
+
+Practical applications using REXX converted from YAML can be found in the **Dyname-Syslib** members, and others on this GitHub.
 
 ## Dynamic-Syslib
 
@@ -43,10 +51,9 @@ Items in this folder support the sharing of input components across developer ef
 
 For example, development for a January release might be underway in one sandbox (or environment) at the same time as development for a March release in another sandbox (or environment). This feature allows the March release to include libraries from the January release within its own SYSLIB concatenations, before the January release is Moved to production.
 
-## OPTVALDT, TXTRPLCE, JCLRPLCE and YAML2REX
+## OPTVALDT, TXTRPLCE and JCLRPLCE
 
 These are REXX subroutines which are used by other FDP solutions:
  - OPTVALDT processes OPTIONS statements to ensure values are numeric or properly quoted
  - TXTRPLCE is a generic Search and Replace utility
  - JCLRPLCE is like TXTRPLCE, but provides precise JCL change instructions, where jobcard and/or Stepname.DDname references point to specific locations within a JCL for changes and inserts.
- - YAML2REX is converts many YAML constructs into usable REXX. The conversion might result in REXX stem arrays, so that when accompanied by appropriate Do Loops, various actions are automated.
