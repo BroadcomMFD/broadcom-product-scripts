@@ -30,7 +30,7 @@ Dataset------------------------------------ DSorg Fmt Recz Blksz  Mmbrs
 //MODEL     DD *                                                                
 &DSN &ThisDSORG &ThisRECFM &ThisLRECL &ThisBLKSZ &ThisMembs                     
 //TABLE     DD DSN=&&LISTCAT,DISP=(OLD,DELETE)                                  
-//SYSEXEC  DD DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQCLS0                         
+//SYSEXEC  DD DISP=SHR,DSN=YOURHLQ.NDVR.R1801.CSIQCLS0                          
 //SYSTSIN   DD DUMMY                                                            
 //SYSTSPRT  DD SYSOUT=*                                                         
 //TBLOUT    DD SYSOUT=*                                                         

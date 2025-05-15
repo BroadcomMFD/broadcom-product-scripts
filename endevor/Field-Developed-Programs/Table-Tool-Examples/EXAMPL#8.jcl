@@ -3,8 +3,8 @@
 //      NOTIFY=&SYSUID                                                  00040000
 //*-------------------------------------------------------------------  00050000
 //  SET WORKLIB=IBMUSER.PARMS                                           00060000
-//  SET CSIQCLS0=CAPRD.NDVR.PROD.CATSNDVR.CSIQCLS0                      00070000
-//  SET NDVR#HLQ=CAPRD.NDVR.V180CA06                                    00080000
+//  SET CSIQCLS0=YOUR.NDVR.PROD.ADMINSYS.CSIQCLS0                      00070000 
+//  SET NDVR#HLQ=YOUR.NDVR.V180CA06                                    00080000 
 //*-------------------------------------------------------------------  00090000
 //*   Report processor usage                                            00100000
 //*   Outputs:                                                          00110000

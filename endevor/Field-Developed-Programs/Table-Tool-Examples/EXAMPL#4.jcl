@@ -5,17 +5,17 @@
 //*-- Execute PDM to update elements out of sync. --------------------*         
 //*-- Outputs:  IBMUSER.ENDEVOR.WIPFILE           --------------------*         
 //*-------------------------------------------------------------------*         
-// SET SYSEXEC=SYS1.EXEC                                                        
-// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+// SET SYSEXEC=YOUR.REXX.EXEC                                                   
+// SET SYSEXEC=YOUR.NDVR.PROD.ADMINSYS.CEXEC                                    
 //*-------------------------------------------------------------------*         
 //PDM#001  EXEC PGM=NDVRC1,                                                     
 //             DYNAMNBR=1500,                                                   
 //             REGION=4096K,                                                    
 //             PARM='C1BM3000'                                                  
-//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
-//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
-//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
-//CONLIB   DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//STEPLIB  DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQAUTU                          
+//         DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQAUTH                          
+//         DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQLOAD                          
+//CONLIB   DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQLOAD                          
 //C1MSGS1  DD SYSOUT=*                                                          
 //C1MSGS2  DD DSN=&&C1MSGS2,DISP=(NEW,PASS),                                    
 //            UNIT=SYSDA,SPACE=(TRK,(5,5)),                                     
@@ -65,10 +65,10 @@
 //*--------------------------------------------------------------------*        
 //PDM#003  EXEC PGM=NDVRC1,REGION=4M,                                           
 //         PARM='BC1PCSV0'                                                      
-//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
-//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
-//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
-//CONLIB   DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//STEPLIB  DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQAUTU                          
+//         DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQAUTH                          
+//         DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQLOAD                          
+//CONLIB   DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQLOAD                          
 //BSTIPT01 DD  DSN=&&CSVLISTS,DISP=(OLD,DELETE)                                 
 //APIEXTR  DD DSN=&&CSVFILE,                                                    
 //      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
