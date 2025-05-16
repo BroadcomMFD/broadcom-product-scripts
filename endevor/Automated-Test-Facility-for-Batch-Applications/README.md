@@ -5,7 +5,36 @@ These samples are provided as is and are not officially supported (see [license]
 
 This procedure allows Endevor processors to automate the tailoring, submission and evaluation of Batch application tests. Tests are triggered automatically by the Move or Generate actions of elements of any element type. For example, you may initiate automated tests when a COBOL program is Moved or Generated at a certain stage of Endevor. The test will locate, tailor, submit and evaluate results for one or more JCL elements whose names appear in the "OPTIONS" content of the COBOL program. 
 
+## Features and  Choices
+The collection of items in this folder provides for automating Tests of your Endevor inventory. 
+
+- **Generate and/or Move actions** on an element of any type can be accompanied by the automated submission of a batch test of that element. You can choose to test programs, JCL, PROCS, PARMS or other elements that you want to be tested.
+
+- **Simple instructions** you give to your Endevor processors can be written in either of two simple formats:
+    1) OPTIONS format - like the syntax given to CONPARMX steps
+    2) YAML - a popular, modern data serialization language that is widely used for writing configuration files. It is designed to be human-readable.
+
+    You can establish unique tests on an element for selected Stages in Endevor, and have the submitted test automatically adjust lines of JCL for the Stage name where the element is found. STEPLIB concatenations,  for example, can be automatically adjusted in a TEST stage, and different than the adjustment in the QA stage. 
+
+    You can use broad statements to tailor the JCL or use Step and DDName references to pinpoint where changes are to be made. 
+
+- **Test evaluations** may be bypassed entirely, or masked and compared to a test baseline. A failed comparison can then reflect onto the element as a failed Generate or Move action. 
+
+## OPTIONS
+
 The use of "OPTIONS" is not a new concept to Endevor. Typically, they are objects that provide detailed instructions to the CONPARMX steps of an Endevor processor. To implement this procedure, it is not necessary that you be familiar with the use of OPTIONS or with the CONPARMX utility. Example OPTIONS and processors are provided with this procedure. However, if you would like to know more about the use of OPTIONS in an Endevor processor, see [this doc](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/18-1/administrating/processors/processor-utilities.html#concept.dita_f657792fe5b63ba8cd9304095175664793517854_CONPARMXUtility).
+
+## YAML 
+
+Data can be constructed into a YAML format, and is easily readable by humans. YAML is a valid choice on the mainframe too - being known mostly to be used in distributed processes.
+
+If you are new to YAML, you can find some introductions here:
+
+ - [YAML Site](https://yaml.org/spec/1.2.2/)
+ - [YAML (YAML Ain't Markup Language)](https://www.techtarget.com/searchitoperations/definition/YAML-YAML-Aint-Markup-Language)
+ - [What is YAML?](https://www.freecodecamp.org/news/what-is-yaml-the-yml-file-format/)
+
+## Items in this collection
 
 With this procedure, sample processor code is provided in the form of "Includes". Endevor optionally supports either a Panvalet include ("++INCLUDE"), or a Librarian include ("-INC"). If you are not using either, then just copy the sample "Include" code into the processors where you need them. If you are using the Panvalet include, then change the "-INC" references to "++INCLUDE" references (starting in column 8).
 
@@ -43,4 +72,6 @@ Setup steps for the Automated Test Facility for Batch Applications:
     The provided OPTIONS specify the Endevor C1STAGE, where Automated Testing is to occur. You can modify it to meet your needs, including using C1ENVMNT or C1SUBSYS to provide Automated Testing for Deploy to Test actions.
 
 
-Note: Members **OPTVALDT**, **TXTRPLCE**, **JCLRPLCE** and **YAML2REX** are REXX subroutines required for the **Automated Test Facility for Batch Applications**. They are used by more than one solution on this GitHub, but can be found under the **Field-Developed-Programs** folder in the **Processor-Tools-and-Processor-Snippets** subfolder.
+Note: Members **[OPTVALDT](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/OPTVALDT.rex)**, **[TXTRPLCE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/TXTRPLCE.rex)**, **[JCLRPLCE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/JCLRPLCE.rex)** and **[YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex)** are REXX subroutines required for the **Automated Test Facility for Batch Applications**. They are used by more than one solution on this GitHub, but can be found by clicking their names, as shown above, or by navigating to the **Field-Developed-Programs** folder and the **Processor-Tools-and-Processor-Snippets** subfolder.
+
+You may use a moveout file to collect all members related to the **Automated Test Facility for Batch Applications**.
