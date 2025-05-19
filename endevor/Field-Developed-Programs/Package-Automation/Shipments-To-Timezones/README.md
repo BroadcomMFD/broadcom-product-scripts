@@ -14,15 +14,16 @@ When a Timezone is entenred onto the SHIPRULE table, then the BILDTGGR (ond othe
     Say "Remote" RemoteDateTime                                         
 
 Where values passed to the DTADJUST routine are pulled from a SHIPRULE table, and affect the timing of package shipments to the destination. 
+        
+- **remoteTimeZone** a Timezone value, listed among those presented by the  **TimeTestAvailableTimezones.py** program.             
 
-    /*        
-    **remoteTimeZone** a Timezone value, listed among those presented by the **TimeTestAvailableTimezones.py** program.             
-    
-    **remoteTime** the earliest time of the day when shipping is allowed. The time is given in the hh:mm:ss format for the remoteTimeZone          
+- **remoteTime** the earliest time of the day when shipping is allowed. The time is given in the hh:mm:ss format for the remoteTimeZone          
 
-    **DaysIncrement* a number of days (0 to any integer) designating required full days to delay package shipments from the package execution date and tim.
-    */               
-                                                                        
+- **DaysIncrement** a number of days (0 to any integer) designating required full days to delay package shipments from the package execution date and tim.
+               
+               
+## Supporting Folder items
+                                                                     
 
 **DTADJUST.rex** - this REXX routine can be called with variables extracted from a SHIPRULE row, and will return local date and time values to be entered onto the Trigger file for a shipment. This REXX calls the **TimeZoneConvert.py** python program, and provides local date and time values for a shipment to the Destination. The time zone for the local date and time values are given according to the localTimezone as defined in **TimeZoneConvert.py**. 
 
