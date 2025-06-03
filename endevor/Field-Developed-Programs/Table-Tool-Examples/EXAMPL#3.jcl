@@ -2,7 +2,7 @@
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,              
 //      NOTIFY=&SYSUID                                                          
 //*-------------------------------------------------------------------          
-// SET SYSEXEC=CAPRD.NDVR.PROD.CATSNDVR.CEXEC                                   
+// SET SYSEXEC=YOUR.NDVR.PROD.ADMINSYS.CEXEC                                    
 //*--------------------------------------------------------------               
 //*- Add members of a PDS into Endevor                -----------               
 //*--------------------------------------------------------------               
@@ -55,9 +55,9 @@
 //*--------------------------------------------------------------------*        
 //STEP03   EXEC PGM=NDVRC1,REGION=4M,                                           
 //         PARM='BC1PCSV0'                                                      
-//STEPLIB  DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTU                         
-//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQAUTH                         
-//         DD  DISP=SHR,DSN=CAPRD.NDVR.V160PRD.CSIQLOAD                         
+//STEPLIB  DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQAUTU                          
+//         DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQAUTH                          
+//         DD  DISP=SHR,DSN=YOUR.NDVR.V160PRD.CSIQLOAD                          
 //BSTIPT01 DD *                                                                 
   LIST ELEMENT '*'     FROM ENVIRONMENT SMPLPROD STAGE P                        
        SYSTEM '*'  SUBSYSTEM '*'  TYPE "*"                                      

@@ -1,0 +1,234 @@
+//********************************************************************
+//MOVESQL PROC AAA=,
+//        CSIQCLS0='Your.Endevor.CSIQCLS0',
+//        HLQ='Your.Team',
+//        PFXS='&HLQ..&C1SSTAGE..&C1SSUBSYS.',
+//        PFXT='&HLQ..&C1STAGE..&C1SU.',
+//        REXXLIB='Your.Team.$REXX',
+//        SHOWME='Y',
+//        SITEDBR='&#&C1SUBSYS.DBR',   DBRM
+//        SITESQL='&#&C1SUBSYS.SQL',   Deploy for Test Target Dsn
+//        SITETRG='&#&C1SUBSYS.D4T',   Deploy for Test Target Y/N
+//        SQL#SRC='&PFXS..SQL',        Sending SQL library
+//        SQL#TRG='&PFXT..SQL',        Target  SQL library
+//        TUNIT='VIO',                 UNIT FOR TEMP DSNS
+//        ZZZ=
+//*
+//**=================================================================**
+//  IF (&SITETRG = 'Y') THEN
+//**********************************************************************
+//*  Going to do "masking" of the SQL.
+//*   Get The YAML controls for this System
+//**********************************************************************
+//GETYAML  EXEC PGM=CONWRITE,PARM='EXPINCL(Y)',MAXRC=0     MOVESQL
+//YAMLDB2  DD DSN=&&YAMLDB2,DISP=(,PASS),
+//            SPACE=(TRK,(1,5)),UNIT=SYSDA,
+//            DCB=(RECFM=FB,LRECL=180,BLKSIZE=7200)
+//CONWIN   DD *
+WRITE ELEMENT &C1SY
+   FROM ENV &C1EN SYS &C1SY SUB &C1SSUBSYS
+   TYPE YAML STAGE &C1STGID
+   TO   DDN YAMLDB2
+   OPTION SEARCH .
+/*
+//**=================================================================**
+//BILDMASK EXEC PGM=IRXJCL,
+//         PARM='ENBPIU00 PARMLIST',MAXRC=4,COND=(4,LE)
+//SYSEXEC   DD DISP=SHR,DSN=&CSIQCLS0
+//          DD DISP=SHR,DSN=&REXXLIB
+//SYSTSPRT  DD SYSOUT=*
+//PARMLIST  DD *
+  NOTHING   NOTHING  OPTIONS   0
+  MASKMODL  MASKING  OPTIONS1  A
+  BPIOPIN   BPIOPOUT OPTIONS1  A
+  CONNECTI  CONNECTO OPTIONS1  A
+  DROPIN    DROPOUT  OPTIONS1  A
+  SPUFIIN   SPUFIOUT OPTIONS1  A
+//TABLE     DD *
+* Do
+  *
+//YAMLDB2   DD DSN=&&YAMLDB2,DISP=(OLD,DELETE)
+//YAML2REX  DD DUMMY   <- Turn on/off Trace
+//SQLSRC    DD DISP=SHR,DSN=&SQL#SRC(&C1ELEMENT)
+//OPTIONS   DD *       <- Convert YAML to REXX
+* Convert YAML to REXX   **
+ Call YAML2REX 'YAMLDB2'
+ HowManyYamls = QUEUED();
+ If HowManyYamls < 1 then, +
+    Do; Say 'YAML2REX: Not finding any Rexx converted from YAML'; +
+    Exit(8); +
+    End;
+ Say 'HowManyYamls=' HowManyYamls
+ Do yaml# =1 to HowManyYamls; +
+    Parse pull yaml2rexx; +
+    Interpret yaml2rexx ; +
+ End
+ Call DB2SNAME 'SQLSRC'
+ Lines = QUEUED();
+ Do Loop# =1 to Lines; +
+    Parse pull SPName; +
+    Interpret SPName ; +
+ End
+//OPTIONS1  DD *
+*  Now build Outputs from Rexx created from YAML
+ thisDB2_Subsytem_ID = Value('&C1SY..&C1SU..DB2_Subsytem_ID')
+ thisSQLID     = USERID()
+ thisOWNER     = Value('&C1SY..&C1SU..Bind_Owner_Target_Pattern')
+ thisQUALIFIER = Value('&C1SY..&C1SU..Bind_Qualifier_Target_Pat')
+ thisSchema    = Value('&C1SY..&C1SU..Schema_Target_Pattern')
+ thisSPName    = Value('SPName')
+ VERSION  = '&VERSION'
+ NAME     = '&ELEMENT'
+//****** MASKING ************************************************
+//MASKMODL  DD *                                <-Build 'MASK' for DB2
+  CONNECT         = '&thisDB2_Subsytem_ID'
+  PACKAGE_OWNER   = '&thisOWNER'
+  QUALIFIER       = '&thisQUALIFIER'
+  CREATE_PROCEDURE = '&thisSchema.&thisSPName                        '
+//MASKING   DD DSN=&&MASKING,DISP=(,PASS),      <-Output Mask
+//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
+//     LRECL=080,RECFM=FB,BLKSIZE=0
+//****** BPIOPT *************************************************
+//BPIOPIN   DD *                                <-BPIOPT input
+.CONTROL BPID(PTIDEVL.VIRTUEL.DB2-JPMCSP) +
+ LOGID(&thisDB2_Subsytem_ID) UNIT(SYSDA)
+.LIST SYSOUT(A)
+.OPTION   ERRORS NOSQLERRORS RETRY(04) NOBINDERRORS    +
+   SQLFORMAT(SQL)
+.RESTART SYNC
+.CONNECT &thisDB2_Subsytem_ID
+//BPIOPOUT  DD DSN=&&BPIOPT,DISP=(,PASS),       <-DBTool cntlcard
+//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
+//     LRECL=080,RECFM=FB,BLKSIZE=0
+//****** CONNECT command **************************************
+//CONNECTI  DD *
+.CONNECT &thisDB2_Subsytem_ID
+//CONNECTO  DD DSN=&&CONNECT(CONNECT),DISP=(,PASS),  <-CONNECT
+//     SPACE=(TRK,(1,1,5)),UNIT=SYSDA,
+//     DCB=(LRECL=080,RECFM=FB,BLKSIZE=0,DSORG=PO)
+//****** DROP & COMMIT    used by existing Stored Procedures ****
+//DROPIN    DD *                                <-Build DROP & COMMIT
+ DROP PROCEDURE &thisSchema.&thisSPName ;
+ COMMIT ;
+//DROPOUT   DD DSN=&&DROP(DROP),DISP=(,PASS),   <-DROP & COMMIT
+//     SPACE=(TRK,(1,1,5)),UNIT=SYSDA,
+//     DCB=(LRECL=080,RECFM=FB,BLKSIZE=0,DSORG=PO)
+//****** SPUFI- used to check status of a Stored Procedure ****
+//SPUFIIN   DD *                                <-Build DROP & COMMIT
+ SELECT COUNT(*)
+ FROM SYSIBM.SYSROUTINES A
+ WHERE A.SCHEMA = '&thisSchema'
+ AND A.NAME = '&thisSPName'
+//SPUFIOUT  DD DSN=&&SPUFI,DISP=(,PASS),        <-SPUFI check command
+//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
+//     DCB=(LRECL=080,RECFM=FB,BLKSIZE=0)
+//*-------------------------------------------------------------------*
+//* SHOWME: DISPLAY the MASK values
+//*-------------------------------------------------------------------*
+//SHOWME   EXEC PGM=IEBGENER,COND=(4,LE)                   MOVESQL
+//SYSPRINT DD DUMMY
+//SYSUT1   DD *
+ ************ Mask ****************
+//         DD DSN=&&MASKING,DISP=(OLD,PASS)
+//         DD *
+ ************ BPIOPT **************
+//         DD DSN=&&BPIOPT,DISP=(OLD,PASS)
+//         DD *
+ ************ DROP ****************
+//         DD DSN=&&DROP(DROP),DISP=(OLD,PASS)
+//         DD *
+ ************ CONNECT *************
+//         DD DSN=&&CONNECT(CONNECT),DISP=(OLD,PASS)
+//         DD *
+ ************ SPUFI   *************
+//         DD DSN=&&SPUFI,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY
+//*-------------------------------------------------------------------*
+//*  Apply DB2 Masking (if necessary)
+//*-------------------------------------------------------------------*
+//DB2MASK  EXEC PGM=IRXJCL,PARM='DB2MASK2 DB2#NEW',        MOVESQL
+//              MAXRC=4,COND=(4,LE)
+//MASKING  DD DSN=&&MASKING,DISP=(OLD,DELETE)
+//SYSEXEC  DD DISP=SHR,DSN=&REXXLIB
+//SYSTSPRT DD SYSOUT=*
+//DB2MASK2 DD DUMMY
+//SHOWME   DD SYSOUT=*
+//DB2#STMT DD DISP=SHR,DSN=&SQL#SRC(&C1ELEMENT)      <-In
+//DB2#NEW  DD DISP=SHR,DSN=&SQL#TRG(&C1ELEMENT),     <-Out
+//            MONITOR=COMPONENTS,FOOTPRNT=CREATE
+//*-------------------------------------------------------------------*
+//*  SPUFI batch to check status of the Stored Procedure
+//*-------------------------------------------------------------------*
+//SPUFI    EXEC PGM=IKJEFT01,COND=(4,LE)
+//STEPLIB  DD DISP=SHR,DSN=Your.Db2.SNSNLOAD
+//SYSTSPRT DD DUMMY
+//SYSPRINT DD DSN=&&SPUFIRPT,DISP=(,PASS),SPACE=(TRK,(1,1)),
+//            UNIT=VIO,DCB=(RECFM=FB,LRECL=133,BLKSIZE=0)
+//SYSUDUMP DD SYSOUT=*
+//SYSTSIN  DD *
+ DSN 'SYSTEM(YourDb2SubSys)
+ RUN PROGRAM(DSNTEP2) PLAN(DSNTEP12) LIB('Your.Db2.SPUFI.RUNLIB')  +
+     PARMS('/ALIGN(MID)')
+ END
+//SYSIN    DD DSN=&&SPUFI,DISP=(OLD,DELETE)
+//*
+//****************************************************************
+//* THIS UTILITY READS A SUPFI BATCH REPORT TO DETERMINE IF A    *
+//* STORED PROCEDURE EXISTS.                                     *
+//* RC=0 MEANS THE STORED PROCEDURE IS NEW. RC=1 MEANS IT EXISTS *
+//****************************************************************
+//SPCHECK  EXEC PGM=IKJEFT1B,PARM='%DB2SPCHK',COND=(4,LE),MAXRC=1
+//SYSEXEC  DD DISP=SHR,DSN=Your.Team.$REXX
+//SYSTSPRT DD DUMMY
+//SYSPRINT DD DUMMY
+//SYSTSIN  DD DUMMY
+//SYSIN    DD DUMMY
+//FILEIN   DD DSN=&&SPUFIRPT,DISP=(OLD,DELETE)
+//*
+//*-------------------------------------------------------------------*
+//*  Broadcom's DB Tools to refresh/create the Stored Procedure
+//*-------------------------------------------------------------------*
+//DBTOOLS  EXEC PGM=PTLDRIVM,PARM='EP=BPLBCTL',
+//              MAXRC=4,COND=(4,LE)
+//****** This is for brand new Stored Procedures
+//   IF (SPCHECK.RC EQ 0) THEN
+//BPIIPT   DD DSN=&&CONNECT(CONNECT),DISP=(OLD,DELETE)
+//         DD DISP=SHR,DSN=&SQL#TRG(&C1ELEMENT)
+//***ELSE this SP exists / active
+//   ELSE
+//BPIIPT   DD DSN=&&CONNECT(CONNECT),DISP=(OLD,DELETE)
+//         DD DSN=&DROP(DROP),DISP=(OLD,DELETE)
+//         DD DISP=SHR,DSN=&SQL#TRG(&C1ELEMENT)
+//   ENDIF
+//BPIOPT   DD DSN=&&BPIOPT,DISP=(OLD,DELETE)   <- DBTOOLs cntlcard
+//STEPLIB  DD DISP=SHR,DSN=Your.DBTools.CDBALOAD
+//         DD DISP=SHR,DSN=Your.Db2.SNSNEXIT
+//         DD DISP=SHR,DSN=Your.Db2.SNSNLOAD
+//PTILIB   DD DISP=SHR,DSN=Your.DBTools.CDBALOAD
+//         DD DISP=SHR,DSN=Your.Db2.SNSNEXIT
+//         DD DISP=SHR,DSN=Your.Db2.SNSNLOAD
+//PTIPARM  DD DISP=SHR,DSN=Your.DBTools.CDBAPARM
+//PTIXMSG  DD DISP=SHR,DSN=Your.DBTools.CDBAXMSG
+//SYSOUT   DD SYSOUT=*
+//PTIIMSG  DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//ABNLIGNR DD DUMMY                 SUPPRESS ABENDAID DUMPS
+//SYSUT1   DD UNIT=SYSDA,SPACE=(CYL,(30,30))
+//SYSREC   DD UNIT=SYSDA,SPACE=(TRK,(1,1))
+//*
+//*******************************************************************
+//  ELSE
+//*********************************************************************
+//* READ SOURCE AND EXPAND INCLUDES
+//*********************************************************************
+//CONWRITE EXEC PGM=CONWRITE,MAXRC=0,   <- Write to D4T/stage library
+// PARM='EXPINCL(Y)'
+//ELMOUT   DD DSN=&SQL#TRG,                  (&C1ELEMENT)
+//            MONITOR=COMPONENTS,DISP=SHR,
+//            FOOTPRNT=CREATE
+//SYSUT3   DD UNIT=&TUNIT,SPACE=(TRK,(1,1))
+//SYSUT4   DD UNIT=&TUNIT,SPACE=(TRK,(1,1))
+//SYSPRINT DD SYSOUT=*
+//  ENDIF
+//**=================================================================**

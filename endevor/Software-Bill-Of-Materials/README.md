@@ -1,5 +1,8 @@
 # Software Bill Of Materials 
 
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 The items in this folder support the blog [Adding SBOM Generation and Hash Validation to Endevor Package Ship Facility](https://medium.com/modern-mainframe/adding-sbom-generation-and-hash-validation-to-endevor-package-ship-facility-3183f5354212) .
 
 ## SBOM Shipping Approach 

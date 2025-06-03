@@ -8,8 +8,8 @@
 //*--------------------------------------------------------------------         
 //  SET TABLE=IBMUSER.NDVR.DATASETS         <- Saved 3.4 data                   
 //  SET TABLE=IBMUSER.PUBLIC.DATASETS       <- Saved 3.4 data                   
-//  SET SYSEXEC=SYS1.EXEC                   <- Rexx library                     
-//  SET SYSEXEC=CAPRD.NDVR.EMER.CATSNDVR.CSIQCLS0                               
+//  SET SYSEXEC=YOUR.REXX.EXEC                   <- Rexx library                
+//  SET SYSEXEC=YOUR.NDVR.EMER.ADMINSYS.CSIQCLS0                                
 //*--------------------------------------------------------------------         
 //TEST001  EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'                             
 //TABLE    DD DISP=SHR,DSN=&TABLE                                               

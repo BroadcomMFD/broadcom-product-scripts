@@ -1,12 +1,12 @@
 //IBMUSER5 JOB (0000),'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,                     
 //      REGION=0M,MSGCLASS=A,NOTIFY=&SYSUID                                     
 //*--------------------------------------------------------------------         
-//*- SYS1.EXEC(ALLOLIKE)                                                        
+//*- YOUR.REXX.EXEC(ALLOLIKE)                                                   
 //*--------------------------------------------------------------------         
 //  SET DSNLIST=IBMUSER.MYLIST.DATASETS     <-                                  
-//  SET DSNLIST=IBMUSER.CAPRD.DATASETS      <-                                  
+//  SET DSNLIST=IBMUSER.YOUR.DATASETS      <-                                   
 //  SET DSNLIST=IBMUSER.TESTING.DATASETS    <-                                  
-//  SET SYSEXEC=SYS1.EXEC                   <-                                  
+//  SET SYSEXEC=YOUR.REXX.EXEC                   <-                             
 //*--------------------------------------------------------------------         
 //*- IBMUSER.JCL(EXAMPL#5) --------------------------------------------         
 //*--------------------------------------------------------------------         
