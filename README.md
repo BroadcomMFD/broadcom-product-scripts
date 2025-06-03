@@ -7,13 +7,13 @@ Sample scripts for each product are located in the directory that shares its nam
 Alternatively, you can select from the use cases below:
 
 ## Code4z - VS Code extension for the example.com company
-
-This is an [example](code4z/example-com-extension) of an extension a fictitious company `example.com` may want to create to supplement Code4z with custom, company specific functionality. It shows now to make the functionality of custom in house ISPF applications available in VS Code.
+This is an [example](code4z/example-com-extension) of an extension that a fictitious company `example.com` might want to create to supplement Code4z with custom, company-specific functionality. It shows how to make the functionality of custom in-house ISPF applications available in VS Code.
 
 ## Endevor - Automated Test Facility for Batch Applications
 This [sample repository](endevor/Automated-Test-Facility-for-Batch-Applications) contains artifacts described in the [How to Leverage Endevor Processors to Test Batch Applications](https://medium.com/modern-mainframe/how-to-leverage-endevor-processors-to-test-batch-applications-6247a9dfdafa) blog on Medium.  The objects are for using Endevor processors in Building an Automated Test Facility for Batch Applications in Endevor.
 
 ## Endevor - Self-servicing Project Workareas in Endevor with Dynamic Environments
+
 This [sample repository](endevor/Self-servicing-Project-Workareas-in-Endevor-with-Dynamic-Environments) contains artifacts described in the [Self-servicing Project Workareas in Endevor with Dynamic Environments](https://medium.com/modern-mainframe/self-service-developer-workspaces-in-endevor-3b83c72bdc14) blog on Medium.  The objects are sample processors for enabling self service with Dynamic Environments backed by Deferred File Creation.
 
 ## Endevor - Shipments for a Single-Destination
