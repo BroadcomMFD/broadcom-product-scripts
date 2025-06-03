@@ -6,6 +6,10 @@ Sample scripts for each product are located in the directory that shares its nam
 
 Alternatively, you can select from the use cases below:
 
+## Code4z - VS Code extension for the example.com company
+
+This is an [example](code4z/example-com-extension) of an extension a fictitious company `example.com` may want to create to supplement Code4z with custom, company specific functionality. It shows now to make the functionality of custom in house ISPF applications available in VS Code.
+
 ## Endevor - Automated Test Facility for Batch Applications
 This [sample repository](endevor/Automated-Test-Facility-for-Batch-Applications) contains artifacts described in the [How to Leverage Endevor Processors to Test Batch Applications](https://medium.com/modern-mainframe/how-to-leverage-endevor-processors-to-test-batch-applications-6247a9dfdafa) blog on Medium.  The objects are for using Endevor processors in Building an Automated Test Facility for Batch Applications in Endevor.
 

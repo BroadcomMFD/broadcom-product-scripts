@@ -13,7 +13,7 @@ The following sections outline the steps to take.
 1. Update your ISPF application to accept arguments instead of relying on screen inputs
 1. Update the application to store its output to a dataset, or print it to the terminal instead of showing the result on an ISPF screen
 1. Test your updated application by running it in TSO without ISPF and check its output.
-1. Run your updated application through ZOWE CLI via the following command `zowe tso issue command "exec 'PUBLIC.REXX(REPOUT)' 'ARG1 ARG2'"`, where `PUBLIC.REXX(REPOUT)` is your REXX application and `ARG1` `ARG2` are the arguments that are passed to it. The syntax above works both in Windows CMD, Powershell as well as bourne compatible UNIX shells.
+1. Run your updated application through ZOWE CLI via the following command `zowe tso issue command "exec 'PUBLIC.REXX(REPOUT)' 'ARG1 ARG2'"`, where `PUBLIC.REXX(REPOUT)` is your REXX application and `ARG1` `ARG2` are the arguments that are passed to it. The syntax above works both in Windows CMD, PowerShell as well as Bourne compatible UNIX shells.
 
 ### Use the basic-report command in this extension
 
@@ -22,14 +22,14 @@ The following sections outline the steps to take.
 1. In this new VS Code window open the _Command Palette_ by pressing `F1`
 1. Type `example.com` in the command palette input box 
 
-Now you should see ![Command Pallete](command-palette.png)
+Now you should see ![Command Palette](command-palette.png)
 
 1. Select the `Basic Report on a Dataset` command
 1. After a short moment an editor with the output of your applications will open
 
 If you would like to try this out with a basic REXX program, you can use the included [basic-report.rexx](commands/basic-report.rexx) sample. The output should look similar to ![Report](report.png)
 
-### Explore the ehnanced-report
+### Explore the enhanced-report
 
 The [basic report](commands/basic-report.js) is only 30 lines long. It is as simple as possible to get started quickly. To make the extension real there is a lot more to do. For example:
 
@@ -37,19 +37,19 @@ The [basic report](commands/basic-report.js) is only 30 lines long. It is as sim
 - Error checking
 - Remembering last entry
 - Adding a progress bar
-- Storeing the report to a dataset and retrieving it from there
+- Storing the report to a dataset and retrieving it from there
 - Adding a VS Code Output channel to diagnose issues
 - Adding a setting for the location of the REXX exec instead of hard coding it in the extension code
 
-All of these ehnancements have been added to the [enhanced report](commands/enhanced-report.js) with its corresponding [enhanced-report.rexx](commands/enhanced-report.rexx) REXX exec. This adds a little over 100 lines of code and illustrated many other useful VS Code APIs as well as adding typescript checking via [JS Doc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html) annotations.
+All of these enhancements have been added to the [enhanced report](commands/enhanced-report.js) with its corresponding [enhanced-report.rexx](commands/enhanced-report.rexx) REXX exec. This adds a little over 100 lines of code and illustrated many other useful VS Code APIs. It also adds typescript checking via [JS Doc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html) annotations to help you catch errors while authoring the code rather than at runtime.
 
 ### Build the extension
 
-The extension can be build by running the two following commands
+The extension can be built by running the two following commands
 
 ```
 # Install development dependencies - typescript, types, and vsce
-npm install
+npm ci
 # Package the extension
 npm run package
 ```
