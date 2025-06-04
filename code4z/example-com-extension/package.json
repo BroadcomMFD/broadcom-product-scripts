@@ -49,7 +49,7 @@
 		"@types/node": "^22.13.9",
 		"@types/vscode": "^1.98.0",
 		"typescript": "^5.8.2",
-		"vsce": "^2.15.0"
+		"@vscode/vsce": "^3.4.2"
 	},
 	"scripts": {
 		"package": "vsce package"
