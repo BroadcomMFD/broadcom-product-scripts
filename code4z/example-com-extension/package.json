@@ -5,6 +5,7 @@
 	"version": "0.0.1",
 	"publisher": "none",
 	"icon": "resources/icon.png",
+  "license": "SEE LICENSE IN LICENSE",
 	"repository": {
 		"url": "https://github.com/BroadcomMFD/broadcom-product-scripts"
 	},
