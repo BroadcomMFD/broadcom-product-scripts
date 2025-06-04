@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const { registerReportCommand, ReportProvider } = require("./commands/enhanced-report");
 const { openDocsCommand } = require('./commands/open-docs');
-const { simpleReport } = require('./commands/basic-report');
+const { basicReport } = require('./commands/basic-report');
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -9,19 +9,19 @@ const { simpleReport } = require('./commands/basic-report');
 function activate(context) {
 	const log = vscode.window.createOutputChannel('Example.com', { log: true });
 
-	// Report on Dataset
-	const reportDisp = vscode.commands.registerCommand('com.example.report.on.dataset', registerReportCommand(context, log));
-	const provider = new ReportProvider;
-	const providerRegistration = vscode.workspace.registerTextDocumentContentProvider(ReportProvider.scheme, provider);
-	context.subscriptions.push(reportDisp, providerRegistration);
-
-	// Simple Report
-	const simpleReportDisp = vscode.commands.registerCommand('com.example.simple.report', simpleReport(context));
-	context.subscriptions.push(simpleReportDisp);
-
 	// Open Docs
 	const openDocsDisp = vscode.commands.registerCommand('com.example.open.docs', openDocsCommand);
 	context.subscriptions.push(openDocsDisp);
+
+	// Basic Report
+	const basicReportDisp = vscode.commands.registerCommand('com.example.report.basic', basicReport(context));
+	context.subscriptions.push(basicReportDisp);
+
+	// Enhanced Report
+	const reportDisp = vscode.commands.registerCommand('com.example.report.enhanced', registerReportCommand(context, log));
+	const provider = new ReportProvider;
+	const providerRegistration = vscode.workspace.registerTextDocumentContentProvider(ReportProvider.scheme, provider);
+	context.subscriptions.push(reportDisp, providerRegistration);
 
 	console.log('Congrats, your com.example extension is now active!');
 }

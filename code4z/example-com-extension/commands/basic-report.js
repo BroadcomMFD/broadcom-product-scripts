@@ -5,7 +5,7 @@ const execFile = util.promisify(require('node:child_process').execFile);
 
 const REXX_EXEC = "PUBLIC.REXX(BASIC)";
 
-const simpleReport = context => async () => {
+const basicReport = context => async () => {
     await vscode.workspace.fs.createDirectory(context.globalStorageUri);
     const reportUri = vscode.Uri.joinPath(context.globalStorageUri, "report.txt");
 
@@ -26,5 +26,5 @@ async function execRexx(dsn) {
 }
 
 module.exports = {
-    simpleReport
+    basicReport
 }
