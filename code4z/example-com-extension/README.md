@@ -22,13 +22,13 @@ The following sections outline the steps to take.
 1. In this new VS Code window open the Command Palette by pressing <kbd>F1</kbd>
 1. Type `example.com` in the command palette input box.  
    A list of commands displays.
-   ![Command Palette](command-palette.png)
+   ![Command Palette](docs/command-palette.png)
 1. Select the `Basic Report on a Dataset` command.
 1. After a short moment an editor with the output of your applications opens.
 
 To try this out with a basic REXX program, you can use the included [basic-report.rexx](commands/basic-report.rexx) sample. A successful output report looks like this:
 
-![Report](report.png)
+![Report](docs/report.png)
 
 ### Explore the Enhanced-Report
 
