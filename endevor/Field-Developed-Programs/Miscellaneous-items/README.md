@@ -1,6 +1,11 @@
 # Miscellaneous-items
 
-These are miscellaneous tools collected by Broadcom Services members and used in supporting Endevor.
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
+## GETJOBNM 
+
+A modified Shareware program that has a wide range of usage. Information about a running job can be written in a REXX format, to be used again with TableTool (or othere REXX processing. See the [Automated-Test-Facility-Using-Test4Z](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Automated-Test-Facility-Using-Test4Z) as an example. 
 
 ## ANL#DRIV, ANL#VIEW and BTCHEDIT
 

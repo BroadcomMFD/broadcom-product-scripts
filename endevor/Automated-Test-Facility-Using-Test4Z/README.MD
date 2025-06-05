@@ -5,7 +5,14 @@ These samples are provided as is and are not officially supported (see [license]
 
 ## Introduction
 
-Items in this folder can be used to introduce and automate testing in Endevor, running the kinds of test supported by Test4Z. 
+Items in this folder can be used to introduce and automate testing in Endevor, running the kinds of test supported by Test4Z.  There are many items in this folder largely to support the many choices available to you and your configuration for testing.
+
+Your Endevor processor can submit JCL and wait for your batch test to compleete. You have a choice on how the job accounting code is derived for the submmitted job. 
+- **GETACCTC lookup.rex**
+ allows you to enter userids and accounting codes at your site.
+- **GETACCTC.rex** uses the **GETJOBNM** program in [Miscelaneous-Items folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Miscellaneous-items) to get the accounting information from a low memory address.
+
+
 See the two modes of testing described in [Testing Modes](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0/administrating/define-options-for-unit-and-record-and-replay.html) and [Test4Z techdocs documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0.html) :
 
 1. [Record and Replay](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0/administrating/record-replay-and-verification-processing.html). The .jcl items in the **Quick-Edit-User-Extension-Points** subfolder correspond to the **Record and Replay** examples.

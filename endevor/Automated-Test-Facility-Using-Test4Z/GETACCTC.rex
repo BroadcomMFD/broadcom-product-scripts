@@ -1,18 +1,15 @@
-/* REXX */
-  Arg whatuser
-  JobAccountingCode.         = '12340'
-  JobAccountingCode.user#01  = '127398730'
-  JobAccountingCode.user#02  = '127398730'
-  JobAccountingCode.user#03  = '106321234'
-  JobAccountingCode.user#04  = '106321234'
-  JobAccountingCode.user#05  = '111212340'
-  JobAccountingCode.user#06  = '124312340'
-  JobAccountingCode.user#07  = '121412340'
-  JobAccountingCode.user#08  = '118412340'
-  JobAccountingCode.user#09  = '124312340'
-  JobAccountingCode.user#10  = '114412340'
-  JobAccountingCode.user#11  = '123212340'
-  JobAccountingCode.user#12  = '111412340'
-  JobAccountingCode.user#13  = '106341234'
-  JobAccountingCode.user#14  = '301123400'
-  Return JobAccountingCode.whatuser
+/* REXX  */
+/* Get the running-job's accounting code  */
+/* Job can be batch or User's tso session */
+  CALL BPXWDYN ,
+    "ALLOC DD(JOBINFO) LRECL(80) BLKSIZE(8000) SPACE(1,1) ",
+       " RECFM(F,B) TRACKS ",
+       " NEW UNCATALOG REUSE ";
+  GETJOBNM
+  "EXECIO * DISKR JOBINFO  (stem job. FINIS ";
+  CALL BPXWDYN "FREE  DD(JOBINFO)"
+  Do j# = 1 to job.0
+     If Substr(job.j#,1,15) = 'accounting_code' then,
+        Return Strip(Word(Substr(job.j#,17),1),"B","'")
+  End
+  Return '0'
