@@ -9,8 +9,8 @@ Items in this folder can be used to introduce and automate testing in Endevor, r
 
 Your Endevor processor can submit JCL and wait for your batch test to compleete. You have a choice on how the job accounting code is derived for the submmitted job. 
 - **GETACCTC lookup.rex**
- allows you to enter userids and accounting codes at your site.
-- **GETACCTC.rex** uses lower-memory to get the accounting information for an active job or session.
+ allows you to enter userids and accounting codes for your site.
+- **GETACCTC.rex** uses data blocks in lower-memory to obtain the accounting information for an active job or session.
 
 
 See the two modes of testing described in [Testing Modes](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0/administrating/define-options-for-unit-and-record-and-replay.html) and [Test4Z techdocs documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0.html) :
