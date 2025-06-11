@@ -5,6 +5,7 @@
 	"version": "0.0.1",
 	"publisher": "none",
 	"icon": "resources/icon.png",
+	"license": "SEE LICENSE IN LICENSE",
 	"repository": {
 		"url": "https://github.com/BroadcomMFD/broadcom-product-scripts"
 	},
@@ -16,18 +17,18 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "com.example.simple.report",
+				"command": "com.example.open.docs",
+				"title": "Open Docs",
+				"category": "example.com"
+			},
+			{
+				"command": "com.example.report.basic",
 				"title": "Basic Report on a Dataset",
 				"category": "example.com"
 			},
 			{
-				"command": "com.example.report.on.dataset",
+				"command": "com.example.report.enhanced",
 				"title": "Enhanced Report on a Dataset",
-				"category": "example.com"
-			},
-			{
-				"command": "com.example.open.docs",
-				"title": "Open Docs",
 				"category": "example.com"
 			}
 		],
@@ -48,10 +49,11 @@
 	"devDependencies": {
 		"@types/node": "^22.13.9",
 		"@types/vscode": "^1.98.0",
-		"typescript": "^5.8.2",
-		"vsce": "^2.15.0"
+		"@vscode/vsce": "^3.4.2",
+		"typescript": "^5.8.2"
 	},
 	"scripts": {
+		"check": "tsc --pretty",
 		"package": "vsce package"
 	}
 }
