@@ -2,15 +2,15 @@
 //XCOM#JOB EXEC PGM=XCOMJOB,   <- Exec SonarQube Analysis  XCOM#JOB             
 //     PARM=('TYPE=EXECUTE'),COND=(4,LT)                                        
 //STEPLIB  DD  DISP=SHR,                                                        
-//             DSN=SHARE.XCOM.CBXGLOAD           * XCOM LOAD MODULES            
+//             DSN=your.XCOM.CBXGLOAD           * XCOM LOAD MODULES             
 //         DD  DISP=SHR,                                                        
 //             DSN=CEE.SCEERUN                   * IBM LE RUNTIME               
 //XCOMCNTL DD  DISP=SHR,                                                        
-//             DSN=SHARE.XCOM.R120.CBXGPARM      * CONTROL LIBRARY              
+//             DSN=your.XCOM.CBXGPARM      * CONTROL LIBRARY                    
 //CAOESTOP DD DUMMY                                                             
 //SYSIN01  DD *                                            XCOM#JOB             
 TYPE=SEND                                                                       
-IPNAME=10.252.121.121                                                           
+IPNAME=12.345.678.9                                                             
 IPPORT=8044                                                                     
 CKPT=0                                                                          
 FILEOPT=REPLACE                                                                 
