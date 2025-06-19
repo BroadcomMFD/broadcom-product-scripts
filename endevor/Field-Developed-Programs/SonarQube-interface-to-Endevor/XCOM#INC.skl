@@ -10,8 +10,11 @@ PASSWORD=ndvruser
 *                                                                               
 QQ                                                                              
 //XCOM2    DD *,SYMBOLS=JCLONLY                            XCOM#INC             
-FILE=/tmp/&Member.&extension                                                    
+FILE=/opt/xfer/inbound/&Member.&extension                                       
 LFILE=&Dataset(&Member)                                                         
 *                                                                               
-&NewXfer                                                                        
-//XCOM3    DD DUMMY                                        XCOM#INC             
+NEWXFER                                                                         
+//XCOM3    DD *                                            XCOM#INC             
+FILE=/opt/xfer/inbound/&Unique_Name.lst                                         
+LFILE=&SonarWorkfile(TRANSMIT)                                                  
+*                                                                               
