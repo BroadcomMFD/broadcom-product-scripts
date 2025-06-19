@@ -1,0 +1,175 @@
+//&Jobname JOB (0000),                                                          
+//         CLASS=A,MSGCLASS=X,REGION=4M,                                        
+//         NOTIFY=&SYSUID                                                       
+//*==================================================================*          
+// JCLLIB  ORDER=(&MySEN2Library,                                               
+//           &MySENULibrary)                                                    
+//*-------------------------------------------------------------------          
+//  EXPORT SYMLIST=(*)                                                          
+//  SET RSLTPFX=&ReportingPFX                                                   
+//  SET SONARWRK=&SonarWorkfile                                                 
+//  SET PACKAGE='&Package'                                                      
+//  SET RETURNTO='&MyHomeAddress'                                               
+//*-------------------------------------------------------------------*         
+//*-- Report back that job is started                -----------------*         
+//*-------------------------------------------------------------------*         
+//REPORT1  EXEC PGM=IKJEFT1B,  <- Report that job started  SONARMDL             
+//         PARM='ENBPIU00 1'                                                    
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//OPTIONS  DD *                                                                 
+  JobName = MVSVAR('SYMDEF',JOBNAME )                                           
+  X = OUTTRAP(LINE.);                                                           
+  address TSO "ST " JobName                                                     
+  JobData   = Strip(LINE.1);                                                    
+  Say JobData                                                                   
+  whereparen = Pos('(',JobData)                                                 
+  If whereparen > 0 then, +                                                     
+     JobNumber = Substr(JobData,whereparen+1,8)                                 
+  Queue JobName JobNumber "at" DATE('O') TIME() ":--------------------"         
+  Queue "         Job starting"                                                 
+  Queue "         Initiating File Transmissions"                                
+  Queue "         reporting using &ReportingPFX.* "                             
+  Queue "         Transmission Table:             "                             
+  "EXECIO 5 DISKW REPORT "                                                      
+  "EXECIO * DISKR TABLE   ( Finis"                                              
+  "EXECIO * DISKW REPORT  ( Finis"                                              
+ Exit                                                                           
+//SYSEXEC   DD DISP=SHR,DSN=&MyCLS2Library                                      
+//          DD DISP=SHR,DSN=&MyCLS0Library                                      
+//TABLE    DD  DISP=SHR,                                                        
+//             DSN=&SonarWorkfile(TRANSMIT)                                     
+//REPORT   DD  DSN=&ReportingPFX.#1,                                            
+//         DISP=(MOD,CATLG,KEEP),FREE=CLOSE,                                    
+//         UNIT=SYSALLDA,SPACE=(TRK,(01,01),RLSE),                              
+//         DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PS)                           
+//*-------------------------------------------------------------------*         
+//*==================================================================*          
+//*- Build Transmit commands                                                    
+//*==================================================================*          
+//  SET METHOD=&TransmitMethod                                                  
+//  SET IPADDRSS=10.252.120.14                                                  
+//*-------------------------------------------------------------------          
+//*   STEP 1 -- EXECUTE CSV UTILITY                                             
+//*-------------------------------------------------------------------          
+//TRANSMIT EXEC PGM=IRXJCL,    <- Build Transmit commands  SONARMDL             
+//         PARM='ENBPIU00 PARMLIST'                                             
+//TABLE   DD  DISP=SHR,                                                         
+//            DSN=&SonarWorkfile(TRANSMIT)                                      
+//PARMLIST DD *,SYMBOLS=JCLONLY                                                 
+&METHOD.1  TBLOUT  NOTHING  1                                                   
+&METHOD.2  TBLOUT  OPTIONS  A                                                   
+&METHOD.3  TBLOUT  NOTHING  1                                                   
+//OPTIONS  DD *                                                                 
+* Folder-- Member--   Dataset-------------------------------------              
+If Folder = 'COPYBOOK' then extension = 'cpy'                                   
+If Folder = 'COBOL'    then extension = 'cbl'                                   
+NewXfer = 'NEWXFER'                                                             
+If $tbl = $tablerec.0 then NewXfer = '*'                                        
+//   INCLUDE MEMBER=&METHOD.#INC       <- where are includes                    
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSEXEC   DD DISP=SHR,DSN=&MyCLS2Library                                      
+//          DD DISP=SHR,DSN=&MyCLS0Library                                      
+//NOTHING  DD DUMMY                                                             
+//SYSTSIN  DD DUMMY                                                             
+//TBLOUTX  DD SYSOUT=*                                                          
+//TBLOUT   DD DSN=&&COMMANDS,DISP=(NEW,PASS),                                   
+//            UNIT=SYSDA,SPACE=(TRK,(1,1)),                                     
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=8000)                              
+//*----------------------------------------------------------------*            
+//*  Print Commands                                                             
+//*----------------------------------------------------------------*            
+//SHOWME   EXEC PGM=IEBGENER   <- Show File Transmit cmds  SONARMDL             
+//SYSPRINT DD DUMMY                                                             
+//SYSIN    DD DUMMY                                                             
+//SYSUT1   DD DSN=&&COMMANDS,DISP=(OLD,PASS)                                    
+//SYSUT2   DD SYSOUT=*                                                          
+//*                                                                             
+//*----------------------------------------------------------------*            
+//*----------------------------------------------------------------*            
+//   IF (RC < &TransmitCOND) THEN                                               
+//   INCLUDE MEMBER=&METHOD.#RUN       <- Exec the Transmission                 
+//   ENDIF                                                                      
+//*-------------------------------------------------------------------*         
+//*-------------------------------------------------------------------*         
+//   IF  (RC > 4)  THEN                                                         
+//*-------------------------------------------------------------------*         
+//REPORT2B EXEC PGM=IKJEFT1B,  <- Report Transmit FAILED   SONARMDL             
+//         PARM='ENBPIU00 1',COND=EVEN                                          
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//OPTIONS  DD *                                                                 
+  JobName = MVSVAR('SYMDEF',JOBNAME )                                           
+  X = OUTTRAP(LINE.);                                                           
+  address TSO "ST " JobName                                                     
+  JobData   = Strip(LINE.1);                                                    
+  Say JobData                                                                   
+  whereparen = Pos('(',JobData)                                                 
+  If whereparen > 0 then, +                                                     
+     JobNumber = Substr(JobData,whereparen+1,8)                                 
+  Queue JobName JobNumber "at" DATE('O') TIME() ":--------------------"         
+  Queue "         File Transmissions failed"                                    
+  Queue "         Stopping further action"                                      
+  Quey= "        reporting using &ReportingPFX.* "                              
+  "EXECIO 3 DISKW REPORT  ( Finis"                                              
+ Exit                                                                           
+//   ELSE                                                                       
+//*-------------------------------------------------------------------*         
+//REPORT2A EXEC PGM=IKJEFT1B,  <- Report Transmit is done  SONARMDL             
+//         PARM='ENBPIU00 1'                                                    
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//OPTIONS  DD *                                                                 
+  JobName = MVSVAR('SYMDEF',JOBNAME )                                           
+  X = OUTTRAP(LINE.);                                                           
+  address TSO "ST " JobName                                                     
+  JobData   = Strip(LINE.1);                                                    
+  Say JobData                                                                   
+  whereparen = Pos('(',JobData)                                                 
+  If whereparen > 0 then, +                                                     
+     JobNumber = Substr(JobData,whereparen+1,8)                                 
+  Queue JobName JobNumber "at" DATE('O') TIME() ":--------------------"         
+  Queue "         File Transmissions completed"                                 
+  Queue "         Starting the SonarQube Analysis"                              
+  Quey= "        reporting using &ReportingPFX.* "                              
+  "EXECIO 3 DISKW REPORT  ( Finis"                                              
+ Exit                                                                           
+//SYSEXEC   DD DISP=SHR,DSN=&MyCLS2Library                                      
+//          DD DISP=SHR,DSN=&MyCLS0Library                                      
+//REPORT   DD  DSN=&ReportingPFX.#2,                                            
+//         DISP=(MOD,CATLG,KEEP),FREE=CLOSE,                                    
+//         UNIT=SYSALLDA,SPACE=(TRK,(01,01),RLSE),                              
+//         DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PS)                           
+//*-------------------------------------------------------------------*         
+//*-------------------------------------------------------------------          
+//SONRQUBE EXEC PGM=IEFBR14    <- Start SonarQube Analysis SONARMDL             
+//*-------------------------------------------------------------------          
+//*-------------------------------------------------------------------          
+//REPORT3  EXEC PGM=IKJEFT1B,  <- Report SonarQube is done SONARMDL             
+//         PARM='ENBPIU00 1'                                                    
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSTSIN  DD DUMMY                                                             
+//OPTIONS  DD *                                                                 
+  $QuietMessages = 'Y'         /* Bypass messages Y/N        */                 
+  JobName = MVSVAR('SYMDEF',JOBNAME ) /*Returns JOBNAME */                      
+  X = OUTTRAP(LINE.);                                                           
+  address TSO "ST " JobName                                                     
+  JobData   = Strip(LINE.1);                                                    
+  Say JobData                                                                   
+  whereparen = Pos('(',JobData)                                                 
+  If whereparen > 0 then, +                                                     
+     JobNumber = Substr(JobData,whereparen+1,8)                                 
+  Queue JobName JobNumber "at" DATE('O') TIME() ":--------------------"         
+  Queue "         SonarQube Analysis is completed"                              
+  Queue "         reporting using &ReportingPFX.* "                             
+  "EXECIO 3 DISKW REPORT  ( Finis"                                              
+ Exit                                                                           
+//SYSEXEC   DD DISP=SHR,DSN=&MyCLS2Library                                      
+//          DD DISP=SHR,DSN=&MyCLS0Library                                      
+//REPORT   DD  DSN=&ReportingPFX.#3,                                            
+//         DISP=(MOD,CATLG,KEEP),FREE=CLOSE,                                    
+//         UNIT=SYSALLDA,SPACE=(TRK,(01,01),RLSE),                              
+//         DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PS)                           
+//*-------------------------------------------------------------------*         
+//   ENDIF                                                                      
+//*-------------------------------------------------------------------*         

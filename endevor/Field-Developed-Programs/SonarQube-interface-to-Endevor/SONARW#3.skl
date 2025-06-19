@@ -1,0 +1,13 @@
+* WAIT#2 wait for the SonarQube analysis to complete                            
+  If $row# = 0 then $SkipRow = 'Y'                                              
+  ReportingDSN = ReportingPFX || '.#3'                                          
+* LONGEST  wait for the SonarQube Analysis to finish                            
+  wait3 =  (wait2 * 1.5) % 1                                                    
+  wait3 = max(wait3,10)                                                         
+  wait3 = WAITFILE(ReportingDSN 55 wait3)                                       
+  say "ReportingDSN " ReportingDSN "is returned after" wait3 "secs"             
+  if wait3 = 0 then, +                                                          
+     Do; Say '#2 is lost'; Exit(13); end                                        
+  cmd = "ALLOC DD(STATUS3) DA("ReportingDSN") SHR REUSE "                       
+  CALL BPXWDYN  cmd                                                             
+  MODEL = 'STATUS3'                                                             
