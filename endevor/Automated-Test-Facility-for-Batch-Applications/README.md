@@ -74,4 +74,13 @@ Setup steps for the Automated Test Facility for Batch Applications:
 
 Note: Members **[OPTVALDT](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/OPTVALDT.rex)**, **[TXTRPLCE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/TXTRPLCE.rex)**, **[JCLRPLCE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/JCLRPLCE.rex)** and **[YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex)** are REXX subroutines required for the **Automated Test Facility for Batch Applications**. They are used by more than one solution on this GitHub, but can be found by clicking their names, as shown above, or by navigating to the **Field-Developed-Programs** folder and the **Processor-Tools-and-Processor-Snippets** subfolder.
 
+To prepare your JCL for testing, you have two choices:
+
+ 1. Use simple commands to automatically make broad, sweeping changes to your JCL with [TXTRPLCE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/TXTRPLCE.rex). Write as many FindTxt and Replace commands as needed.  
+
+ 2. If you need a more precise method for modifying your JCL, use [JCLRPLCE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/JCLRPLCE.rex), where you can name the STEP and optionally the DDname where your changes must be made. 
+
+ Both tools allow you to insert lines into your JCL before it is submitted for testing.
+
+
 You may use a moveout file to collect all members related to the **Automated Test Facility for Batch Applications**.

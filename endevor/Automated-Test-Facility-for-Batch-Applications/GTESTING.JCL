@@ -11,7 +11,7 @@
 //*  -- This processor must run in batch.                        ------*
 //*--------------------------------------------------------------------*
 //GTESTING PROC AAAAAA=,
-//    HLQ='SYSMD32.NDVR.&C1ENVMNT..&C1SY..&C1SU.',
+//    HLQ='YOURSITE.NDVR.&C1ENVMNT..&C1SY..&C1SU.',
 //*   INCLUDE='-INC &C1ELEMENT',
 //    INCLUDE='       ++INCLUDE &C1ELEMENT',
 //    EXPINC=N,
@@ -21,8 +21,8 @@
 //    OUTLIB='&HLQ..JCL',                         output JCL lib
 //    RESLTHLQ='PUBLIC.&C1ELEMENT',               perhaps C1userid...
 //    SHOWME='Y',       Show diagnostics & intermediate results Y/N
-//    SYSEXEC1=SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX,
-//    SYSEXEC2=SYSMD32.NDVR.ADMIN.ENDEVOR.ADM2.CLSTREXX,
+//    SYSEXEC1=YOURSITE.NDVR.REXX,
+//    SYSEXEC2=YOURSITE.YOUR.NDVR.NODES2.CLSTREXX,
 //    SYSOUT=*,
 //    WAITS=15,                                   Default # wait loops
 //    WAITSECS=3,                                 Default wait seconds
