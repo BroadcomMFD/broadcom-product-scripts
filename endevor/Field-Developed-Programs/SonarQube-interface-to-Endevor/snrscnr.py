@@ -71,7 +71,7 @@ def get_analysis_results():
         "p": 1
     }
     issues = []
-    while True:
+    while True: 
         response = requests.get(url, headers=headers, params=params)
         if response.status_code != 200:
             logging.error(f"Failed to retrieve issues: {response.status_code}")
