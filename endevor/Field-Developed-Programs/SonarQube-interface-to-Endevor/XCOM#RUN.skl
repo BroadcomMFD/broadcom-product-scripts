@@ -1,13 +1,14 @@
 //*-------------------------------------------------------------------          
-//XCOMJOB  EXEC PGM=XCOMJOB,   <- Transmit Files 2 server  XCOM#RUN             
-// PARM=('TYPE=EXECUTE')                                                        
-//*PARM=('TYPE=SCHEDULE,STCIP=10.175.80.48,STCPORT=8044')                       
+//XCOM#RUN EXEC PGM=XCOMJOB,   <- Exec SonarQube Analysis  XCOM#RUN             
+//     PARM=('TYPE=EXECUTE'),COND=(4,LT)                                        
 //STEPLIB  DD  DISP=SHR,                                                        
-//             DSN=SHARE.XCOM.CBXGLOAD           * XCOM LOAD MODULES            
+//             DSN=your.XCOM.CBXGLOAD           * XCOM LOAD MODULES             
 //         DD  DISP=SHR,                                                        
 //             DSN=CEE.SCEERUN                   * IBM LE RUNTIME               
 //XCOMCNTL DD  DISP=SHR,                                                        
-//             DSN=SHARE.XCOM.R120.CBXGPARM      * CONTROL LIBRARY              
+//             DSN=your.XCOM.CBXGPARM      * CONTROL LIBRARY                    
 //CAOESTOP DD DUMMY                                                             
+//*--------                                                                     
 //SYSIN01  DD DSN=&&COMMANDS,DISP=(OLD,DELETE)             XCOM#RUN             
 //*-------------------------------------------------------------------          
+//*--------------------------------------------------------XCOM#RUN---          

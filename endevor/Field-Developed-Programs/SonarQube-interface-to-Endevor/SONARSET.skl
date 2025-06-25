@@ -4,10 +4,10 @@
   ReportingPFX = USERID() || '.SONRQUBE.'uniqueName'.RESULTS'                   
   $QuietMessages = 'Y'         /* Bypass messages Y/N        */                 
   myJob     = MVSVAR('SYMDEF','JOBNAME' )                                       
-  Jobname = BUMPJOB(myJob)                                                      
+  Jobname = BUMPJOB(myJob) j                                                    
   OrderLibrary  = '&MYISPSLB'                                                   
   SonarWorkfile = '&SONARWRK'                                                   
   TransmitMethod = 'XCOM'                                                       
   TransmitMethod = 'FTP'                                                        
-  TransmitCOND  = 4        /* Skip step if prev > TransmitCOND */               
   TransmitCOND  = 0        /* Skip step if prev > TransmitCOND */               
+  TransmitCOND  = 4        /* Skip step if prev > TransmitCOND */               

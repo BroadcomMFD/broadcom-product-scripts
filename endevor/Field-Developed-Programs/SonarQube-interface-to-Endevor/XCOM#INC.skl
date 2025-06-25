@@ -1,6 +1,6 @@
 //XCOM1    DD DATA,DLM=QQ,SYMBOLS=JCLONLY                  XCOM#INC             
 TYPE=SEND                                                                       
-IPNAME=10.252.121.121                                                           
+IPNAME=12.345.678.9                                                             
 IPPORT=8044                                                                     
 CKPT=0                                                                          
 FILEOPT=REPLACE                                                                 
@@ -10,8 +10,11 @@ PASSWORD=ndvruser
 *                                                                               
 QQ                                                                              
 //XCOM2    DD *,SYMBOLS=JCLONLY                            XCOM#INC             
-FILE=/tmp/&Member.&extension                                                    
+FILE=/your/uss/inbound/&Member.&extension                                       
 LFILE=&Dataset(&Member)                                                         
 *                                                                               
-&NewXfer                                                                        
-//XCOM3    DD DUMMY                                        XCOM#INC             
+NEWXFER                                                                         
+//XCOM3    DD *                                            XCOM#INC             
+FILE=/your/uss/inbound/&Unique_Name.lst                                         
+LFILE=&SonarWorkfile(TRANSMIT)                                                  
+*                                                                               

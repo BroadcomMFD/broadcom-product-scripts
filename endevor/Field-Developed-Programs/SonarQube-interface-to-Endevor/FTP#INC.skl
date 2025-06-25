@@ -10,6 +10,6 @@
       \&Folder\&Member.&extension                                               
 //FTP3     DD *  <- All kinds of Stage info                FTP#INC              
   PUT '&SonarWorkfile(TRANSMIT)' +                                              
-      TransmitTable.&uniqueName.lst                                             
+      &uniqueName.lst                                                           
   QUIT                                                                          
 //*----------                                                                   

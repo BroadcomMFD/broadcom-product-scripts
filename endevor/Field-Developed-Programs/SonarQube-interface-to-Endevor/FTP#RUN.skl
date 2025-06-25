@@ -1,10 +1,10 @@
 //*================================================================             
-//C1BMXNDM EXEC PGM=FTP,COND=(4,LT)                        FTP#RUN              
+//FTP#RUN  EXEC PGM=FTP,COND=(4,LT)                        FTP#RUN              
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          
 //NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                     
 //SYSOUT   DD SYSOUT=*                                                          
 //OUTPUT   DD SYSOUT=*                                                          
-//INPUT    DD DSN=&&COMMANDS,DISP=(OLD,DELETE)             FTP#RUN              
+//INPUT    DD *                                            FTP#RUN              
 //*================================================================             
