@@ -5,30 +5,27 @@ Items in this folder provide an example method for interfacing SonarQube with En
 These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
 ) for more information).
 
-Features of this solution are easily tailorable to fit your site. By default they include:
+Features of this solution are easily tailorable to the requirements at your site. By default they include:
 
-1. Makes some initial analysis of a CASTing package to 
-determine whether to initiate the SonarQube 
-analysis:
-   -  The Package must have at least one COBOL element. Element types of COB* or CBL* are selected, but you can designate your own choice.
-   -  If any of rhe Package note lines can begin with the text "BYPASS SONARQUBE", no SonarQube analysis is done. 
-2.  If conditions are met, and the package is being CAST in TSO foreground, the CAST action is resubmitted in Batch. Since it may be necessary to wait for time-consuming actions to run, it is best for this process to run in batch.
-3. COBOL programs in the package are identified.
-4. ACM is referenced to identify input components for  packaged COBOL elements. Input components such as copybooks, do not need to be included in the package. Rather, the ACM information for COBOL elements will caulse copybooks to be included in the SonarQube analysis.
-5. A separate (second) JOB is constructed and submitted. The steps of the separate job include:
-    - Report back to the Endevor exit (running as job #1 doing a CAST) that the second job is running
+1. During a package CAST, an analysis of the pckage content and package notes is done.
+   -  It is determined whether the Package has at least one COBOL element. Element types of COB* or CBL* make the determination, but you can designate your own manner of recognition.
+   -  If any of rhe Package note lines can begin with the text "BYPASS SONARQUBE", no SonarQube analysis will be done. If it becomes necessary to bypass the SonarQube processing, then a simple update of the package notes will bypass the SonarQube analysis.
+2.  If package contains COBOL elements, and the BYPASS is not selected, and the package is being CAST in TSO foreground, then the CAST action is resubmitted in Batch. Since it may be necessary to wait for time-consuming actions to complete, it is best for this process to run in batch.
+3. All COBOL programs in the package are identified, and ACM queries are used for identifying input components for packaged COBOL elements. Input components such as copybooks, do not need to be included in the package. Rather, the ACM information for packaged COBOL elements will bring copybooks into the SonarQube analysis.
+4. A separate (second) JOB is constructed and submitted. The steps of the separate job include:
+    - Reports back to the Endevor exit (running as job #1 doing a CAST) that the second job is running
     - COBOL elements are RETRIEVEd into a PDS dataset
-    - COBOL and copybook members are transmittted to the server that runs SonarQube. Cobol members are transmitted from the RETRIEVE dataset. Copybook members are transmitted from  datasets named in the ACM references.  
-    - Report back to the Endevor exit that the member transmissions are done
-    - A SonarQube analysis is executed
-    - The SonarQube results are transmitted back to the site running the Endevor CAST.
-    - Report back to the Endevor exit the SonarQube results. 
-6. The Endevor exit waits for confirmation that the separate job is running, and displays messages accordingly
-7. The Endevor exit waits for confirmation that the file transmissions are done, and displays messages accordingly.
-8. The Endevor exit waits for the return of the SonarQube analysis, and displays messages accordingly.
-9. If any of the expected results are not returned, or the analysis indicates a code analysis failure, the package CAST is made to Fail.
+    - COBOL and copybook members are transmittted to the SonarQube server. Cobol members are transmitted from the RETRIEVE dataset. Copybook members are transmitted from datasets named in the ACM references.  
+    - Reports back to the Endevor exit that the member transmissions are completed
+    - Executes a SonarQube analysis.
+    - Transmits the SonarQube results back to the site running the Endevor CAST.
 
-The COBOL exit is constructed to rely on a REXX subroutine to perform the main processing. A Python member orchestrates the SonarQube activity. The Python itself. File transmissions are performed with XCOM, in these examples, but can easily be swapped out with members that run your transmission tool. 
+5. The Endevor exit waits for confirmation that the separate job is running, and displays messages accordingly
+6. The Endevor exit waits for confirmation that the file transmissions are done, and displays messages accordingly.
+7. The Endevor exit waits for the return of the SonarQube analysis, and displays messages accordingly.
+8. If any of the expected results are not returned, or the analysis indicates a code analysis failure, the package CAST is made to Fail.
+
+Processing logic is primarily found in REXX, JCL and Python members. The Python member orchestrates the SonarQube activity. File transmissions are performed using XCOM, in these examples, but they easily be swapped out for members that use your transmission tool. 
 
 Some supporting items not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
 
