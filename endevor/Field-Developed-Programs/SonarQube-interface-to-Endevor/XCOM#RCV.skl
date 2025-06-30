@@ -19,6 +19,6 @@ CODE=UTF8
 REMOTE_CHARSET=UTF8                                                             
 LFILE=&SonarWorkfile.RESULTS                                                    
 FILE=/opt/xfer/outbound/&Unique_Name.rslt                                       
-USERID=sonaruser                                                                
-PASSWORD=ndvruser                                                               
+USERID=root                                                                     
+PASSWORD=<yourpassword>                                                              
 //*--------------------------------------------------------XCOM#RCV---          

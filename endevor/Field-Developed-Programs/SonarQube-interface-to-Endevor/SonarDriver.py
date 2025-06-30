@@ -6,7 +6,7 @@ import requests
 import json
 import logging
 import textwrap
-
+#
 logging.basicConfig(
         filename='/opt/xxx/scripts/scanjob.log', # Provide your log file and its path
         filemode='a',

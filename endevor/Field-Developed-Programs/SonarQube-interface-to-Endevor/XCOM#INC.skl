@@ -5,8 +5,8 @@ IPPORT=8044
 CKPT=0                                                                          
 FILEOPT=REPLACE                                                                 
 FILETYPE=FILE                                                                   
-USERID=sonaruser                                                                
-PASSWORD=sonarpswd                                                               
+USERID=root                                                                     
+PASSWORD=<yourpassword>                                                              
 *                                                                               
 QQ                                                                              
 //XCOM2    DD *,SYMBOLS=JCLONLY                            XCOM#INC             
