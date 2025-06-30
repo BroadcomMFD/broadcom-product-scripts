@@ -9,7 +9,7 @@ Features of this solution are easily tailorable to the requirements at your site
 
 1. During a package CAST, an analysis of the pckage content and package notes is done.
    -  It is determined whether the Package has at least one COBOL element. Element types of COB* or CBL* make the determination, but you can designate your own manner of recognition.
-   -  If any of rhe Package note lines can begin with the text "BYPASS SONARQUBE", no SonarQube analysis will be done. If it becomes necessary to bypass the SonarQube processing, then a simple update of the package notes will bypass the SonarQube analysis.
+   -  If any of the Package note lines can begin with the text "BYPASS SONARQUBE", no SonarQube analysis will be done. If it becomes necessary to bypass the SonarQube processing, then a simple update of the package notes will bypass the SonarQube analysis.
 2.  If package contains COBOL elements, and the BYPASS is not selected, and the package is being CAST in TSO foreground, then the CAST action is resubmitted in Batch. Since it may be necessary to wait for time-consuming actions to complete, it is best for this process to run in batch.
 3. All COBOL programs in the package are identified, and ACM queries are used for identifying input components. Input components such as copybooks, do not need to be included in the package. Rather, the ACM information for packaged COBOL elements will bring copybooks into the SonarQube analysis.
 4. Packaged COBOL elements are RETRIEVEd into a PDS.
