@@ -6,7 +6,7 @@ CKPT=0
 FILEOPT=REPLACE                                                                 
 FILETYPE=FILE                                                                   
 USERID=sonaruser                                                                
-PASSWORD=ndvruser                                                               
+PASSWORD=sonarpswd                                                               
 *                                                                               
 QQ                                                                              
 //XCOM2    DD *,SYMBOLS=JCLONLY                            XCOM#INC             

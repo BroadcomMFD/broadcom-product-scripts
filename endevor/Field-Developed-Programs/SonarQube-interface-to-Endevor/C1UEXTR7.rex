@@ -114,7 +114,7 @@
          Call GetUnique_Name                                                    
          SonarDSNPrefix = USERID()'.SONRQUBE.' || Unique_Name                   
          SonarRemoteCommand =,                                                  
-           "python3 /opt/xfer/scripts/sqp3.py" Unique_Name.lst                  
+           "python3 /opt/xfer/scripts/SonarDriver.py" Unique_Name.lst                 
          TransmitTable = ""                                                     
          End /* If Cast_with_SonarQube = 'Y' */                                 
       End /* If Cast_with_SonarQube /= 'N' */                                   
