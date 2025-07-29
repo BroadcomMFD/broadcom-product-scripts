@@ -468,7 +468,7 @@ function checkZoweSetup() {
         error "Zowe CLI must be installed to run this script."
     fi
 
-    if ! zowe plugins validate '@broadcom/caview-for-zowe-cli' >/dev/null 2>&1; then
+    if ! zowe caview >/dev/null 2>&1; then
         error "The View Plug-in for Zowe CLI must be installed to run this script."
     fi
 }
