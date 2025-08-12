@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "2.20.2"
+    "@openapitools/openapi-generator-cli": "2.22.0"
   },
   "scripts": {
     "generate-sdk": "openapi-generator-cli generate --generator-name java --config generator.yml --input-spec api-specification.json --output sdk",
