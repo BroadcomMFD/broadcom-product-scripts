@@ -5,12 +5,9 @@ These samples are provided as is and are not officially supported (see [license]
 
 ## Introduction
 
-Items in this folder can be used to introduce and automate testing in Endevor, running the kinds of test supported by Test4Z.  There are many items in this folder largely to support the many choices available to you and your configuration for testing.
+Items in this folder can be used to introduce and automate testing in Endevor, running the kinds of test supported by Test4Z.  There are many items in this folder largely to support the many choices available to you and your configuration for testing.  Your Endevor processor can submit JCL and wait for your batch test to complete. 
 
-Your Endevor processor can submit JCL and wait for your batch test to compleete. You have a choice on how the job accounting code is derived for the submmitted job. 
-- **GETACCTC lookup.rex**
- allows you to enter userids and accounting codes for your site.
-- **GETACCTC.rex** uses data blocks in lower-memory to obtain the accounting information for an active job or session.
+Processor code that is provided can be copied into yuor processors, or used as "Includes" - like copybooks. Files with the .prc extension use an OPTIONS approach for determining which tests to run. Files with the .inc extension use a Table approach.  **UTABLE.tbl** is an example Table. It is expected that you will use one method or the other. 
 
 
 See the two modes of testing described in [Testing Modes](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0/administrating/define-options-for-unit-and-record-and-replay.html) and [Test4Z techdocs documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/test4z/1-0.html) :
@@ -63,17 +60,6 @@ An assessment of the completed Test is made automatically to make it easier for 
     ________ SUCCESS  $$$$$$@           QUEUED        1         2 A         144   
     
   
-
-## Why is there So Much REXX
-
-REXX can run almost anywhere on the mainframe. The IBM feature for [Using IRXJCL to execute an in-stream REXX exec](https://www.ibm.com/docs/en/zos/2.5.0?topic=routine-using-irxjcl-execute-in-stream-rexx-exec) has empowered this solution in several ways:
-
-- REXX can run in skeleton-based submitted jobs - without having to be placed into separate REXX libraries.
-- In-stream REXX works quite well within processors, empowering them to make dynamic decisions based on Endevor processor symbols and other information.
-- REXX runs comfortably in Table Tool steps 
-- The REXX code in this solution is stable, and does not need any adjustments at your site.
-
-
 ## Endevor Types
 
 There are four potential Endevor Types that might be useful for this solution. If you use Endevor Processors to automate testing, then only the OPTIONS element type is required. You may use any Types name you prefer, rather than the ones refereced within items in this folder. 
