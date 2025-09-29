@@ -29,9 +29,10 @@ Processing logic is primarily found in REXX, JCL and Python members. The Python 
 
 Some supporting items are not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
 
+**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%20(zowe))** 
+
 
 **[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/BUMPJOB.rex)** for bumping an existing jobname to render a new job name
-
 
 **[GETACCT.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Automated-Test-Facility-Using-Test4Z/GETACCTC.rex)** for obtaining and re-using the users accounting code information
 
