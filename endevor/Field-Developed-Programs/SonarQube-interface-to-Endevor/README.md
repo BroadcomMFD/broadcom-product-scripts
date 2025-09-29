@@ -27,21 +27,22 @@ Features of this solution are easily tailorable to the requirements at your site
 
 Processing logic is primarily found in REXX, JCL and Python members. The Python member orchestrates the SonarQube activity. File transmissions are performed using XCOM, in these examples, but they easily be swapped out for members that use your transmission tool. 
 
-Some supporting items not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
+Some supporting items are not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
 
 
-**[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/BUMPJOB.rex)** for bumping an existing jobname to render a new job name
+**[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/BUMPJOB.rex)** for bumping an existing jobname to render a new job name
 
 
 **[GETACCT.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Automated-Test-Facility-Using-Test4Z/GETACCTC.rex)** for obtaining and re-using the users accounting code information
 
-**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/GTUNIQUE.rex)** for obtaining a unique 8-byte name from the current date and time.
+**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/GTUNIQUE.rex)** for obtaining a unique 8-byte name from the current date and time.
 
-**[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
+**[QMATCH.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/QMATCH.rex)** for comparing two text strings, where one or both may have wild-carded values.
 
-**[SCAN#SCL](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Multi-Package-Reporting-and-Validations/SCAN%23SCL.rex)** for converting SCL statements  into a table format.
+**[SCAN#SCL.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Multi-Package-Reporting-and-Validations/SCAN%23SCL.rex)** for converting SCL statements  into a table format.
 
-**[QMATCH]( )**
+
+**[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
 
 **[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
 
