@@ -39,7 +39,16 @@ Some supporting items not found in this folder, since they are utilities, or alr
 
 **[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
 
+**[SCAN#SCL](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Multi-Package-Reporting-and-Validations/SCAN%23SCL.rex)** for converting SCL statements  into a table format.
+
+**[QMATCH]( )**
+
+**[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
+
+
+
+
+
 Use the SonarQube.bat commmand to bring the items together for your mainframe.
 
-
-
+ 
