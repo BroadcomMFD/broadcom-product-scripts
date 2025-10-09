@@ -3,7 +3,7 @@
 ## Overview
 Items in this folder are example Endevor objects for interfacing with ServiceNow. This interface assumes that the automated activity begins in Endevor. 
 
-An alternative interface, not supported by items in this folder, begins with ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
+An alternative interface, not supported by items in this folder, begins with human actions in ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
 
 - [Endevor Package Integration with ServiceNow
 ](https://medium.com/modern-mainframe/endevor-package-integration-with-servicenow-5302c7d3780a)
