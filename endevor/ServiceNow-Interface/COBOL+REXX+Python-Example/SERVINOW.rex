@@ -2,6 +2,9 @@
 /*  Validate the Ticket# with Service-Now                      */
 /*  This routine can be used to validate a CCID or package     */
 /*  name (for example) as valid Service-Now ticket numbers.    */
+   isItThere = ,
+     BPXWDYN("INFO FI(SERVINOW) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
+   If isItThere = 0 then Trace ?r
    Arg Caller Ticket# TSOorBatch .
    If TSOorBatch = 'B' then say "SERVINOW - validating" Ticket#
    NEWSTACK
@@ -36,13 +39,7 @@
    lastrecord = Substr(stdout.lastrec#,1,40)
    whereExists = Pos("Exists",lastrecord)
    If whereExists = 0 then,
-      Do
       Message = Caller'/SERVINOW - Ticket Number ' Ticket# ||,
                 ' is **NOT** defined to Service-Now'
-      /* Print the output from running Python */
-      do i=1 to stderr.0
-         say stderr.i
-      end    /* Do.... */
-      End /* If whereExists = 0  */
    DELSTACK
    Return Message;
