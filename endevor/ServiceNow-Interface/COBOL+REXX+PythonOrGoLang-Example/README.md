@@ -38,7 +38,7 @@ If you know that the python "request" package has not been installed, or if you 
 Other items in this folder are Endevor exit code examples that query ServiceNow. Endevor functions listed below, each use a COBOL exit, a REXX subroutine and a Python subroutine. Functions include:
 - **Exit 2**. Before element action exit code to validate a CCID value with ServiceNow. 
 - **Exit 7**. Package exit code to validate (a portion of) a package namee with ServiceNow. 
-- **C1UEXTR2** and **C1UEXTR7** are Rexx subroutines to the COBOL exit programs. The C1UEXTR2 module is coded to not call the SERVINOW subroutine when the requested CCID already exists on an element. So for example, Update and MOVE actions might find the requested CCID value already on the element and bypass the valication.    
+- **C1UEXTR2** and **C1UEXTR7** are Rexx subroutines to the COBOL exit programs. The C1UEXTR2 module is coded to not call the SERVINOW subroutine when the requested CCID already exists on an element. So for example, Update and MOVE actions might find the requested CCID value already on the element and bypass the validation.    
 - **SERVINOW** is a REXX subroutine to both C1UEXTR2 and C1UEXTR7 and is the member that calls the Python code to validate a 10-byte value with ServiceNow.
 
 
