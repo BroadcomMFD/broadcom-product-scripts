@@ -9,6 +9,8 @@ Details for Endevor Exit actions can be found [here](https://techdocs.broadcom.c
 Note that Endevor supports "exits that are written in either assembler or in high-level languages such as COBOL". The exits provided in this folder are written in COBOL, but there is no requirement for implementers or users to have knowledge of COBOL. All processing logic for this solution is coded in the Rexx, and the Python or Golang subroutines.
 
 ## Where to start
+Python uses the "square bracket" characters, "[" and "]". On the mainframe these characters must be the hex AD and hex BD characters to run properly.
+
 If you have not yet loaded the Python "requests" package, make that be your first step. If you are not sure whether the "requests" package is installed, you can use this step to find out.
 
 If you have already installed the "request" package and it is found in the search path, then comment out the sys.path line in the python. For example:
