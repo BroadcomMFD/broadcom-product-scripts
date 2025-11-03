@@ -8,14 +8,14 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 ##  Build the complete url  here
-print("#Arguments:", sys.argvÝ1:¨)   # Additional arguments passed
-listticketnumber = sys.argvÝ1:2¨
+print("#Arguments:", sys.argvï¿½1:ï¿½)   # Additional arguments passed
+listticketnumber = sys.argvï¿½1:2ï¿½
 print("#listticketnumber :", type(listticketnumber), listticketnumber)
-ticketnumber = listticketnumberÝ0¨
+ticketnumber = listticketnumberï¿½0ï¿½
 ticketnumberType = type(ticketnumber)
-mySubstring = ticketnumberÝ0:3¨                 # does a substring
+mySubstring = ticketnumberï¿½0:3ï¿½                 # does a substring
 #
-url = "https://dev341534.service-now.com/api/now/table"
+url = "https://yoursite.service-now.com/api/now/table"
 if mySubstring == 'PRB':
    print('problem ticket query')
    url = url + "/problem?sysparm_query=number="
@@ -26,10 +26,10 @@ else:
 url = url + ticketnumber
 print("#url:", url)                  # complete url
 #
-response = requests.get(url, auth=HTTPBasicAuth('admin', 'j=H%D9U3ukJk'))
+response = requests.get(url, auth=HTTPBasicAuth('admin', 'yourpassword'))
 print(response.content)
 out = json.loads(response.content)
-n = outÝ'result'¨
+n = outï¿½'result'ï¿½
 #
 typeout = type(out)
 typen   = type(n)
@@ -38,7 +38,7 @@ print("#out type", typeout)
 #
 if len(n) == 0:
    print("error - no output")
-elif "number" in nÝ0¨.keys():
+elif "number" in nï¿½0ï¿½.keys():
    print("Exists")
 else:
    print("error - not found")
