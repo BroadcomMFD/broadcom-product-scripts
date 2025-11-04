@@ -1,9 +1,11 @@
 # ServiceNow interface to Endevor
 
-Items in this folder show example Endevor exit code that interfaces with ServiceNow. This interface assumes that the automated activity begins in Endevor. These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
-) for more information).
+## Overview
+Items in this folder are objects that serve as examples for interfacing Endevor with ServiceNow. They assume that the automated activity begins in Endevor. 
 
-An alternative interface begins with ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
+## An Alternative not Covered Here
+
+An alternative interface, not supported by items in this folder, begins with ServiceNow, and allows actions in ServiceNow to automate package actions in Endevor. See these sites for more details:
 
 - [Endevor Package Integration with ServiceNow
 ](https://medium.com/modern-mainframe/endevor-package-integration-with-servicenow-5302c7d3780a)
@@ -12,13 +14,14 @@ An alternative interface begins with ServiceNow, and allows actions in ServiceNo
 ](https://medium.com/modern-mainframe/endevor-package-integration-with-servicenow-part-2-e982e92b3214
 )
 
-This folder contains Endevor exit code examples that causes Endevor activity to reach out to ServiceNow. Each function uses a COBOL exit, a REXX subroutine and a Python subroutine. Functions include:
-- Exit 2. Before element action exit code to validate a CCID value with ServiceNow (C1UEXT02 / C1UEXTR2 / ServiceNow.py)
-- Exit 7. Package exit code to validate (a portion of) a package namee with ServiceNow. (C1UEXT07 / C1UEXTR7 / ServiceNow.py)
+## What is in this folder
 
-Processing starts with an Endevor action. Endevor then calls an example COBOL exit. The COBOL examples show how you can collect exit block information and pass it to a REXX subroutine. Rexx then calls the same example python code.
+For Endevor to query ServiceNow, there are at least two choices. They give you the opportunity to choose a method most compatible to your skills and site requirements. Two methods are located within sub-folders in this section.
 
-Both REXX examples contain code that allows on-demand REXX tracing to be automatically invoked. Simply allocate the name of the REXX program to DUMMY. For example, to engage the Trace for C1UEXTR2, then allocate C1UEXTR2 to DUMMY. There are two ways to do the allocation:
+- **COBOL+REXX+WebEnablementToolkit** - contains items that leverage [IBM's Web Enablement Toolkit](https://www.ibm.com/docs/en/zos/3.2.0?topic=languages-zos-client-web-enablement-toolkit), avoiding any dependencies for off-host and Open Source items.
 
-- In TSO forground, enter "TSO ALLLOC F(C1UEXTR2) DUMMY"
-- In batch, include a JCL line  "//C1UEXTR2  DD DUMMY"
+- **COBOL+REXX+PythonOrGolang-Example** - contains items that depend use a simple Python or a GoLang member on USS, instead of using the Web Enablement Toolkit.
+
+Open each folder to find additional details.  
+
+The processing begins with an Endevor action, such as generating an element or creating a package. These actions trigger an Endevor-engaged COBOL exit. The COBOL examples gather exit block information from Endevor and transmit it to a REXX subroutine. The COBOL exits are expected to remain static. Ultimately, REXX, Python, or GoLang will perform the query to ServiceNow. The query's response is a JSON string, which can then be further examined as required.
