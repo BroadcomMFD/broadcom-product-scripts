@@ -1,0 +1,27 @@
+/*****************************************************************\
+* Rexx routine to put move, gen, delete processor data onto one   *
+* line.                                                           *
+\*****************************************************************/
+
+'execio * diskr FILEIN (stem line.'
+do # = 1 to line.0
+   writerec = 'N'
+   skiprec  = 'N'
+
+   if POS(' G ',line.#) > 0 then save1 = SUBSTR(line.#,1,48)
+   if POS(' D ',line.#) > 0 then save2 = SUBSTR(line.#,39,10)
+   if POS(' M ',line.#) > 0 then do
+      save3  = SUBSTR(line.#,39,10)
+      line.# = save1 save2 save3
+      if POS('G *NOPROC* D *NOPROC* M *NOPROC*',line.#) > 0 then,
+         skiprec = 'Y'
+      if POS('G GPPROCSS D DPPROCSS M GPPROCSS',line.#) > 0 then,
+         skiprec = 'Y'
+      if skiprec = 'N' then writerec = 'Y'
+   end
+
+   if writerec = 'Y' then queue line.#
+end
+
+'EXECIO * DISKW FILEOUT ( FINIS'
+exit

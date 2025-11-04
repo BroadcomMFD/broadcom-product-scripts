@@ -189,6 +189,12 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
+                  'REQ_USER_DATA = "'
+                     DELIMITED BY SIZE
+                   REQ-USER-DATA
+                     DELIMITED BY SIZE
+                  '";'
+                     DELIMITED BY SIZE
                   'REQ_SISO_INDICATOR = "'
                      DELIMITED BY SIZE
                    REQ-SISO-INDICATOR
@@ -555,7 +561,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(REXFILE) ',
-                 'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                 'DA(YOURSITE.NDVR.REXX)'         00051710
                       DELIMITED BY SIZE
                         ' SHR REUSE'
                       DELIMITED BY SIZE
@@ -570,7 +576,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(SYSEXEC) ',
-                 'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                 'DA(YOURSITE.NDVR.REXX)'         00053210
                       DELIMITED BY SIZE
                         ' SHR REUSE'
                       DELIMITED BY SIZE

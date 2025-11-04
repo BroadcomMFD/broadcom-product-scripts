@@ -1,0 +1,30 @@
+/*****************************************************************\
+* Rexx routine to merge Endevor processor group data with         *
+* element counts.                                                 *
+\*****************************************************************/
+
+'execio * diskr FILEIN1 (stem file1.'
+'execio * diskr FILEIN2 (stem file2.'
+h1 = 'Env      # System   Type     P.Group  Generate   Delete     Mo'
+h2 = 've        E.Count'
+header = h1 || h2
+queue header
+h1 = '-------- - -------- -------- -------- ---------- ---------- --'
+h2 = '--------  -------'
+header = h1 || h2
+queue header
+
+do # = 1 to file1.0
+   f1key = SUBSTR(file1.#,1,38)
+
+   do $ = 1 to file2.0
+      f2key    = SUBSTR(file2.$,1,38)
+      ecount   = SUBSTR(file2.$,39,7)
+      if f1key = f2key then file1.# = SUBSTR(file1.#,1,71) ecount
+   end
+
+   queue file1.#
+end
+
+'EXECIO * DISKW FILEOUT ( FINIS'
+exit

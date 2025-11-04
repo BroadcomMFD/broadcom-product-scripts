@@ -1,0 +1,26 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ ^ TYPE(INPUT) CAPS(OFF) JUST(ASIS) PAD(' ')                                    
+ _ TYPE(INPUT) CAPS(ON)  JUST(ASIS) PADC(USER)                                  
+ ` TYPE(TEXT) SKIP(ON)                                                          
+  › TYPE(OUTPUT) INTENS(LOW) CAPS(OFF)                                          
+  { TYPE(PT)                /* Panel Title */                                   
+  } TYPE(NT)                /* Normal Text */                                   
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+)BODY WINDOW(65,15) CMD()                                                       
+}             {Test4Z Endevor Submit a Record job}              }               
+}                                                               }               
+}Element     ......›EEVETKEL  `                                 }               
+}Description ......›USERDESC                                 `  }               
+}JCL   Lib   ......^MYJCLLIB                                 `  }               
+}Load  Lib   ......^LOADLIB                                  `  }               
+}Data  Lib   ......^T4ZLDATA                                 `  }               
+}Cover Lib   ......^COVERLIB                                 `  }               
+}Review JCL? ......^Z`                                          }               
+}ENV:›EEVETKEN}SYS:›EEVETKSY`}SUB:›EEVETKSB`}TYP:›EEVETKTY`    }                
+}                                                               }               
+}Enter criteria for a batch TEST4Z 'record' submission.         }               
+)INIT                                                                           
+ .ZVARS='(SHOWJCL)'                                                             
+ .CURSOR = SHOWJCL                                                              
+)PROC                                                                           
+)END                                                                            

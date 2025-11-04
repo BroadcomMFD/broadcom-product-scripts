@@ -1,4 +1,4 @@
-//IBMUSERO JOB (0000),'Dan Walther',CLASS=A,MSGCLASS=Z,MSGLEVEL=(1,1),          
+//IBMUSERO JOB (0000),'Your Name',CLASS=A,MSGCLASS=Z,MSGLEVEL=(1,1),            
 //         NOTIFY=&SYSUID,REGION=0M                                             
 //*-------------------------------------------------------------------*         
 //*--Report processor group Overrides --------------------------------*         

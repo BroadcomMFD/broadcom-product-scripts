@@ -1,0 +1,11 @@
+** List in chronological order the Tests to run                                 
+TEST_Test_Suite = 'ZTTQSAML ZTTQSAMK ZTTQSAMI ' +                               
+                  'ZTTQSAMH ZTTQSAMJ ZTTQSAMM'                                  
+TEST_Allow_test_fails= +                                                        
+                  'N        N        N        ' +                               
+                  'N        Y        N        '                                 
+  QA_Test_Suite = 'ZTTQSAMH ZTTQSAMJ ZTTQSAMM ' +                               
+                  'ZTTQSAML ZTTQSAMK ZTTQSAMI'                                  
+  QA_Allow_test_fails= +                                                        
+                  'N        Y        Y        ' +                               
+                  'N        N        N        '                                 

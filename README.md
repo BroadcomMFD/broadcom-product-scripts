@@ -1,22 +1,28 @@
 # Broadcom Product Scripts
-This repository houses sample scripts for use cases involving Broadcom Products.
+This repository houses sample scripts for use cases involving Broadcom Products. 
+
+These samples are provided as is and are not officially supported (see [license](LICENSE) for more information).
 
 # Using
 Sample scripts for each product are located in the directory that shares its name. For example, Endevor samples are in the [endevor](endevor) directory. If you cannot find a particular use case, [please open an issue](https://github.com/BroadcomMFD/broadcom-product-scripts/issues/new).
 
 Alternatively, you can select from the use cases below:
 
+## Code4z - VS Code extension for the example.com company
+This is an [example](code4z/example-com-extension) of an extension that a fictitious company `example.com` might want to create to supplement Code4z with custom, company-specific functionality. It shows how to make the functionality of custom in-house ISPF applications available in VS Code.
+
 ## Endevor - Automated Test Facility for Batch Applications
 This [sample repository](endevor/Automated-Test-Facility-for-Batch-Applications) contains artifacts described in the [How to Leverage Endevor Processors to Test Batch Applications](https://medium.com/modern-mainframe/how-to-leverage-endevor-processors-to-test-batch-applications-6247a9dfdafa) blog on Medium.  The objects are for using Endevor processors in Building an Automated Test Facility for Batch Applications in Endevor.
 
 ## Endevor - Self-servicing Project Workareas in Endevor with Dynamic Environments
+
 This [sample repository](endevor/Self-servicing-Project-Workareas-in-Endevor-with-Dynamic-Environments) contains artifacts described in the [Self-servicing Project Workareas in Endevor with Dynamic Environments](https://medium.com/modern-mainframe/self-service-developer-workspaces-in-endevor-3b83c72bdc14) blog on Medium.  The objects are sample processors for enabling self service with Dynamic Environments backed by Deferred File Creation.
 
 ## Endevor - Shipments for a Single-Destination
-This [sample repository](endevor/Shipments-for-a-Single-Destination) contains artifacts described in the [Automate Endevor Package Shipments with Zowe CLI](https://medium.com/zowe/automate-ca-endevor-package-shipments-with-zowe-cli-e15feb61745a) blog on Medium.  The objects are used to initiate package shipments for an Endevor image that has only one Shipment destination.  The installation steps are fewer and simpler than those necessary for Shipments-for-Multiple-Destinations.
+This [sample repository](<endevor/Shipments-for-a-Single-Destination (zowe)>) contains artifacts described in the [Automate Endevor Package Shipments with Zowe CLI](https://medium.com/zowe/automate-ca-endevor-package-shipments-with-zowe-cli-e15feb61745a) blog on Medium.  The objects are used to initiate package shipments for an Endevor image that has only one Shipment destination.  The installation steps are fewer and simpler than those necessary for Shipments-for-Multiple-Destinations.
 
 ## Endevor - Shipments for Multiple Destinations
-This [sample repository](endevor/Shipments-for-Multiple-Destinations) contains artifacts described in the [Automate Endevor Package Shipments with Zowe CLI](https://medium.com/zowe/automate-ca-endevor-package-shipments-with-zowe-cli-e15feb61745a) blog on Medium.  The objects are used to initiate package shipments for Endevor images that have multiple Shipment destinations.  Zero to many package shipment destinations are determined, and shipment jobs are submitted based on each Endevor package content.
+This [sample repository](<endevor/Shipments-for-Multiple-Destinations (zowe)>) contains artifacts described in the [Automate Endevor Package Shipments with Zowe CLI](https://medium.com/zowe/automate-ca-endevor-package-shipments-with-zowe-cli-e15feb61745a) blog on Medium.  The objects are used to initiate package shipments for Endevor images that have multiple Shipment destinations.  Zero to many package shipment destinations are determined, and shipment jobs are submitted based on each Endevor package content.
 
 ## Endevor - Storing zUnit Artifacts in Endevor
 This [sample repository](endevor/zunit) contains the artifacts described in the [Modern Mainframe](https://medium.com/modern-mainframe) blog on Medium.  The REXX scripts and corresponding JCL are used to serialize and deserialize zUnit test cases.  Also included is a JenkinsFile that shows how these scripts can be invoked via Zowe CLI in a Jenkins pipeline.

@@ -1,0 +1,59 @@
+{
+	"name": "example-com-extension",
+	"displayName": "example.com in House Extension",
+	"description": "Minimal extension with REXX, ZOWE, and VS Code",
+	"version": "0.0.1",
+	"publisher": "none",
+	"icon": "resources/icon.png",
+	"license": "SEE LICENSE IN LICENSE",
+	"repository": {
+		"url": "https://github.com/BroadcomMFD/broadcom-product-scripts"
+	},
+	"engines": {
+		"vscode": "^1.98.0"
+	},
+	"activationEvents": [],
+	"main": "./extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "com.example.open.docs",
+				"title": "Open Docs",
+				"category": "example.com"
+			},
+			{
+				"command": "com.example.report.basic",
+				"title": "Basic Report on a Dataset",
+				"category": "example.com"
+			},
+			{
+				"command": "com.example.report.enhanced",
+				"title": "Enhanced Report on a Dataset",
+				"category": "example.com"
+			}
+		],
+		"configuration": [
+			{
+				"type": "object",
+				"title": "Configuration for example.com",
+				"properties": {
+					"example-com.reportExec": {
+						"description": "The location of the REXX exec on the mainframe",
+						"type": "string",
+						"default": ""
+					}
+				}
+			}
+		]
+	},
+	"devDependencies": {
+		"@types/node": "^22.13.9",
+		"@types/vscode": "^1.98.0",
+		"@vscode/vsce": "^3.4.2",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"check": "tsc --pretty",
+		"package": "vsce package"
+	}
+}

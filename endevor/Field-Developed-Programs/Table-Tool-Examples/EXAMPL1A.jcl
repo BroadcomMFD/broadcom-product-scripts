@@ -30,6 +30,6 @@ LIST ELEMENT '*'
      ELM_LAST_LL_DATE=&ELM_LAST_LL_DATE @ &ELM_LAST_LL_TIME                     
 //TABLE    DD  DSN=&&CSVFILE,DISP=(OLD,DELETE)                                  
 //SYSTSPRT DD SYSOUT=*                                                          
-//SYSEXEC  DD DISP=SHR,DSN=CARSMINI.NDVR.R1801.CSIQCLS0                         
+//SYSEXEC  DD DISP=SHR,DSN=YOURHLQ.NDVR.R1801.CSIQCLS0                          
 //TBLOUT    DD SYSOUT=*                                                         
                                                                                 

@@ -16,3 +16,5 @@ Currently available samples:
 
 - [Administrator Tools](administrator-tools) - A set of script-based tools covering various
   use cases targeted at product administrators.
+
+- [Report Concatenation](report-concatenation) - Samples dealing with concatenation of reports.

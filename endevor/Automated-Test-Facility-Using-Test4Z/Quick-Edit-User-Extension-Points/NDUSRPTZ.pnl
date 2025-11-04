@@ -1,0 +1,29 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+ ^ TYPE(INPUT) CAPS(OFF) JUST(ASIS) PAD(' ')                                    
+ _ TYPE(INPUT) CAPS(ON)  JUST(ASIS) PADC(USER)                                  
+ ` TYPE(TEXT) SKIP(ON)                                                          
+  { TYPE(PT)                /* Panel Title */                                   
+  } TYPE(NT)                /* Normal Text */                                   
+  % TYPE(FP)                /* Field Prompt - Use for command/scroll text*/     
+  ç AREA(SCRL) EXTEND(ON)                                                       
+)BODY WINDOW(65,15) CMD()                                                       
+}             {Test4Z Endevor Meta-Data}                        }               
+}                                                               }               
+}{Element    .......^EEVETKEL  `                                }               
+}{Description.......^USERDESC                                `  }               
+}                                                               }               
+}{ENV ^EEVETKEN{SYS ^EEVETKSY`{SUB ^EEVETKSB`{TYP ^EEVETKTY`    }               
+}{ Program   ^PROGRAM `}                                                        
+}{ Parameter ^PARM                                             `}               
+}                                                               }               
+çSAREA38                                                        ç               
+)AREA SAREA38                                                                   
+}Use this panel to enter criteria for a batch TEST4Z submission.}               
+)INIT                                                                           
+ .CURSOR = PROGRAM                                                              
+ VGET (USERDAT1 USERDAT2 USERDESC) SHARED                                       
+ VGET (USERLCCI USERGCCI USERRCCI USERPGRP USERUSER) SHARED                     
+)PROC                                                                           
+ VPUT (USERDAT1 USERDAT2 USERDESC) SHARED                                       
+ VPUT (USERLCCI USERGCCI USERRCCI USERPGRP USERUSER) SHARED                     
+)END                                                                            

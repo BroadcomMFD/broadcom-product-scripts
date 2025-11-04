@@ -4,6 +4,11 @@
      /* WRITTEN BY DAN WALTHER */                                               
 /*   TRACE R ;                                                        */        
 /*   ADDRESS ISREXEC " CONTROL RETURN ERRORS " ;                      */        
+     ADDRESS ISREDIT  "CHANGE 'CE'X '4A'X ALL " ;                               
+     ADDRESS ISREDIT  "CHANGE '6A'X '4F'X ALL " ;                               
+     ADDRESS ISREDIT  "CHANGE 'B7'X '5F'X ALL " ;                               
+     ADDRESS ISREDIT  "CHANGE 'FA'X '4F'X ALL " ;                               
+     ADDRESS ISREDIT  "CHANGE '9A'X '5F'X ALL " ;                               
      ADDRESS ISREDIT " CURSOR = 1 1 " ;                                         
      RETCODE = 0  ;                                                             
      ADDRESS ISREDIT " (LPOS1,CPOS1) = CURSOR " ;                               
@@ -33,8 +38,11 @@
         IF REPRC = 0 THEN ,                                                     
            ADDRESS ISREDIT " DELETE "LPOS1  LPOS2 ;                             
       END;  /* DO WHILE RETCODE = 0 */                                          
+      IF SYSVAR(SYSENV) = BACK THEN ,                                           
+         DO                                                                     
+         ADDRESS ISREDIT " SAVE "                                               
+         ADDRESS ISREDIT " CANCEL "                                             
+         END                                                                    
      ADDRESS ISREDIT " EXCLUDE ALL ";                                           
      ADDRESS ISREDIT " FIND './  ADD  NAME=' 1 ALL" ;                           
-     IF SYSVAR(SYSENV) = 'BACK' THEN ,                                          
-        ADDRESS ISREDIT " CANCEL "                                              
      EXIT 0                                                                     
