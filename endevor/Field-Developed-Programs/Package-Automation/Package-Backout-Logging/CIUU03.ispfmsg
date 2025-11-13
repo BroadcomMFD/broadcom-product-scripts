@@ -1,0 +1,6 @@
+CIUU033E 'PKG CAST in Batch '                          .ALARM=NO                
+'&VARSPPKG is CAST by submitted batch job'                                      
+CIUU034W 'PKG BAK Action submitted in Batch'           .ALARM=NO                
+'&VARSPPKG &ACTION is submitted in batch job'                                   
+CIUU035E 'ServiceNow num required'                     .ALARM=NO                
+'&VARSPPKG &VARWKCMD is **Not** authorized'                                     

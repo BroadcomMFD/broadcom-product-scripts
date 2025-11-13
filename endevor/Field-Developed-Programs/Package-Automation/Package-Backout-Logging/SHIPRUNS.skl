@@ -1,0 +1,31 @@
+//&Jobname JOB (&MyAccountingCode),                                             
+//   'SHIP PACKAGE',CLASS=A,MSGCLASS=X,REGION=0M,NOTIFY=&SYSUID                 
+//*==================================================================*          
+// JCLLIB  ORDER=(&MySEN2Library,                                               
+//           &MySENULibrary)                                                    
+//*==================================================================*          
+//*=== For a given package, search the SHIPRULE table and ===========*          
+//*=== submit a package shipment job for each match.      ===========*          
+//*==================================================================*          
+//  EXPORT SYMLIST=(*)                                                          
+//   SET CSIQCLS0='&MyCLS0Library'                                              
+//   SET CSIQCLS2='&MyCLS2Library'                                              
+//   SET PACKAGE='&PECB_PACKAGE_ID'                                             
+//   SET SHIPOUT='BAK'                                                          
+//*-------------------------------------------------------------------          
+//*   STEP 01-- Submit a job to scan the SHIPRULE table for shipments           
+//*-------------------------------------------------------------------          
+//SHIPRULE EXEC PGM=IRXJCL,                                SHIPRUNS             
+//         PARM='ENBPIU00 1'                                                    
+//  INCLUDE MEMBER=STEPLIB                                                      
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS2                                            
+//         DD DISP=SHR,DSN=&CSIQCLS0                                            
+//SYSTSIN  DD DUMMY                                                             
+//PKGESHIP DD DUMMY  ** turn trace on/off **                                    
+//OPTIONS  DD *,SYMBOLS=JCLONLY                                                 
+  PKGESHIP_Parm = Copies(' ',587)                                               
+  PKGESHIP_Parm = Overlay('&PACKAGE' ,PKGESHIP_Parm,001)                        
+  PKGESHIP_Parm = Overlay('&SHIPOUT' ,PKGESHIP_Parm,584)                        
+  Call PKGESHIP PKGESHIP_Parm ;  myRc = RC                                      
+  Exit(myRc)                                                                    
+//SYSTSPRT DD SYSOUT=*                                                          
