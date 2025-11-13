@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 
 DIR=gradle/wrapper
-JAR=${DIR}/gradle-wrapper.jar
 GRADLE_WRAPPER_GITHUB_URL="https://raw.githubusercontent.com/gradle/gradle/refs/tags/v8.14.3/gradle/wrapper"
 
 if [ ! -f ${DIR}/gradle-wrapper.jar ]; then
