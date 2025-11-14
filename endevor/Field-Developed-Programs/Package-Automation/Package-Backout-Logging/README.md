@@ -1,6 +1,6 @@
 # Package Backout/Backin Logging
 
-This folder contains items you can use to write a log for all packaged BackedIn or BackOut members. 
+This folder contains items you can use to write a log for all package BackOut and BackIn actions.  
 
 When a Package or selected elements are Backout or BackedIn, a log is written to contain a record of members affected. Here is an example:
 
@@ -17,19 +17,22 @@ When a Package or selected elements are Backout or BackedIn, a log is written to
     WAITTILL BACKED-OUT UTIL#ZJKN3113635 CHG0000017 IBMUSER   20251101 17:55
     WAITTILL BACKED-IN  UTIL#ZJKN3113635 CHG0000025 IBMUSER   20251101 18:51
 
-You must enter the name of the file within the BKOUTLOG.rex program. Records will be appended to the file for each BackOut and BackIn action. You can copy the heading from this example and place it at the top of your file if you choose.
+You must enter the name of the file within the BKOUTLOG.rex program. Records will be appended to the file for each BackOut and BackIn action. You can copy the heading from this example and place it at the top of your file if you choose. 
 
-- BKOUTLOG.rex - Called by C1UEXTR7 for BackOut/BackIn actions
-- C1SP6000.pnl - ISPF panel for BackOut/BackIn actions
-- CIUU03.ispfmsg
-- SHIPRUNS.skl - Job skeleton to search for needed package shipments after  BackOut/BackIn actions
+**Note** that unique member names are listed, as also displayed on the **Display Data Set Backout Info** package display. In most cases the member names match the element names, but there may be exceptions. If an element has multiple output member names, all the names will be reported.
+
 
 Existing items modifed for this solution include:
 - C1UEXT07.cob - includes code for BackOut/BackIn actions
 - C1UEXTR7.rex - includes code for BackOut/BackIn actions
 
+New items found in the **Package-Backout-Logging** folder include:
+- BKOUTLOG.rex - Called by C1UEXTR7 for BackOut/BackIn actions
+- C1SP6000.pnl - ISPF panel for BackOut/BackIn actions
+- CIUU03.ispfmsg
+- SHIPRUNS.skl - Job skeleton to search for needed package shipments after  BackOut/BackIn actions
+
+
 SERVINOW.rex is part of the ServiceNow folder found [here](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/ServiceNow-Interface/COBOL%2BREXX%2BPythonOrGoLang-Example/SERVINOW.rex). If you are not required to validate BackOut and BackIn actions, then you can remove references to SERVINOW. 
 
-
-
-All items that provide integration between Endevor and ServiceNow can be found in the [ServiceNow](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/ServiceNow-Interface) folder.
+Items that provide integration between Endevor and ServiceNow can be found in the [ServiceNow](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/ServiceNow-Interface) folder.
