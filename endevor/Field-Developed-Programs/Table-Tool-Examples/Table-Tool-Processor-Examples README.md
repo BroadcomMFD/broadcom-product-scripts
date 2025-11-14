@@ -70,7 +70,7 @@ Using the example, you can build BSTCOPY statement
 
 ## Working with YAML input
 
-When combined with the [YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex) program, Table Tool can let you use YAML to drive automated actions. For information on YAML, see [here](https://en.wikipedia.org/wiki/YAML) and [here](https://yaml.org/)).
+When combined with the [YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex) program, Table Tool can let you use YAML to drive automated actions. For information on YAML, find the official link [here](https://yaml.org/) and more [here](https://www.redhat.com/en/topics/automation/what-is-yaml).
 
 YAML is easy to learn, and easy to use everywhere - from the ISPF panels in Quick-Edit to VSCode under CODE4Z. See examples of both in this section.
 
@@ -144,7 +144,7 @@ Table Tool execution:
     - The LISTALC command within OPTIONS is executed, which lists all datasets currently allocated on the step.
     - Subsequent OPTIONS statements write this list of allocated datasets to the Table Tool Table.
     - Consequently, when Table Tool opens the Table, it contains the LISTALC data, including the datasets allocated by Endevor using the ALLOC=LMAP clause.
-    - Table Tool reads the dataset names allocated for LMAPPEd, applies the MODEL to format the output, and writes the expanded result to TBLOUT. In this case, the MODEL is a single line of JCL.
+    - Table Tool reads the dataset names allocated for LMAPPED, applies the MODEL to format the output, and writes the expanded result to TBLOUT. In this case, the MODEL is a single line of JCL.
     - Upon completion of the step, the contents of TBLOUT will resemble the expanded JCL.
 
 When the step completes, the content of TBLOUT might look something like this:
