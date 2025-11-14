@@ -1,21 +1,60 @@
-//WALJO11G JOB (301000000),'EXAMPLEG',CLASS=B,PRTY=6,
+//IBMUSERG JOB (0000),'EXAMPLEG',CLASS=B,PRTY=6,
 //  MSGCLASS=3,REGION=0M,NOTIFY=&SYSUID
 /*JOBPARM  SYSAFF=*
 //*-------------------------------------------------------------------
 //*- Build a report showing a count of each processor group referenced
 //*-------------------------------------------------------------------
-// JCLLIB  ORDER=(SYSDE32.NDVR.TEAM.JCL)
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)
 //  EXPORT SYMLIST=(*)
 //*********************************************************************
-//  SET ENVIRON=DEV
+//* SET ENVIRON=DEV
 //  SET SYSTEM='FINANCE'
 //*-------------------------------------------------------------------
-//*   Report processor usage counts
+//**Report processor usage counts **
+//*--------------------------------------------------------------------
+//*-------------------------------------------------------------------
+//*   Convert Environment info into Rexx Stem array data
+//*-------------------------------------------------------------------
+//*   STEP 1 -- EXECUTE CSV UTILITY
+//*-------------------------------------------------------------------
+//STEP1    EXEC PGM=NDVRC1,REGION=4M,
+//         PARM='BC1PCSV0'
+//   INCLUDE MEMBER=STEPLIB
+//BSTIPT01 DD *
+  LIST ENVIRONMENT '*' TO DDNAME 'EXTRACTS' OPTIONS  RETURN ALL.
+//EXTRACTS DD DSN=&&EXTRACTS,
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),
+//      DISP=(NEW,PASS),UNIT=VIO,
+//      SPACE=(TRK,(5,1),RLSE)
+//C1MSGS1  DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//*--------------------------------------------------------------------
+//STEP2   EXEC PGM=IRXJCL,PARM='ENBPIU00 A'
+//TABLE    DD  DSN=&&EXTRACTS,DISP=(OLD,DELETE)
+//OPTIONS  DD  *
+  $Table_Type = 'CSV'
+//MODEL    DD  *,SYMBOLS=JCLONLY
+  LIST ELEMENT '*'
+     FROM ENVIRONMENT '&ENV_NAME'  '&SYSTEM'
+          SUBSYSTEM '*'  TYPE  '*'   STAGE NUMBER '*'
+     TO DDNAME 'LISTELMS'
+     OPTIONS  NOSEARCH   RETURN ALL  .
+//SYSTSPRT DD SYSOUT=*
+//   INCLUDE MEMBER=CSIQCLS0
+//TBLOUT   DD  SYSOUT=*   DSN=&&COUNTS,DISP=(NEW,PASS),
+//*--------------------------------------------------------------------
+//
+//SHOWME  EXEC PGM=IEBGENER,REGION=1024K
+//SYSPRINT  DD SYSOUT=*                           MESSAGES
+//SYSUT1   DD  DSN=&&EXTRACTS,DISP=(OLD,PASS)
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS
+//SYSUDUMP DD SYSOUT=*
 //*--------------------------------------------------------------------
 //*-------------------------------------------------------------------
 //*   STEP 1 -- EXECUTE CSV UTILITY to collect processor group info
 //*-------------------------------------------------------------------
-//STEP1   EXEC PGM=NDVRC1,
+//STEP3   EXEC PGM=NDVRC1,
 //         PARM='BC1PCSV0'
 //*--
 //   INCLUDE MEMBER=STEPLIB
