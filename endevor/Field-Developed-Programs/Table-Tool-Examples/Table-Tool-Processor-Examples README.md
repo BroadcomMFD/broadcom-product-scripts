@@ -77,7 +77,7 @@ YAML is easy to learn, and easy to use everywhere - from the ISPF panels in Quic
 
 Items in the [Dynamic SYSLIB folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/Dynamic-Syslib) demonstrate how each project in Endevor (Sandbox or dynamic Environment) may elect to include input components from other projects. Here is an example image from Quick-Edit for a YAML element that controls library concatenations for the ACTP0002 Sandbox.
 
-![alt text](image-2.png)
+![alt text](image-2-1.png)
 
 
 ### YAML for Automating Procesor DB2 Binds
