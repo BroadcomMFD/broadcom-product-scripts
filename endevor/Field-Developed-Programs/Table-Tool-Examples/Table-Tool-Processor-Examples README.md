@@ -3,13 +3,14 @@
 Table Tool can run in your Endevor processors. This folder gives some things to consider, and some examples for the use of Table Tool in processors.
 
 **Caution** When allowing OPTIONS as input
-When OPTIONS are an element and available to Developers to edit then take these cautionary measures. Use a processor like [GOPTIONS](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/GOPTIONS%20-%20Options%20syntax%20processor.jcl) to validate that the OPTIONS element contains only statements in one of these formats:
 
-    keyword = 'value'
-    keyword = "value"
-    keyword = number 
+If developers have the ability to edit an OPTIONS element, you must take the following precautionary steps. Use a processor, such as [GOPTIONS](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/GOPTIONS%20-%20Options%20syntax%20processor.jcl), to validate that the OPTIONS element only contains statements in one of these three acceptable formats:
+- keyword = 'value'
+- keyword = "value"
+- keyword = number
 
-Also in the Table Tool processor step that operates on the options, use the IncludeQuotedOptions reference to them, as opposed to including or appending them to the OPTIONS.
+
+In the Table Tool processor step that processes the options, you should reference them using IncludeQuotedOptions instead of including or appending them directly to the OPTIONS.
 
     x = 'IncludeQuotedOptions(UOPTIONS)';   
     . . .
@@ -75,23 +76,25 @@ YAML is easy to learn, and easy to use everywhere - from the ISPF panels in Quic
 
 ### YAML for Dynamic SYSLIBS
 
-Items in the [Dynamic SYSLIB folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/Dynamic-Syslib) demonstrate how each project in Endevor (Sandbox or dynamic Environment) may elect to include input components from other projects. Here is an example image from Quick-Edit for a YAML element that controls library concatenations for the ACTP0002 Sandbox.
+Items in the [Dynamic SYSLIB folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/Dynamic-Syslib) demonstrate how each project in Endevor (Sandbox or dynamic Environment) may elect to include input components from other projects. Here is Quick-Edit view of a YAML element that controls library concatenations for the ACTP0002 Sandbox.
 
-![alt text](image-2-1.png)
+![alt text](image-3.png)
 
 
-### YAML for Automating Procesor DB2 Binds
-Here is a VSCode view of an example YAML file that provides DB2 Bind details to the Endevor processors for elements in the FINANCE system at various Endevor stages. 
+### YAML for Automating Processor DB2 Binds
+Here is a VSCode view of an example YAML that provides DB2 Bind details to the Endevor processors for elements in the FINANCE system at various Endevor stages. 
 
 ![alt text](image.png)
 
 This example shows "Pattern" entries, which are masking values to be applied to production Bind statements using the [DB2MASK#](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/DB2MASK%23.rex) tool. 
 
-You can build your procesor's DB2 Bind steps by starting with the GALIAS processor from the DYNAMIC SYSLIB folder, and designing the statements for your YAML
+
+Starting with these examples, you have a foundation for building your processors to leverage YAML to automate Endevor actions.
 
 ## Leveraging Endevor's ALLOC=LMAP/PMAP feature
 
-Here is a processor step that is used with processors that orchestrate automated tests, at the end of normal element Generation. This example identifies the libraries allocated by Endevor, for either an ALLOC=LMAP or an ALLOC=PMAP clause, and creates output containing those library names. When submitting jobs to run tests, the library names are placed into the STEPLIB. There are other reasons you might want to leverage this method, for example, want to put the expanded list of libraries in your processor output listings.
+In this example, the substitution of variables occurs during this processor step, with both Endevor and Table Tool performing the substitution, but only for variables they recognize. For instance, Endevor substitutes values for variables it is aware of (e.g., &C1 variables, processor variables, and Esymbols variables) while leaving others, including Table Tool variables, unchanged.
+
 
     //*********INCLUDE (TZUNITST)****************************************   
     //*--------------------------------------------------------------------*
@@ -129,16 +132,22 @@ Here is a processor step that is used with processors that orchestrate automated
     //             UNIT=SYSDA,SPACE=(TRK,(1,1)),                 
     //             DCB=(RECFM=FB,LRECL=080,BLKSIZE=24000)                 
 
-Both Endevor and TableTool will substitute variables on this step. Both only substitute values for variables that they know. For example, Endevor Knows the values for the &C1 variables, processor and Esymbols variables, but leaves the rest (including Table Tool variables alone. Here is what happens on this step:
+The process on this step unfolds as follows:
+Endevor's actions before processor execution:
+- Endevor replaces its known variables with corresponding values.
+    - Endevor allocates files, including allocating TABLE as an initially empty dataset.
+    - The ALLOC=LMAP clause for the LMAPPAED DDname is expanded by - Endevor into multiple actual dataset names.
+    - Endevor then initiates the execution of the processor and the T4ZUNI#1 step.
+Table Tool execution:
+- Table Tool begins execution while TABLE is still an empty file.
+    - Before attempting to open the Table, Table Tool executes the commands specified in OPTIONS.
+    - The LISTALC command within OPTIONS is executed, which lists all datasets currently allocated on the step.
+    - Subsequent OPTIONS statements write this list of allocated datasets to the Table Tool Table.
+    - Consequently, when Table Tool opens the Table, it contains the LISTALC data, including the datasets allocated by Endevor using the ALLOC=LMAP clause.
+    - Table Tool reads the dataset names allocated for LMAPPEd, applies the MODEL to format the output, and writes the expanded result to TBLOUT. In this case, the MODEL is a single line of JCL.
+    - Upon completion of the step, the contents of TBLOUT will resemble the expanded JCL.
 
-- Before the processor runs, Endevor replaces its known variables with values and allocates files:
-    - At this point, Table is allocated as an empty dataset 
-    - For the ALLOC=LMAP clause on the LMAPPAED DDname, Endevor expands into multiple real dataset names
-    - Endevor begins the execution of the processor and the T4ZUNI#1 step. 
-- Table Tool is executed. 
-    - The TABLE is still an empty file at this point. Before Table Tool attempts to open a Table, it first executes the content of OPTIONS. Notice the [LISTALC](https://www.ibm.com/docs/en/zos/3.2.0?topic=subcommands-listalc-command) command is executed within the OPTIONS. This IBM function gets a list of allocated datasets. Additional OPTIONS statements write the list of datasets to the Table Tool Table. Then, when Table Tool opens the Table, there is data there - a LISTALC of datasets allocated on that step, including the LMAPPED datasets allocated by Endevor with the ALLOC=LMAP clause.
-    - Table Tool reads the dataset names allocated for LMAPPEd, uses the MODEL to format output, and writes the expanded result to TBLOUT. In this case the MODEL is a single line of JCL. 
-    - When the step completes, the content of TBLOUT might look something like this:
+When the step completes, the content of TBLOUT might look something like this:
 
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.DEV1.LOADLIB      
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.DEV2.LOADLIB     
@@ -148,6 +157,11 @@ Both Endevor and TableTool will substitute variables on this step. Both only sub
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.DEV2.T4ZLOAD     
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.QAS2.T4ZLOAD  
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.PRD.T4ZLOAD  
+
+
+
+This method offers utility beyond automated test executions; for instance, it enables the inclusion of the expanded list of libraries within the processor output listings.
+
 
 See the [T4ZUNIT.prc](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Automated-Test-Facility-Using-Test4Z/T4ZUNIT.prc) processor Include member for an example with this step.
 
