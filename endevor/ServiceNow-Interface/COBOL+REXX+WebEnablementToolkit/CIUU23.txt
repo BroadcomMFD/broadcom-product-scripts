@@ -1,0 +1,8 @@
+CIUU230E 'Invalid CCID length'                           .ALARM=YES             
+'CCID for ServiceNow must have 10 Characters'                                   
+                                                                                
+CIUU231E 'Invalid Incident DataType'                     .ALARM=YES             
+'ServiceNOW Incident Number must be NUMERIC'                                    
+                                                                                
+CIUU236E 'Object does not exist'                         .ALARM=YES             
+'ServiceNow Object is not created in the Repository'                            
