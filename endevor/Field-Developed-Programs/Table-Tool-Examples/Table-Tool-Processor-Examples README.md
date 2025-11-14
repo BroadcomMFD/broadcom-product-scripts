@@ -136,7 +136,7 @@ The process on this step unfolds as follows:
 Endevor's actions before processor execution:
 - Endevor replaces its known variables with corresponding values.
     - Endevor allocates files, including allocating TABLE as an initially empty dataset.
-    - The ALLOC=LMAP clause for the LMAPPAED DDname is expanded by - Endevor into multiple actual dataset names.
+    - The ALLOC=LMAP clause for the LMAPPED DDname is expanded by - Endevor into multiple actual dataset names.
     - Endevor then initiates the execution of the processor and the T4ZUNI#1 step.
 Table Tool execution:
 - Table Tool begins execution while TABLE is still an empty file.
