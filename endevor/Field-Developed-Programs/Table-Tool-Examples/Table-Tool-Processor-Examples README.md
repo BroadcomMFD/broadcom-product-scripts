@@ -69,30 +69,29 @@ Using the example, you can build BSTCOPY statement
 
 ## Working with YAML input
 
-When Table Tool is partnered with the YAML2REX.rex program, then YAML can drive the automated processing.
+When combined with the [YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex) program, Table Tool can let you use YAML to drive automated actions. For information on YAML, see [here](https://en.wikipedia.org/wiki/YAML) and [here](https://yaml.org/)).
+
+YAML is easy to learn, and easy to use everywhere - from the ISPF panels in Quick-Edit to VSCode under CODE4Z. See examples of both in this section.
+
+### YAML for Dynamic SYSLIBS
+
+Items in the [Dynamic SYSLIB folder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/Dynamic-Syslib) demonstrate how each project in Endevor (Sandbox or dynamic Environment) may elect to include input components from other projects. Here is an example image from Quick-Edit for a YAML element that controls library concatenations for the ACTP0002 Sandbox.
+
+![alt text](image-2.png)
 
 
-### Dynamic Syslibs
-
-
-
-
-### Other 
-
-Combined with the [YAML2REX](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/YAML2REX.rex) program, Table Tool can process YAML (see [here](https://en.wikipedia.org/wiki/YAML) and [here](https://yaml.org/)) as an input.
-The processor for Sandboxes named [GALIAS](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/Dynamic-Syslib/GALIAS.jcl) is an example. See also the **Examples for DB2 Binds**
-
-
-## Examples for DB2 Binds
-Here is a VSCode view of an example YAML file providing DB2 Bind details for the TEST system at various Endevor stages. 
+### YAML for Automating Procesor DB2 Binds
+Here is a VSCode view of an example YAML file that provides DB2 Bind details to the Endevor processors for elements in the FINANCE system at various Endevor stages. 
 
 ![alt text](image.png)
 
-This example shows "Pattern" entries, which are masking values to be applied to production Bind statements using the [DB2MASK#](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/DB2MASK%23.rex) tool.
+This example shows "Pattern" entries, which are masking values to be applied to production Bind statements using the [DB2MASK#](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/DB2MASK%23.rex) tool. 
+
+You can build your procesor's DB2 Bind steps by starting with the GALIAS processor from the DYNAMIC SYSLIB folder, and designing the statements for your YAML
 
 ## Leveraging Endevor's ALLOC=LMAP/PMAP feature
 
-Here is a processor step that identifies the libraries allocated by Endevor for either an ALLOC=LMAP or an ALLOC=PMAP clause. You can use a step like this for many different reasons. This code is found in the processor that supports automated TEST4Z testing from the processor, but you might, for example, want to put the expanded list of libraries in your processor output listings.
+Here is a processor step that is used with processors that orchestrate automated tests, at the end of normal element Generation. This example identifies the libraries allocated by Endevor, for either an ALLOC=LMAP or an ALLOC=PMAP clause, and creates output containing those library names. When submitting jobs to run tests, the library names are placed into the STEPLIB. There are other reasons you might want to leverage this method, for example, want to put the expanded list of libraries in your processor output listings.
 
     //*********INCLUDE (TZUNITST)****************************************   
     //*--------------------------------------------------------------------*
@@ -150,9 +149,6 @@ Both Endevor and TableTool will substitute variables on this step. Both only sub
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.QAS2.T4ZLOAD  
     //         DD DISP=SHR,DSN=Myhlq.ENDEVOR.PRD.T4ZLOAD  
 
+See the [T4ZUNIT.prc](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Automated-Test-Facility-Using-Test4Z/T4ZUNIT.prc) processor Include member for an example with this step.
 
-
-
-
-
-
+If you are unfamiliar with the use of processor includes, see an explanation [here](https://community.broadcom.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=4e97b9d9-9a2e-6349-96e3-27c89ce5b00d).
