@@ -33,6 +33,7 @@
               ADDRESS ISREDIT " REPLACE "MYMBR LPOS1+1 LPOS2                    
            REPRC = RC                                                           
            LPOS1 = 1                                                            
+           IF SYSVAR(SYSENV) = 'BACK' THEN SAY MYMBR                            
            END;  /* ELSE (RETCODE ...) */                                       
         IF REPRC = 0 THEN ,                                                     
            ADDRESS ISREDIT " DELETE "LPOS1  LPOS2 ;                             
