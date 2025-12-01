@@ -1,79 +1,79 @@
-)ATTR DEFAULT(%+_)                                                              
-       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
-       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
-       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
-       /* $ TYPE(INPUT) INTENS(LOW) PAD(_)      ** Redefined **      */         
-       /* ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  **   below   **      */         
-   \ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT) PAD(_)                        
-   › TYPE(OUTPUT) INTENS(LOW)                                                   
-   | TYPE(OUTPUT) INTENS(HIGH)                                                  
-   µ TYPE(TEXT)  INTENS(&VNBPKGD4)                                              
-   < TYPE(TEXT)  INTENS(&VNBPKGDB)                                              
-   @ TYPE(TEXT)  INTENS(&VNBPKGD6)                                              
-   # TYPE(TEXT)  INTENS(&VNBPKGD7)                                              
-   $ TYPE(TEXT) INTENS(&VARPKEBT)                                               
-   ! TYPE(TEXT) INTENS(&VARPKEBO)                                               
-   ~ TYPE(OUTPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) INTENS(HIGH)                
-)BODY                                                                           
+)ATTR DEFAULT(%+_)
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */
+       /* $ TYPE(INPUT) INTENS(LOW) PAD(_)      ** Redefined **      */
+       /* ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)  **   below   **      */
+   \ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT) PAD(_)
+   ¢ TYPE(OUTPUT) INTENS(LOW)
+   | TYPE(OUTPUT) INTENS(HIGH)
+   ^ TYPE(TEXT)  INTENS(&VNBPKGD4)
+   < TYPE(TEXT)  INTENS(&VNBPKGDB)
+   @ TYPE(TEXT)  INTENS(&VNBPKGD6)
+   # TYPE(TEXT)  INTENS(&VNBPKGD7)
+   $ TYPE(TEXT) INTENS(&VARPKEBT)
+   ! TYPE(TEXT) INTENS(&VARPKEBO)
+   ~ TYPE(OUTPUT) CAPS(&VARCADES) FORMAT(&VARFMDES) INTENS(HIGH)
+)BODY
 %BACKOUT --------------------  BACKOUT PACKAGE  --------------------------------
 %OPTION  ===>_VARWKCMD                                                         +
-+  &MESSAGE                                                                     
-+  @BP+- Backout Package                 µB +- Display Data Set Backout Info    
-+  #BI+- Backin Package                  <BU+- Display USS Backout Information  
-+  !EB$- Element Action Backout/Backin   !ServiceNow Incident Number...         
-+                                        \SNOWRQST  !for BackOut/In Actions     
-+PACKAGE ID:|VPHPKGID        +            STATUS:|VPHSTAT     +                 
-+DESCRIPTION: ~VPHCOMM                                           +              
-+PACKAGE TYPE:|VPHTYPE   +                                                      
-+SHARABLE PACKAGE:|Z+                                                           
-+EXECUTION WINDOW FROM:|Z      |Z    +    TO:|Z      |Z    +                    
-+                                                                               
-+              USER ID  DATE    TIME                                            
-+CREATED:     |VPHCRUID|Z      |Z    +                                          
-+LAST UPDATED:|VPHPUUID|Z      |Z    +                                          
-+CAST:        |VPHCUID |Z      |Z    +                                          
-+APPROVED:             |Z      |Z    +                                          
-+EXECUTED:    |VPHXUID |Z      |Z    +         RC:|Z    +|Z         +           
-+BACKED OUT:  |VPHOUID |Z      |Z    +                                          
-+BACKED IN:   |VPHIUID |Z      |Z    +                                          
-+                                                                               
-)INIT                                                                           
-  &MESSAGE = &Z                                                                 
-  .HELP = CITP6000                                                              
-  .ZVARS = '( VPHPSHR                                             +             
-              VPHWSD VPHWST VPHWED VPHWET                         +             
-              VPHCRD VPHCRT                                       +             
-              VPHPUD VPHPUT VPHCD  VPHCT                          +             
-              VPHAD VPHAT VPHXD VPHXT VPHXRC VPHBSTAT             +             
-              VPHOD VPHOT VPHID VPHIT )'                                        
-)PROC                                                                           
-*REXX(VARWKCMD,VPHPKGID,SNOWRQST,MESSAGE)                                       
-  If SNOWRQST = '' then Exit                                                    
-  If VARWKCMD  = 'B'  then Exit                                                 
-  Trace Off                                                                     
-  where = 'C1SP6000'                                                            
-  MESSAGE = ' '                                                                 
-  CALL BPXWDYN "INFO FI(AUTHORIZ)",                                             
-             "INRTDSN(DSNVAR) INRDSNT(myDSNT)"                                  
-  If RESULT = 0 then CALL BPXWDYN "FREE F(AUTHORIZ)"                            
-  If RC > 0 then Say "F(AUTHORIZ) not freed"                                    
-  MESSAGE = 'Assume Valid'                                                      
-  validate = SERVINOW('C1SP6000' SNOWRQST 'T')                                  
-  sa = validate                                                                 
-  If USERID() /= 'IBMUSER' &,                                                   
-     Pos('is defined',Validate) = 0 then,                                       
-     Do                                                                         
-     MESSAGE = ' '                                                              
-     EXIT                                                                       
-     End                                                                        
-  /* Make the ServiceNow Request number available to Exit program */            
-  Push SNOWRQST                                                                 
-  CALL BPXWDYN ,                                                                
-      "ALLOC DD(AUTHORIZ) LRECL(080) BLKSIZE(0800) SPACE(1,1) ",                
-             " RECFM(F,B) TRACKS ",                                             
-             " NEW UNCATALOG REUSE ";                                           
-  ADDRESS TSO "EXECIO 1 DISKW AUTHORIZ (Finis"                                  
-*ENDREXX                                                                        
- VER (&SNOWRQST,NB,MSG=CIUU035E)                                                
- VER (&MESSAGE,NB,MSG=CIUU035E)                                                 
-)END                                                                            
++  &MESSAGE
++  @BP+- Backout Package                 ^B +- Display Data Set Backout Info
++  #BI+- Backin Package                  <BU+- Display USS Backout Information
++  !EB$- Element Action Backout/Backin   !ServiceNow Incident Number...
++                                        \SNOWRQST  !for BackOut/In Actions
++PACKAGE ID:|VPHPKGID        +            STATUS:|VPHSTAT     +
++DESCRIPTION: ~VPHCOMM                                           +
++PACKAGE TYPE:|VPHTYPE   +
++SHARABLE PACKAGE:|Z+
++EXECUTION WINDOW FROM:|Z      |Z    +    TO:|Z      |Z    +
++
++              USER ID  DATE    TIME
++CREATED:     |VPHCRUID|Z      |Z    +
++LAST UPDATED:|VPHPUUID|Z      |Z    +
++CAST:        |VPHCUID |Z      |Z    +
++APPROVED:             |Z      |Z    +
++EXECUTED:    |VPHXUID |Z      |Z    +         RC:|Z    +|Z         +
++BACKED OUT:  |VPHOUID |Z      |Z    +
++BACKED IN:   |VPHIUID |Z      |Z    +
++
+)INIT
+  &MESSAGE = &Z
+  .HELP = CITP6000
+  .ZVARS = '( VPHPSHR                                             +
+              VPHWSD VPHWST VPHWED VPHWET                         +
+              VPHCRD VPHCRT                                       +
+              VPHPUD VPHPUT VPHCD  VPHCT                          +
+              VPHAD VPHAT VPHXD VPHXT VPHXRC VPHBSTAT             +
+              VPHOD VPHOT VPHID VPHIT )'
+)PROC
+*REXX(VARWKCMD,VPHPKGID,SNOWRQST,MESSAGE)
+  If SNOWRQST = '' then Exit
+  If VARWKCMD  = 'B'  then Exit
+  Trace Off
+  where = 'C1SP6000'
+  MESSAGE = ' '
+  CALL BPXWDYN "INFO FI(AUTHORIZ)",
+             "INRTDSN(DSNVAR) INRDSNT(myDSNT)"
+  If RESULT = 0 then CALL BPXWDYN "FREE F(AUTHORIZ)"
+  If RC > 0 then Say "F(AUTHORIZ) not freed"
+  MESSAGE = 'Assume Valid'
+  validate = SERVINOW('C1SP6000' SNOWRQST 'T')
+  sa = validate
+  If USERID() /= 'IBMUSER' &,
+     Pos('is defined',Validate) = 0 then,
+     Do
+     MESSAGE = ' '
+     EXIT
+     End
+  /* Make the ServiceNow Request number available to Exit program */
+  Push SNOWRQST
+  CALL BPXWDYN ,
+      "ALLOC DD(AUTHORIZ) LRECL(080) BLKSIZE(0800) SPACE(1,1) ",
+             " RECFM(F,B) TRACKS ",
+             " NEW UNCATALOG REUSE ";
+  ADDRESS TSO "EXECIO 1 DISKW AUTHORIZ (Finis"
+*ENDREXX
+ VER (&SNOWRQST,NB,MSG=CIUU035E)
+ VER (&MESSAGE,NB,MSG=CIUU035E)
+)END

@@ -28,7 +28,7 @@ Existing items modifed for this solution include:
 
 New items found in the **Package-Backout-Logging** folder include:
 - BKOUTLOG.rex - Called by C1UEXTR7 for BackOut/BackIn actions
-- C1SP6000.pnl - ISPF panel for BackOut/BackIn actions
+- C1SP6000.pnl - ISPF panel for BackOut/BackIn actions. **This panel contains special characters that must be retained to work properly. It is recommended to use a TSO SEND action to bring the content onto the mainframe.**
 - CIUU03.ispfmsg
 - SHIPRUNS.skl - Job skeleton to search for needed package shipments after  BackOut/BackIn actions
 
