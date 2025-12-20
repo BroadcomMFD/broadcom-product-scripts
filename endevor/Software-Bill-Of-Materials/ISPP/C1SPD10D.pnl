@@ -1,0 +1,148 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)                                             
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)                                         
+    TYPE(OUTPUT) INTENS(LOW)                                                   
+   | TYPE(OUTPUT) INTENS(HIGH)                                                  
+)BODY                                                                           
+%-----------------------  DESTINATION SELECTION LIST  --------------------------
+%COMMAND ===>_VARWKCMD                                        %SCROLL ===>_AMT +
++                                                                               
++  %S+- SELECT DESTINATION(S) TO RECEIVE SHIPMENT OF PACKAGE|VPHPKGID        +  
++                                                                   %   MORE==> 
+%  DEST-ID  MESSAGE    TRAN-METHOD RMT-NODENAME     DESCRIPTION                 
+)MODEL                                                                          
+_ZZ       |Z         Z          Z               Z                           
+)INIT                                                                           
+/* START CODE FOR ESORT */                                                      
+VGET (ZSCREEN)                                                                  
+  IF (&ZSCREEN = 1)                                                             
+    &PANELID1 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID1) PROFILE                                                     
+  IF (&ZSCREEN = 2)                                                             
+    &PANELID2 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID2) PROFILE                                                     
+  IF (&ZSCREEN = 3)                                                             
+    &PANELID3 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID3) PROFILE                                                     
+  IF (&ZSCREEN = 4)                                                             
+    &PANELID4 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID4) PROFILE                                                     
+  IF (&ZSCREEN = 5)                                                             
+    &PANELID5 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID5) PROFILE                                                     
+  IF (&ZSCREEN = 6)                                                             
+    &PANELID6 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID6) PROFILE                                                     
+  IF (&ZSCREEN = 7)                                                             
+    &PANELID7 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID7) PROFILE                                                     
+  IF (&ZSCREEN = 8)                                                             
+    &PANELID8 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID8) PROFILE                                                     
+  IF (&ZSCREEN = 9)                                                             
+    &PANELID9 = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELID9) PROFILE                                                     
+  IF (&ZSCREEN = A)                                                             
+    &PANELIDA = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDA) PROFILE                                                     
+  IF (&ZSCREEN = B)                                                             
+    &PANELIDB = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDB) PROFILE                                                     
+  IF (&ZSCREEN = C)                                                             
+    &PANELIDC = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDC) PROFILE                                                     
+  IF (&ZSCREEN = D)                                                             
+    &PANELIDD = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDD) PROFILE                                                     
+  IF (&ZSCREEN = E)                                                             
+    &PANELIDE = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDE) PROFILE                                                     
+  IF (&ZSCREEN = F)                                                             
+    &PANELIDF = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDF) PROFILE                                                     
+  IF (&ZSCREEN = G)                                                             
+    &PANELIDG = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDG) PROFILE                                                     
+  IF (&ZSCREEN = H)                                                             
+    &PANELIDH = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDH) PROFILE                                                     
+  IF (&ZSCREEN = I)                                                             
+    &PANELIDI = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDI) PROFILE                                                     
+  IF (&ZSCREEN = J)                                                             
+    &PANELIDJ = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDJ) PROFILE                                                     
+  IF (&ZSCREEN = K)                                                             
+    &PANELIDK = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDK) PROFILE                                                     
+  IF (&ZSCREEN = L)                                                             
+    &PANELIDL = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDL) PROFILE                                                     
+  IF (&ZSCREEN = M)                                                             
+    &PANELIDM = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDM) PROFILE                                                     
+  IF (&ZSCREEN = N)                                                             
+    &PANELIDN = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDN) PROFILE                                                     
+  IF (&ZSCREEN = O)                                                             
+    &PANELIDO = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDO) PROFILE                                                     
+  IF (&ZSCREEN = P)                                                             
+    &PANELIDP = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDP) PROFILE                                                     
+  IF (&ZSCREEN = Q)                                                             
+    &PANELIDQ = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDQ) PROFILE                                                     
+  IF (&ZSCREEN = R)                                                             
+    &PANELIDR = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDR) PROFILE                                                     
+  IF (&ZSCREEN = S)                                                             
+    &PANELIDS = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDS) PROFILE                                                     
+  IF (&ZSCREEN = T)                                                             
+    &PANELIDT = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDT) PROFILE                                                     
+  IF (&ZSCREEN = U)                                                             
+    &PANELIDU = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDU) PROFILE                                                     
+  IF (&ZSCREEN = V)                                                             
+    &PANELIDV = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDV) PROFILE                                                     
+  IF (&ZSCREEN = W)                                                             
+    &PANELIDW = '&ZSCREEN:C1SPD10D'                                             
+    VPUT (PANELIDW) PROFILE                                                     
+/* END CODE FOR ESORT */                                                        
+  .HELP = CITPD100                                                              
+  .ZVARS = '(VARWKSEL VDDDSTID VNBSLMSG VDDXMETH VDDXNODE VDDDESCR)'            
+  IF (&AMT = ' ')                                                               
+     &AMT = PAGE                                                                
+)PROC                                                                           
+ *REXX(*,ZTDSELS,VARWKSEL,VDDDSTID,VDDXMETH,VDDXNODE,VDDDESCR,                  
+ VDDDSTID,VDDXIPNM,VDDXIPPT,VNBSQDSP,ZTDLROWS,VDDXIPNM,VDDXIPPT)                
+   SA= 'ZTDSELS: 'ZTDSELS                                                       
+   SA= 'VARWKSEL: 'VARWKSEL                                                     
+   SA= 'VDDDSTID: 'VDDDSTID                                                     
+   SA= 'VDDXMETH: 'VDDXMETH                                                     
+   SA= 'VDDXNODE: 'VDDXNODE                                                     
+   SA= 'VDDDESCR: 'VDDDESCR                                                     
+   SA= 'VDDDSTID: 'VDDDSTID                                                     
+   SA= 'VDDXIPNM: 'VDDXIPNM                                                     
+   SA= 'VDDXIPPT: 'VDDXIPPT                                                     
+   SA= 'VNBSQDSP: 'VNBSQDSP                                                     
+   SA= 'ZTDLROWS: 'ZTDLROWS                                                     
+   SA= 'VDDXIPNM: 'VDDXIPNM                                                     
+   SA= 'VDDXIPPT: 'VDDXIPPT                                                     
+   RETURN                                                                       
+ *ENDREXX                                                                       
+  VPUT (AMT) PROFILE                                                            
+  IF (&ZTDSELS ^= 0000)                                                         
+    &XMETHOD = &VDDXMETH                                                        
+    &XNODE = &VDDXNODE                                                          
+    &XIPNM = &VDDXIPNM                                                          
+    &XIPPT = &VDDXIPPT                                                          
+    &XPKGID = &VPHPKGID                                                         
+    VPUT (XMETHOD XNODE XPKGID)  SHARED                                         
+)END                                                                            

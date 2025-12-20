@@ -1,0 +1,14 @@
+@REM ****************************************************** #RJICPYL ***        
+@REM *    CONTENTS: ENDEVOR/MVS - COPY MODEL FOR ICPY                           
+@REM *     PURPOSE: (SEE #RJICPY1 FOR DETAILS)                                  
+@REM *                                                                          
+@REM *    ADDED BY VIRTUE OF P003154                                            
+@REM *******************************************************************        
+@REM *                                                                          
+@SECTION=03   <===================================================              
+@IFNOT RECFM=U                                                                  
+ COPY      INDD=((&TDDN,R)),OUTDD=&RDDN        FROM TEST                        
+@ENDIF                                                                          
+@IF RECFM=U                                                                     
+ COPYMOD   INDD=((&TDDN,R)),OUTDD=&RDDN        FROM TEST                        
+@ENDIF                                                                          

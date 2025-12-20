@@ -1,4 +1,71 @@
-)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)          
+)CM Capture Package shipping variables for JCL substitutions                    
+)CM Choose which )REXX ... )ENDREXX sections work for you                       
+)CM ----------                                                                  
+)CM ----------  Get Package, Destination and pkg/Bko values                     
+)REXX VNBSQDSP PKGID DESTIN TYPRUN OUTRBAK VDDXNODE NODENAME XNODE     ?        
+      XIPNM XIPPT                                                               
+  TRACE OFF                                                                     
+  WHEREAMI = 'C1BMXIN'                                                          
+  PARSE VAR VNBSQDSP STR "'" PKGID "' TO DEST " DESTIN " OPT" TAIL '.'          
+  DESTIN = STRIP(DESTIN)                                                        
+  PKGID = STRIP(PKGID)                                                          
+  IF TYPERUN = 'TYPRUN' THEN TYPRUN = ''                                        
+  OUTRBAK = STRIP(STRIP(TAIL,'T','.'))                                          
+  If XNODE \= '' THEN NODENAME = Strip(XNODE)                                   
+  else NODENAME = Strip(XIPNM)                                                  
+  /* NODENAME = Strip(XNODE)                                                    
+  SAY 'XCOM IP Name: 'XIPNM                                                     
+  SAY 'XCOM IP Port: 'XIPPT                                                     
+  NODENAME = REXALDST(DESTIN) */                                                
+)ENDREXX                                                                        
+)CM ----------                                                                  
+)CM ----------  Get Date and Time variables from VNBCPARM                       
+)REXX  VNBCPARM DATE6 TIME6 DATE8 TIME8 NEXTJOB SHIPPER SYSUID SENDNODE         
+  TRACE off                                                                     
+  WHEREAMI = 'C1BMXIN'                                                          
+  NEXTJOB  = SUBMITER || '@'                                                    
+  PARSE VAR VNBCPARM STR "," DATE8 "," TIME8                                    
+  DATE6 = Substr(DATE8,3)                                                       
+  TIME8 = Strip(TIME8)                                                          
+  TIME6 = Substr(TIME8,1,6)                                                     
+  SHIPPER = USERID()                                                            
+  SYSUID  = USERID()                                                            
+  SENDNODE =  SYSVAR(SYSNODE)                                                   
+)ENDREXX                                                                        
+)CM ----------                                                                  
+)CM ----------  HOSTHLQ and RMOTHLQ from VDDHSPFX and VDDRSPFX                  
+)CM ----------  You may elect to hard-code these values, or                     
+)CM ----------  to use the CSVCALL step below. Only 1 method is needed.         
+)REXX HOSTHLQ VDDHSPFX RMOTHLQ VDDRSPFX                                         
+  TRACE off                                                                     
+  WHEREAMI = 'C1BMXIN'                                                          
+  HOSTHLQ = Strip(VDDHSPFX)                                                     
+  RMOTHLQ = Strip(VDDRSPFX)                                                     
+)ENDREXX                                                                        
+)CM ---------- This section shows accessing Site-Specific variables             
+)CM ----------      Longer variable names must be assigned to                   
+)CM ----------      valid 8-byte ISPF variable names                            
+)REXX  CSIQCLS0 ORDERDSN                                                        
+  TRACE OFF                                                                     
+  WHERE = 'C1BMXIN Get local variables '                                        
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;                               
+  interpret 'Call' WhereIam "'MyCLS0Library'"                                   
+  CSIQCLS0  = Result                                                            
+  interpret 'Call' WhereIam "'AltIDOrderfile'"                                  
+  ORDERDSN  = Result                                                            
+)ENDREXX                                                                        
+)CM ---------- This section only applies to a Broadcom demo system              
+)REXX PKGID MYSUBSYS                                                            
+  /* code for Broadcom demo system shipping only */                             
+  TRACE Off                                                                     
+  WHERE = 'C1BMXIN DEV2 only code '                                             
+  PkgInfo  = GETSYRSB(PKGID) ; /* get sys/sub from pkg name*/                   
+  If Words(PkgInfo) = 2 then,                                                   
+     MYSUBSYS = Word(PkgInfo,1); /* get sys/sub from pkg name*/                 
+  Else,                                                                         
+     MYSUBSYS = 'NA'                                                            
+)ENDREXX                                                                        
+)CM  PKGID SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)            
 )CM                                                                             
 )CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT            
 )CM  TO C1BMX000.                                                               
@@ -10,13 +77,3 @@
 )CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
 )CM                                                                             
 &VNBSQDSP                                                                       
-)REXX VNBSQDSP PKGLIST                                                          
-   SA= 'VALOR PKGLIST: 'PKGLIST                                                 
-   IF PKGLIST = 'PKGLIST' THEN DO                                               
-     PKGLIST = VNBSQDSP                                                         
-    END                                                                         
-   ELSE DO                                                                      
-     PKGLIST  = PKGLIST  || '@' || VNBSQDSP                                     
-    END                                                                         
-   SA= 'PKGLIST:  ==> 'PKGLIST                                                  
-)ENDREXX                                                                        

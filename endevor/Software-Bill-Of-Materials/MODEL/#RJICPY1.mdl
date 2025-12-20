@@ -1,0 +1,254 @@
+@TRACEON                                                                        
+@REM ****************************************************** #RJICPY1 ***        
+@REM *    CONTENTS: ENDEVOR/MVS - START PROCESSING A NEW DESTINATION            
+@REM *              REMOTE JOBSTREAM TO COPY/DELETE SHIPMENT MEMBERS            
+@REM *     PURPOSE: GENERATE A REMOTE JOBSTREAM TO CREATE/DELETE                
+@REM *              SHIPMENT MEMBERS USING IBM UTILITIES AND CONFIRM            
+@REM *              THE EXECUTION OF THIS JOBSTREAM AT THE HOST                 
+@REM *******************************************************************        
+@REM *                                                                          
+@REM *     P003154 APPLIED     REMOVE //* IN SECTION05                          
+@REM *     P005812 ADDED INCLUDE OF #RJICPYU TO CONTAIN SYSUT3, SYSUT4          
+@REM *                                                                          
+@SECTION=01   <=======================================================          
+&RJOBCARDS                                                                      
+@IF &ANY2COPY                                                                   
+//*#####################################################################        
+//*                                                                             
+//* SYMBOLS DEFINITION                                                          
+//*                                                                             
+//*#####################################################################        
+//E1       EXPORT SYMLIST=(*)                                                   
+//S1       SET DATE=&LYYMMDD                                                    
+//S2       SET TIME=&LHHMMSS                                                    
+//S3       SET USER=&SYSUID                                                     
+//S4       SET PKGID='@@PKGID@@'                                                
+//*#####################################################################        
+//*                                                                             
+//* Convert remote mapping file to ASCII                                        
+//*                                                                             
+//*#####################################################################        
+//CNVASCII EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(0,LT)         C1BMXCOP          
+//RMAPOUT  DD PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._shiprmap.json',           
+// PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                            
+// PATHMODE=SIRWXU                                                              
+//*                                                                             
+//RSDSOUT  DD DSN=&&SHIPRMAP,                                                   
+//            UNIT=SYSDA,                                                       
+//            SPACE=(CYL,(1,1)),                                                
+//            DISP=(NEW,PASS,DELETE),                                           
+//            DCB=(RECFM=FB,LRECL=80)                                           
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SYSTSIN  DD *                                                                 
+OCOPY INDD(SHIPRMAP) OUTDD(RMAPOUT) TEXT CONVERT((BPXFX311)) FROM1047           
+OCOPY INDD(SHIPRMAP) OUTDD(RSDSOUT) TEXT                                        
+//SHIPRMAP DD   *                                                               
+//*#####################################################################        
+//*                                                                             
+//* SBOM HASH Validation using remap and signature validation                   
+//*                                                                             
+//*#####################################################################        
+//HASHVRFY EXEC PGM=BPXBATCH,REGION=0M,COND=(0,LT)            C1BMXCOP          
+//STDIN    DD DUMMY                                                             
+//STDOUT   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
+// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._sbom.out',                           
+// PATHMODE=SIRWXU                                                              
+//STDERR   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
+// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._sbom.err',                           
+// PATHMODE=SIRWXU                                                              
+//STDENV   DD DUMMY                                                             
+//STDPARM  DD *,SYMBOLS=JCLONLY                                                 
+sh                                                                              
+echo $SBOMZ_HOME ;                                                              
+cd $SBOMZ_HOME ;                                                                
+sbomz validate                                                                  
+@@signedSBOMfile@@                                                              
+--dataset-remap-config                                                          
+/tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap.json                               
+--key-path-public                                                               
+$SBOMZ_HOME/ship_sbom_pub.key                                                   
+--config-work-directory $SBOMZ_HOME                                             
+//*#####################################################################        
+//*                                                                             
+//* Verify if Remote Staging Data Sets have been tampered with                  
+//*                                                                             
+//*#####################################################################        
+//RSDSVRFY EXEC PGM=IKJEFT01,COND=(0,NE),REGION=0M         C1BMXCOP             
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//SHIPRMAP DD DSN=&&SHIPRMAP,DISP=(OLD,PASS)                                    
+//SYSEXEC  DD UNIT=SYSDA,SPACE=(CYL,(5,1,5)),                                   
+// DSN=&SYSEXEC,                                                                
+// RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PO                                         
+//SYSUT2   DD DISP=(OLD,PASS),VOL=REF=*.SYSEXEC,                                
+// DSN=&SYSEXEC(RSDSVRFY)                                                       
+//SYSTSIN  DD *                                                                 
+REPRO IFILE(REXXMOD) OFILE(SYSUT2)                                              
+RSDSVRFY                                                                        
+/*                                                                              
+//REXXMOD  DD *,DLM='@@'                                                        
+/* REXX */                                                                      
+if ^ExistDDname('SHIPRMAP') Then Do                                             
+  Say 'RSDSVRFY01E DDname SHIPRMAP is not allocated.'                           
+  Return 8                                                                      
+End                                                                             
+"execio * diskr shiprmap (stem shiprmap. finis"                                 
+if shiprmap.0 = 0 then do                                                       
+  say 'RSDSVRFY02E SHIPRMAP file is empty'                                      
+  return 8                                                                      
+End                                                                             
+/*                                                                              
+  Build actual mapping table                                                    
+*/                                                                              
+RSDSList = ''                                                                   
+RSDSx.= ''                                                                      
+Do i=1 to shiprmap.0                                                            
+ If shiprmap.i \= '{' & shiprmap.i \= '}' Then Do                               
+   If pos(':',shiprmap.i) <> 0 then do                                          
+     j = i + 1                                                                  
+     RSDS = strip(shiprmap.j)                                                   
+     parse var RSDS '"' RSDS '"' .                                              
+     parse var RSDS RSDS "(" Member ")"                                         
+     if pos(RSDS,RSDSList) = 0 then do                                          
+       RSDSList = RSDSList || RSDS || ';'                                       
+     end                                                                        
+     x = VALUE(value(RSDS).member,1)                                            
+   End /* pos(':',shiprmap.i) <> 0 */                                           
+ End /* shiprmap.i NOT IN '{,}' */                                              
+End /* Do i */                                                                  
+Loc = pos(';',RSDSList)                                                         
+Do while Loc <> 0                                                               
+  RemoteStagingDS = substr(RSDSList,1,Loc-1)                                    
+  RSDSList = substr(RSDSList,Loc+1)                                             
+  /*                                                                            
+    Process every Remote Staging Data Set to validate if all members            
+    are in the Transmission List sent by Endevor LPAR                           
+  */                                                                            
+  x = outtrap(dirList.)                                                         
+  address TSO "listds '"RemoteStagingDS"' members"                              
+  x = outtrap(off)                                                              
+  k = 1                                                                         
+  do while pos('--MEMBERS--',dirList.k) = 0                                     
+   k = k + 1                                                                    
+  end                                                                           
+  do k = k + 1 to dirList.0                                                     
+    member = strip(dirList.k)                                                   
+    if VALUE(value(RemoteStagingDS).member) \= 1 then DO                        
+      say 'RSDSVRFY03E Remote Staging Data Set 'RemoteStagingDS ,               
+                       'has been tampered with.'                                
+      say '            Member 'member' has been added before' ,                 
+                      'Endevor Shipment Remote JCL Execution.'                  
+      return 12                                                                 
+    end                                                                         
+  end /* K = 7 */                                                               
+  Loc = pos(';',RSDSList)                                                       
+End /* Loc <> 0 */                                                              
+return 0                                                                        
+/*                                                                              
+  Procedure ExistDDname allocated                                               
+*/                                                                              
+ExistDDname: Procedure                                                          
+arg search4dd                                                                   
+last1 = 0                                                                       
+dsnlist = ''                                                                    
+Found = 0                                                                       
+Do i = 1 by 1 Until (last1 /= 0)                                                
+   Call bpxwdyn 'info inrelno('i') inrtddn(found_dd)',                          
+                'inrtlst(last1)'                                                
+   If found_dd = search4dd Then                                                 
+     Do                                                                         
+       Found = 1                                                                
+       leave                                                                    
+     End                                                                        
+End                                                                             
+Return found                                                                    
+@@                                                                              
+@ENDIF                                                                          
+@SECTION=02   <=======================================================          
+@INCLUDE=(B)                                                                    
+@IF &ANY2COPY                                                                   
+//*#####################################################################        
+//*                                                                             
+//* COPY OF STAGING DATA SETS TO PRODUCTION DATA SETS                           
+//*                                                                             
+//*#####################################################################        
+//JS01     EXEC PGM=IEBCOPY,COND=(0,NE)                    #RJICPY1             
+//SYSPRINT DD   SYSOUT=*                                                        
+@INCLUDE=U                                                                      
+@ENDIF                                                                          
+@REM *----------------------------------------------------------------          
+@REM #RJICPY2 @SECTION=01 GENS AN INDD CARD AND AN OUTDD CARD PER PDS           
+@REM *----------------------------------------------------------------          
+@SECTION=03   <=======================================================          
+@IF &ANY2COPY                                                                   
+//SYSIN    DD   *                                                               
+@ENDIF                                                                          
+@REM *----------------------------------------------------------------          
+@REM #RJICPY2 @SECTION=02 GENS AN IEBCOPY "COPY" STATEMENT PER PDS              
+@REM *----------------------------------------------------------------          
+@SECTION=04   <=======================================================          
+//*                                                                             
+@IF &ANY2DELETE                                                                 
+//*#####################################################################        
+//*                                                                             
+//* DELETE STAGING DATS SETS                                                    
+//*                                                                             
+//*#####################################################################        
+//JS02     EXEC PGM=IDCAMS,COND=(0,NE)                     #RJICPY1             
+//SYSPRINT DD   SYSOUT=*                                                        
+@ENDIF                                                                          
+@SECTION=05   <=======================================================          
+@IF &ANY2DELETE                                                                 
+//SYSIN    DD   *                                                               
+@ENDIF                                                                          
+@REM *----------------------------------------------------------------          
+@REM #RJICPY4 @SECTION=04 GENS A DD CARD PER PDS                                
+@REM *----------------------------------------------------------------          
+@SECTION=06   <=======================================================          
+@IF &RUCD                                                                       
+//*                                                                             
+//*#####################################################################        
+//*                                                                             
+//* (OPTIONAL) MODIFY ARUCD COMMAND FILE                       #RJICPY1         
+//*                                                                             
+//* IF REQUIRED, YOU CAN EDIT THIS MODEL JCL HERE TO INSERT                     
+//* A STEP TO MODIFY THE ARUCD BPXBATCH COMMAND FILE BEFORE                     
+//* IT IS PROCESSED BY BPXBATCH.                                                
+//* THE SYMBOL RUCD CAN BE USED FOR THE INPUT TO THE                            
+//* TAILORING STEP.                                                             
+//* THE STDPARM DD STATEMENT IN THE BPXBATCH STEP THAT                          
+//* FOLLOWS CAN BE USED AS A MODEL FOR INPUT TO THE                             
+//* INSERTED STEP.                                                              
+//*                                                                             
+//*#####################################################################        
+//*                                                                             
+//BPXBAT   EXEC PGM=BPXBATCH,COND=(0,NE)                   #RJICPY1             
+//STDOUT   DD   SYSOUT=*                                                        
+//STDERR   DD   SYSOUT=*                                                        
+//STDPARM  DD   DISP=SHR,                                                       
+//         DSN=&RUCD                                                            
+@ENDIF                                                                          
+@SECTION=07   <=======================================================          
+@INCLUDE=(A)                                                                    
+@IF RDISP=DELETE                                                                
+//*#####################################################################        
+//*                                                                             
+//* DELETE USS FILES                                                            
+//*                                                                             
+//*#####################################################################        
+//JS03     EXEC PGM=IDCAMS,COND=(0,NE)                     #RJICPY1             
+//SYSPRINT DD   SYSOUT=*                                                        
+//SYSIN    DD   *                                                               
+@ENDIF                                                                          
+@REM *----------------------------------------------------------------          
+@REM #RJICPY2 @SECTION=06 GENS AN IDCAMS "DELETE" STATEMENT FOR REMOTE          
+@REM                      STAGING DATA SETS IF REMOTE DISP=DELETE               
+@REM #RJICPY6 @SECTION=06 GENS AN IDCAMS "DELETE" STATEMENT FOR REMOTE          
+@REM                      JOB DATA SET AND DSN CROSS REFERENCE DATASET          
+@REM                      IF REMOTE DISP=DELETE                                 
+@REM *----------------------------------------------------------------          
+@SECTION=08   <=======================================================          
+//*                                                                             
+&RCONFJCL                                                                       
+//* **** END OF JOBSTREAM **** *                                                

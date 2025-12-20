@@ -1,0 +1,39 @@
+@REM ****************************************************** #RJFCPY2 ***        
+@REM *    CONTENTS: ENDEVOR/MVS - START PROCESSING A PDS TO BE SHIPPED          
+@REM *     PURPOSE: (SEE #RJFCPY1 FOR DETAILS)                                  
+@REM *******************************************************************        
+@REM *                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@SECTION=01   <=======================================================          
+@IF &FSTGDSN                                                                    
+//&FSTGDDN DD DISP=SHR,  STAGING DATA SET                                       
+//         DSN=&FSTGDSN                                                         
+@ENDIF                                                                          
+@IF &RDDN                                                                       
+//&RDDN    DD DISP=OLD,  REMOTE PRODUCTION DATA SET                             
+//         DSN=&RDSN                                                            
+@ENDIF                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@SECTION=02   <=======================================================          
+@IF &FSTGDSN                                                                    
+@IFAND &RDDN                                                                    
+ COPY      INDD=((&FSTGDDN,R)),OUTDD=&RDDN                                      
+@ENDIF                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@SECTION=03   <=======================================================          
+@IF &MBRS2DELETE                                                                
+@IFAND &RDDN                                                                    
+ EDITDIR   OUTDD=&RDDN                                                          
+@ENDIF                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@REM *                                                                          
+@SECTION=05   <=======================================================          
+@IF RDISP=DELETE                                                                
+@INCLUDE=#RJNDVRD                                                               
+@ENDIF                                                                          

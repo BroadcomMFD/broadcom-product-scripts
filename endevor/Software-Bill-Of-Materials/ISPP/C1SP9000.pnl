@@ -1,0 +1,54 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)                                             
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)                                         
+    TYPE(OUTPUT) INTENS(LOW)                                                   
+   | TYPE(OUTPUT) INTENS(HIGH)                                                  
+)BODY                                                                           
+%SHIP -----------------------  PACKAGE SHIPMENT  -------------------------------
+%OPTION  ===>_VARWKCMD                                                         +
++                                                                               
++%1+- BUILD SHIPMENT REQUEST      - Build and Queue A SHIP Action               
++%2+- DISPLAY SHIPMENT QUEUE      - Display Shipment Action Queue               
++%3+- SUBMIT SHIPMENT QUEUE       - Submit Shipment Action Queue                
++%4+- RESET SHIPMENT QUEUE        - Delete Shipment Action Queue                
++%5+- DISPLAY SHIPMENT STATUS     - Display the Status of a Shipment            
++                                                                               
++ PACKAGE ID %===>_VARSPPKG        +                                            
++ DESTINATION%===>_Z      +                                                     
++ PKG/BACKOUT%===>_Z      +        %P+- PACKAGE    %B+- BACKOUT                 
++                                                                               
++ STATUS DATE RANGE:  From%===>_VNBSFDAT+        To%===>_VNBSTDAT+              
++ STATUS SORT ORDER:  Shipment Date%===>_Z+  Dest-Id%===>_Z+  Pkg-Id%===>_Z+    
++                                                                               
++%HOST+JOB STATEMENT INFORMATION:                                               
++ ===>!C1SJC1                                                                  +
++ ===>!C1SJC2                                                                  +
++ ===>!C1SJC3                                                                  +
++ ===>!C1SJC4                                                                  +
++                                                                               
+)INIT                                                                           
+  .HELP = CITP9000                                                              
+  .ZVARS = '(VNBSIDST VNBSRQST VNBSORT1 VNBSORT2 VNBSORT3)'                     
+  VGET (C1SJC1 C1SJC2 C1SJC3 C1SJC4 VPHPKGID) PROFILE                           
+)PROC                                                                           
+ *REXX(*,ZTDSELS,VARWKSEL,VDDDSTID,VDDXMETH,VDDXNODE,VDDDESCR,                  
+ VDDDSTID,VDDXIPNM,VDDXIPPT,VNBSQDSP,VARWKCMD,VPHPKGID)                         
+   SA= 'C1SP9000 VPHPKGID: 'VPHPKGID                                            
+   SA= 'ZTDSELS: 'ZTDSELS                                                       
+   SA= 'VARWKSEL: 'VARWKSEL                                                     
+   SA= 'VDDDSTID: 'VDDDSTID                                                     
+   SA= 'VDDXMETH: 'VDDXMETH                                                     
+   SA= 'VDDXNODE: 'VDDXNODE                                                     
+   SA= 'VDDDESCR: 'VDDDESCR                                                     
+   SA= 'VDDDSTID: 'VDDDSTID                                                     
+   SA= 'VDDXIPNM: 'VDDXIPNM                                                     
+   SA= 'VDDXIPPT: 'VDDXIPPT                                                     
+   SA= 'VNBSQDSP: 'VNBSQDSP                                                     
+   SA= 'VARWKCMD: 'VARWKCMD                                                     
+   RETURN                                                                       
+ *ENDREXX                                                                       
+  VPUT (C1SJC1 C1SJC2 C1SJC3 C1SJC4) PROFILE                                    
+)END                                                                            

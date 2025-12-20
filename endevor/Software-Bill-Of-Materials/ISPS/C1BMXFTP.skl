@@ -13,10 +13,10 @@
 )CM                                                                             
 )CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
 )CM                                                                             
-)REXX VNBSQDSP XNODE                                                            
+)REXX VNBSQDSP NODENAME                                                         
    TRACE off                                                                    
    SA= '&VNBSQDSP> 'VNBSQDSP                                                    
-   SA= 'XNODE  ==> 'XNODE                                                       
+   SA= 'NODENAME  ==> 'NODENAME                                                 
 )ENDREXX                                                                        
 )IM C1BMXSBD                                                                    
 //* *==============================================* ISPSLIB(C1BMXFTP) *        
@@ -26,15 +26,14 @@
 //*                                                                             
 //*#####################################################################        
 //CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXFTP             
-//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE                                  
+)IM SCMM@REX                                                                    
 //XFTC     DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
-//SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
     MODAHJOB     +                                                              
-      &VPHPKGID  +                                                              
-      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
+      &PKGID     +                                                              
+      /tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json                     
 /*                                                                              
 //*#####################################################################        
 //*                                                                             
@@ -43,45 +42,23 @@
 //*#####################################################################        
 //FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          C1BMXFTP             
 //         REGION=2048K,TIME=800                                                
-//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
+//NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                     
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSUDUMP DD SYSOUT=Q                                                          
 //OUTPUT   DD SYSOUT=*                                                          
 //SYSIN    DD *,SYMBOLS=JCLONLY                                                 
-&XNODE                                                                          
+&NODENAME                                                                       
 BINARY                                                                          
 cd /tmp                                                                         
-PUT /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json                         
-/*                                                                              
-//*#####################################################################        
-//*                                                                             
-//*  FTP validation script to remote                                            
-//*                                                                             
-//*#####################################################################        
-//FTPSBOM  EXEC PGM=IEFBR14                                C1BMXFTP             
-//*FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),         C1BMXFTP             
-//*         REGION=2048K,TIME=800                                               
-//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
-//SYSTSPRT DD SYSOUT=*                                                          
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSUDUMP DD SYSOUT=Q                                                          
-//OUTPUT   DD SYSOUT=*                                                          
-//SYSIN    DD *,SYMBOLS=JCLONLY                                                 
-&XNODE                                                                          
-BINARY                                                                          
-cd /tmp                                                                         
-mk &VPHPKGID                                                                    
-cd &VPHPKGID                                                                    
-PUT /u/users/IBMUSER/rexxobj/HASHSBOM                                           
-/*                                                                              
+PUT /tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json                       
 //*#####################################################################        
 //*                                                                             
 //*  SUBMIT FTP JOB                                                             
 //*                                                                             
 //*#####################################################################        
 //*                                                                             
-//&VNBXSTP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXFTP             
+//&VNBXSTP EXEC PGM=IEBGENER,COND=(4,LT)                  C1BMXFTP              
 //SYSUT1   DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
 //SYSPRINT DD SYSOUT=*                                                          

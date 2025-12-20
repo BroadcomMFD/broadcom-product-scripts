@@ -22,15 +22,14 @@
 //*S2       SET TIME=&&LHHMMSS                                                  
 //*S3       SET USER=&&SYSUID                                                   
 //CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXLOC             
-//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE                                  
+)IM SCMM@REX                                                                    
 //XLCC     DD DSN=&&&&XLCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
-//SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
     MODAHJOB     +                                                              
-      &VPHPKGID  +                                                              
-      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
+      &PKGID     +                                                              
+      /tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json                     
 //* *==================================================================*        
 //* *===============================================* CSIQSENU(C1BMXLOC)        
 //* *==================================================================*        

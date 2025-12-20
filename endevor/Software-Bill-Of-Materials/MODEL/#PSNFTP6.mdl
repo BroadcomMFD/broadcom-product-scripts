@@ -1,0 +1,35 @@
+@REM ****************************************************** #PSNFTP6 ***        
+@REM *    CONTENTS: ENDEVOR/MVS - START PROCESSING THE SEQ DATASETS             
+@REM * TRANSMITTER: NETVIEW FILE TRANSFER PROGRAM (FTP)                         
+@REM *     PURPOSE: CREATE THE JOBSTEPS AND CONTROL CARDS NEEDED TO             
+@REM *              TRANSMIST THE THREE SEQUENTIAL FILES.  FOR A MORE           
+@REM *              DETAILED DESCRIPTION, REFER TO #PSNFTP1.                    
+@REM *******************************************************************        
+@REM                                                                            
+@PASS=10                                                                        
+@INCLUDE=J                       COPY JOBSTEP TO TRANSMIT AHJOB                 
+@INCLUDE=S                                                                      
+ PUT '&AHJOBDSN' +                                                              
+     '&ARJOBDSN'                                                                
+@REM          SFILEID='&AHJOBDSN' -                                             
+@REM          RFILEID='&ARJOBDSN'                                               
+@REM                                                                            
+@IF &CHJOBDSN                                                                   
+@INCLUDE=J                       COPY JOBSTEP TO TRANSMIT CHJOB                 
+@INCLUDE=S                                                                      
+ PUT '&CHJOBDSN' +                                                              
+     '&CRJOBDSN'                                                                
+@REM          SFILEID='&CHJOBDSN' -                                             
+@REM          RFILEID='&CRJOBDSN'                                               
+@ENDIF                                                                          
+@REM                                                                            
+@INCLUDE=J                       COPY JOBSTEP TO TRANSMIT AHREF                 
+@INCLUDE=S                                                                      
+ PUT '&AHREFDSN' +                                                              
+     '&ARREFDSN'                                                                
+@REM          SFILEID='&AHREFDSN' -                                             
+@REM          RFILEID='&ARREFDSN'                                               
+@PASS=20                                                                        
+@IF HDISP=DELETE                                                                
+@INCLUDE=X                       DELETE THE SEQUENTIALS                         
+@ENDIF                                                                          

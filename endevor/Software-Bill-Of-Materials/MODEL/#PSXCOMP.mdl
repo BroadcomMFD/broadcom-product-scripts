@@ -1,0 +1,45 @@
+@REM ****************************************************** #PSXCOMP ***        
+@REM *    CONTENTS: ENDEVOR/MVS - TRANSMIT A PARTITIONED DATASET                
+@REM * TRANSMITTER: CA-XCOM                                                     
+@REM *     PURPOSE: CREATE CONTROL CARDS TO TRANSMIT A PDS                      
+@REM *******************************************************************        
+@REM *  PTF C9224550 - CHANGE FILE=&TDSN TO FILE=&TDSN(*)                       
+@REM *******************************************************************        
+*                                                                               
+@IF &FDSN                                                                       
+@IFAND &NODENAME                                                                
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+XTCJOB=J&D4.DSN                                                                 
+HOLDCOUNT=0                                                                     
+XTCGOODDECR=J&D4.AR                                                             
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+LU=&NODENAME                                                                    
+UNIT=&RUNIT                                                                     
+@INCLUDE=Q                                                                      
+HOLD=NO                                                                         
+@ENDIF                                                                          
+@IF &FDSN                                                                       
+@IFAND &IPNAME                                                                  
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+XTCJOB=J&D4.DSN                                                                 
+HOLDCOUNT=0                                                                     
+XTCGOODDECR=J&D4.AR                                                             
+FILETYPE=FILE                                                                   
+FILEOPT=CREATE                                                                  
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+UNIT=&RUNIT                                                                     
+@INCLUDE=Q                                                                      
+HOLD=NO                                                                         
+@ENDIF                                                                          
+@IF &FDSN                                                                       
+LFILE=&FDSN(*)                                                                  
+FILE=&TDSN(*)                                                                   
+@ENDIF                                                                          

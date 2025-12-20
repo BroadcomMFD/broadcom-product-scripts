@@ -1,3 +1,3 @@
-//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE             SCMM@REX             
-//         DD DISP=SHR,DSN=CADEMO.ENDV.PRCS.ADMTEST.REXXEXEC                    
+//SYSEXEC  DD DISP=SHR,DSN=your.ENDVLIB.SSC2.REXX  SCMM@REX                     
+//         DD DISP=SHR,DSN=your.ENDVLIB.ADMPROD.SSC2.REXX                       
 //SYSTSPRT DD SYSOUT=*                                                          

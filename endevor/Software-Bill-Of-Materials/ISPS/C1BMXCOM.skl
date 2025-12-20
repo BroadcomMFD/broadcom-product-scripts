@@ -16,10 +16,13 @@
 )CM  2.  MODIFY THE DFLTAB=XCOMDFLT PARAMETER, IF NECESSARY.                    
 )CM                                                                             
 )CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)REXX VNBSQDSP XNODE                                                            
+)REXX VNBSQDSP NODENAME VDDXIPNM VDDXIPPT XNODE                                 
    TRACE Off                                                                    
    SA= '&VNBSQDSP> 'VNBSQDSP                                                    
-   SA= 'XNODE  ==> 'XNODE                                                       
+   SA= '&NODENAME  ==> 'NODENAME                                                
+   SA= '&VDDXIPNM> 'VDDXIPNM                                                    
+   SA= '&VDDXIPPT> 'VDDXIPPT                                                    
+   SA= '&XNODE> 'XNODE                                                          
 )ENDREXX                                                                        
 )IM C1BMXSBD                                                                    
 //* *==============================================* ISPSLIB(C1BMXCOM) *        
@@ -29,15 +32,14 @@
 //*                                                                             
 //*#####################################################################        
 //CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXCOM             
-//SYSEXEC  DD DISP=SHR,DSN=IBMUSER.CNTL.SOURCE                                  
+)IM SCMM@REX                                                                    
 //XXCC     DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
-//SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
     MODAHJOB     +                                                              
-      &VPHPKGID  +                                                              
-      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
+      &PKGID     +                                                              
+      /tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json                     
 //*#####################################################################        
 //*                                                                             
 //* Transmit SBOM to REMOTE SYSTEM                                              
@@ -45,34 +47,34 @@
 //*#####################################################################        
 //C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXCOM             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
-//STEPLIB  DD DISP=SHR,DSN=SHARE.XCOM.CBXGLOAD                                  
+//STEPLIB  DD DISP=SHR,DSN=your.XCOM.CBXGLOAD                                   
 //         DD DISP=SHR,                                                         
-//            DSN=CEE.SCEERUN                                                   
+//            DSN=your.SCEERUN                                                  
 //XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=SHARE.XCOM.R120.CBXGPARM                                      
+//            DSN=your.XCOM.CBXGPARM                                            
 //**********************************************************************        
 //SYSTCPD  DD  DISP=SHR,                                                        
-//             DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
+//             DSN=your.TCPIP.TCPPARMS(TCPDATA)                                 
 //XCOMGLOB DD  DISP=SHR,                                                        
-//             DSN=SHARE.XCOM.XCOMGLOB                                          
+//             DSN=your.XCOM.XCOMGLOB                                           
 //XCOMREST DD  DISP=SHR,                                                        
-//             DSN=SHARE.XCOM.XCOMREST                                          
+//             DSN=your.XCOM.XCOMREST                                           
 //XCOMPRNT DD  SYSOUT=*                            * IEBCOPY MSGS               
 //SYSPRINT DD  SYSOUT=*                            * TCP/IP MSGS                
 //SYSTERM  DD  SYSOUT=*                            * TCP/IP MSGS                
 //**********************************************************************        
 //SYSIN01  DD *,SYMBOLS=JCLONLY                                                 
-IPNAME=&VDDXIPNM                                                                
-IPPORT=&VDDXIPPT                                                                
+IPNAME=&NODENAME                                                                
+IPPORT=&XIPPT                                                                   
 TYPE=SEND                                                                       
-USERID=IBMUSER                                                                  
+USERID=&USERID                                                                  
 DROPSESS=YES                                                                    
 FILEOPT=CREATE                                                                  
 CKPT=0                                                                          
 CODE=BINARY                                                                     
 FILETYPE=FILE                                                                   
-LFILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json                       
-FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json                        
+LFILE=/tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json                     
+FILE=/tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json                      
 /*                                                                              
 //*#####################################################################        
 //*                                                                             
@@ -115,12 +117,12 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=&I@PRFX..XCOM.CBXGLOAD                               
 //         DD DISP=SHR,                                                         
-//            DSN=CEE.SCEERUN                                                   
+//            DSN=your.SCEERUN                                                  
 //XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=&I@PRFX..XCOM.R120.CBXGPARM                                   
+//            DSN=&I@PRFX..XCOM.R###.CBXGPARM                                   
 //**********************************************************************        
 //SYSTCPD  DD  DISP=SHR,                                                        
-//             DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
+//             DSN=your.TCPIP.TCPPARMS(TCPDATA)                                 
 //XCOMGLOB DD  DISP=SHR,                                                        
 //             DSN=&I@PRFX..XCOM.XCOMGLOB                                       
 //XCOMREST DD  DISP=SHR,                                                        

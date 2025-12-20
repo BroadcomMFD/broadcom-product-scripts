@@ -95,10 +95,12 @@
 //*                                                                             
 //* *-----------------------------------**---------* C1BMXJOB (CONT.)  *        
 //*                                                                             
-//SYSPRINT DD DISP=(NEW,PASS),DSN=&&CHJOBDSN,SPACE=(CYL,(1,1))                  
+//*SYSPRINT DD DISP=(NEW,PASS),DSN=&&CHJOBDSN,SPACE=(CYL,(1,1))                 
 //C1BMXDET DD SYSOUT=*     ** SHIPMENT DETAIL REPORT  ****************          
 //C1BMXSUM DD SYSOUT=*     ** SHIPMENT SUMMARY REPORT ****************          
 //C1BMXSYN DD SYSOUT=*     ** INPUT LISTING AND SYNTAX ERROR REPORT **          
+//*EN$TROPT DD SYSOUT=*                                                         
+//EN$TRXIT DD SYSOUT=*                                                          
 //*                                                                             
 //* ********************************************************************        
 //* *  XCOM COMMAND DATASET                                                     
@@ -109,7 +111,7 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
 //            UNIT=&T@DISK                                                      
 //C1BMXXCM DD DISP=SHR,                                                         
-//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP.SBOM                                
+//            DSN=your.ENDVLIB.SSC2.MODEL                                       
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
@@ -122,7 +124,7 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
 //            UNIT=&T@DISK                                                      
 //C1BMXFTM DD DISP=SHR,                                                         
-//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP.SBOM                                
+//            DSN=your.ENDVLIB.SSC2.MODEL                                       
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
@@ -152,6 +154,8 @@
 //* ********************************************************************        
 //*                                                                             
 //C1BMXRJC DD DISP=SHR,                                                         
+//            DSN=your.ENDVLIB.SSC2.ISPSENU                                     
+//         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQSENU                                    
 //*                                                                             
 //* ********************************************************************        
@@ -183,7 +187,9 @@
 //* ********************************************************************        
 //*                                                                             
 //C1BMXMDL DD DISP=SHR,                                                         
-//            DSN=SHARE.ENDV.LIBR.ISPS.SHIP.SBOM                                
+//            DSN=your.ENDVLIB.SSC2.MODEL                                       
+//         DD DISP=SHR,                                                         
+//            DSN=your.ENDVLIB.SSC2.REXX                                        
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
