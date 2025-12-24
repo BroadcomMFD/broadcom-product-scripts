@@ -26,4 +26,5 @@ The items in this folder support the blog [Adding SBOM Generation and Hash Valid
 
 
                                     SBOM Diagram
-    ![alt text](image.png)
+
+    ![alt text](image001.png)
