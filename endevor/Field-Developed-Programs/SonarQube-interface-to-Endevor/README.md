@@ -40,8 +40,6 @@ Some supporting items are not found in this folder, since they are utilities, or
 
 **[QMATCH.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/QMATCH.rex)** for comparing two text strings, where one or both may have wild-carded values.
 
-**[SCAN#SCL.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Multi-Package-Reporting-and-Validations/SCAN%23SCL.rex)** for converting SCL statements  into a table format.
-
 
 **[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
 
