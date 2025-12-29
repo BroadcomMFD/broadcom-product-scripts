@@ -27,6 +27,8 @@ Features of this solution are easily tailorable to the requirements at your site
 
 Processing logic is primarily found in REXX, JCL and Python members. The Python member orchestrates the SonarQube activity. File transmissions are performed using XCOM, in these examples, but they easily be swapped out for members that use your transmission tool. 
 
+
+
 Some supporting items are not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
 
 **[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%20(zowe))** 
@@ -45,9 +47,18 @@ Some supporting items are not found in this folder, since they are utilities, or
 
 **[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
 
+This code in the SONRQUBE.rexx  is used for identifying COBOL elements and copybooks. You might need to tweak it for your site:
 
+The cobol element type is expected to begin with COB or CBL
 
+    COBOL_Element_Types     = 'COB* CBL*'
+    COBOL_Compile_StepNames = 'COMPILE COMP CMP COB'
 
+Then the compile step should be one of those above. 
+
+The ProcessCopybookMembers routine looks for Input components from SYSLIB in a compile step. 
+
+When the process runs, it places members into the dataset you name as the **SonarWorkfile**. You can use the members to see details of actions performed, and to help resolve issues.  
 
 Use the SonarQube.bat commmand to bring the items together for your mainframe.
 
