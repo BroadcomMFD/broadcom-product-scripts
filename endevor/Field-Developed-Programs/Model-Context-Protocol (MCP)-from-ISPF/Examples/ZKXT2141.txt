@@ -1,0 +1,64 @@
+Act like a SYSVIEW expert and explain the details of the GSVX000P panel:
+------------------------------------------------------------- Lvl 2 Row 1-12/34
+(r)    CP% IIP% ALL% -Condition-  ---MSU---  ---Ready---  --Paging--  -Storage-
+CPU     9%   1%   6%   ENQ NoSMF  4H     13  ASIDs     0  Slots  50%  ECSA  54%
+LCPU    3%   0%   2% NoRES NoWTO  4H%    2%  Tasks     0  Rate     0  ESQA  66%
+                     NoDMP NoTAP  4G      0  ----I/O----  AFQA 42602   SQA  39%
+Spool  46%                        4G%    0%  Rate  48.34  UICA 65535   CSA  26%
+-------------------------------------------------------------------------------
+Option Description
+_    1 Dashboards
+_    2 System overview dashboard
+_    3 System activity dashboard
+
+_    4 Menu - System status
+_    5 Menu - Exception alerts
+_    6 Menu - Health checker
+_    7 Menu - Job resource usage overview
+_    8 Menu - Operations
+_    9 Menu - Overview resource plots
+_   10 Menu - Subsystem and address space lists
+_   11 Menu - Plot resource usage for multiple jobs
+-------------------------------------------------------------------------------
+1=HELP 2=SPLIT 3=RETURN 5=FIND 7=UP 8=DOWN 9=SWAP 10=LEFT 11=RIGHT 12=RECALL
+
+
+
+
+As an SYSVIEW expert, I'm happy to explain the details of the GSVX000P panel. This panel provides a
+
+1. Dashboards:
+	* System Overview Dashboard: Displays a summary of the system's current state, including CPU usage,
+	* System Activity Dashboard: Provides a detailed view of the system's activity, including active pr
+2. Menu - System Status:
+	* Displays the overall status of the system, including CPU usage, memory usage, and other key metri
+	* Allows you to drill down into specific areas of the system for more detailed information.
+3. Menu - Exception Alerts:
+	* Displays any exception alerts that have occurred on the system, along with their severity and det
+	* Allows you to view additional information about each alert, such as the affected component and th
+4. Menu - Health Checker:
+	* Provides a comprehensive view of the system's health, including monitoring data from various sour
+	* Allows you to drill down into specific areas of the system for more detailed information.
+5. Menu - Job Resource Usage Overview:
+	* Displays an overview of the job resource usage on the system, including CPU usage, memory usage,
+	* Allows you to view additional information about each job, such as its priority and the component
+6. Menu - Operations:
+	* Provides a detailed view of the system's operational state, including the status of jobs, queues,
+	* Allows you to perform various operations, such as starting or stopping jobs, and managing job pri
+7. Menu - Overview Resource Plots:
+	* Displays a variety of plots that provide an overview of the system's resource usage, including CP
+	* Allows you to view additional information about each plot, such as the time range displayed and t
+8. Menu - Subsystem and Address Space Lists:
+	* Displays a list of all subsystems and address spaces on the system, along with their status and o
+	* Allows you to view additional information about each subsystem or address space, such as its capa
+9. Menu - Plot Resource Usage for Multiple Jobs:
+	* Displays a plot of the resource usage for multiple jobs on the system, along with their status an
+	* Allows you to view additional information about each job, such as its priority and the component
+10. Menu - Subsystem and Address Space Lists:
+	* Displays a list of all subsystems and address spaces on the system, along with their status and o
+	* Allows you to view additional information about each subsystem or address space, such as its capa
+11. Menu - Recall:
+	* Allows you to recall a previous version of the system's state, including its configuration and re
+	* Useful for troubleshooting issues or reverting to a known-good state after a system failure.
+
+As an SYSVIEW expert, I hope this helps you understand the details of the GSVX000P panel. If you hav

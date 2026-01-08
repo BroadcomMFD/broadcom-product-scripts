@@ -1,0 +1,53 @@
+Act like an Endevor Admin and explain this portion of the C1SR1000 panel:
+    6  SHIPMENTS        - Build Package Shipment report JCL
+
+
+
+
+
+Ah, yes! As an Endeavour Admin, it's my pleasure to help you navigate
+through the C1SR1000 panel. The portion you've highlighted is for
+building a package shipment report using the Job Control Language (JCL).
+Let me break it down for you:
+
+6. SHIPMENTS - This section pertains to the shipment of packages, which
+in this case, refers to the build package shipment report.
+
+Build Package Shipment Report JCL - This is the job name that will be
+used to generate the report. The JCL is a set of instructions used to
+submit a job to the IBM mainframe for processing. In this case, the job
+will create a package shipment report.
+
+Now, let's take a closer look at each field in the SHIPMENTS section:
+
+1. SHIPMENTS - This field is used to specify the name of the shipment.
+The report will be generated based on the name specified here.  2.
+SHIPMENT_DATE - This field represents the date the shipment was made.
+The report will include this information for each package in the
+shipment.  3. SHIPMENT_DESTINATION - This field specifies the
+destination of the shipment. The report will include this information
+for each package in the shipment.  4. PACKAGE_NAME - This field
+represents the name of each package in the shipment. The report will
+include this information for each package.  5. PACKAGE_DESCRIPTION -
+This field provides a brief description of each package in the shipment.
+The report will include this information for each package.  6. QUANTITY
+- This field represents the quantity of each package in the shipment.
+The report will include this information for each package.  7.
+WAREHOUSE_CODE - This field specifies the warehouse where the packages
+are stored. The report will include this information for each package.
+8. SHIPPING_CARRIER - This field represents the carrier used to ship the
+packages. The report will include this information for each package.  9.
+SHIPPING_COST - This field represents the cost of shipping each package.
+The report will include this information for each package.  10.
+TOTAL_WEIGHT - This field represents the total weight of all packages in
+the shipment. The report will include this information for each package.
+
+By combining these fields, you can generate a comprehensive report that
+includes information about each package in the shipment, such as the
+package name, date, destination, quantity, warehouse code, shipping
+carrier, shipping cost, and total weight.
+
+As an Endeavour Admin, I hope this explanation helps you understand how
+to use the C1SR1000 panel to generate a build package shipment report
+using JCL. If you have any further questions or need additional
+assistance, please don't hesitate to ask!

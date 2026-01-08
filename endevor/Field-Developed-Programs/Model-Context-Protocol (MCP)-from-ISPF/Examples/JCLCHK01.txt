@@ -1,0 +1,69 @@
+Act like a JCLCheck expert and explain the details of the JCK0210 panel:
+
+       Date: 2025/11/24       User: WALJO11                   Time: 16:45
+
+                     1 - Process Control Options
+
+                     2 - Output Control Options
+
+                     3 - Security Options
+
+                     4 - CA JCLNeat Options
+
+                     5 - Job Card Specification
+
+                     X - EXIT
+
+
+
+
+
+As an expert in JCLCheck, I can provide you with detailed information
+about the JCK0210 panel. The JCK0210 panel is a crucial part of the Job
+Control Language (JCL) and contains various options that control the
+processing of a job in IBM Z systems. Here are some key details about
+the JCK0210 panel:
+
+1. Date: The date field on the JCK0210 panel allows you to specify the
+date and time when the job will be processed. The format of this field
+is MM/DD/YYYY HH24:MM. For example, if you want the job to run at 3 PM
+on November 24, 2025, you would enter "11/24/2025 15:00".
+
+2. User: The user field allows you to specify the username of the user
+who will be running the job. This is useful when multiple users need to
+access the same job and need to keep track of who ran it last.
+
+3. Time: The time field allows you to specify the time at which the job
+will be processed, in 15-minute increments. For example, if you want the
+job to run at 4 PM, you would enter "16:00".
+
+4. Job Card Specification: This section of the JCK0210 panel allows you
+to specify various options related to the job card, such as the job
+name, job class, and job priority. For example, if you want to run a job
+named "MyJob", you would enter "MYJOB" in the job name field.
+
+5. Output Control Options: This section of the JCK0210 panel allows you
+to specify options related to the output of the job, such as the type of
+output, the number of copies, and the delivery method. For example, if
+you want to send a copy of the output to a printer, you would enter
+"PRN" in the output field.
+
+6. Security Options: This section of the JCK0210 panel allows you to
+specify security-related options for the job, such as who can access the
+job and under what conditions. For example, if you want to restrict
+access to the job to only authorized users, you would enter "AUTH" in
+the security field.
+
+7. CA JCLNeat Options: This section of the JCK0210 panel allows you to
+specify options related to the use of CA JCLNeat, such as whether or not
+to use JCLNeat for the job. For example, if you want to use JCLNeat for
+the job, you would enter "Y" in the JCLNeat field.
+
+8. X - EXIT: This option allows you to exit the JCK0210 panel and return
+to the Job Control Language (JCL) editor.
+
+
+In summary, the JCK0210 panel is a critical part of the Job Control
+Language (JCL) that allows you to specify various options related to the
+processing of a job in IBM Z systems. By using this panel, you can
+ensure that your jobs are processed correctly and efficiently.

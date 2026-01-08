@@ -1,0 +1,86 @@
+Act like a File Master expert and explain the details of the CAWAPVSM panel:
+
+BLANK - Display Dataset Information      I - Define Alternate Index A -
+    Define VSAM File                 B - Build Alternate Index D -
+    Delete VSAM File                 P - Define Path
+   DD - Delete/Define VSAM File          R - Rename Component
+                                         M - Modify VSAM File
+
+Dataset to be Processed:  Dataset name  ===>
+
+Model VSAM dataset for allocations (optional):  Dataset name  ===>
+
+Saved IDCAMS control statements (optional):  Dataset name  ===> Member
+   name   ===>
+
+Execution mode   ===> E                  O = Online S = Submit JCL E =
+                                         Edit JCL
+
+
+
+
+
+Ah, a fellow File Master enthusiast! *adjusts glasses* The CAWAPVSM
+panel is a powerful tool for managing VSAM files in the z/OS
+environment. Let me break it down for you:
+
+1. BLANK - Display Dataset Information: This option allows you to view
+detailed information about the selected dataset, including its name,
+type, and format. It's like a "card" for your dataset, giving you all
+the essential details at a glance.
+
+2. I - Define Alternate Index: This option enables you to create an
+alternate index on a VSAM file. An alternate index is similar to a
+B-tree index in other databases, allowing you to quickly locate specific
+data within the file. By defining an alternate index, you can improve
+query performance and reduce the time it takes to retrieve data from the
+file.
+
+3. A - Define VSAM File: This option allows you to specify the VSAM file
+you want to work with. You can enter the file name or path directly, or
+use the "Browse" button to locate the file on your system.
+
+4. B - Build Alternate Index: Once you've defined an alternate index,
+this option lets you build it on the selected VSAM file. Building the
+index involves creating the necessary structures and linking them to the
+file. This process can take some time, depending on the size of the file
+and the complexity of the index.
+
+5. D - Delete VSAM File: If you no longer need a VSAM file, this option
+allows you to delete it permanently. Be careful when using this option,
+as deleting a VSAM file cannot be undone!
+
+6. P - Define Path: This option lets you specify the path where the VSAM
+file will be stored. You can enter the path directly or use the "Browse"
+button to locate the directory on your system.
+
+7. DD - Delete/Define VSAM File: This option allows you to delete an
+existing VSAM file and define a new one in its place. Use this option
+when you want to replace an old file with a new one, or if you need to
+delete a file that is no longer needed.
+
+8. R - Rename Component: If you need to renumber a VSAM file or change
+the name of a component within the file, this option lets you do so. Use
+the "New Name" field to enter the desired name for the component, and
+the "Old Name" field to specify the original name.
+
+9. M - Modify VSAM File: This option allows you to make changes to the
+contents of a VSAM file without deleting or renaming it. You can modify
+individual records or entire sections within the file using this option.
+
+10. Execution mode: This option determines how CAWAPVSM interacts with
+the selected VSAM file. The available modes are:
+
+	* Online: CAWAPVSM operates on the VSAM file in real-time, allowing you
+to make changes and view results as they happen.  	* Submit JCL:
+CAWAPVSM submits a JCL (Job Control Language) script to the z/OS
+operating system, which performs the necessary operations on the VSAM
+file. This mode is useful for automating VSAM file management tasks.  	*
+Edit JCL: This option allows you to edit an existing JCL script related
+to the selected VSAM file. Use this feature to customize your JCL
+scripts or fix errors in existing ones.
+
+There you have it, my friend! With these CAWAPVSM panel options, you'll
+be well on your way to managing your VSAM files like a pro. Remember to
+always exercise caution when working with VSAM files, as they can be
+critical to the operation of your z/OS applications. Happy VSAM-ing!
