@@ -1,0 +1,44 @@
+Act like a SYSVIEW expert and explain the details of the GSVX000P panel:
+----------------------------------------------- Lvl 3 Row 1-19/128 Col 1-79/254
+PLOT CPU% CP =========== W01P01 ? + PLOT CPU% IIP ========== W01P02 ? + PLOT CP
+ * CPU%                           |  * CPU%                           |  * CPU%
+      20 |                    |   |       10 |                    |   |       1
+      18 |                    |   |        9 |                    |   |
+      16 |                    |   |        8 |                    |   |
+      14 |            *       |   |        7 |                    |   |
+      12 |     *      *       |   |        6 |                    |   |
+      10 A***-****************|   |        5 |                    |   |
+       8 |********************|   |        4 |          *         |   |
+       6 |********************|   |        3 A********************|   |
+       4 |********************|   |        2 |********************|   |
+       2 |********************|   |        1 |********************|   |
+          +----+----+----+----+   |           +----+----+----+----+   |
+        19:24     19:54     20:24 |         19:24     19:54     20:24 |
+ACTSUM Top CPU Users ====== W02P01 ? + WMSYSSUM WLM System Su W02P02 ? + JOBSUM
+Jobname  ASID  ALLT%  CPUT% ClockTim | Workload Class    Per Imp  Inde | GSVX00
+ZWE1AD   0108 1.124% 1.124% 20.8DAYS | OMVSOTX  OMVSOTX    1   2  4.00 | Jobnam
+ZWE1AG   0087 0.726% 0.726% 20.8DAYS | ONLINE   ONLTEST    1   3  3.75 |
+CEMLOGGR 0104 0.611% 0.611% 20.8DAYS | RPTCLASS ONLTEST    1   3  3.75 |
+-------------------------------------------------------------------------------
+1=HELP 2=SPLIT 3=RETURN 5=FIND 7=UP 8=DOWN 9=SWAP 10=LEFT 11=RIGHT 12=RECALL
+
+
+
+
+As a SYSVIEW expert, I can explain the details of the GSVX000P panel. This panel displays informatio
+
+Lvl 3 Row 1-19/128 Col 1-79/254:
+
+* PLOT CPU% CP: Displays the current CPU percentage for the system, with the "CP" standing for "CPU
+* W01P01 ? + PLOT CPU% IIP: Displays the total CPU usage of all jobs in the system, including those
+* W01P02 ? + PLOT CP * CPU%: Displays the ratio of CPU usage to the number of CPUs in the system. Th
+
+Lvl 3 Row 19/128 Col 1-79/254:
+
+* ACTSUM Top CPU Users: Displays a list of the top CPU users in the system, along with their associa
+
+The information displayed on this panel is updated every 10 minutes by default, but can be customize
+
+In terms of the data format used in this panel, each column displays a different aspect of CPU usage
+
+I hope this helps! Let me know if you have any further questions or concerns.

@@ -1,0 +1,49 @@
+Act like a COBOL Expert and explain the following:
+          **
+          **                          PROCESSOR STEP INFORMATION
+          **                            INITLIST.......RC=0000
+          **                            CICSPRE .......RC=0004
+          **                            COMPILE .......RC=0000
+          **                            OBJCOPY .......RC=0000
+
+
+
+
+
+Oh, my dear fellow! *adjusts glasses* It's a pleasure to see you again!
+*grins widely* I must say, you've come to the right place! *winks*
+
+Now, let me explain these process steps to you. *clears throat*
+
+Ah, yes! ** **! That's right! The PROCESSOR step information is telling
+us that the program is in the processing stage. *nods* It's like a chef
+preparing a delicious dish! *smiles*
+
+And look at those RC values! *excitedly* 0000, 0004, and 0000! *giggles*
+They're like little secrets, aren't they? *winks*
+
+The INITLIST step is where the program initializes its lists. *nods*
+It's like a librarian organizing books on a shelf! *smiles* And with
+RC=0000, it means the list was successfully initialized. *grins*
+
+Next up is CICSPRE! *excitedly* That's where the program compiles its
+instructions into machine code. *nods* It's like a blacksmith forging a
+sword! *smiles* And with RC=0004, it means the compilation was
+successful. *grins*
+
+And last but not least, we have COMPILE! *excitedly* That's where the
+program is compiled into machine code. *nods* It's like a chef baking a
+cake! *smiles* And with RC=0000, it means the compilation was successful
+once again! *grins*
+
+Ah, OBJCOPY! *excitedly* That's where the program creates an object
+file. *nods* It's like a tailor sewing a suit! *smiles* And with
+RC=0000, it means the object file was successfully created! *grins*
+
+There you have it, my dear fellow! *winks* Those are the process steps
+and their RC values. *nods* I hope that helps you understand your COBOL
+program better! *smiles* Now, if you'll excuse me, I have some important
+COBOL business to attend to... *adjusts glasses*
+
+Now, where was I? Ah yes! *excitedly* The PROCESSOR step information is
+telling us that the program is in the processing stage! *nods*

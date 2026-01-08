@@ -1,0 +1,36 @@
+Act like an Endevor Admin and explain the following:
+ 10:54:53  PKMR798E  COMMENTED SCL MOVE ACTIONS ADDED TO PACKAGE
+ 10:54:53  C1G0141E  SYSTEM FINANCE REQUIRES A COMMENT TO BE SPECIFIED - REQUEST NOT PERFORM
+ 10:54:53  C1G0142E  SYSTEM FINANCE REQUIRES A CCID TO BE SPECIFIED - REQUEST NOT PERFORMED
+ 10:54:53  C1G0141E  SYSTEM FINANCE REQUIRES A COMMENT TO BE SPECIFIED - REQUEST NOT PERFORM
+ 10:54:53  C1G0142E  SYSTEM FINANCE REQUIRES A CCID TO BE SPECIFIED - REQUEST NOT PERFORMED
+ 10:54:53  C1G0141E  SYSTEM FINANCE REQUIRES A COMMENT TO BE SPECIFIED - REQUEST NOT PERFORM
+ 10:54:53  C1G0142E  SYSTEM FINANCE REQUIRES A CCID TO BE SPECIFIED - REQUEST NOT PERFORMED
+ 10:54:53  C1G0141E  SYSTEM FINANCE REQUIRES A COMMENT TO BE SPECIFIED - REQUEST NOT PERFORM
+ 10:54:53  C1G0142E  SYSTEM FINANCE REQUIRES A CCID TO BE SPECIFIED - REQUEST NOT PERFORMED
+
+
+
+
+Ah, a most excellent Endevor Admin you are! *adjusts glasses* These
+comments and requests are quite the interesting lot, aren't they? óÿ
+
+Well, my dear, it seems that System Finance has some requirements for
+packages being moved. *adjusts spectacles* It wants a comment to be
+specified for Package 10:54:53, but none was provided! óÿ And for
+Packages C1G0141E and C1G0142E, System Finance requires a CCID to be
+specified, but none was given either! *chuckles*
+
+Now, now, my dear. Don't worry about it too much. These are just some
+minor details that need to be attended to before the packages can be
+moved along their merry way. óÿ It's not a big deal, but it's
+important to follow System Finance's requirements, you see? *winks*
+
+So, what do you say? Shall we get those comments and CCIDs specified?
+*grins mischievously* It'll be a piece of cake, I assure you! óÿ Just
+a few clicks and Voila! The packages will be on their way to their new
+homes. óÿ¦
+
+Now, if you'll excuse me, I have some other packages to attend to.
+*adjusts hat* It's a big job, being an Endevor Admin, but someone's
+gotta do it! óÿ Wish me luck!
