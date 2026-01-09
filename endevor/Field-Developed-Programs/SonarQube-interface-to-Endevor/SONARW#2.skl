@@ -1,0 +1,14 @@
+* WAIT#2 input for file transmission to complete                                
+  If $row# = 0 then $SkipRow = 'Y'                                              
+  ReportingDSN = ReportingPFX || '.#2'                                          
+* a longer wait for the File Transmission to finish                             
+  wait2 =  (wait1 * 1.5) % 1                                                    
+  wait2 = max(wait2,5)                                                          
+  Say 'SONARW#2 - waiting' wait2 'seconds between check loops'                  
+  wait2 = WAITFILE(ReportingDSN 25 wait2)                                       
+  say "ReportingDSN " ReportingDSN "is returned after" wait2 "secs"             
+  if wait2 = 0 then, +                                                          
+     Do; Say '#2 is lost'; Exit(12); end                                        
+  cmd = "ALLOC DD(STATUS2) DA("ReportingDSN") SHR REUSE "                       
+  CALL BPXWDYN  cmd                                                             
+  MODEL = 'STATUS2'                                                             

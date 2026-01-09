@@ -1,0 +1,72 @@
+REM   In Windows, execute this command file to collect all Package
+@ECHO OFF
+ECHO ./  ADD  NAME=@README                     > SonarQube.moveout
+ECHO These items come from the Endevor GitHub at >> SonarQube.moveout
+ECHO https://github.com/BroadcomMFD/broadcom-product-scripts >> SonarQube.moveout
+ECHO ------------------------------------------------------- >> SonarQube.moveout
+ECHO These are rex/CSIQCLS0 : BUMPJOB C1UEXTR7 DTADJUST GETACCTC GTUNIQUE WAITFILE >> SonarQube.moveout
+ECHO These are skl/CSIQSENU : CAST#JCL FTP#INC FTP#RCV FTP#RUN SONARMDL SONARPRM SONARSET SONARTBL SONARW#1 SONARW#2 SONARW#3 XCOM#INC XCOM#JOB XCOM#RCV XCOM#RUN >> SonarQube.moveout
+ECHO ./  ADD  NAME=BUMPJOB                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\BUMPJOB.rex   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=C1UEXTR7                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\C1UEXTR7.rex   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=DTADJUST                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\DTADJUST.rex   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=GETACCTC                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\GETACCTC.rex   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=GTUNIQUE                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\GTUNIQUE.rex   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=WAITFILE                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\WAITFILE.rex   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=CAST#JCL                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\CAST#JCL.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=FTP#INC                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\FTP#INC.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=FTP#RCV                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\FTP#RCV.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=FTP#RUN                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\FTP#RUN.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARMDL                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARMDL.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARPRM                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARPRM.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARSET                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARSET.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARTBL                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARTBL.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARW#1                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARW#1.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARW#2                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARW#2.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=SONARW#3                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\SONARW#3.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=XCOM#INC                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\XCOM#INC.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=XCOM#JOB                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\XCOM#JOB.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=XCOM#RCV                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\XCOM#RCV.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+ECHO ./  ADD  NAME=XCOM#RUN                >> SonarQube.moveout
+TYPE SonarQube-interface-to-Endevor\XCOM#RUN.skl   >> SonarQube.moveout
+ECHO.          >> SonarQube.moveout
+REM
