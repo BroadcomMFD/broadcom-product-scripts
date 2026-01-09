@@ -1,0 +1,8 @@
+CIUU710E 'Invalid PackageID length'                          .T=W .A=Y          
+'Invalid PackageID Length for new servicenow change request.'                   
+                                                                                
+CIUU717E 'CR not avilable'                                   .T=W .A=Y          
+'Change Request could not be validated in the servicenow instance.'             
+                                                                                
+CIUU719E 'Invalid Content'                                   .T=W .A=Y          
+'Package ID Change Request Number must be a numeric value.'                     
