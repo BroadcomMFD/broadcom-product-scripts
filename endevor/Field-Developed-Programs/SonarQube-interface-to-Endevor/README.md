@@ -34,16 +34,16 @@ Some supporting items are not found in this folder, since they are utilities, or
 **[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%20(zowe))** 
 
 
-**[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/BUMPJOB.rex)** for bumping an existing jobname to render a new job name
+**[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/BUMPJOB.rex )** for bumping an existing jobname to render a new job name
 
 **[GETACCT.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Automated-Test-Facility-Using-Test4Z/GETACCTC.rex)** for obtaining and re-using the users accounting code information
 
-**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/GTUNIQUE.rex)** for obtaining a unique 8-byte name from the current date and time.
+**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/GTUNIQUE.rex )** for obtaining a unique 8-byte name from the current date and time.
 
-**[QMATCH.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/QMATCH.rex)** for comparing two text strings, where one or both may have wild-carded values.
+**[QMATCH.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/QMATCH.rex )** for comparing two text strings, where one or both may have wild-carded values.
 
 
-**[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/SonarQube-Interface-with-Endevor/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
+**[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
 
 **[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
 
