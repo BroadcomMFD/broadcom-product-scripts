@@ -163,6 +163,4 @@ When the step completes, the content of TBLOUT might look something like this:
 This method offers utility beyond automated test executions; for instance, it enables the inclusion of the expanded list of libraries within the processor output listings.
 
 
-See the [T4ZUNIT.prc](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Automated-Test-Facility-Using-Test4Z/T4ZUNIT.prc) processor Include member for an example with this step.
-
 If you are unfamiliar with the use of processor includes, see an explanation [here](https://community.broadcom.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=4e97b9d9-9a2e-6349-96e3-27c89ce5b00d).
