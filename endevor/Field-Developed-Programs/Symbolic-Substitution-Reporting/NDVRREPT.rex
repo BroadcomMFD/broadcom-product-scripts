@@ -121,7 +121,7 @@ EndevorVariablesEvaluate:
       /* Finding a variable name and the variable name length       */
       VariableLen#1 = FindVariableNameEnd()
       appendVariable =,
-         Substr(string,positionAmper+1,VariableLen#1-1)
+         Strip(Substr(string,positionAmper+1,VariableLen#1-1))
       /* VariableLen#1 have acceptable length ?             */
       If VariableLen#1 > (maxVariableLen+1) then,
          Do
