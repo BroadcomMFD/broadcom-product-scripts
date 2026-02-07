@@ -1,7 +1,17 @@
-   /*   REXX  */                                                                
+      /*   REXX  */                                                                
    PARSE ARG Parm                                                               
-                                                                                
-/* Required for all Bundles :   */                                              
+
+/* Enter one or more mapping representations                */    
+/*       where PDA should search for inventory.             */    
+   PDAMaplist = ,        /* required only for PDA  */             
+      " DEV/D-QAS/Q ",                                            
+      " QAS/1-QAS/1 ",                                            
+      " EMER/1-EMER/2 "                                           
+   /* " DEV/1-QAS/2 "                                       */                                   
+   /* " EMER/1-EMER/2 "                                     */ 
+   /*                                                       */ 
+
+/* Required for many Bundles :   */                                              
    /* Enter High Level Qualifiers */                                            
    SHLQ='IPRFX.IQUAL'   /* Systems High Level Qualifier */                      
    FHLQ='IPRFX.IQUAL'   /* Field Developed Program (FDP) HLQ */                 

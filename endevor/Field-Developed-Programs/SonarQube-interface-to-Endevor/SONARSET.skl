@@ -1,0 +1,13 @@
+* SETUP INPUT FOR THE FOREGROUND TABLE TOOL STEP DUING CAST                     
+* If $row# = 0 then $SkipRow = 'Y'                                              
+  uniqueName = GTUNIQUE()                                                       
+  ReportingPFX = USERID() || '.SONRQUBE.'uniqueName'.RESULTS'                   
+  $QuietMessages = 'Y'         /* Bypass messages Y/N        */                 
+  myJob     = MVSVAR('SYMDEF','JOBNAME' )                                       
+  Jobname = BUMPJOB(myJob) j                                                    
+  OrderLibrary  = '&MYISPSLB'                                                   
+  SonarWorkfile = '&SONARWRK'                                                   
+  TransmitMethod = 'XCOM'                                                       
+  TransmitMethod = 'FTP'                                                        
+  TransmitCOND  = 0        /* Skip step if prev > TransmitCOND */               
+  TransmitCOND  = 4        /* Skip step if prev > TransmitCOND */               
