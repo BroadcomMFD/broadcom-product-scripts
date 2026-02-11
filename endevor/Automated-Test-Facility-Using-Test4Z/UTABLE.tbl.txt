@@ -1,6 +1,0 @@
-*Tst_Suite Unit Subsystem Allow_test_fails
- ZTTQSAMP  Y              Y
- ZTTRNDY   Y              Y
- ZTTDOGWS  N              N
- ZTTDB2PH  Y    DB2       N
- ZTTCICSQ  Y    CICS      Y
