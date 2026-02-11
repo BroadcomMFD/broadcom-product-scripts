@@ -31,9 +31,11 @@ Use one of the methods below to convert the content of your Site Symbol table in
     
 Copy the results into a dataset, or dataset(member), which is also listed in the JCL for reporting. 
 
-## Copy variable sections from your processor(s)
+## Collect variable sections from your processor(s)
 
-Find the variables you want expanded and reported from your processors. See the examples provided in this folder.
+You can use the edit macro named REPTPREP to collect the variables from the top of the processor into a MODEL dataset. If your processor has multiple statements on a line, it will reforat the line so that each line of the MODEL output contains only one statement.
+
+Otherwise, you can manually find the variables you want expanded and reported from your processors. See the examples provided in this folder.
 
 ##  Collect processor group overrides 
 
