@@ -1,7 +1,10 @@
      
 # Email for External Approver Groups
 
-Send Email to Approvers in External Endevor Approver Groups. These are groups where individuals are identified in your ESM and not within the defined Approver Groups of Endevor.
+Send Email to Approvers defined in External Endevor Approver Groups. These are groups where individuals are not defined within the Endevor Approver Group, but rather are defined in the  external security product in use at your site.
+
+See the discussion of External Groups in [Endevor's tech docs documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/18-1/administrating/package-administration/approver-groups.html).
+
 
 As with many of the folders on this GitHub, this one contains a response from requests of one or more customers.
 
