@@ -122,6 +122,7 @@ EndevorVariablesEvaluate:
       VariableLen#1 = FindVariableNameEnd()
       appendVariable =,
          Strip(Substr(string,positionAmper+1,VariableLen#1-1))
+      appendVariable = Strip(appendVariable)
       /* VariableLen#1 have acceptable length ?             */
       If VariableLen#1 > (maxVariableLen+1) then,
          Do
@@ -232,6 +233,7 @@ FindVariableNameEnd:
           ,variableChars)
    tempVariableName =,
       Substr(string,positionAmper+1,tempEndCharacter-1)
+   tempVariableName = Strip(tempVariableName)
    If Wordpos(tempVariableName, ResolvedVariables) > 0 then,
       Return tempEndCharacter
    /* Examine the last resolved value to see where          */
@@ -241,6 +243,7 @@ FindVariableNameEnd:
           ,variableChars)
    tempVariableName =,
       Substr(string,positionAmper+1,tempEndCharacter-1)
+   tempVariableName = Strip(tempVariableName)
    If Wordpos(tempVariableName, ResolvedVariables) > 0 then,
       Return tempEndCharacter
    /* Examine the   resolved string   to see where          */
