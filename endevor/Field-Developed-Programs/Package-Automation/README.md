@@ -96,33 +96,17 @@ You can find the code for JCLCOMMT.rex in the [ISPF-tools-for-Quick-Edit-and-End
 
 The commnenting will allow you to reveiew your package shipping (and other) jobs, and know the element or member name that contains the lines of JCL.
 
-## Find items at the these locations:
+## Items outside of this folder, that might be a part of your solution: 
 
-**item**               Location
 
-**@site.rex** -  endevor\Field-Developed-Programs\Package-Automation
+[**BPXWDYN**](https://www.ibm.com/docs/en/zos/3.2.0?topic=guide-dynamic-allocation) - a Dynamic Allocation routine from IBM
 
-**BILDTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
+[**GTUNIQUE**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GTUNIQUE.rex) - returns a unique 8-byte name, base on date and time, that can be used as a dataset node.
+ 
+[**GETACCTC**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GETACCTC.rex) - returns the "accounting code" for the current user id.
 
-**PKGESHIP.rex**  - endevor\Field-Developed-Programs\Package-Automation
+[**JCLCOMMT.rex**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/JCLCOMMT.rex)  - an edit macro that comments JCL, Skeletons and processors.
 
-**PULLTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation 
+**ENTBJAPI** - see member BC1JAAPI in your CSIQJCL library.
 
-**SHIP#FTP.skl**  - endevor\Field-Developed-Programs\Package-Automation
-
-**other models**  - endevor\Field-Developed-Programs\Package-Automation
-
-**SHIPRULE**      - endevor\Field-Developed-Programs\Package-Automation
-
-**TBLUNLOD.rex**  - endevor\Field-Developed-Programs\Package-Automation
-
-**Trigger**       - endevor\Shipments-for-Multiple-Destinations + endevor\Field-Developed-Programs\Package-Automation
-
-**UPDTTGGR.rex**  - endevor\Field-Developed-Programs\Package-Automation
-
-**WHERE@M1.rex**  - endevor\Field-Developed-Programs\Package-Automation
-
-**WHEREAMI.rex**  - endevor\Field-Developed-Programs\Package-Automation
-
-**JCLCOMMT.rex**  - endevor\Field-Developed-Programs\ISPF-tools-for-Quick-Edit-and-Endevor
-
+[**BKOUTLOG**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Backout-Logging/endevor/Field-Developed-Programs/Package-Automation/Package-Backout-Logging/BKOUTLOG.rex) - for logging package Backout and BackIn actions. (currently in a branch)
