@@ -1,4 +1,4 @@
-# Broadcom ACF2 AC REXX Script
+# Broadcom ACF2 AE REXX Script
 AE – Viewing/Editing/Updating ACF2 Dataset and Resource Rulesets quickly and interactively.
 
 The challenge:  Use the ACF2 utilities and REXX to create an interactive, quick capability that decompiles the ruleset into a temporary dataset, places the ACF2 cybersecurity professional into ISPF Edit, and provides the ability to review, scroll, search, or change the ruleset as desired.  The REXX checks for any changes made when you press PF3 or Exit; if changed, the REXX will then compile and store, and present the results back to the screen for review.  If successful, when the ACF2 cybersecurity professional presses PF3 or Exit, the REXX will then issue the appropriate REBUILD or RELOAD command as needed.
