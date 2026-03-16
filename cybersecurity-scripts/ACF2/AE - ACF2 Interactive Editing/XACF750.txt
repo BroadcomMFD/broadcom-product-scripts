@@ -1,0 +1,12 @@
+/* REXX MACRO PROGRAM   XACF750                             */
+/*                                                          */
+/*  Broadcom has provided this REXX MACRO as an example     */
+/*  for use within AERULE REXX in using ACFUNIX to enhance  */
+/*  customers experience with ACF2.                         */
+/*                                                          */
+"ISREDIT MACRO PROCESS"
+"ISREDIT X ALL ACF750"
+"ISREDIT DELETE X ALL"
+"ISREDIT END"
+ADDRESS 'ISPEXEC'
+RETURN

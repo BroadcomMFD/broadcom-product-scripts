@@ -1,0 +1,149 @@
+/* rexx */
+/*                                                          */
+/*  Broadcom has provided this REXX as an example of        */
+/*  using the ACFUNIX command interactively to enhance      */
+/*  customers experience with ACF2.                         */
+/*                                                          */
+/*  Note: in order to use ACFUNIX in this example, you must */
+/*  have LU18336 for r16 or LU18337 for r17 applied         */
+/*                                                          */
+/* PURPOSE:  Provide an interactive method to immediately   */
+/*           Edit/review an ACF2 Ruleset, allowing for      */
+/*           editing, scrolling, searching, reviewing in a  */
+/*           dynamically alloated temporary data set by     */
+/*           using standard ACF2 utilities such as ACFUNIX, */
+/*           DECOMP and ACFCOMP.                            */
+/*                                                          */
+/*           1. List (decompile) a ruleset into a temporary */
+/*              data set for review, scrolling, searching,  */
+/*              or editing/updating the ruleset.            */
+/*                                                          */
+/*           2. If edited, use ACFCOMP utility to recompile */
+/*              and present the compiled output back to the */
+/*              ACF2 professional for review/validation     */
+/*                                                          */
+/* SYNTAX:                                                  */
+/*   r or d and resource rule key with TYPE after.          */
+/*                                                          */
+/*   Resource rules:  r type resource_name.                 */
+/*   Dataset  rules:  d dataset key name                    */
+/*                                                          */
+/* EXAMPLES:                                                */
+/*        ae d sys1                                         */
+/*        ae r fac bpx                                      */
+/*        ae r sur bpx                                      */
+/*        ae r fac csvapf                                   */
+/*                                                          */
+/*  Version 1.0 April 2024                                  */
+/*          1.1 May 2025                                    */
+/*          2.0 October 2025                                */
+/*          2.1 december 2025                               */
+/*          2.2 Jan 2026 Moved Macro Execution after editing*/
+/*                       check to remove ACF750* messages   */
+/*                       while still allowing those to be   */
+/*                       displayed when editing             */
+/*                                                          */
+/*  This rexx is an example of the art of the possible      */
+/*  in using ACFUNIX interactively                          */
+/*                                                          */
+/* Rexx created by Team Collaboration, member Steve Hosie   */
+/*                                                          */
+/* trace(i) */
+parse arg p1 p2 p3 p4 p5
+upper p1
+if length(p1) = 0 then
+ do
+   say 'No arguments provided, please try again'
+   exit
+ end
+/* determine sysid, esm, sysplex */
+CVT      = C2d(Storage(10,4))                /* point to CVT         */
+CVTRAC   = C2d(Storage(D2x(CVT + 992),4))    /* point to RACF CVT    */
+RCVT     = CVTRAC                            /* use RCVT name        */
+RCVTID   = Storage(D2x(RCVT),4)              /* point to RCVTID      */
+ESMNAME = RCVTID
+SYSID = mvsvar('SYSNAME')
+SYSPLEX = mvsvar('sysplex')
+IF LENGTH(SYSPLEX) < 1 then SYSPLEX = "NONE"
+If RCVTID = 'RCVT' then ESMNAME = 'RACF'
+If RCVTID = 'RTSS' then ESMNAME = 'TSS '
+esx = ESMNAME
+syspxxxx = SYSPLEX
+sysxx = SYSID
+if esx /= 'ACF2' then
+  do
+    say 'This system is not ACF2, you are on a 'esx' managed system'
+    say 'The SYSID is 'sysxx' and the sysplex is 'syspxxxx
+    exit
+  end
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF2.TEMP.'last_qual
+udsn = strip(udsn)
+odsn = user'.ACF2.TEMP.COMPILE.OUT'
+odsn = odsn'.'last_qual
+ddname = "A"current_seconds
+odsn = strip(odsn)
+oddname = "O"current_seconds
+STATUS = MSG('OFF')
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(V B) LRECL(255)"
+if substr(p1,1,1) = 'D' then
+ do
+  p1 = substr(p1,3,60)
+  "ACFUNIX -dd "ddname" "decomp p1 p2
+  acf_cmd99 = 'f acf2,reload('p2')'
+ end
+else
+  if substr(p1,1,1) = 'R' then
+   do
+     restype = STRIP(p2)
+     resource = strip(p3)
+     cmd1 = 'MULT set res('restype') ~ decomp 'resource
+     cmd1 = "'"cmd1"'"
+     "ACFUNIX -dd "ddname" "cmd1
+     acf_cmd99 = 'f acf2,rebuild('restype')'
+     end
+   else
+    do
+      say "wrong input"
+      "free f("ddname")"
+      exit
+    end
+"ISPEXEC edit DATASET('"udsn"')"
+editrc = rc
+if editrc = 0 then
+  do
+   "ISPEXEC edit DATASET('"udsn"') MACRO(XACF750)"
+    if sysdsn("'"odsn"'") = OK then
+      "alloc f("oddname") da('"odsn"') shr reu"
+    else
+      "alloc f("oddname") da('"odsn"') NEW SP(25 15)
+       TR DSORG(PS) RECFM(F B) LRECL(80)"
+    x = OUTTRAP('ACFO.')
+    cmd2 = "'"udsn"'"
+STATUS = MSG('ON')
+    address tso ACFCOMP "'"udsn"'"
+    "execio * diskw "oddname" (stem ACFO. finis"
+    say 'Press Enter to see the results of the updated ACF2 ruleset'
+STATUS = MSG('ON')
+    "ISPEXEC browse DATASET('"odsn"')"
+    "free f("oddname")"
+    address tso "DELETE '"odsn"'"
+    "free f(ddname)"
+    address tso "DELETE '"udsn"'"
+    "ACFUNIX "acf_cmd99
+  end
+else
+ say "NO ACF2 CHANGES WERE MADE.... "
+ say "                              "
+"free f(ddname)"
+address tso "DELETE '"udsn"'"
+s1 ='THANK YOU for using this amazing utility brought to you by'
+s1 = s1' Broadcom'
+say s1
+say ' - Team Collaboration!'
