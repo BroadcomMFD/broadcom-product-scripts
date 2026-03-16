@@ -1,0 +1,78 @@
+/* rexx */
+/*                                                            */
+/*  This rexx is an example of the art of the possible        */
+/*  in using ACFUNIX interactively                            */
+/*                                                            */
+/*  Purpose: Provide example of how to add or remove lids     */
+/*  from a role with a simple single line command using       */
+/*  ACFUNIX                                                   */
+/*                                                            */
+/*  This rexx performs set x(rol), the Change command and     */
+/*  the F ACF2,NEWXREF,TYPE(ROL) commands displaying the      */
+/*  output to the user                                        */
+/*                                                            */
+/*  Version 1.0 December 2025                                 */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in providing a more interactive experience  */
+/*                                                            */
+/* created by steve hosie                                     */
+/*                                                            */
+/*  Review ACF2 Techdocs on ACFUNIX for more info             */
+/*                                                            */
+parse arg p1 p2 p3 p4 p5 p6
+UPPER p1 p2 p3 p4 p5 p6
+if length(p2) = 0 then
+ do
+  say 'NO ROLE provided'
+  exit
+ end
+if p1 = 'A' then
+  do
+   action = 'ADD'
+  end
+ else
+ if p1 = 'D' then
+  do
+    action = 'DEL'
+  end
+ else
+   do
+     say 'No action provided, specify A or D to add or delete'
+     say 'LID(s) from role'p1
+     exit
+   end
+if length(p3) = 0 then
+ do
+  say 'NO LID provided'
+  exit
+ end
+ do
+acf_cmd = 'mult set terse ~ li like(-) if(non-cncl)'
+acf_cmd = 'mult set x(rol)~ change '||p2
+acf_cmd = acf_cmd||' role include('||p3
+if length(p4) > 0 then
+ do
+   acf_cmd = acf_cmd||' '||p4
+   if length(p5) > 0 then
+    do
+      acf_cmd = acf_cmd||' '||p5
+      if length(p6) > 0 then
+       do
+         acf_cmd = acf_cmd||' '||p6
+       end
+    end
+end
+acf_cmd = acf_cmd||') 'action
+
+"ACFUNIX "acf_cmd
+if rc = 0 then
+ do
+   p1 = 'f acf2,newxref,type(rol)'
+   "ACFUNIX "p1
+ end
+s1 ='THANK YOU for using this amazing utility brought to you by'
+s1 = s1' Broadcom'
+say s1
+say ' - Team Collaboration!'
+return

@@ -1,0 +1,48 @@
+/* rexx */
+/*                                                            */
+/*  This rexx is an example of the art of the possible        */
+/*  in using ACFUNIX interactively                            */
+/*                                                            */
+/*  Purpose: Provide example of how to add a new role to acf2 */
+/*  with simple single line command using ACFUNIX             */
+/*                                                            */
+/*  This rexx performs set x(rol), the insert command and     */
+/*  the F ACF2,NEWXREF,TYPE(ROL) commands displaying the      */
+/*  output to the user                                        */
+/*                                                            */
+/*  Version 1.0 December 2025                                 */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in providing a more interactive experience  */
+/*                                                            */
+/* created by steve hosie                                     */
+/*                                                            */
+/*  Review ACF2 Techdocs on ACFUNIX for more info             */
+/*                                                            */
+/*  syntax: TSO AR role lid                                   */
+/*                                                            */
+/*  example: TSO AR SYSADMIN ABC1234                          */
+/*                                                            */
+parse arg p1 p2
+UPPER p1 p2
+if length(p1) = 0 then
+ do
+  say 'NO ROLE provided'
+  exit
+ end
+
+acf_cmd = 'mult set x(rol)~ insert '||p1
+acf_cmd = acf_cmd||' role include('||p2
+acf_cmd = acf_cmd||') role'
+
+"ACFUNIX "acf_cmd
+if rc = 0 then
+ do
+   p1 = 'f acf2,newxref,type(rol)'
+   "ACFUNIX "p1
+ end
+s1 ='THANK YOU for using this amazing utility brought to you by'
+s1 = s1' Broadcom'
+say s1
+say ' - Team Collaboration!'
+return
