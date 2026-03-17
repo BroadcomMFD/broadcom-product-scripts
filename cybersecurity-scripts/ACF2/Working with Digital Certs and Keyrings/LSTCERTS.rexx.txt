@@ -1,0 +1,53 @@
+/* rexx */
+/*                                                            */
+/*  This rexx is an example of the art of the possible        */
+/*  in using ACFUNIX interactively                            */
+/*                                                            */
+/*  Purpose: Provide example of quickly list all Digital      */
+/*  Certificates in the ACF2 database into a dynamically      */
+/*  allocated temp dataset, for review/scroll/search          */
+/*                                                            */
+/*  Version 1.0 Oct 2025                                      */
+/*          1.1 March 2026 added input p1                     */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  ACFUNIX usage in proving ACF2 command output into a       */
+/*  MVS dataset allowing for interactive browse, search or    */
+/*  edit of the results from the ACF2 commands.               */
+/*                                                            */
+/* created by steve hosie                                     */
+/*                                                            */
+/* examples:                                                  */
+/*  TSO LSTCERTS                                              */
+/*  TSO LSTCERTS CERT-                                        */
+/*  TSO LSTCERTS A-                                           */
+/*                                                            */
+parse arg p1 p2
+UPPER p1 p2
+if length(p1) > 0 then
+ do
+  acf_cmd = 'mult set profile(user) div(certdata) ~ li like('p1')'
+ end
+else
+ do
+  acf_cmd = 'mult set profile(user) div(certdata) ~ li like(-)'
+ end
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF2.TEMP.'last_qual
+udsn = strip(udsn)
+ddname = "A"current_seconds
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(F B) LRECL(80) BLKSIZE(3120)"
+"ACFUNIX -dd "ddname " "acf_cmd
+"ISPEXEC EDIT DATASET('"udsn"')"
+/* "ISPEXEC BROWSE DATASET('"udsn"')" */
+/* "ISPEXEC EDIT DATASET('"udsn"')" */
+/*  use above EDIT versus browse if you want to */
+ STATUS = MSG('OFF')
+"free f("ddname")"
+address tso "DELETE '"udsn"'"

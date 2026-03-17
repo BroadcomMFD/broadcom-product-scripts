@@ -1,0 +1,92 @@
+/* REXX                                                            */   00010000
+/*                                                                 */   00011000
+/* Interactive Certificate reporting                               */   00012000
+/*                                                                 */   00013000
+/*                                                                 */   00014000
+/*  This rexx is an example of the art of the possible             */   00015000
+/*  in using SAFCRRPT Interactively                                */   00016000
+/*                                                                 */   00017000
+/* Purpose:  this REXX code create an interactive reporting for    */   00018000
+/* digital certificates, placing output into temp dataset and user */   00019000
+/* into ISPF Edit mode for scrolling/searching, etc.               */   00020000
+/*                                                                 */   00030000
+/*  Broadcom has provided this REXX as an example of the           */   00040000
+/*  Using SAFCRRPT interactively without having to submit JCL      */   00050000
+/*  to obtain reports.                                             */   00051000
+/*                                                                 */   00052000
+/*  Version 1.0 November 2025                                      */   00053000
+/*                                                                 */   00054000
+/*  Code created by Steve Hosie                                    */   00055000
+/*                                                                 */   00055100
+/* Examples:                                                       */   00055200
+/* a. certrpt input                                                */   00055300
+/*                                                                 */   00055400
+/* trace(i) */                                                          00055500
+                                                                        00055600
+parse upper arg p1 p2 p3 p4                                             00055700
+UPPER p1 p2 p3 p4                                                       00055800
+SYSID = mvsvar('SYSNAME')                                               00055900
+                                                                        00056000
+/*                                                                   */ 00057000
+                                                                        00058000
+STATUS = MSG('ON')                                                      00059000
+STATUS = MSG('OFF')                                                     00060000
+                                                                        00070000
+"free f(SYSPRINT)"                                                      00080000
+"free f(SYSIN)"                                                         00090000
+"free f(TEMP1)"                                                         00100000
+                                                                        00110000
+if length(p1) = 0 then                                                  00120000
+ do                                                                     00130000
+  p1 = 'RECORDID(-) DETAIL EXT'                                         00140000
+ end                                                                    00150000
+else                                                                    00160000
+ do                                                                     00170000
+  p1 = p1 p2 p3 p4                                                      00180000
+ end                                                                    00190000
+                                                                        00200000
+INITIATE:                                                               00210000
+STATUS = MSG('ON')                                                      00220000
+STATUS = MSG('OFF')                                                     00230000
+user = userid()                                                         00240000
+                                                                        00250000
+current_seconds = TIME(S)                                               00260000
+last_qual = "D"current_seconds                                          00270000
+                                                                        00280000
+sysin = user'.certrpt.sysin.'last_qual                                  00290000
+cert_rpt = user'.certrpt.sysprint.'last_qual                            00300000
+                                                                        00310000
+if sysdsn("'"cert_rpt"'") = OK then                                     00320000
+ do                                                                     00330000
+   address tso "alloc f(SYSPRINT) da('"cert_rpt"') SHR REU"             00340000
+ END                                                                    00350000
+else                                                                    00360000
+ do                                                                     00370000
+   address tso "alloc f(SYSPRINT) da('"cert_rpt"') NEW SP(400 400)      00380000
+   TR DSORG(PS) RECFM(F B) LRECL(133) "                                 00390000
+ END                                                                    00400000
+if sysdsn("'"sysin"'") = OK then                                        00410000
+ do                                                                     00420000
+   address tso "alloc f(SYSIN) da('"sysin"') SHR REU"                   00430000
+ END                                                                    00440000
+else                                                                    00450000
+ do                                                                     00460000
+   address tso "alloc f(SYSIN) da('"sysin"') NEW SP(2 10)               00470000
+   TR DSORG(PS) RECFM(F B) LRECL(80)"                                   00480000
+ END                                                                    00490000
+sysin1.1 = 'TITLE(CERT DETAILED REPORT)'                                00500000
+sysin1.2 = p1                                                           00510000
+address tso "execio * diskw SYSIN (stem sysin1. finis"                  00520000
+address tso safcrrpt                                                    00530000
+address tso "ISPEXEC EDIT DATASET('"cert_rpt"')"                        00540000
+/*  "ISPEXEC BROWSE DATASET('"cert_rpt"')" */                           00550000
+                                                                        00560000
+address tso "free f(SYSPRINT)"                                          00570000
+address tso "free f(SYSIN)"                                             00580000
+                                                                        00590000
+address tso "DELETE '"cert_rpt"'"                                       00600000
+address tso "DELETE '"sysin"'"                                          00610000
+return                                                                  00620000
+/*             */                                                       00630000
+/* END OF CODE */                                                       00640000
+/*             */                                                       00650000
