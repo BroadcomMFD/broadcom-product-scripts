@@ -6,6 +6,7 @@ These samples are provided as is and are not officially supported (see [license]
 If you are new to Table Tool see these links for more information:
 
 - [Techdocs Documentation](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/administrating/table-tool.html)
+- [Table Tool Introduction video](https://community.broadcom.com/mainframesoftware/viewdocument/table-tool-introduction-video?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2)
 - [Programming results without writing any code](https://www.youtube.com/watch?v=41tPGWpxm3s)
 - [Community Website Table Tool Examples Library ](https://community.broadcom.com/viewdocument/table-tool-examples-2020-june?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2&tab=librarydocuments)
 
@@ -20,7 +21,7 @@ Examples in this folder include:
    - EXAMPL#3  Add members of a PDS into Endevor                             
    - EXAMPL#4  Execute PDM to update elements out of sync.                   
    - EXAMPL#5  Report the total Track consumption of a list of datasets      
-   - EMPL#7XA  Example processor that uses Table Tool to process JCLCheck data
+   - EXAMPL#7  Example processor that uses Table Tool to process JCLCheck data
    - EXAMPL#8  Report processor usage including  UnUsed processors.          
    - EXAMPLEG  Report of counts for each processor group reference
    - EXAMPL1A  Report Elements in DEV signed out to one userid               
@@ -31,6 +32,8 @@ Examples in this folder include:
    - EXAMPL2P  To Report Packages created over nnn days ago (using CSV data)                                  
    - LISTDSNS  From a Dataset mask, lists dataset names and attributes
    - PKGEMNTR  To run the Package Monitor report    
+   - GIOVANNI - Retroactive Snapshot. To give you a workable snapshot of inventory at a point in time. See the [Endevor Community site](https://community.broadcom.com/mainframesoftware/question/endevor-shapshot-at-certain-date#4aafa198-87e5-4c61-962e-019cbdbc1896)
+
    - Commonly requested utilities and the rexx which support them: 
       * CSV and TableTool emails element list to a distribution - need a report of what's in QA? need it emailed as an attachment? 
       * CSV and TableTool shows processor group usage - too many processor groups? want to know which ones are used / not used?  
