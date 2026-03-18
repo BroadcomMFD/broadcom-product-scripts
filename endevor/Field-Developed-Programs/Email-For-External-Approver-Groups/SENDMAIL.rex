@@ -20,30 +20,14 @@
             Do
             SonarWorkfile = Strip(Word(sonar.so#,3),'B',"'")
             Leave
+            End
       End /* Do so# = 1 to sonar.0 */
      End /* If RESULT = 0 then */
-  /* Individuals for receiving email are defined here     */
-  /* There is no dependency on ESMTPTBL or XIT7MAIL .     */
-  EmailAddresses. = ''
-  EmailAddresses.GROUP01     = 'First1.Last1@yoursite.com ',
-                               'First2.Last2@yoursite.com ',
-                               'First3.Last3@yoursite.com ',
-                               'First4.Last4@yoursite.com '
-  EmailAddresses.GROUP02     = 'First2.Last2@yoursite.com '
-  EmailAddresses.GROUP03   = ' '
-  EmailAddresses.GROUP04     = ' '
-  EmailAddresses.GROUP05       = ' '
-  EmailAddresses.GROUP06  = ' '
-  EmailAddresses.GROUP07 = 'First4.Last4@yoursite.com'
-  EmailAddresses.GROUP08     = 'First3.Last3@yoursite.com ',
-                               'First4.Last4@yoursite.com '
-  EmailAddresses.GROUP09        = 'First1.Last1@yoursite.com ',
-                               'First2.Last2@yoursite.com ',
-                               'First4.Last4@yoursite.com '
-  EmailAddresses.GROUP10         = ''
-  sa = ApproverGroup
-  EmailAddressList = EmailAddresses.ApproverGroup
+  /* For the Approver Group passed as an argument by the exit    */
+  /* Call your custom routine that provides 1+ email addresses.  */
+  EmailAddressList = GTEMADDS(ApproverGroup)
   If EmailAddressList = '' then Exit
+  /* If none are provided, then just exit                        */
   myLrecl = 80
   Body.0 =  0
   If PackageCondition = 'NEEDS-APPROVAL' then,
@@ -53,9 +37,10 @@
      Body.2 = "CC:" EmailAddressList
      Body.3 = "Package"  Package "is ready for your approval."
      Body.4 = "      "
-     Body.5 ="http://mstrsvw.your.site.com:" || ,
+     Body.5 ="http://YOURSITE.yoursite.com:" || ,
           "7080/endevorui/app/packages/" || Package
      Body.0 = 5
+     bdy# = Body.0
      If SonarWorkfile /= '' then,
         Do
         ALLOC_CMD = "ALLOC FI(SONAR)",
@@ -83,8 +68,8 @@
   Exit
 SendAnEmail:
   email.0=0
-  Call SMTP "helo DEVRSVW"
-  Call SMTP "Mail From:<DEVRSVW@yoursite.com> "
+  Call SMTP "helo YOURSITE"
+  Call SMTP "Mail From:<YOURSITE@yoursite.com> "
   Call SMTP "Rcpt To:<"EMAIL_ADDRESS">"
   Call SMTP "data "
   Call SMTP "To: "EMAIL_ADDRESS" "
