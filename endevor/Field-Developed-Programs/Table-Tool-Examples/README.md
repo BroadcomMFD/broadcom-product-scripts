@@ -21,7 +21,7 @@ Examples in this folder include:
    - EXAMPL#3  Add members of a PDS into Endevor                             
    - EXAMPL#4  Execute PDM to update elements out of sync.                   
    - EXAMPL#5  Report the total Track consumption of a list of datasets      
-   - EMPL#7XA  Example processor that uses Table Tool to process JCLCheck data
+   - EXAMPL#7  Example processor that uses Table Tool to process JCLCheck data
    - EXAMPL#8  Report processor usage including  UnUsed processors.          
    - EXAMPLEG  Report of counts for each processor group reference
    - EXAMPL1A  Report Elements in DEV signed out to one userid               
