@@ -12,15 +12,15 @@ ISPF is inherently suited for executing Model Context Protocol AI queries becaus
 
 This capability allows users to inquire about displayed errors and message codes, get details on options within applications (such as Endevor or Sysview), and navigate seamlessly. ASKAI supports this by either automating the construction of the query text or permitting the user to type their question manually.
 
-The construction of an ASMAI query can be done in  many ways: 
-The user migrates to an ISPF screen that needs explanation. ASMAI constructs a query automatically. The cursor acts as a pointer.
+The construction of an ASKAI query can be done in  many ways: 
+The user migrates to an ISPF screen that needs explanation. ASKAI constructs a query automatically. The cursor acts as a pointer.
 From Edit and View sessions, the user can use mainframe CUT and PASTE commands to assist in building a query
 The user can replace the text with manually entered text
 
 
 On the mainframe, both IBM and Broadcom products often operate as applications within the Interactive System Productivity Facility (ISPF) environment.
 
-To manage settings within ISPF, each application uses a unique 1-to-4 character identifier called the APPLID. When a user selects an option from an ISPF panel to start an application, the ZAPPLID variable is typically assigned a  corresponding APPLID value.
+To manage settings within ISPF, each application uses a unique 1-to-4 character identifier called the APPLID. When a user selects an option from an ISPF panel to start an application, the [ZAPPLID variable](https://www.ibm.com/docs/en/zos/3.2.0?topic=variables-general) is typically assigned a  corresponding APPLID (Application ID) value.
 
 The following table provides examples of the relationship between ISPF Application IDs and associated IBM and Broadcom products.
 
@@ -58,7 +58,7 @@ If your question relates to specific text visible on the screen, position your c
 
 This capability ensures that when a user has a question about what they see, ISPF variables automatically provide the necessary context to the AI Query.
 
-The [ISPF variables](https://www.ibm.com/docs/en/zos/2.5.0?topic=variables-general) available to ASKAI include:
+The [ISPF variables](https://www.ibm.com/docs/en/zos/3.2.0?topic=variables-general) available to ASKAI include:
 
 
 
