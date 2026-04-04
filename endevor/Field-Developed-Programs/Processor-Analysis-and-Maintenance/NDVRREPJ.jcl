@@ -4,30 +4,22 @@
 //* RESTART=RUNTEST,
 //*==================================================================*
 // JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)
-//  SET TRACE=T                     T/Y/N/variable-name
-//  SET TRACE=#VARB1                T/Y/N/variable-name
+//  SET TRACE=N                     T/Y/N/variable-name
 //*==================================================================*
-//*   LIST ENTRIES OF THE ENDEVOR SITE SYMBOL   TABLE              **
-//*******************************************************************
-//ESYMBOLS EXEC PGM=IKJEFT01,DYNAMNBR=30,REGION=4096K
-//   INCLUDE MEMBER=SYSEXEC
-//STEPLIB  DD  DISP=SHR,DSN=YOURSITE.NDVR.NODES1.LOADLIB
-//         DD  DISP=SHR,DSN=YOUR.NDVR.CSIQAUTU
-//         DD  DISP=SHR,DSN=YOUR.NDVR.CSIQAUTH
-//         DD  DISP=SHR,DSN=YOUR.NDVR.CSIQLOAD
-//SYSTSIN  DD * / The name of your ESYMBOLS table
- %LOADSYMB ESYMBOLS REXX
-//SYSTSPRT DD SYSOUT=*
-//SYSTSPRT DD SYSOUT=*
-//ESYMBOLS DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.WRK(ESYMBOLO)
-//*
-//*================================================================
+//*   If a Site Symbol table is inuse at your site, 
+//*   Create a representation of the table in a format like:
+//*      SYMBOLNAME="value"
+//*   See the ESYMBOLR.rex member for a method for doing this.
+//*   Place the results into a dataset(member) for the next step. 
+//*   Something like DSN=YOURSITE.NDVR.TEAM.WRK(ESYMBOLO)
+//*-----------
+//*   Concatenate below it, another input containing variables from
+//*   one or more processors, in the same format. 
+//*//*================================================================
 //RUNTEST  EXEC PGM=IRXJCL,
 //         PARM='NDVRREPT &TRACE'
-//INPUT    DD *,SYMBOLS=JCLONLY
-C1EN     = 'PRD'
-C1ELEMEBT =  GEORGE
-C1PRGRP   =  12345678
+//INPUT    DD *    < "seed" C1 variables here (only ones necessary)
+C1PRGRP   =  G2345678
 C1SI      =  P
 C1ST      =  PRD
 C1SY      =  FINAN
@@ -40,7 +32,7 @@ C1SSTG    =  TEST
 C1SSTG#   =  1
 C1SSUBSYS =  A110
 //         DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.WRK(ESYMBOLO)
-//*        DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.WRK(PSYMBOLS)
+//         DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.WRK(PSYMBOLS)
 //         DD * <use stmts like these for longer variable names>
 C1ENVMNT  = &C1EN.
 C1STGID   = &C1SI.
@@ -49,9 +41,7 @@ C1SYSTEM  = &C1SY.
 C1SUBSYS  = &C1SU.
 C1ELTYPE  = &C1TY.
 //SYSEXEC  DD DISP=SHR,DSN=YOURSITE.NDVR.REXX
-//         DD DISP=SHR,DSN=YOURSITE.YOUR.NDVR.NODES2.CLSTREXX
-//         DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.REXX
-//REPORT   DD DISP=SHR,DSN=YOURSITE.NDVR.TEAM.WRK(NDVRREPT)
+//REPORT   DD SYSOUT=* 
 //SYSTSIN  DD DUMMY
 //SYSTSPRT DD SYSOUT=*
 //*================================================================
