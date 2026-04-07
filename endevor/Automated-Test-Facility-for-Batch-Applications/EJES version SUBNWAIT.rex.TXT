@@ -1,0 +1,146 @@
+/*    REXX    */
+   /*----------------------------------------------------------*/
+   /* Submit the JCL whose name is found in ARG                */
+   /* Wait for the submitted job to finish running             */
+   /* Then pass back the final returncode/status for the       */
+   /* submitted job.                                           */
+   /*                                                          */
+   /* Get my jobname....  Cannot wait for myself               */
+   /* Ensure the job we submit does not have the same jobname  */
+   /* as my own.                                               */
+   /*----------------------------------------------------------*/
+
+/*===   If SUBNWAIT is allocated as a DDname, then Trace         =*/
+   CALL BPXWDYN 'INFO DD(SUBNWAIT)'
+   If RESULT = 0 then Trace R
+/*===                                                            =*/
+
+   Arg Parms;
+
+   submitJCL   = Word(Parms,1)
+   Loopcount   = Word(Parms,2)
+   LoopSeconds = Word(Parms,3)
+
+   /*------------------------------------------------------------*/
+   /* submitJCL is the name of the JCL to submit                 */
+   /* Loopcount is the number of loops to wait for job to finish */
+   /* LoopSeconds is number of seconds after each loop           */
+   /*------------------------------------------------------------*/
+   myJobName = MVSVAR('SYMDEF',JOBNAME ) /*Returns JOBNAME */
+   thisMAXCOMP = ''
+
+   /* Submit the tailored JCL                                  */
+   Call Submit_n_save_jobInfo
+
+   If SubmittedJobName = myJobName then,
+      Do
+      Push 'The job to be monitored is mine. Invalid request'
+      Push 'you must ensure the test job has a different name.'
+      "EXECIO 2 DISKW ERRORS (Finis"
+      Exit(8)
+      End;
+
+   Say 'SubmittedJobName  =' SubmittedJobName
+   Say 'SubmittedJobid    =' SubmittedJobid
+
+   seconds = LoopSeconds
+   SubmittedJobStatus = ''
+   Do Loopcount ;
+      Call WatchSubmittedJob ;
+      If Length(thisMAXCOMP) > 0 then leave;
+      Call WaitAwhile;
+   End; /* Do Forever */
+
+   Say 'SubmittedJob ' SubmittedJobName SubmittedJobid ,
+       'completed with' thisMAXCOMP
+
+   myReturns = Word(thisMAXCOMP,2)
+   If Verify(myReturns,'0123456789') > 0 then Return(16)
+   Return(myReturns)
+
+Submit_n_save_jobInfo: /* submit submitJCL job and save job info */
+
+   DELSTACK
+   QUEUE "SUBMIT '"submitJCL"'"
+   QUEUE ""
+   RC = EJESREXX("EXECAPI * ")
+   lastentry# = EJES_MSG.0
+   lastentry  = EJES_MSG.lastentry#
+   RC = EJESREXX("TERMAPI")
+   lastentry = Translate(lastentry,' ',")(" )
+    Say lastentry
+   SubmittedJobName =  Word(lastentry,2)
+   SubmittedJobid   =  Word(lastentry,3)
+   Say SubmittedJobName submittedJobid
+
+   Return;
+
+WatchSubmittedJob:
+/* Input parm is the command that */
+/*     SubmittedJobName           */
+/*     SubmittedJobid             */
+/* invokes the requested display. */
+
+  cmd2invk = "Prefix" SubmittedJobName ";ST"
+  oldclass = "*UNKNOWN"
+  rptix = 0
+  delstack
+  queue "PRESET;"cmd2invk
+  queue "SHOWCOLS JOBNAME JOBID JPRTY JCLASS STATUS MAXCOMP",
+        " QDATE QTIME"
+  queue "J="Substr(SubmittedJobid,4)
+  queue ""
+  rc = ejesrexx("execapi")
+  if rc>0 then do i=1 to EJES_Msg.0;say EJES_Msg.i;end
+  else,
+  Do
+    rc = ejesrexx("execapi * 'SORT JCLASS;UPDATE'")
+    if rc>0 then,
+      do i=1 to EJES_Msg.0;say EJES_Msg.i;end
+    else,
+      do row=1 to EJES_Lines
+        Sa= 'EJES_TCData.row' EJES_TCData.row
+        thisJobname=  EJES_Jobname.row
+        thisJobid  =  EJES_Jobid.row
+        thisEntryQDATE = EJES_TCData.EJES__QDATE.row
+        thisEntryQDATE = Substr(thisEntryQDATE,1,4) ³³,
+                         Substr(thisEntryQDATE,6,2) ³³,
+                         Substr(thisEntryQDATE,9)
+        thisEntryQTIME = EJES_TCData.EJES__QTIME.row
+        thisEntryStamp = '@' ³³ thisEntryQDATE Strip(thisEntryQTIME)
+        thisMAXCOMP     = EJES_TCData.EJES__MAXCOMP.row
+
+        Say thisJobname thisJobid thisEntryStamp thisMAXCOMP
+
+      end /* do row=1 to EJES_Lines  */
+  end /*  else, */
+  rc = ejesrexx('termapi')
+
+  Return;
+
+WaitAwhile:
+  /*                                                               */
+  /* A resource is unavailable. Wait awhile and try                */
+  /*   accessing the resource again.                               */
+  /*                                                               */
+  /*   The length of the wait is designated in the parameter       */
+  /*   value which specifies a number of seconds.                  */
+  /*   A parameter value of '000003' causes a wait for 3 seconds.  */
+  /*                                                               */
+  seconds = Abs(seconds)
+  seconds = Trunc(seconds,0)
+  Say "Waiting " seconds "seconds at " DATE(S) TIME() ,
+       "for" submitJCL
+  /* AOPBATCH and BPXWDYN are IBM programs */
+  CALL BPXWDYN  "ALLOC DD(STDOUT) DUMMY SHR REUSE"
+  CALL BPXWDYN  "ALLOC DD(STDERR) DUMMY SHR REUSE"
+  CALL BPXWDYN  "ALLOC DD(STDIN) DUMMY SHR REUSE"
+
+  /* AOPBATCH and BPXWDYN are IBM programs */
+  parm = "sleep "seconds
+  Address LINKMVS "AOPBATCH parm"
+
+  Return
+
+
+

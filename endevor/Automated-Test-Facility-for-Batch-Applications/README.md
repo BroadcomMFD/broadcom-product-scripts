@@ -87,9 +87,10 @@ To prepare your JCL for testing, you have two choices:
 
 The TEST#JOB.REX member in this folder  submits a tailored JCL, waits for its completion, and scans the outputs produced to compare with a "baseline".
 
-The alternatives below are provided in case you want a simpler method for submitting and waiting for job completions:
+The alternatives below are provided in case you want a simpler method for submitting and waiting for job completions:.
 
 - **SUBMITST.REX** in this folder submits a JCL and waits for its completion. Like TEST#JOB.REX, it leverages IBM's REXX methods supported under SDSF.  
+- **EJES version SUBNWAIT.rex** is a version you can use if you are using EJES, and not SDSF
 - [WAITFILE](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex) allows you to submit one or more jobs, using any method, and then wait until an expected output file is created. It has no dependencies on SDSF. 
 
 You may use the Automated-Test-Facility-Batch bat file to collect all members related to the **Automated Test Facility for Batch Applications**. The bat file creates a .movout file for your convenience.
