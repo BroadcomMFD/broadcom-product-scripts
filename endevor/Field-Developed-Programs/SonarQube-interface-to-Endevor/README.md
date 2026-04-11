@@ -1,29 +1,77 @@
 #  SonarQube Interface to Endevor
 
-Items in this folder provide an example method for interfacing SonarQube with Endevor. They allow Endevor to initiate a SonarQube analysis for an Endevor package, receive the quality gates response from the SonarQube analysis, and pass or fail the CAST of the package depending on the results.
+This folder provides example assets demonstrating the integration of SonarQube and Endevor.
+
+The integration enables Endevor to automatically trigger a SonarQube analysis when an Endevor package is CAST. To avoid tying up the user's session, any foreground CAST action is resubmitted to run in batch.
+
+Optionally, based on user configuration, the CAST job can be set to wait for the SonarQube results. If this option is chosen, the final package status will be updated to reflect the outcome of the analysis.
+
 
 These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
 ) for more information).
 
+## What Endevor Packages are to be processed with SonarQube?
+
+Within the SONRQUBE.rex member you can provide Endevor Type masks for the elements you wish to analyze. Here is an example:
+
+    /* Provide Endevor Type masks for element to be analyzed   */    
+    SonarQube_Element_Types = 'COB* CBL* CPP* '                      
+
+Also within the SONRQUBE.rexx name the steps in your Generate processors, where input component relationships can be gathered by your site's ACM. Here is an example:
+
+    /* Provide Endevor processor steps which show ACM inputs   */    
+    GenerateProcessorStepnames = 'COMPILE COMP CMP COB'              
+                                                        
+## Transmission Methods
+
+Once the right kind of elements and optionally input components are found in a package, they must be transmitted to the platform where SonarQube is found. Indicate what transmission method you will use. (The last one named is the one acutally used). Here are some examples:
+
+    TransmitMethod = 'FTP'       /* **chose one ** Last one wins **/ 
+    TransmitMethod = 'SSH'       /* **chose one ** Last one wins **/ 
+    TransmitMethod = 'XCOM'      /* **chose one ** Last one wins **/ 
+
+The name you choose will also be a prefix for Transmission member names in the configuration.  See the **Transmission Members** section below for details
+
+##SonarQube Options
+
+As you implement the items in this folder, you can establish default values for these two options in the C1UEXTR7.rex program:
+
+- **Cast_with_SonarQube** when elements are found with the Type matching your selection criteria, should they be submitted for a SonarQube Analysis by default? (Y/N)
+
+- **Wait_for_SonarQube** when a SonarQube analysis job is submitted, should the Endevor CAST job wait for it? (Y/N). If you indicate that the Cast job should wait, then the results of the Analysis impact the Success or Failure of the CAST. Otherwise, there is no impact. 
+
+Note that persons who create, and CAST Endevor packages can override the default values by entering text into the package notes.
+
+
+## Package Notes Overrides
+
+The Notes in each package can select or override either or both of the two SonarQube options. Just reflect the choices for the package anywhere in the Notes section. You can use any case for the words, and you can use underscores, dashes or blanks between the words. The words are recognized by C1UEXTR7 and will be used to direct the processing. Here is an example notes section where both options are specified:
+
+        .........1.........2.........3.........4.........5.........6
+    1.  This package is very special. Hanlde with care.             
+    2.  ____________________________________________________________
+    3.  ____________________________________________________________
+    4.  Cast_with_SonarQube= Y                                      
+    5.  WAIT-FOR-SONARQUBE = Y                                      
+    6.                                                              
+    7.                                                              
+    8.                                                              
+
+
+## Transmission Members
+
+The value you give to **TransmitMethod** is used to locate members that contribute to the submitted SonarQube Analysis JCL. The members, where &TransmitMethod is the value you assigned, are:
+
+- &TransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
+- &TransmitMethod.#RUN - JCL for using the Tansmission tool to initiating the execution of the SonarQube analysis
+- &TransmitMethod.#RCV - JCL for receiving the RESULTS of the SonarQube analysis
+
+The examples in this folder show the TransmitMethod  assigned to 'XCOM' and the three JCL members are XCOM#JOB, XCOM#RUN, and XCOM#RCV accordingly. If necessary, you can mix methods within the 3 members, and not use the same tool for all of them, but the names for all 3 must use the same prefix.
+
+## Other items
+
 Features of this solution are easily tailorable to the requirements at your site. By default they include:
 
-1. During a package CAST, an analysis of the pckage content and package notes is done.
-   -  It is determined whether the Package has at least one COBOL element. Element types of COB* or CBL* make the determination, but you can designate your own manner of recognition.
-   -  If any of the Package note lines can begin with the text "BYPASS SONARQUBE", no SonarQube analysis will be done. If it becomes necessary to bypass the SonarQube processing, then a simple update of the package notes will bypass the SonarQube analysis.
-2.  If package contains COBOL elements, and the BYPASS is not selected, and the package is being CAST in TSO foreground, then the CAST action is resubmitted in Batch. Since it may be necessary to wait for time-consuming actions to complete, it is best for this process to run in batch.
-3. All COBOL programs in the package are identified, and ACM queries are used for identifying input components. Input components such as copybooks, do not need to be included in the package. Rather, the ACM information for packaged COBOL elements will bring copybooks into the SonarQube analysis.
-4. Packaged COBOL elements are RETRIEVEd into a PDS.
-5. A separate (second) JOB is constructed and submitted. The steps of the separate job include:
-    - Reports back to the Endevor exit (running as job #1 doing a CAST) that the second job is running
-    - COBOL and copybook members are transmittted to the SonarQube server. Cobol members are transmitted from the RETRIEVE dataset. Copybook members are transmitted from datasets named in the ACM references.  
-    - Reports back to the Endevor exit that the member transmissions are completed
-    - Executes a SonarQube analysis.
-    - Transmits the SonarQube results back to the site running the Endevor CAST.
-
-6. The Endevor exit waits for confirmation that the separate job is running, and displays messages accordingly
-7. The Endevor exit waits for confirmation that the file transmissions are done, and displays messages accordingly.
-8. The Endevor exit waits for the return of the SonarQube analysis, and displays messages accordingly.
-9. If any of the expected results are not returned, or the analysis indicates a code analysis failure, the package CAST is made to Fail.
 
 Processing logic is primarily found in REXX, JCL and Python members. The Python member orchestrates the SonarQube activity. File transmissions are performed using XCOM, in these examples, but they easily be swapped out for members that use your transmission tool. 
 
@@ -47,18 +95,10 @@ Some supporting items are not found in this folder, since they are utilities, or
 
 **[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
 
-This code in the SONRQUBE.rexx  is used for identifying COBOL elements and copybooks. You might need to tweak it for your site:
+As a SonarQube job runs, it places members into a "work" dataset you name as the **SonarWorkfile**. You can View the members to see actions performed, and to help resolve issues.  
 
-The cobol element type is expected to begin with COB or CBL
 
-    COBOL_Element_Types     = 'COB* CBL*'
-    COBOL_Compile_StepNames = 'COMPILE COMP CMP COB'
 
-Then the compile step should be one of those above. 
-
-The ProcessCopybookMembers routine looks for Input components from SYSLIB in a compile step. 
-
-When the process runs, it places members into the dataset you name as the **SonarWorkfile**. You can use the members to see details of actions performed, and to help resolve issues.  
 
 Use the SonarQube.bat commmand to bring the items together for your mainframe.
 
