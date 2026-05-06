@@ -3,7 +3,7 @@
 Samples in this GitHub are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
 ) for more information).
 
-**XCOM** supports seamless, high-speed, and secure data transfer across a wide variety of systems (mainframe, Windows, Linux, AIX, AS/400, cloud storage, etc.). It uses advanced data compression and record packing techniques, offering significantly higher performance (98% improvements, check out the blog [here](https://news.broadcom.com/mainframe-software/xcom-stop-transferring-data-like-its-1999)) compared to FTP. Also see [Broadcom's techdocs for XCOM](https://techdocs.broadcom.com/us/en/ca-mainframe-software/traditional-management/ca-xcom-data-transport-for-z-os/12-0.html).
+**XCOM** supports seamless, high-speed, and secure data transfer across a wide variety of systems (mainframe, Windows, Linux, AIX, AS/400, cloud storage, etc.). It uses advanced data compression and record packing techniques, offering significantly higher performance (up to 98% improvement for z/OS to z/OS transfers compared to FTP, check out the blog [here](https://news.broadcom.com/mainframe-software/xcom-stop-transferring-data-like-its-1999)). Also see [Broadcom's techdocs for XCOM](https://techdocs.broadcom.com/us/en/ca-mainframe-software/traditional-management/ca-xcom-data-transport-for-z-os/12-0.html).
 
 XCOM excels with large batch files, in a reliable, auditable, managed way.
 
