@@ -24,15 +24,53 @@ Also within the SONRQUBE.rexx name the steps in your Generate processors, where 
                                                         
 ## Transmission Methods
 
-Once the right kind of elements and optionally input components are found in a package, they must be transmitted to the platform where SonarQube is found. Indicate what transmission method you will use. (The last one named is the one acutally used). Here are some examples:
+Once the right kind of elements and optionally input components are found in a package, they must be transmitted to the platform where SonarQube is found. Indicate what transmission method you will use. The name you choose will also be a prefix for Transmission member names in the configuration.  
 
-    TransmitMethod = 'FTP'       /* **chose one ** Last one wins **/ 
-    TransmitMethod = 'SSH'       /* **chose one ** Last one wins **/ 
-    TransmitMethod = 'XCOM'      /* **chose one ** Last one wins **/ 
+The value you give to **TransmitMethod** is used to locate members that contribute to the submitted SonarQube Analysis JCL. Member names are:
 
-The name you choose will also be a prefix for Transmission member names in the configuration.  See the **Transmission Members** section below for details
+- &TransmitMethod.#INC - for sending members to the SonarQube server
+- &TransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
+- &TransmitMethod.#RUN - JCL for using the Tansmission tool to initiating the execution of the SonarQube analysis
+- &TransmitMethod.#RCV - JCL for receiving the RESULTS of the SonarQube analysis
 
-##SonarQube Options
+The examples in this folder show the TransmitMethod  assigned to 'XCOM' and the three JCL members are XCOM#JOB, XCOM#RUN, and XCOM#RCV accordingly. If necessary, you can mix methods within the 3 members, and not use the same tool for all of them, but the names for all 3 must use the same prefix.
+
+
+## XCOM for Transmission and Submission
+
+XCOM is an excellent choice for the file transmissions, and remote submission of the SonarQube process. 
+See the [XCOM folder on this GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/XCOM). 
+
+Within the C1UEXTR7 item, designate that XCOM is your choice, by setting the TransmitMethod value:
+
+    TransmitMethod = 'XCOM'     
+
+Also locate these items from the XCOM folder and place them into the library you designate as your 
+**MySEN2Library** library. See the **@SITE.rex** section below.
+
+- [XCOM#INC](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23INC.skl)
+
+- [XCOM#JOB](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23JOB.skl)
+
+- [XCOM#RCV](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23RCV.skl)
+
+- [XCOM#RUN](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23RUN.skl)
+
+
+
+
+## SSH  for Transmission and Submission
+
+Within the C1UEXTR7 item, designate that SSH is your choice, by setting the TransmitMethod value:
+
+    TransmitMethod = 'SSH'     
+
+Also locate these items from the SSH folder and place them into the library you designate as your 
+**MySEN2Library** library. See the **@SITE.rex** section below.
+
+
+
+## SonarQube Options
 
 As you implement the items in this folder, you can establish default values for these two options in the C1UEXTR7.rex program:
 
@@ -57,17 +95,6 @@ The Notes in each package can select or override either or both of the two Sonar
     7.                                                              
     8.                                                              
 
-
-## Transmission Members
-
-The value you give to **TransmitMethod** is used to locate members that contribute to the submitted SonarQube Analysis JCL. The members, where &TransmitMethod is the value you assigned, are:
-
-- &TransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
-- &TransmitMethod.#RUN - JCL for using the Tansmission tool to initiating the execution of the SonarQube analysis
-- &TransmitMethod.#RCV - JCL for receiving the RESULTS of the SonarQube analysis
-
-The examples in this folder show the TransmitMethod  assigned to 'XCOM' and the three JCL members are XCOM#JOB, XCOM#RUN, and XCOM#RCV accordingly. If necessary, you can mix methods within the 3 members, and not use the same tool for all of them, but the names for all 3 must use the same prefix.
-
 ## Other items
 
 Features of this solution are easily tailorable to the requirements at your site. By default they include:
@@ -76,10 +103,19 @@ Features of this solution are easily tailorable to the requirements at your site
 Processing logic is primarily found in REXX, JCL and Python members. The Python member orchestrates the SonarQube activity. File transmissions are performed using XCOM, in these examples, but they easily be swapped out for members that use your transmission tool. 
 
 
-
 Some supporting items are not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
 
-**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%20(zowe))** 
+**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%2-0(zowe))** 
+
+It is within this renamed member where values must be given for:
+
+  - **MySENULibrary** - the Endevor Skeleton (CSIQSENU) library name
+
+  - **MySEN2Library** - a Secondary Skeleton library where XCOM* or SSH* members are found
+
+  - **MyCLS0Library** - the Endevor Clist/REXX (CSIQCLS0) library
+
+  - **MyCLS2Library** - a Secondary Clist/REXX where REXX components of this solution can be found
 
 
 **[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/BUMPJOB.rex )** for bumping an existing jobname to render a new job name

@@ -129,6 +129,16 @@ ProcessPackageSCL:
              " NEW CATALOG REUSE ";
   CALL BPXWDYN STRING;
   CALL BPXWDYN "FREE DD(SONARELM) "
+  /* Create TimeStamp member in the SonarWorkfile    */
+  TimeStamp = DATE('S') TIME()
+  STRING="ALLOC DD(TIMESTMP) DA("SonarWorkfile"(@TIME)) SHR REUSE"
+  CALL BPXWDYN STRING;
+  Queue "TimeStamp = '"TimeStamp"'"
+  Queue "Package   = '"PECB_PACKAGE_ID"'"
+  Queue "WaitOption= '"Wait_for_SonarQube"'"
+  "EXECIO 3 DISKW TIMESTMP (FINIS ";   /* count queued */
+  CALL BPXWDYN "FREE DD(TIMESTMP)" ;
+  /* Export the Package content into SCL        e    */
   STRING = "ALLOC DD(SCL) DA("SonarWorkfile"(SCL)) SHR REUSE"
   CALL BPXWDYN STRING;
   STRING="ALLOC DD(ENPSCLIN) DA("SonarWorkfile"(SCLEXPRT)) SHR REUSE"
@@ -163,6 +173,7 @@ ProcessPackageSCL:
   ReportingPFX = USERID() || '.SONRQUBE.'Unique_Name'.RESULTS'
   myJob     = MVSVAR('SYMDEF','JOBNAME' )
   Jobname = BUMPJOB(myJob)
+  QUEUE " TimeStamp      = '"TimeStamp"'"
   QUEUE " SonarQube_Element_Types = '"SonarQube_Element_Types"'"
   QUEUE " GenerateProcessorStepnames = '"GenerateProcessorStepnames"'"
   QUEUE " Package        = '"PECB_PACKAGE_ID"'"
@@ -180,7 +191,7 @@ ProcessPackageSCL:
   QUEUE " Userid         = '"USERID()"'"
   QUEUE " myJob          = '"myJob"'"
   QUEUE " Jobname        = '"Jobname"'"
-  "EXECIO 17 DISKW SONAROPT (FINIS "; /* count queued */
+  "EXECIO 18 DISKW SONAROPT (FINIS "; /* count queued */
   CALL BPXWDYN "ALLOC DD(NOTHING) DUMMY"
   STRING="ALLOC DD(HEADING1) DA("SonarWorkfile"(HEADING1)) SHR REUSE"
   CALL BPXWDYN STRING;
@@ -406,6 +417,20 @@ SubmitandWaitForSonarQube:
   CALL BPXWDYN STRING;
   STRING = "ALLOC DD(READER) SYSOUT(A) WRITER(INTRDR) REUSE " ;
   CALL BPXWDYN STRING;
+  Trace r
+  /* Build JCL Include member to ADD into Endevor     */
+  /* Optionally just include a comment line           */
+  STRING="ALLOC DD(SONARADD) DA("MySEN2Library"(SONARADD)) SHR REUSE"
+  CALL BPXWDYN STRING;
+  "EXECIO * DISKR SONARADD (Stem add.  Finis"
+  If add.0 < 1 then,
+     Do; add.0 = 1; add.1 = '//** No Endevor ADD is expected'; end
+  CALL BPXWDYN "FREE DD(SONARADD) "
+  STRING="ALLOC DD(SONARADD) DA("SonarWorkfile"(SONARADD)) SHR REUSE"
+  CALL BPXWDYN STRING;
+  "EXECIO * DISKW SONARADD (Stem add. Finis"
+  CALL BPXWDYN "FREE DD(SONARADD) "
+  Trace OFf
   If Wait_for_SonarQube = 'Y' then,
      Do
      /* Replicate the next several files for improved visibility */
