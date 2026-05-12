@@ -140,10 +140,10 @@ Your site's SonarQube selections can be placeed in the @SITE member too, and may
         /*   REXX  */                                                        
         PARSE ARG Parm                                                       
         -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 17 Line(s) not Displayed 
-        MyCLS2Library = 'SHARE.ENDEVOR.EA.P2.REXX'                           
+        MyCLS2Library = 'YourHLQ.ENDEVOR.REXX'                           
         -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  6 Line(s) not Displayed 
-        MySENULibrary = SHLQ'.CSIQSENU'                                      
-        MySEN2Library = 'SHARE.ENDEVOR.EA.P2.SKELS'                          
+        MySENULibrary = 'YourHLQ.CSIQSENU'                                      
+        MySEN2Library = 'YourHLQ.ENDEVOR.SKELS'                          
         -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 13 Line(s) not Displayed 
        
         /* Optional Entries  for SonarQube processing:              */          
