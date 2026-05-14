@@ -94,29 +94,15 @@
      Call Build_Entries_Endevor
   Else,
      Call Build_Entries_QuickEdit   ;
-  Call Get_Next_StgID ;
   COUNT = Words(Element_List) ;
   Call Build_Package_Suffix ;
   Call Calculate_Date_Fields ;
   Do forever
      show_ACTION =  ACTION
-     If ShipSchedulingMethod = 'Notes' then,
-        Call Build_NOTES_Fields   ;
+     Call Build_NOTES_Fields   ;
      Call Display_Panel;
      If ACTION = show_ACTION then Leave;
-     If ShipSchedulingMethod = 'Notes' then,
-           Do
-           VPHNOTE1 = " "
-           VPHNOTE2 = " "
-           VPHNOTE3 = " "
-           VPHNOTE4 = " "
-           VPHNOTE5 = " "
-           VPHNOTE6 = " "
-           VPHNOTE7 = " "
-           VPHNOTE8 = " "
-           Call Build_NOTES_Fields   ;
-           End /* If ShipSchedulingMethod = 'Notes'.... */
-     End /* Do forever */
+  End /* Do forever */
   Call Build_Package ;
   VARSPPKG = PACKAGE
   ADDRESS ISPEXEC "VPUT (VARSPPKG) SHARED "
@@ -137,11 +123,7 @@ Build_Entries_Endevor:
         FirstElmSystem  = EMKSYS ;
         Call Get_Site_Variables
         FirstElmSubsys  = EMKSBS ;
-        If FirstElmEnviron = 'ADMIN' then,
-           PKGPRFIX    = EMKSBS   ;
-        Else,
-           PKGPRFIX    = EMKSYS   ;
-        End;
+        End; /* If row=1 then */
      Else,
      IF EMKENV   /= FirstElmEnviron |,
         EMKSTGI  /= FirstElmStage   |,
@@ -150,18 +132,15 @@ Build_Entries_Endevor:
         Do
         Say 'Inventory locations (Env/Stg/Sys/Sbs) must be the same'
         Exit (12)
-        End;
+        End; /* If ..... /= FirstElmEnviron .....  */
+     C1ElType = EMKTYPE
      /* Is a listed element type is a SonarQube type for scanning  */
      If Words(SonarQube_Element_Types) > 0 &,
         HaveSonarQubeElms = 0 then,
-        Do w# = 1 to Words(SonarQube_Element_Types)
-        HaveSonarQubeElms=QMATCH(EMKTYPE Word(SonarQube_Element_Types,w#))
-        If Pos('COPY', EEVETKTY) > 0 then  HaveSonarQubeElms =0
-        If HaveSonarQubeElms = 1 then leave
-        End
+          Call SonarQubeTypeCheck
      Element_List = Element_List entry
   End; /* do row = 1 to rownum */
- Return ;
+  Return ;
 Build_Entries_QuickEdit:
   HaveSonarQubeElms = 0
   Do row = 1 to rownum
@@ -178,12 +157,12 @@ Build_Entries_QuickEdit:
         Call Get_Site_Variables
         FirstElmSubsys  = EEVETKSB
         PKGPRFIX    = EEVETKSY ;
-        UseCCID     = Strip(EEVETCCI)
         If FirstElmEnviron = 'ADMIN' then,
            PKGPRFIX    = EEVETKSB ;
         Else,
            PKGPRFIX    = EEVETKSY ;
-        End;
+        UseCCID     = Strip(EEVETCCI)
+        End; /* If row=1 then */
      Else,
      IF EEVETKEN /= FirstElmEnviron |,
         EEVETKSI /= FirstElmStage   |,
@@ -192,63 +171,69 @@ Build_Entries_QuickEdit:
         Do
         Say 'Inventory locations (Env/Stg/Sys/Sbs) must be the same'
         Exit (12)
-        End;
+        End; /* If ..... /= FirstElmEnviron .....  */
+     C1ElType = EEVETKTY
+     /* Is a listed element type is a SonarQube type for scanning  */
      If Words(SonarQube_Element_Types) > 0 &,
         HaveSonarQubeElms = 0 then,
-        Do w# = 1 to Words(SonarQube_Element_Types)
-        HaveSonarQubeElms=QMATCH(EEVETKTY Word(SonarQube_Element_Types,w#))
-        If Pos('COPY', EEVETKTY) > 0 then  HaveSonarQubeElms =0
-        If HaveSonarQubeElms = 1 then leave
-        End
+          Call SonarQubeTypeCheck
      Element_List = Element_List entry
   End; /* do row = 1 to rownum */
- Return ;
+  Return ;
+SonarQubeTypeCheck:
+  Do w# = 1 to Words(SonarQube_Element_Types)
+     HaveSonarQubeElms=,
+        QMATCH(C1ElType Word(SonarQube_Element_Types,w#))
+  If HaveSonarQubeElms = 1 then leave
+  End
+  Return ;
 Get_Site_Variables:
-   /* Get the related site-level options */
-   WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
-   /* ShipSchedulingMethod can be set by C1System */
-   interpret 'Call' WhereIam,
-            "'ShipSchedulingMethod_"FirstElmSystem"'"
-   ShipSchedulingMethod = Result
-   If Wordpos(ShipSchedulingMethod,'Rules Notes One None') = 0 then,
-     Do
-     interpret 'Call' WhereIam "'ShipSchedulingMethod'"
-     ShipSchedulingMethod = Result
-     End
-   /* identify Choices for SonarQube Scanning */
-   /* Cast_Location_for_Sonarqube can be set by C1System */
-   interpret 'Call' WhereIam,
-            "'Cast_Location_for_Sonarqube_"FirstElmSystem"'"
-   Cast_Location_for_Sonarqube = Result
-   If Words(Cast_Location_for_Sonarqube) /= 2 then,
-     Do
-     interpret 'Call' WhereIam "'Cast_Location_for_Sonarqube'"
-     Cast_Location_for_Sonarqube = Result
-     End
-   If Words(Cast_Location_for_Sonarqube)  = 2 then,
-     Do
-     interpret 'Call' WhereIam,
-              "'Wait_for_SonarQube_"FirstElmSystem"'"
-     Wait_for_SonarQube            = Result
-     If Length(Wait_for_SonarQube) /= 1 then,
-       Do
-       interpret 'Call' WhereIam "'Wait_for_SonarQube'"
-       Wait_for_SonarQube            = Result
-       End
-     interpret 'Call' WhereIam,
-              "'SonarQube_Element_Types_"FirstElmSystem"'"
-     SonarQube_Element_Types       = Result
-     If SonarQube_Element_Types  = 'Not-valid' then,
-       Do
-       interpret 'Call' WhereIam "'SonarQube_Element_Types'"
-       SonarQube_Element_Types       = Result
-       End
-     End /* If Words(Cast_Location_for_Sonarqube)  = 2 */
-   interpret 'Call' WhereIam "'MyDATALibrary'"
-   MyDATALibrary = Result
-   NoteRules       = MyDATALibrary"(NOTERULE)"
-   NoteRules       = MyDATALibrary"(SHIPRULE)"
-   /* Used only if ShipSchedulingMethod = 'Notes' */
+  Call Get_Next_StgID ;
+  /* Get the related site-level options */
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
+  /* ShipSchedulingMethod can be set by C1System */
+  interpret 'Call' WhereIam,
+           "'ShipSchedulingMethod_"FirstElmSystem"'"
+  ShipSchedulingMethod = Result
+  If Wordpos(ShipSchedulingMethod,'Rules Notes One None') = 0 then,
+    Do
+    interpret 'Call' WhereIam "'ShipSchedulingMethod'"
+    ShipSchedulingMethod = Result
+    End
+  /* identify Choices for SonarQube Scanning */
+  /* Cast_Location_for_Sonarqube can be set by C1System */
+  interpret 'Call' WhereIam,
+           "'Cast_Location_for_Sonarqube_"FirstElmSystem"'"
+  Cast_Location_for_Sonarqube = Result
+  If Words(Cast_Location_for_Sonarqube) /= 2 then,
+    Do
+    interpret 'Call' WhereIam "'Cast_Location_for_Sonarqube'"
+    Cast_Location_for_Sonarqube = Result
+    End
+  If Words(Cast_Location_for_Sonarqube)  = 2 then,
+    Do
+    interpret 'Call' WhereIam,
+             "'Wait_for_SonarQube_"FirstElmSystem"'"
+    Wait_for_SonarQube            = Result
+    If Length(Wait_for_SonarQube) /= 1 then,
+      Do
+      interpret 'Call' WhereIam "'Wait_for_SonarQube'"
+      Wait_for_SonarQube            = Result
+      End
+    interpret 'Call' WhereIam,
+             "'SonarQube_Element_Types_"FirstElmSystem"'"
+    SonarQube_Element_Types       = Result
+    If SonarQube_Element_Types  = 'Not-valid' then,
+      Do
+      interpret 'Call' WhereIam "'SonarQube_Element_Types'"
+      SonarQube_Element_Types       = Result
+      End
+    End /* If Words(Cast_Location_for_Sonarqube)  = 2 */
+  interpret 'Call' WhereIam "'MyDATALibrary'"
+  MyDATALibrary = Result
+  NoteRules       = MyDATALibrary"(NOTERULE)"
+  NoteRules       = MyDATALibrary"(SHIPRULE)"
+  /* Used if ShipSchedulingMethod = 'Notes' */
  Return ;
 Build_Package_Suffix:
    PKGSTAGE   = Stage          /* Package Prefix */
@@ -316,9 +301,6 @@ Display_Panel:
   ADDRESS ISPEXEC,
      "DISPLAY  PANEL(PACKAGEP) "
   if rc > 0 then exit
-  If Words(SonarQube_Element_Types) > 0 &,
-     HaveSonarQubeElms = 1 then,
-     DESCRIPT = Overlay('+SONAR', DESCRIPT,45)
   DESCRIPT = TRANSLATE(DESCRIPT,"'",'"');
   DATE = BTSTDATE ;
   CALL Validate_Date ;
@@ -427,9 +409,14 @@ Build_Package:
    ADDRESS ISPEXEC "SETMSG MSG(CIUU020I)" ;
    return;
 Build_NOTES_Fields:
-  X = OUTTRAP(LINE.);
-  DSNCHECK = SYSDSN("'"NoteRules"'") ;
-  IF DSNCHECK /= OK Then Return  ;
+  VPHNOTE1 = " "
+  VPHNOTE2 = " "
+  VPHNOTE3 = " "
+  VPHNOTE4 = " "
+  VPHNOTE5 = " "
+  VPHNOTE6 = " "
+  VPHNOTE7 = " "
+  VPHNOTE8 = " "
   entry = WORD(Element_List,1)
   entry = Translate(entry," ","/");
   elmEnviron = Word(entry,2)
@@ -442,70 +429,82 @@ Build_NOTES_Fields:
   elmSystem  = Word(entry,4)
   elmSubsys  = Word(entry,5)
   elmType    = Word(entry,6)
-  Tday = DATE('U');
-  #days = DATE('B',Tday,'U');
-   ADDRESS TSO,
-     "ALLOC F(TABLE) DA('"NoteRules"') SHR REUSE "
-  ADDRESS TSO,
-     "EXECIO * DISKR TABLE (STEM $tbl. finis"
-   ADDRESS TSO "FREE  F(TABLE)"
-  List_Destinations = " " ;
-  Time_Destinations = " " ;
-  /* Determine where critical columns are located */
-  $heading = ' ' Substr($tbl.1,2) ;
-  $heading = Translate($heading,' ','-');
-  EnvironWrdPos     = Wordpos('Environment',$heading);
-  StageWrdPos       = Wordpos('Stage',$heading);
-  SystemWrdPos      = Wordpos('System',$heading);
-  DestinationWrdPos = Wordpos('Destination',$heading);
-  DateWrdPos        = Wordpos('Date',$heading);
-  TimeWrdPos        = Wordpos('Time',$heading);
-  JobnameWrdPos     = Wordpos('Jobname',$heading);
-  TyprunWrdPos      = Wordpos('Typrun',$heading);
-  TypRunPosition    = Wordindex($heading,TyprunWrdPos);
-  Do tbl# = 2 to $tbl.0
-     env = Word($tbl.tbl#,EnvironWrdPos)
-     stg = Word($tbl.tbl#,StageWrdPos)
-     sys = Word($tbl.tbl#,SystemWrdPos);
-     If (env =elmEnviron | env = '*') &,
-        (stg =elmStage | stg = '*') &,
-        (sys = elmSystem | sys = '*') then,
-        Do
-        Destination = Word($tbl.tbl#,DestinationWrdPos)
-        If Wordpos(Destination,List_Destinations) > 0 then,
-           iterate ;
-        tmp         = Word($tbl.tbl#,DateWrdPos)
-        tmp = Strip(tmp,'L','+') ;
-        Tday = DATE('U');
-        #days = DATE('B',Tday,'U');
-        #days = #days + tmp ;
-        Date = DATE('S',#days,'B') ;
-        Time_Str    = Word($tbl.tbl#,TimeWrdPos)
-        Jobname     = Word($tbl.tbl#,JobnameWrdPos)
-        Hold_Str    = Strip(Substr($tbl.tbl#,TypRunPosition,8))
-        Time_Entry = Date"\"Time_Str"\"Hold_Str ;
-        entry = Strip(Destination)'/'Strip(Jobname)
-        List_Destinations = entry List_Destinations;
-        Time_Destinations = Time_Entry Time_Destinations ;
-        End;
-  End;  /* Do tbl# = 2 to $tbl.0  */
-  VPHNOTE8 = " "
-  Do cnt# = 1 to Words(List_Destinations)
-     Time_Entry = Word(Time_Destinations,cnt#) ;
-     Time_Entry = Translate(Time_Entry," ","\") ;
-     Date     = Word(Time_Entry,1) ;
-     Time_Str = Word(Time_Entry,2) ;
-     Hold_Str = Word(Time_Entry,3) ;
-     entry       = Word(List_Destinations,cnt#)
-     entry       = Translate(entry,' ','/')
-     Destination = Word(entry,1)
-     Jobname     = Word(entry,2)
-     nbr = 9 - cnt# ;
-     If Hold_Str /= "HOLD" then Hold_Str = " "
-     tmp = "VPHNOTE"nbr" = 'To "Left(Destination,8)":",
-        Date  Time_Str LEFT(Jobname,8) Hold_Str "'"
-     interpret tmp ;
-  End;
+  If ShipSchedulingMethod = 'Notes' then,
+     Do
+     X = OUTTRAP(LINE.);
+     DSNCHECK = SYSDSN("'"NoteRules"'") ;
+     IF DSNCHECK /= OK Then Return  ;
+     Tday = DATE('U');
+     #days = DATE('B',Tday,'U');
+      ADDRESS TSO,
+        "ALLOC F(TABLE) DA('"NoteRules"') SHR REUSE "
+     ADDRESS TSO,
+        "EXECIO * DISKR TABLE (STEM $tbl. finis"
+      ADDRESS TSO "FREE  F(TABLE)"
+     List_Destinations = " " ;
+     Time_Destinations = " " ;
+     /* Determine where critical columns are located */
+     $heading = ' ' Substr($tbl.1,2) ;
+     $heading = Translate($heading,' ','-');
+     EnvironWrdPos     = Wordpos('Environment',$heading);
+     StageWrdPos       = Wordpos('Stage',$heading);
+     SystemWrdPos      = Wordpos('System',$heading);
+     DestinationWrdPos = Wordpos('Destination',$heading);
+     DateWrdPos        = Wordpos('Date',$heading);
+     TimeWrdPos        = Wordpos('Time',$heading);
+     JobnameWrdPos     = Wordpos('Jobname',$heading);
+     TyprunWrdPos      = Wordpos('Typrun',$heading);
+     TypRunPosition    = Wordindex($heading,TyprunWrdPos);
+      Do tbl# = 2 to $tbl.0
+         env = Word($tbl.tbl#,EnvironWrdPos)
+         stg = Word($tbl.tbl#,StageWrdPos)
+         sys = Word($tbl.tbl#,SystemWrdPos);
+         If (env =elmEnviron | env = '*') &,
+            (stg =elmStage | stg = '*') &,
+            (sys = elmSystem | sys = '*') then,
+            Do
+            Destination = Word($tbl.tbl#,DestinationWrdPos)
+            If Wordpos(Destination,List_Destinations) > 0 then,
+               iterate ;
+            tmp         = Word($tbl.tbl#,DateWrdPos)
+            tmp = Strip(tmp,'L','+') ;
+            Tday = DATE('U');
+            #days = DATE('B',Tday,'U');
+            #days = #days + tmp ;
+            Date = DATE('S',#days,'B') ;
+            Time_Str    = Word($tbl.tbl#,TimeWrdPos)
+            Jobname     = Word($tbl.tbl#,JobnameWrdPos)
+            Hold_Str    = Strip(Substr($tbl.tbl#,TypRunPosition,8))
+            Time_Entry = Date"\"Time_Str"\"Hold_Str ;
+            entry = Strip(Destination)'/'Strip(Jobname)
+            List_Destinations = entry List_Destinations;
+            Time_Destinations = Time_Entry Time_Destinations ;
+            End;
+      End;  /* Do tbl# = 2 to $tbl.0  */
+      VPHNOTE8 = " "
+      Do cnt# = 1 to Words(List_Destinations)
+         Time_Entry = Word(Time_Destinations,cnt#) ;
+         Time_Entry = Translate(Time_Entry," ","\") ;
+         Date     = Word(Time_Entry,1) ;
+         Time_Str = Word(Time_Entry,2) ;
+         Hold_Str = Word(Time_Entry,3) ;
+         entry       = Word(List_Destinations,cnt#)
+         entry       = Translate(entry,' ','/')
+         Destination = Word(entry,1)
+         Jobname     = Word(entry,2)
+         nbr = 9 - cnt# ;
+         If Hold_Str /= "HOLD" then Hold_Str = " "
+         tmp = "VPHNOTE"nbr" = 'To "Left(Destination,8)":",
+            Date  Time_Str LEFT(Jobname,8) Hold_Str "'"
+         interpret tmp ;
+      End; /* Do cnt# = 1 to Words(List_Destinations) */
+     End; /* If ShipSchedulingMethod = 'Notes' */
+  /* Expecting a SonarQube Analysis?  */
+  If Words(SonarQube_Element_Types) > 0 &,
+     HaveSonarQubeElms = 1 &,
+       Cast_Location_for_Sonarqube = elmEnviron elmStage then,
+         VPHNOTE1 =,
+            Overlay(' Run SonarQube Analysis',VPHNOTE1,38);
   tmp = "Elm Cnt: "COUNT
   VPHNOTE8 = Overlay(tmp,VPHNOTE8,48);
   return;
