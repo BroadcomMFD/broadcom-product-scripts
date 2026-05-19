@@ -4,7 +4,6 @@
   /* at least one Sonar element of a type to Analyze          */
   /* C1UEXT07(cobol)->C1UEXTR7(rexx)->SONRQUBE                */
   /*                                                          */
-  Say  'SHARE.ENDEVOR.EA.P2.REXX(SONRQUBE)'
   /* If the person Casting the package does not want          */
   /* SonarQube processing, then place anywhere in the Notes:  */
   /* BYPASS SONARQUBE                                         */

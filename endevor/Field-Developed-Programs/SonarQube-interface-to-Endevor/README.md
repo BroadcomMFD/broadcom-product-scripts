@@ -12,13 +12,13 @@ These samples are provided as is and are not officially supported (see [license]
 
 ## What Endevor Packages are to be processed with SonarQube?
 
-By examining the element Types for elements within a package, it can be determined whether the package should be submitted for a SonarQube Analysis.  If a package only contains PARM elements, for example, there is no need to scan the package. 
+By examining the element Types for elements within a package, it can be determined whether the package should be submitted for a SonarQube Analysis.  If a package only contains PARM elements, for example, there is no need to scan the package. You can name the types to be scanned at your site.
 
 ### Optional use of the Package Builder
 
-Package creation is an ideal time to assess if package content requires a SonarQube scan. By utilizing the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) (refer to **PACKAGE PACKAGEP** and [Package.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex)), you can automate this evaluation.
+Package creation is an ideal time to assess if package content requires a SonarQube scan. By utilizing the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) (refer to **PACKAGE PACKAGEP** and [Package.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex)), you can automate the selection of packages for SonarQube scanning.
 
-During construction, the package builder identifies element locations and types, and detects those that should be scanned. Upon discovery, it automatically updates the package Notes, for example:
+During construction of a package, the package builder looks at the locations and types for each element selected. It can then detect whether selected elements are those that should be scanned, and automatically update the package Notes, for example:
 
         1. RUN SONARQUBE ANALYSIS                           
         2.                                                  
@@ -29,35 +29,35 @@ During construction, the package builder identifies element locations and types,
         7.                                                  
         8. ELM CNT: 2                                      
 
- Then, the items in this folder can use the description text to know whether the package is elligible for scanning at CAST time                          
+ Then, when the package is CAST, it also runs a SonarQube Analysis.                           
 
 ### CAST time Determination                              
 
-The SONRQUBE.rex member can determine whether package content should be scanned. Within it, you can provide Endevor Type masks for the elements you wish to analyze. Here is an example:
+The @SITE.rex member can determine, at Cast time, whether package content should be scanned. You can provide Endevor Type masks for the elements you wish to analyze. Here is an example:
 
     /* Provide Endevor Type masks for element to be analyzed   */    
     SonarQube_Element_Types = 'COB* CBL* CPP* '                      
 
+(The Package Builder also accesses the @SITE.rex member)
 
-
-For each approach, SONRQUBE.rexx must identify the Generate processor steps where your site's ACM can collect input component relationships. If you intend to scan COBOL, for instance, you should specify the processor steps that reference COPYBOOKs. Consider this example:
+The @SITE.rexx member must also identify the Generate processor steps where ACM  input component relationships are collected. If you intend to scan COBOL, for instance, you should specify the processor steps that reference COPYBOOKs. Consider this example:
 
     /* Provide Endevor processor steps which show ACM inputs   */    
     GenerateProcessorStepnames = 'COMPILE COMP CMP COB'  
 
 
-## Transmission Methods
+## SonarQube Transmission Methods
 
-Once the right kind of elements and optionally input components are found in a package, they must be transmitted to the platform where SonarQube is found. Indicate what transmission method you will use. The name you choose will also be a prefix for Transmission member names in the configuration.  
+Elements selected for SonarQube scanning, must be transmitted to the server where SonarQube is found. Within the @SITE.rex member indicate what transmission method to use. The name of the transmission method is also a prefix for Transmission member names in the configuration.  
 
-The value you give to **TransmitMethod** is used to locate members that contribute to the submitted SonarQube Analysis JCL. Member names are:
+The value you give to **SonarTransmitMethod** is used to locate additional configuration members: 
 
-- &TransmitMethod.#INC - for sending members to the SonarQube server
-- &TransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
-- &TransmitMethod.#RUN - JCL for using the Tansmission tool to initiating the execution of the SonarQube analysis
-- &TransmitMethod.#RCV - JCL for receiving the RESULTS of the SonarQube analysis
+- &SonarTransmitMethod.#INC - for sending members to the SonarQube server
+- &SonarTransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
+- &SonarTransmitMethod.#RUN - JCL for using the Tansmission tool to initiating the execution of the SonarQube analysis
+- &SonarTransmitMethod.#RCV - JCL for receiving the RESULTS of the SonarQube analysis
 
-The examples in this folder show the TransmitMethod  assigned to 'XCOM' and the three JCL members are XCOM#JOB, XCOM#RUN, and XCOM#RCV accordingly. If necessary, you can mix methods within the 3 members, and not use the same tool for all of them, but the names for all 3 must use the same prefix.
+The examples in this folder show the SonarTransmitMethod assigned to 'XCOM'. It is expected that each transmit method have its own syntax for sending and receiving files, and for running remote tasks. 
 
 
 ## XCOM for Transmission and Submission
@@ -65,9 +65,9 @@ The examples in this folder show the TransmitMethod  assigned to 'XCOM' and the 
 XCOM is an excellent choice for the file transmissions, and remote submission of the SonarQube process. 
 See the [XCOM folder on this GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/XCOM). 
 
-Within the C1UEXTR7 item, designate that XCOM is your choice, by setting the TransmitMethod value:
+Within the @SITE.rex item, designate that XCOM is your choice, by setting the SonarTransmitMethod value:
 
-    TransmitMethod = 'XCOM'     
+    SonarTransmitMethod = 'XCOM'     
 
 Find the XCOM#INC item in the current folder.
 
@@ -83,9 +83,9 @@ Also locate these items from the XCOM folder and place them into the library you
 
 ## SSH  for Transmission and Submission
 
-Within the C1UEXTR7 item, designate that SSH is your choice, by setting the TransmitMethod value:
+Within the @SITE.rex item, designate that SSH is your choice, by setting the SonarTransmitMethod value:
 
-    TransmitMethod = 'SSH'     
+    SonarTransmitMethod = 'SSH'     
 
 Also locate these items from the SSH folder and place them into the library you designate as your **MySEN2Library** library. See the **@SITE.rex** section below.
 
@@ -97,7 +97,7 @@ Also locate these items from the SSH folder and place them into the library you 
 
 ## SonarQube Options
 
-As you implement the items in this folder, you can establish default values for these options in the C1UEXTR7.rex program:
+As you implement the items in this folder, you can establish default values for these options in the @SITE.rex program:
 
 - **Cast_Location_for_Sonarqube** when elements are found with the Type matching your selection criteria, should they be submitted for a SonarQube Analysis by default? (Y/N)
 
@@ -129,10 +129,8 @@ Within **C1UEXTR7.rex**, you can easily adopt the requesting text strings you pr
 
 The Python script, **SonarDriver.py**, serves as the primary orchestrator for SonarQube scanning. While these examples utilize XCOM for file transmissions, the logic is modular, allowing you to easily substitute components to accommodate your preferred transmission utility.
 
+## Site Varaiables
 
-## Other items
-
-The functional characteristics of this solution are designed to easily align with your site's specific requirements. Several utility components or shared items are maintained independently of this folder. These resources are accessible at the following GitHub locations:
 
 **[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%2-0(zowe))** 
 
@@ -164,20 +162,26 @@ Your site's SonarQube selections can be placeed in the @SITE member too, and may
         SonarQube_Element_Types = ''                                            
         SonarQube_Element_Types_FINANCE = 'COB* CBL*'                           
         GenerateProcessorStepnames = 'COMPILE COMP CMP COB'            
-        SonarTransmitMethod = 'XCOM'   /* FTP / SSH / XOM .....  
-        /*************************************************************/          
+        SonarTransmitMethod = 'XCOM'   /* FTP / SSH / XOM .....*/        
 
 
 Remember to rename the @SITE member to reflect the name of your Lpar. For example, if your Lpar name is DEV1, then rename @SITE to @DEV1.
 
+## Other items
 
+The functional characteristics of this solution are designed to easily align with your site's specific requirements. Several utility components or shared items are maintained independently of this folder. These resources are accessible at the following GitHub locations:
 
 **[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/BUMPJOB.rex )** for bumping an existing jobname to render a new job name
-**[GETACCT.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GETACCTC.rex)** for obtaining and re-using the users accounting code information
-**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/GTUNIQUE.rex )** for obtaining a unique 8-byte name from the current date and time.
+
+**[GETACCTC.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GETACCTC.rex)** for obtaining and re-using the users accounting code information
+
+**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GTUNIQUE.rex)** for obtaining a unique 8-byte name from the current date and time.
+
 **[QMATCH.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/QMATCH.rex )** for comparing two text strings, where one or both may have wild-carded values.
+
 **[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
-**[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
+
+**[WHEREIAM.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHEREIAM.rex)** the utility you can run to discover the name to use for renaming your @SITE member. 
 
 As a SonarQube job runs, it places members into a "work" dataset you name as the **SonarWorkfile**. You can View the members to see actions performed, and to help resolve issues.  
 
