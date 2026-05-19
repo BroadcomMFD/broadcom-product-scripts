@@ -12,7 +12,7 @@ These samples are provided as is and are not officially supported (see [license]
 
 ## What Endevor Packages are to be processed with SonarQube?
 
-By examining the element Types for elements within a package, it can be determined whether the package should be submitted for a SonarQube Analysis.  If a package only contains PARM elements, for example, there is no need to scan the package. You can name the types to be scanned at your site.
+By examining the element Types for elements within a package, it can be determined whether the package should be submitted for a SonarQube Analysis.  If a package only contains PARM elements, for example, there is no need to run a SonarQube Analysis. The configuration lets you identify the types to be scanned at your site.
 
 ### Optional use of the Package Builder
 
@@ -33,14 +33,14 @@ During construction of a package, the package builder looks at the locations and
 
 ### CAST time Determination                              
 
-The @SITE.rex member can determine, at Cast time, whether package content should be scanned. You can provide Endevor Type masks for the elements you wish to analyze. Here is an example:
+Alternativley, you can use the @SITE.rex member to determine at Cast time, whether package content should be scanned. You can provide Endevor Type masks for the elements you wish to analyze. Here is an example:
 
     /* Provide Endevor Type masks for element to be analyzed   */    
     SonarQube_Element_Types = 'COB* CBL* CPP* '                      
 
 (The Package Builder also accesses the @SITE.rex member)
 
-The @SITE.rexx member must also identify the Generate processor steps where ACM  input component relationships are collected. If you intend to scan COBOL, for instance, you should specify the processor steps that reference COPYBOOKs. Consider this example:
+Also identify the Generate processor steps where ACM input component relationships are collected. If you intend to scan COBOL, for instance, you should specify the processor steps that reference COPYBOOKs. Consider this example:
 
     /* Provide Endevor processor steps which show ACM inputs   */    
     GenerateProcessorStepnames = 'COMPILE COMP CMP COB'  
@@ -48,9 +48,8 @@ The @SITE.rexx member must also identify the Generate processor steps where ACM 
 
 ## SonarQube Transmission Methods
 
-Elements selected for SonarQube scanning, must be transmitted to the server where SonarQube is found. Within the @SITE.rex member indicate what transmission method to use. The name of the transmission method is also a prefix for Transmission member names in the configuration.  
-
-The value you give to **SonarTransmitMethod** is used to locate additional configuration members: 
+Elements selected for SonarQube scanning, must be transmitted to the server where SonarQube runs. Within the @SITE.rex member indicate what transmission method to use. The name of the transmission method must be assigned to the variable **SonarTransmitMethod**, which also names other members in the configuration.  
+ 
 
 - &SonarTransmitMethod.#INC - for sending members to the SonarQube server
 - &SonarTransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
@@ -99,11 +98,11 @@ Also locate these items from the SSH folder and place them into the library you 
 
 As you implement the items in this folder, you can establish default values for these options in the @SITE.rex program:
 
-- **Cast_Location_for_Sonarqube** when elements are found with the Type matching your selection criteria, should they be submitted for a SonarQube Analysis by default? (Y/N)
+- **Cast_Location_for_Sonarqube** only elements found in an Endevor Environment and stageid location should be submitted for a SonarQube Analysis. Enter a value containing an Environment name, a space, and a StageID.
 
-- **Wait_for_SonarQube** when a SonarQube analysis job is submitted, should the Endevor CAST job wait for it? (Y/N). If you indicate that the Cast job should wait, then the results of the Analysis impact the Success or Failure of the CAST. Otherwise, there is no impact. 
+- **SonarQube_Element_Types** designate Endevor type masks for those elements elligible for SonarQube analysis.  For example, assign one or more values like 'COB* CBL*' to indicate that your COBOL types are to be scanned. 
 
-- **SonarQube_Element_Types** to designate Endevor type masks for those elements elligible for SonarQube analysis.  Assign a value like 'COB* CBL*' to indicate that your COBOL types are to be scanned.
+- **Wait_for_SonarQube** when a SonarQube analysis job is submitted, should the Endevor CAST job wait for its completion? (Y/N). If 'Y', then the Cast job will  wait, and the results of the Analysis will impact the impact the Success or Failure of the package CAST. 
 
 Note that persons who create, and CAST Endevor packages can override the default values by entering text into the package notes.
 
@@ -122,8 +121,7 @@ The Notes section within each package provides a flexible mechanism to select or
     7.  Run SonarQube Analysis                                                            
     8.  Bypass SonarQube waiting                                                            
 
-Within **C1UEXTR7.rex**, you can easily adopt the requesting text strings you prefer to support.
-
+The **C1UEXTR7.rex** member supports the examples shown, but you can adopt support for your own text strings to turn on or off requests. 
 
 ## Python item
 
@@ -132,16 +130,16 @@ The Python script, **SonarDriver.py**, serves as the primary orchestrator for So
 ## Site Varaiables
 
 
-**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%2-0(zowe))** 
+**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to run anywhere unchanged. 
 
-It is within this renamed member where values must be given for:
+Assign your values for variables at your site:
 
   - **MySENULibrary** - the Endevor Skeleton (CSIQSENU) library name
   - **MySEN2Library** - a Secondary Skeleton library where XCOM* or SSH* members are found
   - **MyCLS0Library** - the Endevor Clist/REXX (CSIQCLS0) library
   - **MyCLS2Library** - a Secondary Clist/REXX where REXX components of this solution can be found
 
-Your site's SonarQube selections can be placeed in the @SITE member too, and may include site-level defaiults as well as values for specific System names. For example:
+Your site's SonarQube selections should also be placeed in the @SITE member, and may specify site-level defaults and override values for specific System names. In this example, the system FINANCE has its own values:
 
         /*   REXX  */                                                        
         PARSE ARG Parm                                                       
@@ -153,19 +151,19 @@ Your site's SonarQube selections can be placeed in the @SITE member too, and may
         -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 13 Line(s) not Displayed 
        
         /* Optional Entries  for SonarQube processing:                 */          
-        Cast_Location_for_Sonarqube = 'QAS Q' /* <= env stgid or empty */       
+        Cast_Location_for_Sonarqube = 'DEV 2' /* <= env stgid or empty */       
         Cast_Location_for_Sonarqube = '' /* <= env stgid or empty      */        
         /* you can give values at the system level, for example:       */  
-        Cast_Location_for_Sonarqube_FINANCE = 'COB* CBL*'                       
-        Wait_for_SonarQube = 'N'       /* wait?  Y/N                   */          
+        Cast_Location_for_Sonarqube_FINANCE = 'QAS Q'                       
+        Wait_for_SonarQube = 'Y'       /* wait?  Y/N                   */          
         Wait_for_SonarQube_FINANCE = 'N'                                        
-        SonarQube_Element_Types = ''                                            
+        SonarQube_Element_Types = 'COBOL JAVA CPP'                             
         SonarQube_Element_Types_FINANCE = 'COB* CBL*'                           
         GenerateProcessorStepnames = 'COMPILE COMP CMP COB'            
         SonarTransmitMethod = 'XCOM'   /* FTP / SSH / XOM .....*/        
 
 
-Remember to rename the @SITE member to reflect the name of your Lpar. For example, if your Lpar name is DEV1, then rename @SITE to @DEV1.
+Remember to rename the @SITE member to reflect the name of your Lpar. For example, if your Lpar name is DEV1, then rename @SITE to @DEV1. You can run **[WHEREIAM.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHEREIAM.rex)** to discover the new name to use for your @SITE member. 
 
 ## Other items
 
@@ -181,7 +179,7 @@ The functional characteristics of this solution are designed to easily align wit
 
 **[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
 
-**[WHEREIAM.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHEREIAM.rex)** the utility you can run to discover the name to use for renaming your @SITE member. 
+
 
 As a SonarQube job runs, it places members into a "work" dataset you name as the **SonarWorkfile**. You can View the members to see actions performed, and to help resolve issues.  
 
