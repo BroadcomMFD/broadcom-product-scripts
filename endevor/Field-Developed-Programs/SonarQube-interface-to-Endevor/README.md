@@ -16,11 +16,18 @@ By examining the element Types for elements within a package, it can be determin
 
 ### Optional use of the Package Builder
 
-Package creation is an ideal time to assess if package content requires a SonarQube scan. By utilizing the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) (refer to **PACKAGE PACKAGEP...** and [Package.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex)), you can automate this evaluation.
+Package creation is an ideal time to assess if package content requires a SonarQube scan. By utilizing the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) (refer to **PACKAGE PACKAGEP** and [Package.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex)), you can automate this evaluation.
 
-During construction, the package builder identifies element types and detects those that should be scanned. Upon discovery, it automatically updates the package description.
+During construction, the package builder identifies element locations and types, and detects those that should be scanned. Upon discovery, it automatically updates the package Notes, for example:
 
-          DESCRIPT = Overlay('+SONAR', DESCRIPT,45)       
+        1. RUN SONARQUBE ANALYSIS                           
+        2.                                                  
+        3.                                                  
+        4.                                                  
+        5.                                                  
+        6.                                                  
+        7.                                                  
+        8. ELM CNT: 2                                      
 
  Then, the items in this folder can use the description text to know whether the package is elligible for scanning at CAST time                          
 
@@ -62,10 +69,11 @@ Within the C1UEXTR7 item, designate that XCOM is your choice, by setting the Tra
 
     TransmitMethod = 'XCOM'     
 
+Find the XCOM#INC item in the current folder.
+
 Also locate these items from the XCOM folder and place them into the library you designate as your 
 **MySEN2Library** library. See the **@SITE.rex** section below.
 
-- [XCOM#INC](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23INC.skl)
 - [XCOM#JOB](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23JOB.skl)
 - [XCOM#RCV](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23RCV.skl)
 - [XCOM#RUN](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23RUN.skl)
@@ -108,10 +116,10 @@ The Notes section within each package provides a flexible mechanism to select or
     1.  This package is very special. Hanlde with care.             
     2.  ____________________________________________________________
     3.  ____________________________________________________________
-    4.  Cast_Location_for_Sonarqube= 'DEV D'                                      
-    5.  WAIT-FOR-SONARQUBE = Y                                      
-    6.                                                              
-    7.  Bypass SonarQube Analysis                                                            
+    4.  ____________________________________________________________              
+    5.  ____________________________________________________________
+    6.  ____________________________________________________________
+    7.  Run SonarQube Analysis                                                            
     8.  Bypass SonarQube waiting                                                            
 
 Within **C1UEXTR7.rex**, you can easily adopt the requesting text strings you prefer to support.
@@ -146,15 +154,18 @@ Your site's SonarQube selections can be placeed in the @SITE member too, and may
         MySEN2Library = 'YourHLQ.ENDEVOR.SKELS'                          
         -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 13 Line(s) not Displayed 
        
-        /* Optional Entries  for SonarQube processing:              */          
+        /* Optional Entries  for SonarQube processing:                 */          
         Cast_Location_for_Sonarqube = 'QAS Q' /* <= env stgid or empty */       
-        Cast_Location_for_Sonarqube = '' /* <= env stgid or empty   */          
+        Cast_Location_for_Sonarqube = '' /* <= env stgid or empty      */        
+        /* you can give values at the system level, for example:       */  
         Cast_Location_for_Sonarqube_FINANCE = 'COB* CBL*'                       
-        Wait_for_SonarQube = 'N'       /* wait?  Y/N                */          
+        Wait_for_SonarQube = 'N'       /* wait?  Y/N                   */          
         Wait_for_SonarQube_FINANCE = 'N'                                        
         SonarQube_Element_Types = ''                                            
         SonarQube_Element_Types_FINANCE = 'COB* CBL*'                           
-        /************************************************************/          
+        GenerateProcessorStepnames = 'COMPILE COMP CMP COB'            
+        SonarTransmitMethod = 'XCOM'   /* FTP / SSH / XOM .....  
+        /*************************************************************/          
 
 
 Remember to rename the @SITE member to reflect the name of your Lpar. For example, if your Lpar name is DEV1, then rename @SITE to @DEV1.

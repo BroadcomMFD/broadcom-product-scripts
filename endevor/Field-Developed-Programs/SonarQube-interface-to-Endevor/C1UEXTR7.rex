@@ -45,25 +45,6 @@
    Message = ''
    MessageCode = '    '
    MyRc = 0
-   /* Values to be set for your site......                     */
-   /* For package REVIEW  (APPROVE/DENY).....                  */
-   /*   Enter location of Approver Group sequencing   ...      */
-   ApproverGroupSequence= 'YOURSITE.NDVR.PARMLIB(APPROVER)'
-   ApproverGroupSequence= ''
-   /* Do you want all CAST actions to be peformed in Batch?    */
-   Force_CAST_in_Batch = 'Y' ; /*  Y/N   */
-   Force_CAST_in_Batch = 'N' ; /*  Y/N   */
-   /* Do you want a CAST action to kick off                    */
-   /* a SonarQube analysis when the package contains COBOL?    */
-   /* Set the Default values here. Notes can override          */
-   Cast_with_SonarQube= 'N'   /* Y/N/?=Check Notes */
-   Cast_with_SonarQube= 'N'   /* Y/N/?=Check Notes */
-   If USERID()  = 'IBMUSER' then,
-      Cast_with_SonarQube= 'Y';
-   /* Do you want the CAST action to wait for the SonarQube    */
-   /* results  and impact the CAST success/failure status?     */
-   Wait_for_SonarQube = 'Y'
-   Wait_for_SonarQube = 'N'
    /* Parms are REXX statements passed from COBOL exit              */
    Arg Parms
    Parms = Strip(Parms)
@@ -78,6 +59,9 @@
    what = 'C1UEXTR7-' PECB_FUNCTION_LITERAL,
                       PECB_BEF_AFTER_LITERAL,
                       PHDR_PACKAGE_STATUS
+   /* Find GTUNIQUE on GitHub in the folder-                   */
+   /* endevor/Field-Developed-Programs/Miscellaneous-items     */
+   Unique_Name = GTUNIQUE()
    /* Validate Package prefix with ServiceNow              */
    If PECB_FUNCTION_LITERAL  ='CREATE'   &,
       PECB_BEF_AFTER_LITERAL ='BEFORE'   &,
@@ -85,6 +69,8 @@
        Substr(PECB_PACKAGE_ID,1,3) = 'CHG' )         then,
       Do
       PackageSnowRef = Substr(PECB_PACKAGE_ID,1,10)
+      /* Find SERVINOW on GitHub in the folder-                   */
+      /* \ServiceNow-Interface\COBOL+REXX+PythonOrGoLang-Example*/
       Message = SERVINOW('C1UEXTR7' PackageSnowRef ECB_TSO_BATCH_MODE)
       If POS('**NOT**', Message) > 0 then,
          Do
@@ -100,6 +86,9 @@
       PECB_FUNCTION_LITERAL = 'CAST'      &,
       Substr(CALL_REASON,1,16) = 'APPROVER GROUP #' then,
        Do
+       /* Find SENDMAIL on GitHub in the folder-                 */
+       /* endevor/Field-Developed-Programs/...                   */
+       /*   Email-For-External-Approver-Groups                   */
        Call SENDMAIL PAPP_GROUP_NAME PECB_PACKAGE_ID,
           'Needs-Approval' PAPP_APPROVAL_IDS
        Exit
@@ -113,6 +102,7 @@
        Call CheckExecutionWindow
        If GoExecute = 'Y' then,
          DO
+         Call Get_Site_Shipping_Variables
          PKGEXECT_Parm = Copies(' ',055)
          PKGEXECT_Parm = Overlay(PECB_PACKAGE_ID     ,PKGEXECT_Parm,001)
          PKGEXECT_Parm = Overlay(PHDR_PKG_ENV        ,PKGEXECT_Parm,018)
@@ -121,6 +111,8 @@
          PKGEXECT_Parm = Overlay(PHDR_PKG_CREATE_USER,PKGEXECT_Parm,029)
          PKGEXECT_Parm = Overlay(PHDR_PKG_UPDATE_USER,PKGEXECT_Parm,037)
          PKGEXECT_Parm = Overlay(PHDR_PKG_CAST_USER  ,PKGEXECT_Parm,045)
+         /* Find PKGEXECT on GitHub in the folder-               */
+         /* endevor/Field-Developed-Programs/Package-Automation  */
          Call PKGEXECT PKGEXECT_Parm
          End  /* If GoExecute = 'Y' */
        Exit
@@ -144,6 +136,9 @@
       ADDRESS TSO "EXECIO 1 DISKR AUTHORIZ (Finis"
       pull BakoutCCID
       BakoutCCID = Strip(BakoutCCID)
+      /* Find BKOUTLOG on GitHub in the folder-                  */
+      /* endevor/Field-Developed-Programs/...                    */
+      /*   Package-Backout-Logging                               */
       Call BKOUTLOG PECB_PACKAGE_ID 'Before',
            BakoutCCID USERID()
       End
@@ -168,6 +163,8 @@
        Substr(PECB_FUNCTION_LITERAL,1,4) = 'BACK') then,
        Do
        If TraceRQ = 'Y' then Say 'C1UEXTR7 is exiting @160 '
+       /* Find PKGESHIP on GitHub in the folder-                 */
+       /* endevor/Field-Developed-Programs/Package-Automation    */
        PKGESHIP_Parm = Copies(' ',055)
        PKGESHIP_Parm = Overlay(PECB_PACKAGE_ID     ,PKGESHIP_Parm,001)
        PKGESHIP_Parm = Overlay(PHDR_PKG_ENV        ,PKGESHIP_Parm,018)
@@ -188,6 +185,8 @@
           PKGESHIP_Parm = Overlay('BAK'            ,PKGESHIP_Parm,584)
        Else,
           PKGESHIP_Parm = Overlay('OUT'            ,PKGESHIP_Parm,584)
+       /* Find PKGESHIP on GitHub in the folder-                 */
+       /* endevor/Field-Developed-Programs/Package-Automation    */
        Call PKGESHIP PKGESHIP_Parm
        If TraceRQ = 'Y' then Say 'C1UEXTR7 is exiting @183 '
        Exit
@@ -206,45 +205,26 @@
       End
    /* Early outs          ....                             */
    If PECB_FUNCTION_LITERAL = 'SETUP' then Exit
-   /* What to do  about SonarQube?  Let NOTES decide....   */
-   /* There are 2 options with Y/N values....              */
-   /*         - 1 Submit the SonarQube Analysis            */
-   /*         - 2 Wait for it and reflect in CAST status   */
-   /* If the package is created with +SONAR in the notes   */
-   /* it is assumed the Analysis is to be submitted.       */
-   If Substr(PREQ_PACKAGE_COMMENT,45,6) /= '+SONAR' then,
-      Cast_with_SonarQube = 'N'
-   /* Package notes may make or override SonarQube requests */
-   Call CheckPackageNotes;
+   /* Execute a SonarQube analysis?                        */
+   /* Look at Notes to see if SonarQube processing or      */
+   /* Package Shipment via Notes are given.                */
+   /* Set to values indicating unassigned                  */
    If PECB_FUNCTION_LITERAL  ='CAST'     &,
       PECB_SUBFUNC_LITERAL   ='CAST'     &,
-      PECB_BEF_AFTER_LITERAL ='BEFORE'   &,
-      PHDR_PACKAGE_STATUS    ='IN-EDIT'  &,
-      PECB_MODE = "T" &,          /* TSO foreground  */
-      (Force_CAST_in_Batch= 'Y' | Cast_with_SonarQube= 'Y') then,
+      PECB_BEF_AFTER_LITERAL ='BEFORE'   then,
         Do
-        ModelMember = 'CAST#JCL'
-        Call SubmitBatchJCL
-        Message = JobData
-        MyRc        = 8
-        PACKAGE = PECB_PACKAGE_ID
-        MessageCode = 'U033'
-        Call SetExitReturnInfo
-        Exit
-        End
-   /* Execute a SonarQube analysis?                        */
-   If Cast_with_SonarQube = 'Y' &,
-      PECB_FUNCTION_LITERAL = 'CAST' &,
-      PECB_BEF_AFTER_LITERAL = 'BEFORE' Then
-         Do         /* Call routine to do SonarQube Analysis */
-         Message =  SONRQUBE(Wait_for_SonarQube PECB_PACKAGE_ID)
-         If Message /= '' then,
-            Do
-            MyRc = 8
-            Call SetExitReturnInfo
-            End
-         Exit
-         End
+        /* Set these to un-initialized values */
+        Cast_Location_for_Sonarqube = ''
+        Wait_for_SonarQube          = ''
+        SonarQube_Element_Types     = ''
+        /* Package notes may make or override SonarQube requests */
+        Call CheckPackageNotesBeforeCast;
+        If Cast_Location_for_Sonarqube /= 'none' then,
+           Do
+           SonarDSNPrefix = USERID()'.SONRQUBE.' || Unique_Name
+           Call SonarQubeAnalysisAndKickoff
+           End
+        End; /* If PECB_FUNCTION_LITERAL  ='CAST' ... BEFORE */
    /* Enforce packages to be Backout Enabled              */
    IF PREQ_BACKOUT_ENABLED /= 'Y' then,
       Do
@@ -263,7 +243,8 @@
       PECB_BEF_AFTER_LITERAL ='AFTER'    then,
       Call ManageEmails    ;
    Exit
-CheckPackageNotes:
+CheckPackageNotesBeforeCast:
+   sa = Force_CAST_in_Batch
    /* Package notes may make or override SonarQube requests */
    AllNotes = PHDR_PKG_NOTE1 PHDR_PKG_NOTE2,
               PHDR_PKG_NOTE3 PHDR_PKG_NOTE4,
@@ -273,29 +254,289 @@ CheckPackageNotes:
    AllNotes = Translate(AllNotes,' ',"'-")
    /* To match any case, we are forcing upper case here */
    Upper AllNotes
-   wheretext = Pos('CAST WITH SONARQUBE', AllNotes)
+   wheretext = Pos('RUN SONARQUBE', AllNotes)
    If wheretext > 0 then,
       Do
-      userSelection = Word(substr(AllNotes,wheretext),4)
-      If userSelection = 'Y' | userSelection = 'N' then,
-         Do
-         Cast_with_SonarQube = userSelection
-         Say 'C1UEXTR7 - user notes request',
-             'for a SonarQube Analysis is' userSelection
-         End
+      Cast_Location_for_Sonarqube = 'notes'
+      Force_CAST_in_Batch = 'Y' ;
+      Say 'C1UEXTR7 - user notes request',
+          'a SonarQube Analysis '
       End
-   wheretext = Pos('WAIT FOR SONARQUBE', AllNotes)
+   wheretext = Pos('BYPASS SONARQUBE WAIT', AllNotes)
    If wheretext > 0 then,
       Do
-      userSelection = Word(substr(AllNotes,wheretext),4)
-      If userSelection = 'Y' | userSelection = 'N' then,
-         Do
-         Wait_for_SonarQube  = userSelection
-         Say 'C1UEXTR7 - user notes request',
-             'to wait for the SonarQube Analysis is' userSelection
-         End
+      Wait_for_SonarQube  = 'N'
+      Say 'C1UEXTR7 - user notes request',
+          'to Bypass the wait for the SonarQube Analysis'
+      End
+   wheretext = Pos('BYPASS SONARQUBE ANALYSIS', AllNotes)
+   If wheretext > 0 then,
+      Do
+      Cast_Location_for_Sonarqube = 'none'
+      Say 'C1UEXTR7 - user notes request',
+          'SonarQube Analysis be bypassed'
       End
    Return
+Get_Site_Shipping_Variables:
+  /* Get the related site-level options */
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
+  /* ShipSchedulingMethod can be set by C1System */
+  interpret 'Call' WhereIam,
+           "'ShipSchedulingMethod_"PackageSystem"'"
+  ShipSchedulingMethod = Result
+  If Wordpos(ShipSchedulingMethod,'Rules Notes One None') = 0 then,
+    Do
+    interpret 'Call' WhereIam "'ShipSchedulingMethod'"
+    ShipSchedulingMethod = Result
+    End
+  Return
+Get_SonarQube_variables:
+  /* If unassigned....                       */
+  /* identify Choices for SonarQube Scanning */
+  /* Cast_Location_for_Sonarqube can be set by C1System */
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
+  If Force_CAST_in_Batch /= 'Y' then,
+     Do
+     interpret 'Call' WhereIam,
+        "'Force_CAST_in_Batch_"PackageSystem"'"
+     Force_CAST_in_Batch   = Result
+     End
+  If Wordpos(Force_CAST_in_Batch,'Y N') = 0 then,
+     Do
+     interpret 'Call' WhereIam "'Force_CAST_in_Batch'"
+     Force_CAST_in_Batch   = Result
+     End
+  If Cast_Location_for_Sonarqube = '' then,
+     Do
+     interpret 'Call' WhereIam,
+              "'Cast_Location_for_Sonarqube_"PackageSystem"'"
+     Cast_Location_for_Sonarqube = Result
+     If Words(Cast_Location_for_Sonarqube) /= 2 then,
+       Do
+       interpret 'Call' WhereIam "'Cast_Location_for_Sonarqube'"
+       Cast_Location_for_Sonarqube = Result
+       End
+     End ; /* If Words(Cast_Location_for_Sonarqube)  */
+  If Cast_Location_for_Sonarqube = 'notes' |,
+    Words(Cast_Location_for_Sonarqube)  = 2 then,
+    Do
+    If Wait_for_SonarQube  = '' then,
+       Do
+       /* If unassigned....                       */
+       interpret 'Call' WhereIam,
+                "'Wait_for_SonarQube_"PackageSystem"'"
+       Wait_for_SonarQube            = Result
+       If Length(Wait_for_SonarQube) /= 1 then,
+         Do
+         interpret 'Call' WhereIam "'Wait_for_SonarQube'"
+         Wait_for_SonarQube            = Result
+         End
+       End; /* If Wait_for_SonarQube  = '' */
+    interpret 'Call' WhereIam,
+             "'SonarQube_Element_Types_"PackageSystem"'"
+    SonarQube_Element_Types       = Result
+    If SonarQube_Element_Types  = 'Not-valid' then,
+      Do
+      interpret 'Call' WhereIam "'SonarQube_Element_Types'"
+      SonarQube_Element_Types       = Result
+      End
+    End /* If Cast_Location_for_Sonarqube ..... */
+ Return ;
+SonarQubeAnalysisAndKickoff:
+  /* Do an EXPORT to Capture the Package SCL                  */
+  Call CapturePackageSCL
+  /* Convert exported SCL into a Table format                 */
+  STRING = "ALLOC DD(RESULTS) LRECL(80) BLKSIZE(24000) ",
+             " DSORG(PS) ",
+             " SPACE(5,5) RECFM(F,B) TRACKS ",
+             " NEW UNCATALOG REUSE ";
+  CALL BPXWDYN STRING;
+  /* Use SCAN#SCL to create a TABLE from the SCL content      */
+  /* Find SCAN#SCL on GitHub in the folder-                   */
+  /* endevor/Field-Developed-Programs/Miscellaneous-items     */
+  Call SCAN#SCL 'TABLE'
+  /* Does this package require SonarQube analysis?   */
+  "EXECIO * DISKR RESULTS (Stem tblscl. Finis"
+  whereSystem = Pos('System ',tblscl.1)
+  whereCommand= Pos('Command ',tblscl.1)
+  whereEnvmnt = Pos('Envmnt ',tblscl.1)
+  whereStg    = Pos(' S ',tblscl.1) + 1
+  If whereSystem    = 0 |,
+     whereCommand   = 0 |,
+     whereEnvmnt    = 0 |,
+     whereStg       = 0 then
+      Do
+      message = 'C1UEXTR7 -',
+         'RESULTS Table format error or SCAN#SCL error '
+      MyRc = 8
+      Call SetExitReturnInfo
+      Exit
+      End / * If whereSystem    = 0 .....    */
+  PackageSystem = word(Substr(tblscl.2,whereSystem),1)
+  Call Get_SonarQube_variables
+   /* If this site indicates all CASTS are to run in Batch */
+  If  PECB_MODE = "T" &,          /* TSO foreground  */
+      Force_CAST_in_Batch= 'Y'       then,                              ,
+        Do
+        ModelMember = 'CAST#JCL'
+        Call SubmitBatchJCL
+        Message = JobData
+        MyRc        = 8
+        PACKAGE = PECB_PACKAGE_ID
+        MessageCode = 'U033'
+        Call SetExitReturnInfo
+        Exit
+        End
+   sa = Cast_Location_for_Sonarqube
+   sa = SonarQube_Element_Types
+  PackageCommand= word(Substr(tblscl.2,whereCommand),1)
+  PackageEnvmnt = word(Substr(tblscl.2,whereEnvmnt),1)
+  PackageStg    = word(Substr(tblscl.2,whereStg),1)
+  /* Adjust the Environment and StageID if a MOVE action */
+  If Cast_Location_for_Sonarqube /= 'notes' &,
+     PackageCommand = 'MOVE' then,
+     Do
+     /* Find GTUNIQUE on GitHub in the folder-                   */
+     /* endevor/Field-Developed-Programs/Miscellaneous-items     */
+     NextLocation = GTNXTSTG(PackageEnvmnt PackageStg)
+     PackageEnvmnt = Word(NextLocation,1)
+     PackageStg    = Word(NextLocation,2)
+     sa = Cast_Location_for_Sonarqube '|' PackageEnvmnt PackageStg
+     End /* If PackageCommand = 'MOVE' */
+  /* Based on just looking at Site variables, including those */
+  /* for the c1System, we can                                 */
+  /* Exit if a SonarQube run is not expected for this package */
+  If Cast_Location_for_Sonarqube /= 'notes' &,
+     Cast_Location_for_Sonarqube /= PackageEnvmnt PackageStg then,
+       Do
+       Call FREE_Files_For_ProcessingPackageSCL
+       Return
+       End
+  /* Either Notes or Cast_Location_for_Sonarqube says    */
+  /* we should continue.                                 */
+  /* See if types are designated for SonarQube Scanning  */
+  If Cast_Location_for_Sonarqube  = 'notes' then foundmatch = 1
+  Else,
+   Do
+     foundmatch = 0
+     /* Examine Element Types in package                */
+     /* Search packaged types for list of SonarQube Types */
+     whereType   = Pos('Type ',tblscl.1)
+     Do typ# = 2 to tblscl.0
+        C1ElType =   word(Substr(tblscl.typ#,whereType),1)
+        Do s# = 1 to Words(SonarQube_Element_Types)
+           typemask = Word(SonarQube_Element_Types,s#)
+           /* Find QMATCH   on GitHub in the folder-              */
+           /* endevor/Field-Developed-Programs/Miscellaneous-items*/
+           foundmatch = QMATCH(C1ElType typemask)
+           If foundmatch then Leave;
+        End /* Do s# = 1 to Words(SonarQube_Element_Types) */
+        If foundmatch then Leave;
+     End; /* Do typ# = 2 to tblscl.0  */
+   End /* Else.. If Cast_Location_for_Sonarqube  = 'notes' */
+  /* Based on the types in this package, no SonarQube analysis*/
+  /* is expected.                                             */
+  If foundmatch = 0 then,
+       Do
+       Call FREE_Files_For_ProcessingPackageSCL
+       Return
+       End
+  /* A SonarQube run is expected */
+  /* Are we running in TSO foreground?               */
+  If  PECB_MODE = "T" then,       /* TSO foreground  */
+       Do
+       Call FREE_Files_For_ProcessingPackageSCL
+       ModelMember = 'CAST#JCL'
+       Call SubmitBatchJCL
+       Message = JobData
+       MyRc        = 8
+       PACKAGE = PECB_PACKAGE_ID
+       MessageCode = 'U033'
+       Call SetExitReturnInfo
+       Exit
+       End
+  /* Running in Batch..                              */
+  /* Preparing the SonarQube run. Create the Work file   */
+  SonarWorkfile = SonarDSNPrefix || '.SONARWRK'
+  SonarElmDSN   = SonarDSNPrefix || '.SONARELM'
+  STRING = "ALLOC DD(WRKFILE) LRECL(080) BLKSIZE(24000) ",
+             " DA("SonarWorkfile") ",
+             " DSORG(PO) DSNTYPE(LIBRARY) DIR(9) ",
+             " SPACE(5,5) RECFM(F,B) CYL ",
+             " NEW CATALOG REUSE ";
+  CALL BPXWDYN STRING;
+  CALL BPXWDYN "FREE DD(WRKFILE)"
+  /* Save exported tblscl */
+  CALL BPXWDYN "FREE DD(RESULTS)"
+  STRING =,
+     "ALLOC DD(RESULTS) DA("SonarWorkfile"(PKGTBL)) SHR REUSE"
+  CALL BPXWDYN STRING;
+  "EXECIO" tblscl.0 "DISKW RESULTS (Stem tblscl. Finis"
+  /* Save exported SCL */
+  "EXECIO * DISKR SCL (Stem scl. Finis"
+  CALL BPXWDYN "FREE DD(SCL)" ;
+  STRING = "ALLOC DD(SCL) DA("SonarWorkfile"(SCL)) SHR REUSE"
+  CALL BPXWDYN STRING;
+  "EXECIO * DISKW SCL (Stem scl. Finis"
+  STRING = "ALLOC DD(SONARELM) LRECL(080) BLKSIZE(24000) ",
+             " DA("SonarElmDSN") ",
+             " DSORG(PO) DSNTYPE(LIBRARY) DIR(9) ",
+             " SPACE(5,5) RECFM(F,B) CYL ",
+             " NEW CATALOG REUSE ";
+  CALL BPXWDYN STRING;
+  CALL BPXWDYN "FREE DD(SONARELM) "
+  /* Create TimeStamp member in the SonarWorkfile    */
+  TimeStamp = DATE('S') TIME()
+  STRING="ALLOC DD(TIMESTMP) DA("SonarWorkfile"(@TIME)) SHR REUSE"
+  CALL BPXWDYN STRING;
+  Queue "TimeStamp = '"TimeStamp"'"
+  Queue "Package   = '"PECB_PACKAGE_ID"'"
+  Queue "WaitOption= '"Wait_for_SonarQube"'"
+  "EXECIO 3 DISKW TIMESTMP (FINIS ";   /* count queued */
+  CALL BPXWDYN "FREE DD(TIMESTMP)" ;
+  /* Find SONRQUBE on GitHub in the folder-                  */
+  /* Field-Developed-Programs\SonarQube-interface-to-Endevor */
+  Message =,
+     SONRQUBE(PackageSystem,
+              Wait_for_SonarQube,
+              Unique_Name,
+              PECB_PACKAGE_ID)
+  Call FREE_Files_For_ProcessingPackageSCL
+  If Message /= '' then,
+     Do
+     MyRc = 8
+     Call SetExitReturnInfo
+     End
+  Return ;
+CapturePackageSCL:
+  STRING = "ALLOC DD(C1MSGS1) SYSOUT(A)"
+  CALL BPXWDYN STRING;
+  STRING = "ALLOC DD(BSTERR) SYSOUT(A)"
+  CALL BPXWDYN STRING;
+  STRING = "ALLOC DD(BSTAPI) SYSOUT(A)"
+  CALL BPXWDYN STRING;
+  /* Export the Package content into SCL        e    */
+  STRING = "ALLOC DD(SCL) LRECL(080) BLKSIZE(24000) ",
+              " DSORG(PS) ",
+              " SPACE(5,5) RECFM(F,B) TRACKS ",
+              " NEW UNCATALOG REUSE ";
+  CALL BPXWDYN STRING;
+  STRING = "ALLOC DD(ENPSCLIN) LRECL(80) BLKSIZE(24000) ",
+             " DSORG(PS) ",
+             " SPACE(5,5) RECFM(F,B) TRACKS ",
+             " NEW UNCATALOG REUSE ";
+  CALL BPXWDYN STRING;
+  QUEUE "EXPORT PACKAGE '"PECB_PACKAGE_ID"'"
+  QUEUE "    TO DDN 'SCL' ."
+  "EXECIO 2 DISKW ENPSCLIN (FINIS ";   /* count queued */
+  ADDRESS LINK 'ENBP1000'   ;  /* run  from CSIQAUTH*/
+  call_rc = rc ;
+  CALL BPXWDYN "FREE DD(BSTAPI)  " ;
+  CALL BPXWDYN "FREE DD(BSTERR)  " ;
+  CALL BPXWDYN "FREE DD(C1MSGS1) " ;
+  CALL BPXWDYN "FREE DD(ENPSCLIN)" ;
+  /* Caller is responsible for freeing SCL */
+  Return ;
 CheckExecutionWindow:
   /* Check the Execution window for immediate package Execution */
   curntTimestamp = Substr(DATE('S'),3) || '@'|| Substr(TIME(),1,5)
@@ -337,9 +578,7 @@ ManageEmails:
    /* Initializaztion and Example statements                        */
    /*****************************************************************/
    MySMTP_Message =,
-       'YOURSITE.NDVR.REXX(C1UEXTR7)'
-   MySMTP_Message =,
-       'SHARE.ENDV.SHARABLE.REXX(C1UEXTR7)'
+       'From REXX(C1UEXTR7)'
    MySMTP_Subject = 'Please Approve Package' PECB_PACKAGE_ID
    MySMTP_From = Left('YOURSITE your testing Endevor',50)
    MySMTP_textline.1  = 'Package' PECB_PACKAGE_ID,
@@ -568,7 +807,7 @@ SubmitBatchJCL:
   If TraceRQ = 'Y'             then Trace ?R
   whereami = 'SubmitBatchJCL'
   /* Variable settings for each site --->           */
-  WhereIam =  WHERE@M1()
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
   interpret 'Call' WhereIam "'MySENULibrary'"
   MySENULibrary = Result
   interpret 'Call' WhereIam "'MySEN2Library'"
@@ -577,10 +816,13 @@ SubmitBatchJCL:
   MyCLS0Library = Result
   interpret 'Call' WhereIam "'MyCLS2Library'"
   MyCLS2Library = Result
-  Unique_Name = GTUNIQUE()
   /* Get job-related information from low address locations */
+  /* Find GETACCTC on GitHub in the folder-                   */
+  /* endevor/Field-Developed-Programs/Miscellaneous-items     */
   MyAccountingCode = GETACCTC()
   job_name         = MVSVAR('SYMDEF',JOBNAME ) /*Returns JOBNAME */
+   /* Find BUMPJOB  on GitHub in the folder-                   */
+   /* endevor/Field-Developed-Programs/Miscellaneous-items     */
   Jobname= BUMPJOB(job_name)
   /* Prepare and run a Table Tool to build CAST jcl.......  */
   CALL BPXWDYN ,
@@ -650,29 +892,9 @@ Submit_n_save_jobInfo: /* submit Jcl2SumbitModel job and save job info */
    SelectJobName   = Word(Translate(jobinfo,' ',')('),1) ;
    SelectJobNumber = Word(Translate(jobinfo,' ',')('),2) ;
    Return;
-Allocate_Files_For_CSV_and_API:
-   STRING = "ALLOC DD(C1MSGS1) DUMMY "
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(BSTERR) DA(*) "
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(BSTAPI) DA(*) "
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(MSGFILE) LRECL(133) BLKSIZE(26600) ",
-              " DSORG(PS) ",
-              " SPACE(5,5) RECFM(F,B) TRACKS ",
-              " NEW UNCATALOG REUSE ";
-   CALL BPXWDYN STRING;
-   Return;
-FREE_Files_For_CSV_and_API:
-   CALL BPXWDYN STRING;
-   STRING = "FREE DD(C1MSGS1)" ;
-   CALL BPXWDYN STRING;
-   STRING = "FREE DD(BSTERR)" ;
-   CALL BPXWDYN STRING;
-   STRING = "FREE DD(BSTAPI)" ;
-   CALL BPXWDYN STRING;
-   STRING = "FREE DD(MSGFILE)";
-   CALL BPXWDYN STRING;
+FREE_Files_For_ProcessingPackageSCL:
+   CALL BPXWDYN "FREE DD (SCL)    "
+   CALL BPXWDYN "FREE DD (RESULTS)"
    Return;
 CSV_to_List_Package_Actions:
   /* Get Package Action information for SonarQube preparations     */

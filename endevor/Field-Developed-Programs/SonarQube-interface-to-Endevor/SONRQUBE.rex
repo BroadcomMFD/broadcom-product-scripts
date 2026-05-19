@@ -4,6 +4,7 @@
   /* at least one Sonar element of a type to Analyze          */
   /* C1UEXT07(cobol)->C1UEXTR7(rexx)->SONRQUBE                */
   /*                                                          */
+  Say  'SHARE.ENDEVOR.EA.P2.REXX(SONRQUBE)'
   /* If the person Casting the package does not want          */
   /* SonarQube processing, then place anywhere in the Notes:  */
   /* BYPASS SONARQUBE                                         */
@@ -24,10 +25,24 @@
   CALL BPXWDYN "INFO FI("WhatDDName")",
              "INRTDSN(DSNVAR) INRDSNT(myDSNT)"
   If RESULT = 0 then Trace r
-  Arg Wait_for_SonarQube PECB_PACKAGE_ID
-  Sa= 'You called SONRQUBE ' Wait_for_SonarQube PECB_PACKAGE_ID
-  /* Variable settings for each site --->           */
-  WhereIam =  WHERE@M1()
+  Arg PackageSystem,
+      Wait_for_SonarQube,
+      Unique_Name,
+      PECB_PACKAGE_ID
+  Sa= 'You called SONRQUBE '
+  sa= 'PackageSystem     =' PackageSystem
+  sa= 'Wait_for_SonarQube=' Wait_for_SonarQube
+  sa= 'PECB_PACKAGE_ID   =' PECB_PACKAGE_ID
+  /* Get the related site-level options */
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
+  interpret 'Call' WhereIam,
+           "'SonarQube_Element_Types_"PackageSystem"'"
+  SonarQube_Element_Types       = Result
+  If SonarQube_Element_Types  = 'Not-valid' then,
+    Do
+    interpret 'Call' WhereIam "'SonarQube_Element_Types'"
+    SonarQube_Element_Types       = Result
+    End
   interpret 'Call' WhereIam "'MySENULibrary'"
   MySENULibrary = Result
   interpret 'Call' WhereIam "'MySEN2Library'"
@@ -40,53 +55,44 @@
   MyHomeAddress = Result
   interpret 'Call' WhereIam "'AltIDAcctCode'"
   AltIDAcctCode = Result
+  interpret 'Call' WhereIam "'GenerateProcessorStepnames'"
+  GenerateProcessorStepnames = Result
+  interpret 'Call' WhereIam "'SonarTransmitMethod'"
+  SonarTransmitMethod= Result
   Message = ''
   MessageCode = '    '
   /* Interfacing with SonarQube during package CAST in Batch */
   /* Local selections here...                                */
-  /* Provide Endevor Type masks for element to be analyzed   */
-  SonarQube_Element_Types = 'COB* CBL* CPP* '
-  /* Provide Endevor processor steps which show ACM inputs   */
-  GenerateProcessorStepnames = 'COMPILE COMP CMP COB'
-  TransmitMethod = 'FTP'       /* **chose one ** Last one wins **/
-  TransmitMethod = 'SSH'       /* **chose one ** Last one wins **/
-  TransmitMethod = 'XCOM'      /* **chose one ** Last one wins **/
-  Call GetUnique_Name
   SonarDSNPrefix = USERID()'.SONRQUBE.' || Unique_Name
   TransmitTable = ""
   Call Allocate_Files_For_CSV_and_API
   Elements.0 = 0
   Call ProcessPackageSCL
-  If  SonarElementfound = 'Y' then,
-      Do
-      Call RETRIEVE_Sonar_Elements
-      Call Use_ENTBJAPI_For_BX_Info
-      Call SubmitandWaitForSonarQube;  /* maybe just submit */
-      If Message /= '' then Return Message
-      If Wait_for_SonarQube = 'Y' then,
-         Do
-         If myRC > 4 then,
-            Do
-            Message = 'SONRQUBE -',
-               'Package Failed the SonarQube Analysis'
-            MyRc        = 8
-            End   /* If myRC > 4 */
-         Else,
-            Do
-            MyRc     =  4
-            Message = 'SONRQUBE -',
-               'Package passed a SonarQube Analysis'
-            Message = ''
-            End   /* Else        */
-         End; /* If Wait_for_SonarQube = 'Y' */
+  Call RETRIEVE_Sonar_Elements
+  Call Use_ENTBJAPI_For_BX_Info
+  Call SubmitandWaitForSonarQube;  /* maybe just submit */
+  If Message /= '' then Return Message
+  If Wait_for_SonarQube = 'Y' then,
+     Do
+     If myRC > 4 then,
+        Do
+        Message = 'SONRQUBE -',
+           'Package Failed the SonarQube Analysis'
+        MyRc        = 8
+        End   /* If myRC > 4 */
+     Else,
+        Do
+        MyRc     =  4
+        Message = 'SONRQUBE -',
+           'Package passed a SonarQube Analysis'
+        Message = ''
+        End   /* Else        */
+     End; /* If Wait_for_SonarQube = 'Y' */
+/*
       End;  /* If  SonarElementfound = 'Y' ... */
+*/
   Call FREE_Files_For_CSV_and_API
   Return Message
-GetUnique_Name:
-   Unique_Name = GTUNIQUE()
-   If TraceRQ = 'Y' then,
-      SAY "Unique Member name is " Unique_Name
-   Return
 Allocate_Files_For_CSV_and_API:
    STRING = "ALLOC DD(C1MSGS1) DUMMY "
    CALL BPXWDYN STRING;
@@ -112,48 +118,9 @@ FREE_Files_For_CSV_and_API:
    CALL BPXWDYN STRING;
    Return;
 ProcessPackageSCL:
-  /* Do an EXPORT to Capture the Package SCL                  */
+  SonarDSNPrefix = USERID()'.SONRQUBE.' || Unique_Name
   SonarWorkfile = SonarDSNPrefix || '.SONARWRK'
   SonarElmDSN   = SonarDSNPrefix || '.SONARELM'
-  STRING = "ALLOC DD(WRKFILE) LRECL(080) BLKSIZE(24000) ",
-             " DA("SonarWorkfile") ",
-             " DSORG(PO) DSNTYPE(LIBRARY) DIR(9) ",
-             " SPACE(5,5) RECFM(F,B) CYL ",
-             " NEW CATALOG REUSE ";
-  CALL BPXWDYN STRING;
-  CALL BPXWDYN "FREE DD(WRKFILE)"
-  STRING = "ALLOC DD(SONARELM) LRECL(080) BLKSIZE(24000) ",
-             " DA("SonarElmDSN") ",
-             " DSORG(PO) DSNTYPE(LIBRARY) DIR(9) ",
-             " SPACE(5,5) RECFM(F,B) CYL ",
-             " NEW CATALOG REUSE ";
-  CALL BPXWDYN STRING;
-  CALL BPXWDYN "FREE DD(SONARELM) "
-  /* Create TimeStamp member in the SonarWorkfile    */
-  TimeStamp = DATE('S') TIME()
-  STRING="ALLOC DD(TIMESTMP) DA("SonarWorkfile"(@TIME)) SHR REUSE"
-  CALL BPXWDYN STRING;
-  Queue "TimeStamp = '"TimeStamp"'"
-  Queue "Package   = '"PECB_PACKAGE_ID"'"
-  Queue "WaitOption= '"Wait_for_SonarQube"'"
-  "EXECIO 3 DISKW TIMESTMP (FINIS ";   /* count queued */
-  CALL BPXWDYN "FREE DD(TIMESTMP)" ;
-  /* Export the Package content into SCL        e    */
-  STRING = "ALLOC DD(SCL) DA("SonarWorkfile"(SCL)) SHR REUSE"
-  CALL BPXWDYN STRING;
-  STRING="ALLOC DD(ENPSCLIN) DA("SonarWorkfile"(SCLEXPRT)) SHR REUSE"
-  CALL BPXWDYN STRING;
-  QUEUE "EXPORT PACKAGE '"PECB_PACKAGE_ID"'"
-  QUEUE "    TO DDN 'SCL' ."
-  "EXECIO 2 DISKW ENPSCLIN (FINIS ";   /* count queued */
-  ADDRESS LINK 'ENBP1000'   ;  /* run  from CSIQAUTH*/
-  call_rc = rc ;
-  CALL BPXWDYN "FREE DD(ENPSCLIN)" ;
-  STRING = "ALLOC DD(RESULTS) DA("SonarWorkfile"(PKGTBL)) SHR REUSE"
-  CALL BPXWDYN STRING;
-  /* Use SCAN#SCL to create a TABLE from the SCL content      */
-  Call SCAN#SCL 'TABLE'
-  CALL BPXWDYN "FREE DD(SCL)" ;
  /* Use TableTool to create multiple outputs                 */
   STRING = "ALLOC DD(TABLE) DA("SonarWorkfile"(PKGTBL)) SHR REUSE"
   CALL BPXWDYN STRING;
@@ -172,6 +139,8 @@ ProcessPackageSCL:
   CALL BPXWDYN STRING;
   ReportingPFX = USERID() || '.SONRQUBE.'Unique_Name'.RESULTS'
   myJob     = MVSVAR('SYMDEF','JOBNAME' )
+   /* Find BUMPJOB  on GitHub in the folder-                   */
+   /* endevor/Field-Developed-Programs/Miscellaneous-items     */
   Jobname = BUMPJOB(myJob)
   QUEUE " TimeStamp      = '"TimeStamp"'"
   QUEUE " SonarQube_Element_Types = '"SonarQube_Element_Types"'"
@@ -186,7 +155,7 @@ ProcessPackageSCL:
   QUEUE " MySEN2Library  = '"MySEN2Library"'"
   QUEUE " MyCLS0Library  = '"MyCLS0Library"'"
   QUEUE " MyCLS2Library  = '"MyCLS2Library"'"
-  QUEUE " TransmitMethod = '"TransmitMethod"'"
+  QUEUE " SonarTransmitMethod = '"SonarTransmitMethod"'"
   QUEUE " ReportingPFX   = '"ReportingPFX"'"
   QUEUE " Userid         = '"USERID()"'"
   QUEUE " myJob          = '"myJob"'"
@@ -209,6 +178,8 @@ ProcessPackageSCL:
   Queue "$NumberModelsAndTblouts= 3                               "
   Queue "HaveSonar = 0                                            "
   Queue "Do w# = 1 to Words(SonarQube_Element_Types) ; +          "
+  /* Find QMATCH   on GitHub in the folder-                   */
+  /* endevor/Field-Developed-Programs/Miscellaneous-items     */
   Queue "   HaveSonar=QMATCH(Type Word(SonarQube_Element_Types,w#)); +"
   Queue "   If HaveSonar = 1 then Do; $my_rc = 1; Leave; End; + "
   Queue "End;                                                     "
@@ -377,9 +348,9 @@ SubmitandWaitForSonarQube:
   STRING="ALLOC DD(PARMLIST) DA("SonarWorkfile"(PARMLST2)) SHR REUSE"
   CALL BPXWDYN STRING;
   Queue "NOTHING  NOTHING  SETUP   0"
-  Queue "MDL#JOB  "TransmitMethod"#JOB NOTHING 1"
-  Queue "MDL#RCV  "TransmitMethod"#RCV NOTHING 1"
-  Queue "MDL#RUN  "TransmitMethod"#RUN NOTHING 1"
+  Queue "MDL#JOB  "SonarTransmitMethod"#JOB NOTHING 1"
+  Queue "MDL#RCV  "SonarTransmitMethod"#RCV NOTHING 1"
+  Queue "MDL#RUN  "SonarTransmitMethod"#RUN NOTHING 1"
   Queue "MODEL4   TBLOUT   NOTHING 1"
   Queue "TBLOUT   READER   NOTHING 1"
   If Wait_for_SonarQube = 'Y' then,
@@ -398,22 +369,22 @@ SubmitandWaitForSonarQube:
          'for a SONARQUBE analysis'
      End
   STRING="ALLOC DD(MDL#JOB) ",
-         "DA("MySEN2Library"("TransmitMethod"#JOB) SHR REUSE"
+         "DA("MySEN2Library"("SonarTransmitMethod"#JOB) SHR REUSE"
   CALL BPXWDYN STRING;
   STRING="ALLOC DD(MDL#RCV) ",
-         "DA("MySEN2Library"("TransmitMethod"#RCV) SHR REUSE"
+         "DA("MySEN2Library"("SonarTransmitMethod"#RCV) SHR REUSE"
   CALL BPXWDYN STRING;
   STRING="ALLOC DD(MDL#RUN) ",
-         "DA("MySEN2Library"("TransmitMethod"#RUN) SHR REUSE"
+         "DA("MySEN2Library"("SonarTransmitMethod"#RUN) SHR REUSE"
   CALL BPXWDYN STRING;
-  STRING="ALLOC DD("TransmitMethod"#JOB) ",
-         "DA("SonarWorkfile"("TransmitMethod"#JOB) SHR REUSE"
+  STRING="ALLOC DD("SonarTransmitMethod"#JOB) ",
+         "DA("SonarWorkfile"("SonarTransmitMethod"#JOB) SHR REUSE"
   CALL BPXWDYN STRING;
-  STRING="ALLOC DD("TransmitMethod"#RCV) ",
-         "DA("SonarWorkfile"("TransmitMethod"#RCV) SHR REUSE"
+  STRING="ALLOC DD("SonarTransmitMethod"#RCV) ",
+         "DA("SonarWorkfile"("SonarTransmitMethod"#RCV) SHR REUSE"
   CALL BPXWDYN STRING;
-  STRING="ALLOC DD("TransmitMethod"#RUN) ",
-         "DA("SonarWorkfile"("TransmitMethod"#RUN) SHR REUSE"
+  STRING="ALLOC DD("SonarTransmitMethod"#RUN) ",
+         "DA("SonarWorkfile"("SonarTransmitMethod"#RUN) SHR REUSE"
   CALL BPXWDYN STRING;
   STRING = "ALLOC DD(READER) SYSOUT(A) WRITER(INTRDR) REUSE " ;
   CALL BPXWDYN STRING;
@@ -480,9 +451,9 @@ SubmitandWaitForSonarQube:
   CALL BPXWDYN "FREE DD(REPORT)   "
   CALL BPXWDYN "FREE DD(READER)   "
   CALL BPXWDYN "FREE DD(PARMLIST)"
-  CALL BPXWDYN "FREE DD("TransmitMethod"#JOB) "
-  CALL BPXWDYN "FREE DD("TransmitMethod"#RCB) "
-  CALL BPXWDYN "FREE DD("TransmitMethod"#RUN) "
+  CALL BPXWDYN "FREE DD("SonarTransmitMethod"#JOB) "
+  CALL BPXWDYN "FREE DD("SonarTransmitMethod"#RCB) "
+  CALL BPXWDYN "FREE DD("SonarTransmitMethod"#RUN) "
   CALL BPXWDYN "FREE DD(MDL#JOB) "
   CALL BPXWDYN "FREE DD(MDL#RCV) "
   CALL BPXWDYN "FREE DD(MDL#RCV) "
