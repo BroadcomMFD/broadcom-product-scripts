@@ -1,0 +1,17 @@
+//*----------
+//SSH1  	DD  *                                        	SSH#INC
+open <remoteid>@<remoteURL>
+site RECFM=FB
+site LRECL=80
+ascii
+cd /opt/xxx/inbound/
+//SSH2  	DD  *  <- All kinds of Stage info            	SSH#INC
+sput //'&Dataset(&Member)' &Member.&extension
+/*
+//SSH2XX	DD  *  <- All kinds of Stage info   **NOT USED** SSH#INC
+sput //'&Dataset(&Member)' &Member.&extension
+/*
+//SSH3  	DD  *  <- All kinds of Stage info            	SSH#INC
+sput //'&SonarWorkfile(TRANSMIT)' &Unique_Name.lst
+quit ;
+/*
