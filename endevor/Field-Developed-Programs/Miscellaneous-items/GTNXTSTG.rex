@@ -2,7 +2,10 @@
    Arg thisEnv thisStg ;
   /*    For the given thisEnv and thisStg,                         */
   /*    Return the mapped next Env and Stage Id.                   */
-   Trace o
+  /* Is GTNXTSTG is allocated? If yes, then turn on Trace */
+   isItThere = ,
+       BPXWDYN("INFO FI(GTNXTSTG) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
+   If isItThere = 0 then Trace ?r
    STRING = "ALLOC DD(C1MSGS1) DUMMY "
    CALL BPXWDYN STRING;
    STRING = "ALLOC DD(BSTERR) DUMMY "
@@ -29,9 +32,9 @@
    /* the mapped location is found in NOCSV.2       */
    record = NOCSV.2
    NEXT_ENV   = Word(Substr(record,14),1)
-   NEXT_STG_# = Substr(record,22,1)
+   NEXT_STG_Id = Substr(record,30,1)
    CALL BPXWDYN "FREE DD(EXTRACTS)" ;
    CALL BPXWDYN "FREE DD(BSTIPT01)" ;
    CALL BPXWDYN "FREE DD(C1MSGS1)" ;
    CALL BPXWDYN "FREE DD(BSTERR)" ;
-   Return NEXT_ENV NEXT_STG_#
+   Return NEXT_ENV NEXT_STG_Id
