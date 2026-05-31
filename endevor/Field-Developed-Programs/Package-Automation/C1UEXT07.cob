@@ -398,7 +398,7 @@
               END-STRING
            END-IF.
 *******    Replace any double quote characters in data to be passed
-           IF CAST-PACKAGE OR REVIEW-PACKAGE
+           IF CAST-PACKAGE OR REVIEW-PACKAGE OR EXECUTE-PACKAGE
               INSPECT PREQ-PACKAGE-COMMENT REPLACING ALL '"' BY X'7D'
               INSPECT PHDR-PKG-NOTE1       REPLACING ALL '"' BY X'7D'
               INSPECT PHDR-PKG-NOTE2       REPLACING ALL '"' BY X'7D'

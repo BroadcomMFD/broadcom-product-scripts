@@ -96,6 +96,25 @@ You can find the code for JCLCOMMT.rex in the [ISPF-tools-for-Quick-Edit-and-End
 
 The commnenting will allow you to reveiew your package shipping (and other) jobs, and know the element or member name that contains the lines of JCL.
 
+## The return of Package Shipments via Package Notes
+
+This feature was removed for a while, but has been returned on request. You can format text strings in package notes, or use the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex) (in the **ISPF-tools-for-Quick-Edit-and-Endevor** folder) to fill in notes for a package. 
+
+      .........1.........2.........3.........4.........5.........6
+  1.  ____________________________________________________________
+  2.  ____________________________________________________________
+  3.  ____________________________________________________________
+  4.  ____________________________________________________________
+  5.  ____________________________________________________________
+  6.  TO DESTIN1 : 20260526 0000 PRD#DD01                         
+  7.  NO DESTIN2 : 20260526 0000 PRD#DD02                         
+  8.  NO TESTBOX : 20260526 0000 TEST0022            ELM CNT: 1   
+
+
+When the package Executes and the notes are formatted as package shipping instructions, then shipments are limited to those referenced by the package notes. Here is an example of package Notes that request shipments for a package.
+
+
+
 ## Items outside of this folder, that might be a part of your solution: 
 
 
