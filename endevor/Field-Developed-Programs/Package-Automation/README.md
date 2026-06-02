@@ -113,6 +113,10 @@ This feature was removed for a while, but has been returned on request. You can 
 
 When the package Executes and the notes are formatted as package shipping instructions, then shipments are limited to those referenced by the package notes. Here is an example of package Notes that request shipments for a package.
 
+## A word about the dependency on Comma Separated Value data
+
+The use of extracts and parsing of CSV data, increases the longevity of the solution. For product release upgrades, if field lengths are changed, or new fields are added, there is no impact since field lengths and positions are automatically determined by the CSV heading. 
+
 
 
 ## Items outside of this folder, that might be a part of your solution: 
@@ -129,3 +133,14 @@ When the package Executes and the notes are formatted as package shipping instru
 **ENTBJAPI** - see member BC1JAAPI in your CSIQJCL library.
 
 [**BKOUTLOG**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Backout-Logging/endevor/Field-Developed-Programs/Package-Automation/Package-Backout-Logging/BKOUTLOG.rex) - for logging package Backout and BackIn actions. (currently in a branch)
+
+If you are submitting Package Automation jobs under the Endevor Alt id, then find these modules:
+
+
+[**SWAP2ALT**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/SWAP2ALT.rex
+) to execute in your REXX exits and to enforce actions to run under the Endevor Altid
+
+[**SWAP2USR**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/SWAP2USR.rex) to return processing back to the users' id.
+
+Also review the [**USE_Alitd setting on the C1UEXITS**](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/securing/data-set-security/alternate-id-and-user-exits.html) setting, and for your exit, set the **USE_ALTID** value is to **+**.
+

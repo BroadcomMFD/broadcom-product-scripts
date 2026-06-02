@@ -173,7 +173,6 @@
        IF HOUR = '00' THEN HOUR = '0'
        MINUTE = SUBSTR(NOW,4,2) ;
        CurrentTime= HOUR || MINUTE ;
-       GetDestinationInfo_FilesAllocated  = 'N'
        TriggerFileName = '?'
        /* Pulling shipment data from package notes */
        /* Examine Package notes to find Destination and schedule info */
@@ -190,7 +189,7 @@
           Destination = Word(noteline,1) ;
           /* Default to first model     */
           /* Get info for Destination   */
-          Call  GetDestinationInfo;
+          Call  GetDestinationInfoViaCSV
           If Hostprefix = "?" then,
              Do
              Say 'PKGESHIP - Destination not found' Destination
@@ -199,8 +198,6 @@
           ShipSchedulingMethod = 'Notes'
           Call UpdateTriggerFromNotes
         End;  /*  Do n# = 8 to 1 by -1   */
-       If GetDestinationInfo_FilesAllocated = 'Y' then,
-          Call GetDestinationInfo_FreeFiles
        If TriggerFileName /= '?' then,
           Do
           "EXECIO 0 DISKW TRIGGER (Finis "
@@ -1076,61 +1073,15 @@ UpdateTriggerFromNotes:
    /* endevor/Field-Developed-Programs/Package-Automation    */
    BildRC = RESULT ;
    Return ;
-GetDestinationInfo_FileAllocations:
-   GetDestinationInfo_FilesAllocated = 'Y'
-   STRING = "ALLOC DD(C1MSGS1) DUMMY "
-   STRING = "ALLOC DD(C1MSGS1) SYSOUT(A) "
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(BSTERR) SYSOUT(A) "
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(BSTAPI) DUMMY "
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(DESTINFO) LRECL(4000) BLKSIZE(32000) ",
-              " DSORG(PS) ",
-              " SPACE(1,5) RECFM(F,B) TRACKS ",
-              " NEW UNCATALOG REUSE ";
-   CALL BPXWDYN STRING;
-   STRING = "ALLOC DD(BSTIPT01) LRECL(80) BLKSIZE(800) ",
-              " DSORG(PS) ",
-              " SPACE(1,5) RECFM(F,B) TRACKS ",
-              " NEW UNCATALOG REUSE ";
-   CALL BPXWDYN STRING;
-   Return
-GetDestinationInfo:
+GetDestinationInfoViaCSV:
+   if TraceRc = 1 then Say "GetDestinationInfoViaCSV:   "
    /* Set values for Hostprefix and Rmteprefix */
    /*     From the site definition             */
    /*  Call CSV to Get Destination information  */
-   Hostprefix = "?"
-   Rmteprefix = "?"
-   If GetDestinationInfo_FilesAllocated /= 'Y' then,
-      Call GetDestinationInfo_FileAllocations
-   QUEUE "LIST DESTINATION '"Destination"'"
-   QUEUE "     TO DDNAME 'DESTINFO' "
-   QUEUE "          OPTIONS NOCSV . "
-   "EXECIO" QUEUED() "DISKW BSTIPT01 (FINIS ";
-   CALL BPXWDYN "INFO FI(CONLIB) INRTDSN(DSNVAR) INRDSNT(myDSNT)"
-   if RESULT = 0 then,
-      Do
-      CSVParm = 'DDN:CONLIB,BC1PCSV0'
-      ADDRESS LINKMVS 'CONCALL' "CSVParm"
-      End
-   Else,
-      ADDRESS LINK 'BC1PCSV0'   ;  /* load from authlib */
-   call_rc = rc ;
-  Drop apiDestinations.
-  "EXECIO * DISKR DESTINFO (STEM apiDestinations. finis"
-   IF apiDestinations.0 < 1 THEN RETURN;
-   Hostprefix = Strip(Substr(apiDestinations.1,079,14))
-   Rmteprefix = Strip(Substr(apiDestinations.1,113,14))
-   Return ;
-GetDestinationInfo_FreeFiles:
-   CALL BPXWDYN "FREE DD(DESTINFO)" ;
-   CALL BPXWDYN "FREE DD(BSTIPT01)" ;
-   CALL BPXWDYN "FREE DD(C1MSGS1)" ;
-   CALL BPXWDYN "FREE DD(BSTERR)" ;
-   CALL BPXWDYN "FREE DD(BSTAPI)" ;
-   Return ;
-   /* From PKGESHIP   */
+   SiteNodes = GTDESTIN(Destination)
+   Hostprefix  = Word(SiteNodes,1)
+   Rmteprefix  = Word(SiteNodes,2)
+   Return
 SubmitPackageShipmentFromNotes:
 /*                                                                    */
 /* This subroutine is modified from the TBL#TOOL                      */
@@ -1186,12 +1137,13 @@ CreateNewTriggerEntry:
       /* Build ...pos variables and values */
       tmp = "Trigger = Overlay(",
             $HeadingVariable",Trigger,"$HeadingVariable"pos)"
-      SaY tmp
+      Say tmp
       Interpret tmp
    end; /* DO $pos = 1 to $Heading_TriggerVar_count */
    Sa= Trigger
    Push Trigger
    "EXECIO 1 DISKW TRIGGER "
+   Trace Off
    Return ;
    /* From BILDTGGR   */
 FreeTriggerFile:

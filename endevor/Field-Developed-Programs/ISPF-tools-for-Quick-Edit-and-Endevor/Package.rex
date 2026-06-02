@@ -449,6 +449,7 @@ Build_NOTES_Fields:
      EnvironWrdPos     = Wordpos('Environment',$heading);
      StageWrdPos       = Wordpos('Stage',$heading);
      SystemWrdPos      = Wordpos('System',$heading);
+     SubSysWrdPos      = Wordpos('Subsys',$heading);
      DestinationWrdPos = Wordpos('Destination',$heading);
      DateWrdPos        = Wordpos('Date',$heading);
      TimeWrdPos        = Wordpos('Time',$heading);
@@ -459,9 +460,11 @@ Build_NOTES_Fields:
          env = Word($tbl.tbl#,EnvironWrdPos)
          stg = Word($tbl.tbl#,StageWrdPos)
          sys = Word($tbl.tbl#,SystemWrdPos);
+         sub = Word($tbl.tbl#,SubSysWrdPos);
          If (env =elmEnviron | env = '*') &,
-            (stg =elmStage | stg = '*') &,
-            (sys = elmSystem | sys = '*') then,
+            (stg =elmStage | stg = '*')   &,
+            (sys = elmSystem | sys = '*') &,
+            (sub = elmSubsys | sub = '*') then,
             Do
             Destination = Word($tbl.tbl#,DestinationWrdPos)
             If Wordpos(Destination,List_Destinations) > 0 then,
