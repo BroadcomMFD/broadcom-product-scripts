@@ -1,4 +1,4 @@
-//XCOM1    DD DATA,SYMBOLS=JCLONLY                         XCOM#INC
+//XCOM1    DD *,SYMBOLS=JCLONLY                            XCOM#INC
 TYPE=SEND
 IPNAME=12.345.678.9
 IPPORT=9999

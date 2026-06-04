@@ -16,6 +16,6 @@ CKPT=0
 FILEOPT=REPLACE
 FILETYPE=JOB
 LFILE=&SonarWorkfile(LINUX)
-USERID=root
-PASSWORD=Debug411
+USERID=yourid
+PASSWORD=yourpassword
 //*--------------------------------------------------------XCOM#JOB---
