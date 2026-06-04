@@ -1,12 +1,12 @@
 //XCOM1    DD *,SYMBOLS=JCLONLY                            XCOM#INC
 TYPE=SEND
-IPNAME=12.345.678.9
-IPPORT=9999
+IPNAME=192.0.2.1
+IPPORT=####
 CKPT=0
 FILEOPT=REPLACE
 FILETYPE=FILE
-USERID=sonaruser
-PASSWORD=yourpswrd
+USERID=user2
+PASSWORD=pwd2
 *
 //XCOM2    DD *,SYMBOLS=JCLONLY                            XCOM#INC
 FILE=/your/uss/inbound/&Member.&extension
