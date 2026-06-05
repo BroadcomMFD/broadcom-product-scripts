@@ -10,8 +10,8 @@
 //CAOESTOP DD DUMMY
 //SYSIN01  DD *                                            XCOM#RUN
 TYPE=RECEIVE
-IPNAME=12.345.678.9
-IPPORT=9999
+IPNAME=192.0.2.1
+IPPORT=####
 CKPT=0
 FILEOPT=REPLACE
 FILETYPE=FILE
@@ -19,6 +19,6 @@ CODE=UTF8
 REMOTE_CHARSET=UTF8
 LFILE=&SonarWorkfile.RESULTS
 FILE=/opt/xfer/outbound/&Unique_Name.rslt
-USERID=sonaruser
-PASSWORD=yourpswrd
+USERID=user1
+PASSWORD=pwd1
 //*--------------------------------------------------------XCOM#RCV---
