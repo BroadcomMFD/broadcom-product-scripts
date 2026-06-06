@@ -108,6 +108,13 @@ These items offer Quick-Edit and Endevor users a fast method for managing packag
 
 ENDIEIM1 acts as an "Initial Edit Macro" for Quick-Edit sessions. Items whose names begin with "ENDIEIM1", including the **ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro** folder content, empower Quick-Edit to bypass its normal edit session, and to initiate exception processing.
 
+## Alternatives for ADDing intoEndevor 
+
+While editing a member of a dataset (not Quick-Edit), and after a "Save", you can invoke this **NDVRA** to ADD/UPDATE the member into Endevor. Tailor it to reference your libraries, and optionally use it to call ANL#VIEW to help determine the Type of member you are editing. If you choose to make calls to ANL#VIEW, be sure to tailor it to reflect your Endevor Type and processor group names.
+
+Yet another method builds ADD SCL for members of a PDS, matching the member names with elements in Endevor, to re-use System, Subsystem and Type values. This item can be found in [EXAMPL#3.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Table-Tool-Examples/EXAMPL%233.jcl) among the Table Tool examples.  
+
+
 ## FINDLOOP and FINDWRD1
 
 Together these can be used with Batch Administration SCL for creating new definitions or updating existing definitions. While in View or Edit and excluding some or all lines, FINDLOOP can be used to expose complete statements. Every line from the 'DEFINE' to the statement-closing period is exposed.
