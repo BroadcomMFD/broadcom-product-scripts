@@ -108,11 +108,13 @@ These items offer Quick-Edit and Endevor users a fast method for managing packag
 
 ENDIEIM1 acts as an "Initial Edit Macro" for Quick-Edit sessions. Items whose names begin with "ENDIEIM1", including the **ENDIEIM1-the-ISPF-Edit-Service-Initial-Macro** folder content, empower Quick-Edit to bypass its normal edit session, and to initiate exception processing.
 
-## Alternatives for ADDing intoEndevor 
+## Alternatives for ADDing into Endevor 
 
-While editing a member of a dataset (not Quick-Edit), and after a "Save", you can invoke this **NDVRA** to ADD/UPDATE the member into Endevor. Tailor it to reference your libraries, and optionally use it to call ANL#VIEW to help determine the Type of member you are editing. If you choose to make calls to ANL#VIEW, be sure to tailor it to reflect your Endevor Type and processor group names.
+While editing a member of a dataset (not Quick-Edit), and after a "Save", you can invoke this **NDVRA** to ADD/UPDATE the member into Endevor. You may have to provide Endevor details for a member the first time, but it will remember the values for subsequent uses. 
 
-Yet another method builds ADD SCL for members of a PDS, matching the member names with elements in Endevor, to re-use System, Subsystem and Type values. This item can be found in [EXAMPL#3.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Table-Tool-Examples/EXAMPL%233.jcl) among the Table Tool examples.  
+Tailor its content to reference your site libraries, and optionally use it to call ANL#VIEW to help determine the Type of member you are editing. If you do make calls to ANL#VIEW, be sure to tailor it as well to reflect your Endevor Type and processor group names.
+
+Yet another method builds ADD SCL for members of a PDS, matching the member names with elements in Endevor, to re-use System, Subsystem and Type values. This item can be found in [EXAMPL#3.jcl](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Alternatives-for-ADDing-into-Endevor/endevor/Field-Developed-Programs/Table-Tool-Examples/EXAMPL%233.jcl) among the Table Tool examples.  
 
 
 ## FINDLOOP and FINDWRD1
