@@ -1,6 +1,6 @@
 /* REXX */
 PARSE ARG dsname
-OUTPUT = userid()||'.PUBLIC.JCLOUT(REPORT)'
+OUTPUT = userid()||'.REPORT(ENHANCED))'
 
 flower.0 = 0
 call prnt "==========================================================="
@@ -23,7 +23,7 @@ X = OUTTRAP("OFF")
 "EXECIO 0 DISKW SYSUT2 (FINIS"
 "FREE FI(SYSUT2)"
 
-SAY "DSN='"||OUTPUT||"'"
+SAY "DSN="||OUTPUT||""
 EXIT
 
 prnt:
