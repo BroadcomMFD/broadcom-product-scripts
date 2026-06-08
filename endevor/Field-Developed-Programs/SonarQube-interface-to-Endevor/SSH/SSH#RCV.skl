@@ -1,0 +1,23 @@
+//SSH#RCV  EXEC PGM=BPXBATSL,                              SSH#RCV
+//   PARM='PGM /opt/tectia/bin/sftpg3 -B //DD:PARMINDD -D 2'
+//SYSTSPRT  DD  SYSOUT=*
+//STDPARM   DD  DUMMY
+//STDIN 	DD  DUMMY
+//STDOUT	DD  SYSOUT=*
+//STDERR	DD  SYSOUT=*
+//STDENV	DD  *
+  export _BPXK_AUTOCVT=ON
+  export _BPX_SHAREAS=NO
+  export _BPX_BATCH_UMASK=0022
+  export HOME=<endevordir>
+  export LOGNAME=<altid>
+/*
+//PARMINDD  DD  *,SYMBOLS=JCLONLY
+open <remoteid>@<remoteURL>
+site RECFM=FB
+site LRECL=80
+ascii
+cd /opt/xxx/outbound
+sget &Unique_Name.rslt //'&SonarWorkfile.RSLT'
+quit
+/*
