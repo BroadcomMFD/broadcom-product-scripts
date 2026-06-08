@@ -1,65 +1,188 @@
 #  SonarQube Interface to Endevor
 
-Items in this folder provide an example method for interfacing SonarQube with Endevor. They allow Endevor to initiate a SonarQube analysis for an Endevor package, receive the quality gates response from the SonarQube analysis, and pass or fail the CAST of the package depending on the results.
+This folder provides example assets demonstrating the integration of SonarQube and Endevor.
+
+The integration enables Endevor to automatically trigger a SonarQube analysis when an Endevor package is CAST. To avoid tying up the user's session, any ISPF foreground CAST action is resubmitted to run in batch.
+
+Optionally, based on user configuration, the CAST job can be set to wait for the SonarQube results. If this option is chosen, the final package status csn be updated to reflect the outcome of the analysis. Additionally, whether or not there is wait for the results, they can be placed into Endevor as elements, where the element name is given to match the package name.
 
 These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
 ) for more information).
 
-Features of this solution are easily tailorable to the requirements at your site. By default they include:
 
-1. During a package CAST, an analysis of the pckage content and package notes is done.
-   -  It is determined whether the Package has at least one COBOL element. Element types of COB* or CBL* make the determination, but you can designate your own manner of recognition.
-   -  If any of the Package note lines can begin with the text "BYPASS SONARQUBE", no SonarQube analysis will be done. If it becomes necessary to bypass the SonarQube processing, then a simple update of the package notes will bypass the SonarQube analysis.
-2.  If package contains COBOL elements, and the BYPASS is not selected, and the package is being CAST in TSO foreground, then the CAST action is resubmitted in Batch. Since it may be necessary to wait for time-consuming actions to complete, it is best for this process to run in batch.
-3. All COBOL programs in the package are identified, and ACM queries are used for identifying input components. Input components such as copybooks, do not need to be included in the package. Rather, the ACM information for packaged COBOL elements will bring copybooks into the SonarQube analysis.
-4. Packaged COBOL elements are RETRIEVEd into a PDS.
-5. A separate (second) JOB is constructed and submitted. The steps of the separate job include:
-    - Reports back to the Endevor exit (running as job #1 doing a CAST) that the second job is running
-    - COBOL and copybook members are transmittted to the SonarQube server. Cobol members are transmitted from the RETRIEVE dataset. Copybook members are transmitted from datasets named in the ACM references.  
-    - Reports back to the Endevor exit that the member transmissions are completed
-    - Executes a SonarQube analysis.
-    - Transmits the SonarQube results back to the site running the Endevor CAST.
+## What Endevor Packages are to be processed with SonarQube?
 
-6. The Endevor exit waits for confirmation that the separate job is running, and displays messages accordingly
-7. The Endevor exit waits for confirmation that the file transmissions are done, and displays messages accordingly.
-8. The Endevor exit waits for the return of the SonarQube analysis, and displays messages accordingly.
-9. If any of the expected results are not returned, or the analysis indicates a code analysis failure, the package CAST is made to Fail.
+By examining the element Types for elements within a package, it can be determined whether the package should be submitted for a SonarQube Analysis.  If a package only contains PARM elements, for example, there is no need to run a SonarQube Analysis. The configuration lets you identify the types to be scanned at your site.
 
-Processing logic is primarily found in REXX, JCL and Python members. The Python member orchestrates the SonarQube activity. File transmissions are performed using XCOM, in these examples, but they easily be swapped out for members that use your transmission tool. 
+### Optional use of the Package Builder
+
+Package creation is an ideal time to assess if package content requires a SonarQube scan. By utilizing the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) (refer to **PACKAGE PACKAGEP** and [Package.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex)), you can automate the selection of packages for SonarQube scanning.
+
+During construction of a package, the package builder looks at the locations and types for each element selected. It can then detect whether selected elements are those that should be scanned, and automatically update the package Notes, for example:
+
+        1. RUN SONARQUBE ANALYSIS                           
+        2.                                                  
+        3.                                                  
+        4.                                                  
+        5.                                                  
+        6.                                                  
+        7.                                                  
+        8. ELM CNT: 2                                      
+
+ Then, when the package is CAST, it also runs a SonarQube Analysis.                           
+
+### CAST time Determination                              
+
+Alternativley, you can use the @SITE.rex member to determine at Cast time, whether package content should be scanned. You can provide Endevor Type masks for the elements you wish to analyze. Here is an example:
+
+    /* Provide Endevor Type masks for element to be analyzed   */    
+    SonarQube_Element_Types = 'COB* CBL* CPP* '                      
+
+(The Package Builder also accesses the @SITE.rex member)
+
+Also identify the Generate processor steps where ACM input component relationships are collected. If you intend to scan COBOL, for instance, you should specify the processor steps that reference COPYBOOKs. Consider this example:
+
+    /* Provide Endevor processor steps which show ACM inputs   */    
+    GenerateProcessorStepnames = 'COMPILE COMP CMP COB'  
+
+
+## SonarQube Transmission Methods
+
+Elements selected for SonarQube scanning, must be transmitted to the server where SonarQube runs. Within the @SITE.rex member indicate what transmission method to use. The name of the transmission method must be assigned to the variable **SonarTransmitMethod**, which also names other members in the configuration.  
+ 
+
+- &SonarTransmitMethod.#INC - for sending members to the SonarQube server
+- &SonarTransmitMethod.#JOB - JCL for using the Transmission tool to send items to the SonarQube folders
+- &SonarTransmitMethod.#RUN - JCL for using the Tansmission tool to initiating the execution of the SonarQube analysis
+- &SonarTransmitMethod.#RCV - JCL for receiving the RESULTS of the SonarQube analysis
+
+The examples in this folder show the SonarTransmitMethod assigned to 'XCOM'. It is expected that each transmit method have its own syntax for sending and receiving files, and for running remote tasks. 
+
+
+## XCOM for Transmission and Submission
+
+XCOM is an excellent choice for the file transmissions, and remote submission of the SonarQube process. 
+See the [XCOM folder on this GitHub](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/XCOM). 
+
+Within the @SITE.rex item, designate that XCOM is your choice, by setting the SonarTransmitMethod value:
+
+    SonarTransmitMethod = 'XCOM'     
+
+Find the XCOM#INC item in the current folder.
+
+Also locate these items from the XCOM folder and place them into the library you designate as your 
+**MySEN2Library** library. See the **@SITE.rex** section below.
+
+- [XCOM#JOB](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23JOB.skl)
+- [XCOM#RCV](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23RCV.skl)
+- [XCOM#RUN](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/XCOM/XCOM%23RUN.skl)
 
 
 
-Some supporting items are not found in this folder, since they are utilities, or already contribute to other solutions. They can be found in other locations of this GitHub, including:
 
-**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to be void of details, and able to run anywhere unchanged. See the description for **[@siteMult.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Shipments-for-Multiple-Destinations%20(zowe))** 
+## SSH  for Transmission and Submission
 
+Within the @SITE.rex item, designate that SSH is your choice, by setting the SonarTransmitMethod value:
+
+    SonarTransmitMethod = 'SSH'     
+
+Also locate these items from the SSH folder and place them into the library you designate as your **MySEN2Library** library. See the **@SITE.rex** section below.
+
+- **SSH#INC.skl**                                                                
+- **SSH#JOB.skl**                                                                    
+- **SSH#RCV.skl**                                                                   
+- **SSH#RUN.skl**  
+
+
+## SonarQube Options
+
+As you implement the items in this folder, you can establish default values for these options in the @SITE.rex program:
+
+- **Cast_Location_for_Sonarqube** only elements found in an Endevor Environment and stageid location should be submitted for a SonarQube Analysis. Enter a value containing an Environment name, a space, and a StageID.
+
+- **SonarQube_Element_Types** designate Endevor type masks for those elements elligible for SonarQube analysis.  For example, assign one or more values like 'COB* CBL*' to indicate that your COBOL types are to be scanned. 
+
+- **Wait_for_SonarQube** when a SonarQube analysis job is submitted, should the Endevor CAST job wait for its completion? (Y/N). If 'Y', then the Cast job will  wait, and the results of the Analysis will impact the impact the Success or Failure of the package CAST. 
+
+Note that persons who create, and CAST Endevor packages can override the default values by entering text into the package notes.
+
+
+## Package Notes Overrides
+
+The Notes section within each package provides a flexible mechanism to select or override SonarQube options. These preferences can be specified anywhere within the Notes, utilizing any combination of casing and separators such as underscores, dashes, or spaces. Your C1UEXTR7 utility can support the keywords you want to use for directing processing logic. Consider these examples of a notes section where both options have been defined:
+
+        .........1.........2.........3.........4.........5.........6
+    1.  This package is very special. Hanlde with care.             
+    2.  ____________________________________________________________
+    3.  ____________________________________________________________
+    4.  ____________________________________________________________              
+    5.  ____________________________________________________________
+    6.  ____________________________________________________________
+    7.  Run SonarQube Analysis                                                            
+    8.  Bypass SonarQube waiting                                                            
+
+The **C1UEXTR7.rex** member supports the examples shown, but you can adopt support for your own text strings to turn on or off requests. 
+
+## Python item
+
+The Python script, **SonarDriver.py**, serves as the primary orchestrator for SonarQube scanning. While these examples utilize XCOM for file transmissions, the logic is modular, allowing you to easily substitute components to accommodate your preferred transmission utility.
+
+## Site Varaiables
+
+
+**[@SITE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/%40site.rex)** the member to be renamed with an "@" and your lpar name. Its content has Lpar-specific details, allowing other software items to run anywhere unchanged. 
+
+Assign your values for variables at your site:
+
+  - **MySENULibrary** - the Endevor Skeleton (CSIQSENU) library name
+  - **MySEN2Library** - a Secondary Skeleton library where XCOM* or SSH* members are found
+  - **MyCLS0Library** - the Endevor Clist/REXX (CSIQCLS0) library
+  - **MyCLS2Library** - a Secondary Clist/REXX where REXX components of this solution can be found
+
+Your site's SonarQube selections should also be placeed in the @SITE member, and may specify site-level defaults and override values for specific System names. In this example, the system FINANCE has its own values:
+
+        /*   REXX  */                                                        
+        PARSE ARG Parm                                                       
+        -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 17 Line(s) not Displayed 
+        MyCLS2Library = 'YourHLQ.ENDEVOR.REXX'                           
+        -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  6 Line(s) not Displayed 
+        MySENULibrary = 'YourHLQ.CSIQSENU'                                      
+        MySEN2Library = 'YourHLQ.ENDEVOR.SKELS'                          
+        -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 13 Line(s) not Displayed 
+       
+        /* Optional Entries  for SonarQube processing:                 */          
+        Cast_Location_for_Sonarqube = 'DEV 2' /* <= env stgid or empty */       
+        Cast_Location_for_Sonarqube = '' /* <= env stgid or empty      */        
+        /* you can give values at the system level, for example:       */  
+        Cast_Location_for_Sonarqube_FINANCE = 'QAS Q'                       
+        Wait_for_SonarQube = 'Y'       /* wait?  Y/N                   */          
+        Wait_for_SonarQube_FINANCE = 'N'                                        
+        SonarQube_Element_Types = 'COBOL JAVA CPP'                             
+        SonarQube_Element_Types_FINANCE = 'COB* CBL*'                           
+        GenerateProcessorStepnames = 'COMPILE COMP CMP COB'            
+        SonarTransmitMethod = 'XCOM'   /* FTP / SSH / XOM .....*/        
+
+
+Remember to rename the @SITE member to reflect the name of your Lpar. For example, if your Lpar name is DEV1, then rename @SITE to @DEV1. You can run **[WHEREIAM.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHEREIAM.rex)** to discover the new name to use for your @SITE member. 
+
+## Other items
+
+The functional characteristics of this solution are designed to easily align with your site's specific requirements. Several utility components or shared items are maintained independently of this folder. These resources are accessible at the following GitHub locations:
 
 **[BUMPJOB.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/BUMPJOB.rex )** for bumping an existing jobname to render a new job name
 
-**[GETACCT.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GETACCTC.rex)** for obtaining and re-using the users accounting code information
+**[GETACCTC.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GETACCTC.rex)** for obtaining and re-using the users accounting code information
 
-**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/GTUNIQUE.rex )** for obtaining a unique 8-byte name from the current date and time.
+**[GTUNIQUE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GTUNIQUE.rex)** for obtaining a unique 8-byte name from the current date and time.
 
 **[QMATCH.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/QMATCH.rex )** for comparing two text strings, where one or both may have wild-carded values.
 
-
 **[WAITFILE.rex](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WAITFILE.rex)** for looping through wait periods of time, until a specific file becomes available. 
 
-**[WHERE@M1](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/WHERE%40M1.rex)** the utility used for supporting diversity of dataset names, and other differences, by Lpar.
 
-This code in the SONRQUBE.rexx  is used for identifying COBOL elements and copybooks. You might need to tweak it for your site:
 
-The cobol element type is expected to begin with COB or CBL
+As a SonarQube job runs, it places members into a "work" dataset you name as the **SonarWorkfile**. You can View the members to see actions performed, and to help resolve issues.  
 
-    COBOL_Element_Types     = 'COB* CBL*'
-    COBOL_Compile_StepNames = 'COMPILE COMP CMP COB'
 
-Then the compile step should be one of those above. 
-
-The ProcessCopybookMembers routine looks for Input components from SYSLIB in a compile step. 
-
-When the process runs, it places members into the dataset you name as the **SonarWorkfile**. You can use the members to see details of actions performed, and to help resolve issues.  
-
-Use the SonarQube.bat commmand to bring the items together for your mainframe.
 
  

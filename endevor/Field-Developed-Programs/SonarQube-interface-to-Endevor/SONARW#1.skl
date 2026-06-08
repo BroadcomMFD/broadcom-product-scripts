@@ -1,17 +1,16 @@
-* WAIT#1 for the SonarQube job to start                                         
-  If $row# = 0 then $SkipRow = 'Y'                                              
-  Say 'Jobname=' Jobname                                                        
-  Say 'myJob=' myJob                                                            
-  Say 'Execio 0 DISKW TBLOUT (Finis'                                            
-  "Execio 0 DISKW TBLOUT (Finis"                                                
-*                                                                               
-  ReportingDSN = ReportingPFX || '.#1'                                          
-  say "ReportingDSN=" ReportingDSN                                              
-* a short wait to see if the submitted job starts                               
-  wait1 = WAITFILE(ReportingDSN 45 1)                                           
-  say "ReportingDSN " ReportingDSN "is returned after" wait1 "secs"             
-  if wait1 = 0 then, +                                                          
-     Do; Say '#1 is lost'; Exit(11); end                                        
-  cmd = "ALLOC DD(STATUS1) DA("ReportingDSN") SHR REUSE "                       
-  CALL BPXWDYN  cmd                                                             
-  MODEL = 'STATUS1'                                                             
+* WAIT#1 input for the Table Tool step during Cast
+  If $row# = 0 then $SkipRow = 'Y'
+  Say 'WAIT#1 -Jobname=' Jobname
+  Say 'WAIT#1 -myJob=' myJob
+  "Execio 0 DISKW READER (Finis"
+*
+  ReportingDSN = ReportingPFX || '.#1'
+  say "ReportingDSN=" ReportingDSN
+* a short wait to see if the submitted job starts
+  wait1 = WAITFILE(ReportingDSN 30 1); myRC = RC
+  say "ReportingDSN " ReportingDSN "is returned after" wait1 "waits"
+  if wait1 = 0 | myRC > 4 then, +
+     Do; Say 'WAIT#1 -#1 is lost'; Exit(12); end
+  cmd = "ALLOC DD(STATUS1) DA("ReportingDSN") OLD REUSE "
+  CALL BPXWDYN  cmd
+  MODEL = 'STATUS1'

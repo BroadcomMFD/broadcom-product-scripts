@@ -1,0 +1,15 @@
+//SSH#RUN  EXEC PGM=BPXBATSL,                              SSH#RUN
+//   PARM='PGM /opt/tectia/bin/sftpg3 -B //DD:PARMINDD -D 2'
+//SYSTSPRT  DD  SYSOUT=*
+//STDPARM   DD  DUMMY
+//STDIN 	DD  DUMMY
+//STDOUT	DD  SYSOUT=*
+//STDERR	DD  SYSOUT=*
+//STDENV	DD  *
+  export _BPXK_AUTOCVT=ON
+  export _BPX_SHAREAS=NO
+  export _BPX_BATCH_UMASK=0022
+  export HOME=/u/escmsand
+  export LOGNAME=escmsand
+/*
+//PARMINDD  DD  DISP=(OLD,DELETE),DSN=&&COMMANDS
