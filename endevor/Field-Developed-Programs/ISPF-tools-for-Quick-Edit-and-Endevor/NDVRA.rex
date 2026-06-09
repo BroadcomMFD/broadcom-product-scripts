@@ -52,6 +52,8 @@
          Leave
       Say "Please enter missing Env/System/Subsystem/Type fields"
    End
+   ADDRESS ISPEXEC "DISPLAY PANEL(ENDIE700)"
+   If RC > 0 then Exit
    /* Build ADD Scl Statement */
    EEVGENS1 = "ADD ELEMENT" MEMBER
    EEVGENS2 = "    FROM DSN '"DATASET"'"
