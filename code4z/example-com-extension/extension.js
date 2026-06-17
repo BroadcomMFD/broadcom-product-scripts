@@ -23,6 +23,14 @@ function activate(context) {
 	const providerRegistration = vscode.workspace.registerTextDocumentContentProvider(ReportProvider.scheme, provider);
 	context.subscriptions.push(reportDisp, providerRegistration);
 
+	// Clear Global State
+	const clearGloabalState = vscode.commands.registerCommand('com.example.state.clear',
+		function clearState() {
+			context.globalState.update('arg', undefined);
+		}
+	);
+	context.subscriptions.push(clearGloabalState);
+
 	console.log('Congrats, your com.example extension is now active!');
 }
 

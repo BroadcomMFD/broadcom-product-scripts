@@ -3,7 +3,10 @@
     "checkJs": true,
     "noEmit": true,
     "lib": [
-      "ESNEXT"
+      "ESNEXT",
+    ],
+    "types": [
+      "node"
     ],
     "strict": true,
     "noImplicitAny": true
