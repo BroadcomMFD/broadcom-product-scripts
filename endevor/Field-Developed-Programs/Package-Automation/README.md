@@ -144,3 +144,4 @@ If you are submitting Package Automation jobs under the Endevor Alt id, then fin
 
 Also review the [**USE_Alitd setting on the C1UEXITS**](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/securing/data-set-security/alternate-id-and-user-exits.html) setting, and for your exit, set the **USE_ALTID** value is to **+**.
 
+[**WTO#MSG**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WTO%23MSG.asm) - This utility allows you to notify others of specific site events by sending text strings, such as error messages, to the system log. This ensures that critical incidents receive the necessary attention for follow-up. Once these messages are logged, automation tools like OPS/MVS can scan the system log and initiate the appropriate responsive actions automatically.
