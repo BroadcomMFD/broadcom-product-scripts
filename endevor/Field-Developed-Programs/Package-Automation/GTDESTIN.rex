@@ -113,4 +113,3 @@ ParseDetailCSVline:
   INTERPRET $temp;
   If rec# < 3 then Say Destination  $temp
   RETURN ;
-/* ////  Routines to support Package Shipments from NOTES \\\\ */
