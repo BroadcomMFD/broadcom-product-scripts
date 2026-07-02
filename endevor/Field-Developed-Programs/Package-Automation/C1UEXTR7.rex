@@ -40,7 +40,7 @@
    WhatDDName = 'C1UEXTR7'
    CALL BPXWDYN "INFO FI("WhatDDName")",
               "INRTDSN(DSNVAR) INRDSNT(myDSNT)"
-   if RESULT = 0 then Trace ?R
+   if RESULT = 0 then TraceRQ = 'Y'
    /* Initialize variables....                             */
    Message = ''
    MessageCode = '    '
@@ -52,7 +52,10 @@
    If TraceRQ = 'Y' then,
       Say 'C1UEXTR7 is called again:'
    /* Parms from C1UEXT07 is a string of REXX statements   */
-   Interpret Parms
+   /*  Validate and interpret if validation is OK   */
+   myRC = EvaluateParms()
+   If myRC > 4 then Exit(12)
+   /* Interpret Parms */
    If TraceRQ = 'Y' & PECB_MODE = 'B' then Trace r
    If Substr(PHDR_PKG_NOTE5,1,5) = 'TRACE' then TraceRc = 1
    where = 'C1UEXTR7'
@@ -298,6 +301,56 @@
       PECB_BEF_AFTER_LITERAL ='AFTER'    then,
       Call ManageEmails    ;
    Exit
+EvaluateParms:
+ $numbers   = '0123456789.'   /* chars for numeric values   */
+ RemainingParms = Strip(Parms)
+ Do rexx# = 1 to Words(RemainingParms)
+    Parse Var RemainingParms $keyword '=' RemainingParms
+    $keyword = Strip($keyword)
+    RemainingParms = Strip(RemainingParms,'L')
+    $firstchar = Substr(RemainingParms,1,1)
+    If $firstchar = '"' then $NumericValue = 0
+    Else,
+       Do
+       $firstNonNumeric =,
+          VERIFY(RemainingParms,$numbers || ' ')
+       $NumericValue =,
+          Substr(RemainingParms,$firstNonNumeric,1) = ';'
+       End
+    /* Value must be numeric, or be double quoted */
+    If words($keyword) /= 1 |,
+       DATATYPE($keyword,SYMBOL) /= 1 |,
+       ($NumericValue = 0 & $firstchar /= '"') then,
+       Do
+       Parse var RemainingParms dropit ';' RemainingParms
+       Say "Invalid syntax-" command '=' dropit
+       myAcct  = GETACCTC()
+       myJobnr = GETJOBNR()
+       parm="Invalid syntax-" command '=' dropit
+       parm='Usr=' || USERID() 'Acct='myAcct dropit
+       parm= parm  || ' jobnumber=' myJobnr
+       parm=Left(parm,70)
+       Address LINKMVS "WTO#MSG parm"
+       Return 12
+       End
+    Else       /* double quoted value */
+    If VERIFY($firstchar,$numbers) > 0 then,
+       Do
+       Parse var RemainingParms '"' $value '"' blanks ";" RemainingParms
+       command  = $keyword '=' '"' || Strip($value) || '"'
+       End
+    Else       /* numeric value */
+       Do
+       Parse var RemainingParms $value ';' RemainingParms
+       command  = $keyword '=' Strip($value)
+       End
+    RemainingParms = strip(RemainingParms)
+    If TraceRQ = 'Y' then say command
+    interpret command
+    sa= 'RemainingParms=' RemainingParms
+    If Words(RemainingParms) < 1 then Leave
+ End; /* Do rexx# = 1 to Words(RemainingParms) */
+ Return 0
 CheckPackageNotesBeforeCast:
    sa = Force_CAST_in_Batch
    /* Package notes may make or override SonarQube requests */
@@ -1075,10 +1128,12 @@ UpdateTriggerFromNotes:
    Return ;
 GetDestinationInfoViaCSV:
    if TraceRc = 1 then Say "GetDestinationInfoViaCSV:   "
+   Hostprefix = "?"
    /* Set values for Hostprefix and Rmteprefix */
    /*     From the site definition             */
    /*  Call CSV to Get Destination information  */
    SiteNodes = GTDESTIN(Destination)
+   If Words(SiteNodes) < 2 then Return
    Hostprefix  = Word(SiteNodes,1)
    Rmteprefix  = Word(SiteNodes,2)
    Return
