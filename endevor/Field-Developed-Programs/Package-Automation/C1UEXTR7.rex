@@ -56,8 +56,10 @@
    myRC = EvaluateParms()
    If myRC > 4 then Exit(12)
    /* Interpret Parms */
-   If TraceRQ = 'Y' & PECB_MODE = 'B' then Trace r
-   If Substr(PHDR_PKG_NOTE5,1,5) = 'TRACE' then TraceRc = 1
+   If Substr(PHDR_PKG_NOTE5,1,5) = 'TRACE' then TraceRQ = 'Y'
+   If TraceRQ = 'Y' then,
+      If PECB_MODE = 'B' then Trace r
+      Else                    Trace ?r
    where = 'C1UEXTR7'
    what = 'C1UEXTR7-' PECB_FUNCTION_LITERAL,
                       PECB_BEF_AFTER_LITERAL,
@@ -304,7 +306,7 @@
 EvaluateParms:
  $numbers   = '0123456789.'   /* chars for numeric values   */
  RemainingParms = Strip(Parms)
- Do rexx# = 1 to Words(RemainingParms)
+ Do Until Words(Remainingparms) < 1
     Parse Var RemainingParms $keyword '=' RemainingParms
     $keyword = Strip($keyword)
     RemainingParms = Strip(RemainingParms,'L')
@@ -323,7 +325,7 @@ EvaluateParms:
        ($NumericValue = 0 & $firstchar /= '"') then,
        Do
        Parse var RemainingParms dropit ';' RemainingParms
-       Say "Invalid syntax-" command '=' dropit
+       Say "Invalid syntax-" $keyword '=' dropit
        myAcct  = GETACCTC()
        myJobnr = GETJOBNR()
        parm="Invalid syntax-" command '=' dropit
@@ -347,8 +349,6 @@ EvaluateParms:
     RemainingParms = strip(RemainingParms)
     If TraceRQ = 'Y' then say command
     interpret command
-    sa= 'RemainingParms=' RemainingParms
-    If Words(RemainingParms) < 1 then Leave
  End; /* Do rexx# = 1 to Words(RemainingParms) */
  Return 0
 CheckPackageNotesBeforeCast:
@@ -1046,7 +1046,7 @@ CSV_to_List_Package_Actions:
      Do $column =  1 to Words($table_variables)
         Call ParseDetailCSVline
      End
-     If TraceRc =  1 then Trace r
+     If TraceRQ = 'Y' then Trace r
      IF Substr(ENV_NAME_@S@,1,1) = '00'x |,
         Substr(ENV_NAME_@S@,1,1) = ' ' then Iterate;
      elm# = Elements.0 + 1
@@ -1127,7 +1127,7 @@ UpdateTriggerFromNotes:
    BildRC = RESULT ;
    Return ;
 GetDestinationInfoViaCSV:
-   if TraceRc = 1 then Say "GetDestinationInfoViaCSV:   "
+   if TraceRQ = 'Y' then Say "GetDestinationInfoViaCSV: "
    Hostprefix = "?"
    /* Set values for Hostprefix and Rmteprefix */
    /*     From the site definition             */
@@ -1180,8 +1180,8 @@ AllocateTriggerForMod:
    Return ;
    /* From BILDTGGR   */
 CreateNewTriggerEntry:
-   If TraceRc = 1 then Say 'CreateNewTriggerEntry+            '
-   If TraceRc = 1 then Trace r
+   If TraceRQ = 'Y' then Say 'CreateNewTriggerEntry+            '
+   If TraceRQ = 'Y' then Trace r
    St = '_'
    JOBNUMB = ' '
    Package = PECB_PACKAGE_ID
