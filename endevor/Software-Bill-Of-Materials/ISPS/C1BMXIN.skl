@@ -49,10 +49,12 @@
   TRACE OFF                                                                     
   WHERE = 'C1BMXIN Get local variables '                                        
   WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;                               
+                                                                                
   interpret 'Call' WhereIam "'MyCLS0Library'"                                   
   CSIQCLS0  = Result                                                            
   interpret 'Call' WhereIam "'AltIDOrderfile'"                                  
   ORDERDSN  = Result                                                            
+                                                                                
 )ENDREXX                                                                        
 )CM ---------- This section only applies to a Broadcom demo system              
 )REXX PKGID MYSUBSYS                                                            

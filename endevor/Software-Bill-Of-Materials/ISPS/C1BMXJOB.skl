@@ -111,7 +111,7 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
 //            UNIT=&T@DISK                                                      
 //C1BMXXCM DD DISP=SHR,                                                         
-//            DSN=your.ENDVLIB.SSC2.MODEL                                       
+//            DSN=SYS3.ENDV.ELIB.ADMTEST.SSC2.MODEL                            
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
@@ -124,7 +124,7 @@
 //            DCB=(RECFM=FB,LRECL=80,DSORG=PS),                                 
 //            UNIT=&T@DISK                                                      
 //C1BMXFTM DD DISP=SHR,                                                         
-//            DSN=your.ENDVLIB.SSC2.MODEL                                       
+//            DSN=SYS3.ENDV.ELIB.ADMTEST.SSC2.MODEL                            
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             
@@ -154,7 +154,7 @@
 //* ********************************************************************        
 //*                                                                             
 //C1BMXRJC DD DISP=SHR,                                                         
-//            DSN=your.ENDVLIB.SSC2.ISPSENU                                     
+//            DSN=SYS3.ENDV.ELIB.ADMTEST.SSC2.ISPSENU                          
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQSENU                                    
 //*                                                                             
@@ -187,9 +187,9 @@
 //* ********************************************************************        
 //*                                                                             
 //C1BMXMDL DD DISP=SHR,                                                         
-//            DSN=your.ENDVLIB.SSC2.MODEL                                       
+//            DSN=SYS3.ENDV.ELIB.ADMTEST.SSC2.MODEL                            
 //         DD DISP=SHR,                                                         
-//            DSN=your.ENDVLIB.SSC2.REXX                                        
+//            DSN=SYS3.ENDV.ELIB.ADMTEST.SSC2.REXX                             
 //         DD DISP=SHR,                                                         
 //            DSN=&I@PRFX..&I@QUAL..CSIQOPTN                                    
 //*                                                                             

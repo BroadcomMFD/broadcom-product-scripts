@@ -107,11 +107,11 @@ COPYSBOM COPY -
 //*****************************************************************             
 //*DCTXSBOM EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)                 
 //*DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP                     
-//*             DSN=your.NDM.NETMAP                                             
+//*             DSN=TZLD.NDM.NETMAP                                             
 //*DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET                 
-//*             DSN=your.NDM.MSG                                                
+//*             DSN=TZLD.NDM.MSG                                                
 //*DMPUBLIB DD  DISP=SHR,                                                       
-//*             DSN=hlq.D&DTE..T&TME..SBOMCMD.FILE                              
+//*             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE                              
 //*SYSPRINT DD  SYSOUT=*    ******************************************          
 //*NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *          
 //*DMPRINT  DD  SYSOUT=*    ******************************************          
@@ -119,7 +119,7 @@ COPYSBOM COPY -
 //*SYMDUMP  DD DUMMY                                                            
 //*SYSIN    DD  DSN=&&TEMP1,DISP=(OLD,PASS)                                     
 //*         DD  DISP=SHR,                                                       
-//*         DSN=hlq.D&DTE..T&TME..SBOMCMD.FILE(SUBSBOM)                         
+//*         DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE(SUBSBOM)                         
 //DELMEM   EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)                                
 //SYSPRINT DD  SYSOUT=*                                                         
 //SYSIN    DD  *                                                                
@@ -186,7 +186,7 @@ COPYSBOM COPY -
 //SYMDUMP  DD DUMMY                                                             
 //*SYSIN    DD  DSN=&&TEMP1,DISP=(OLD,PASS)                                     
 //*         DD  DISP=SHR,                                                       
-//*         DSN=hlq.D&DTE..T&TME..SBOMCMD.FILE(SUBSBOM)                         
+//*         DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE(SUBSBOM)                         
 //SYSIN    DD  *                                                                
  SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                              
 //         DD  DISP=SHR,                                                        
@@ -198,11 +198,11 @@ COPYSBOM COPY -
 //*****************************************************************             
 //*&VNBXSTP EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)                 
 //*DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP                     
-//*             DSN=your.NDM.NETMAP                                             
+//*             DSN=TZLD.NDM.NETMAP                                             
 //*DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET                 
-//*             DSN=your.NDM.MSG                                                
+//*             DSN=TZLD.NDM.MSG                                                
 //*DMPUBLIB DD  DISP=SHR,                                                       
-//*             DSN=hlq.D&DTE..T&TME..SBOMCMD.FILE                              
+//*             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE                              
 //*SYSPRINT DD  SYSOUT=*    ******************************************          
 //*NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *          
 //*DMPRINT  DD  SYSOUT=*    ******************************************          
@@ -210,7 +210,7 @@ COPYSBOM COPY -
 //*SYMDUMP  DD DUMMY                                                            
 //*SYSIN    DD  DSN=&&TEMP1,DISP=(OLD,PASS)                                     
 //*         DD  DISP=SHR,                                                       
-//*         DSN=hlq.D&DTE..T&TME..CONNCMD.FILE(SUBMIT)                          
+//*         DSN=NDY.D&DTE..T&TME..CONNCMD.FILE(SUBMIT)                          
 //* *==============================================================* *          
 //SUBMITD  EXEC PGM=IEFBR14,COND=(12,LE,NDVRSHIP)           C1BMXNDM            
 //SYSPRINT DD SYSOUT=*                                                          

@@ -73,10 +73,6 @@
   CMPNTGEN     +                                                        00007400
      &PKGID +                                                           00007500
      &XMETHOD                                                           00007600
-//**********************************************************************00007700
-//*  INPUT DATA SETS                                                   *00007800
-//**********************************************************************00007900
-//LISTPKGA DD DISP=(OLD,PASS),DSN=&&&&LISTPKGA                          00008000
 //**********************************************************************00008100
 //*             SORT WORK FILES                                        *00008200
 //**********************************************************************00008300
@@ -94,12 +90,6 @@
 //            DCB=(DSORG=PS,LRECL=133,RECFM=FBA),                       00009500
 //            SPACE=(CYL,(2,1))                                         00009600
 //C1MSGS2  DD SYSOUT=*                                                  00009700
-//COMPNTS  DD DISP=(NEW,PASS),DSN=&&&&COMPNTS,                          00009800
-//            DCB=(DSORG=PS,LRECL=133),                                 00009900
-//            SPACE=(CYL,(2,1))                                         00010000
-//COMPTEMP DD DISP=(NEW,PASS),DSN=&&&&COMPTEMP,                         00010100
-//            DCB=(DSORG=PS,LRECL=133),                                 00010200
-//            SPACE=(CYL,(2,1))                                         00010300
 //GENFILES DD DISP=(NEW,PASS),DSN=&&&&GENFILES,                         00010400
 //            DCB=(DSORG=PS,LRECL=80),                                  00010500
 //            SPACE=(CYL,(2,1))                                         00010600
@@ -159,13 +149,6 @@
 //SYSUT2   DD SYSOUT=*                                                  00016000
 //SYSPRINT DD DUMMY                                                     00016100
 //SYSIN    DD DUMMY                                                     00016200
-//*                                                                     00016300
-//PRT2SYSO EXEC PGM=IEBGENER,COND=(4,LT)                                00016400
-//SYSUT1   DD DISP=(OLD,PASS),DSN=&&&&COMPNTS                           00016500
-//         DD DISP=(OLD,PASS),DSN=&&&&COMPTEMP                          00016600
-//SYSUT2   DD SYSOUT=*                                                  00016700
-//SYSPRINT DD DUMMY                                                     00016800
-//SYSIN    DD DUMMY                                                     00016900
 //*#####################################################################00017000
 //*                                                                     00017100
 //* COPY CSVs AND COMPONENT LISTING TO USS IN ASCII FORMAT              00017200
@@ -183,17 +166,11 @@
 //LSPKAOUT DD PATH='/tmp/&&USER_D&&DATE_T&&TIME..listpkga.csv',         00018400
 // PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                    00018500
 // PATHMODE=SIRWXU                                                      00018600
-//*                                                                     00018700
-//LSTCMIN  DD DISP=(OLD,DELETE),DSN=&&&&COMPNTS                         00018800
-//LSTCMOUT DD PATH='/tmp/&&USER_D&&DATE_T&&TIME..listcmpnts.txt',       00018900
-// PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                    00019000
-// PATHMODE=SIRWXU                                                      00019100
 //*                                                                     00019200
 //SYSPRINT DD SYSOUT=*                                                  00019300
 //SYSTSIN  DD *                                                         00019400
 OCOPY INDD(LSTPKIN) OUTDD(LSTPKOUT) TEXT CONVERT((BPXFX311)) FROM1047   00019500
 OCOPY INDD(LSPKAIN) OUTDD(LSPKAOUT) TEXT CONVERT((BPXFX311)) FROM1047   00019600
-OCOPY INDD(LSTCMIN) OUTDD(LSTCMOUT) TEXT CONVERT((BPXFX311)) FROM1047   00019700
 /*                                                                      00019800
 //*#####################################################################00019900
 //*                                                                     00020000
@@ -217,15 +194,11 @@ sbomz endevor sbom                                                      00021700
 /tmp/&&USER._D&&DATE._T&&TIME..listpkga.csv                             00021900
 --endevor-list-package-id-path                                          00022000
 /tmp/&&USER._D&&DATE._T&&TIME..listpkgID.csv                            00022100
---endevor-print-component-path                                          00022200
-/tmp/&&USER._D&&DATE._T&&TIME..listcmpnts.txt                           00022300
 --log-debug                                                             00022400
 --sbom-no-endevor-package-source-elements                               00022500
---sbom-endevor-include-package-target-components                        00022700
 --config-path $SBOMZ_HOME/sbomz.config_noloc.json                       00022800
 --config-work-directory $SBOMZ_HOME                                     00022900
 //         DD DISP=(OLD,DELETE),DSN=&&&&GENFILES                        00023000
-//         DD DISP=(OLD,PASS),DSN=&&&&HOSTSTG                           00023100
 //*#####################################################################00023200
 //*                                                                     00023300
 //* SBOM SIGN                                                           00023400
@@ -242,7 +215,7 @@ sbomz endevor sbom                                                      00021700
 sh                                                                      00024500
 sbomz sign json-file                                                    00024600
 /tmp/&&USER._D&&DATE._T&&TIME..&PKGID_sbom.json                         00024700
-$HOME/sbom/ship_sbom_pvt.key                                            00024800
+$SBOMZ_HOME/ship_sbom_pvt.key                                           00024720
 //*#####################################################################00024910
 //*                                                                     00024920
 //*  PACKAGE SHIPMENT Host Staging Data Sets SBOM Generation            00024930
@@ -284,10 +257,10 @@ sbomz endevor sbom                                                      00025000
 //STDENV   DD DUMMY                                                     00025022
 //STDPARM  DD *,SYMBOLS=JCLONLY                                         00025023
 sh                                                                      00025024
-sbomz sign json-file                                                    00025025
-/tmp/&&USER._D&&DATE._T&&TIME..&PKGID_HSDS_sbom.json                    00025026
-$HOME/sbom/ship_sbom_pvt.key                                            00025027
-//*#####################################################################00025030
+sbomz sign json-file                                                    00025026
+/tmp/&&USER._D&&DATE._T&&TIME..&PKGID_HSDS_sbom.json                    00025027
+$SBOMZ_HOME/ship_sbom_pvt.key                                           00025029
+//*#####################################################################00025040
 //*                                                                     00025100
 //* Copy HFS output files to SYSOUT, since BPXBATCH can only write      00025200
 //* STDOUT and STDERR to HFS files.                                     00025300

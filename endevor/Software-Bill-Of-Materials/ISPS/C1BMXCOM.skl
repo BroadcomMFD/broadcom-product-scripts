@@ -47,18 +47,18 @@
 //*#####################################################################        
 //C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXCOM             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
-//STEPLIB  DD DISP=SHR,DSN=your.XCOM.CBXGLOAD                                   
+//STEPLIB  DD DISP=SHR,DSN=SYS3.XCOM.CBXGLOAD                                  
 //         DD DISP=SHR,                                                         
-//            DSN=your.SCEERUN                                                  
+//            DSN=CEE.SCEERUN                                                   
 //XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=your.XCOM.CBXGPARM                                            
+//            DSN=SYS3.XCOM.R120.CBXGPARM                                      
 //**********************************************************************        
 //SYSTCPD  DD  DISP=SHR,                                                        
-//             DSN=your.TCPIP.TCPPARMS(TCPDATA)                                 
+//             DSN=SYS3.TCPIP.TCPPARMS(TCPDATA)                                
 //XCOMGLOB DD  DISP=SHR,                                                        
-//             DSN=your.XCOM.XCOMGLOB                                           
+//             DSN=SYS3.XCOM.XCOMGLOB                                          
 //XCOMREST DD  DISP=SHR,                                                        
-//             DSN=your.XCOM.XCOMREST                                           
+//             DSN=SYS3.XCOM.XCOMREST                                          
 //XCOMPRNT DD  SYSOUT=*                            * IEBCOPY MSGS               
 //SYSPRINT DD  SYSOUT=*                            * TCP/IP MSGS                
 //SYSTERM  DD  SYSOUT=*                            * TCP/IP MSGS                
@@ -67,7 +67,7 @@
 IPNAME=&NODENAME                                                                
 IPPORT=&XIPPT                                                                   
 TYPE=SEND                                                                       
-USERID=&USERID                                                                  
+USERID=IBMUSER                                                                  
 DROPSESS=YES                                                                    
 FILEOPT=CREATE                                                                  
 CKPT=0                                                                          
@@ -117,12 +117,12 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&PKGID._HSDS_sbom.json
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=&I@PRFX..XCOM.CBXGLOAD                               
 //         DD DISP=SHR,                                                         
-//            DSN=your.SCEERUN                                                  
+//            DSN=CEE.SCEERUN                                                   
 //XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=&I@PRFX..XCOM.R###.CBXGPARM                                   
+//            DSN=&I@PRFX..XCOM.R120.CBXGPARM                                   
 //**********************************************************************        
 //SYSTCPD  DD  DISP=SHR,                                                        
-//             DSN=your.TCPIP.TCPPARMS(TCPDATA)                                 
+//             DSN=SYS3.TCPIP.TCPPARMS(TCPDATA)                                
 //XCOMGLOB DD  DISP=SHR,                                                        
 //             DSN=&I@PRFX..XCOM.XCOMGLOB                                       
 //XCOMREST DD  DISP=SHR,                                                        

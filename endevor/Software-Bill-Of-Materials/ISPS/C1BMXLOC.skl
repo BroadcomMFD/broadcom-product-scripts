@@ -1,8 +1,8 @@
 )CM  PACKAGE SHIPMENT BATCH JCL -  LOCAL TRANSFERS - CSIQSENU(C1BMXLOC)         
 )CM                                                                             
 )CM  THIS SKELETON IS USED TO TRANSFER HOST STAGING DATASETS WHICH EXIST        
-)CM  ON SHARED DASD TO PRODUCTION DATASETS WHICH MAY OR MAY NOT EXIST ON        
-)CM  SHARED DASD.  THE JOB EXECUTES TSO IN BATCH AND THE INPUT (SYSTSIN)        
+)CM  ON SYS3. DASD TO PRODUCTION DATASETS WHICH MAY OR MAY NOT EXIST ON        
+)CM  SYS3. DASD.  THE JOB EXECUTES TSO IN BATCH AND THE INPUT (SYSTSIN)        
 )CM  CONTAINS A SUBMIT COMMAND TO RUN AHJOB.                                    
 )CM                                                                             
 )CM //COPYSTMT EXEC PGM=IEBGENER                           C1BMXLOC             

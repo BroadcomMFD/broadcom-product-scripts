@@ -35,50 +35,71 @@
 //S4       SET PKGID='@@PKGID@@'                                                
 //*#####################################################################        
 //*                                                                             
-//* Convert remote mapping file to ASCII                                        
+//* Copy mapping json structure from MVS to USS File                            
 //*                                                                             
 //*#####################################################################        
 //CNVASCII EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(0,LT)         C1BMXCOP          
 //RMAPOUT  DD PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._shiprmap.json',           
-// PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                            
-// PATHMODE=SIRWXU                                                              
-//*                                                                             
-//RSDSOUT  DD DSN=&&SHIPRMAP,                                                   
-//            UNIT=SYSDA,                                                       
-//            SPACE=(CYL,(1,1)),                                                
-//            DISP=(NEW,PASS,DELETE),                                           
-//            DCB=(RECFM=FB,LRECL=80)                                           
+//            PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
+//            PATHMODE=SIRWXU,FILEDATA=TEXT                                     
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSTSIN  DD *                                                                 
-OCOPY INDD(SHIPRMAP) OUTDD(RMAPOUT) TEXT CONVERT((BPXFX311)) FROM1047           
-OCOPY INDD(SHIPRMAP) OUTDD(RSDSOUT) TEXT                                        
+OCOPY INDD(SHIPRMAP) OUTDD(RMAPOUT)                                             
 //SHIPRMAP DD   *                                                               
 //*#####################################################################        
 //*                                                                             
-//* SBOM HASH Validation using remap and signature validation                   
+//* SBOM HASH Validation using remap json file and public signature             
 //*                                                                             
 //*#####################################################################        
 //HASHVRFY EXEC PGM=BPXBATCH,REGION=0M,COND=(0,LT)            C1BMXCOP          
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
-// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._sbom.out',                           
+// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._hashvrfy.out',                       
 // PATHMODE=SIRWXU                                                              
 //STDERR   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
-// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._sbom.err',                           
+// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._hashvrfy.err',                       
 // PATHMODE=SIRWXU                                                              
 //STDENV   DD DUMMY                                                             
 //STDPARM  DD *,SYMBOLS=JCLONLY                                                 
 sh                                                                              
-echo $SBOMZ_HOME ;                                                              
-cd $SBOMZ_HOME ;                                                                
-sbomz validate                                                                  
-@@signedSBOMfile@@                                                              
---dataset-remap-config                                                          
-/tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap.json                               
---key-path-public                                                               
-$SBOMZ_HOME/ship_sbom_pub.key                                                   
---config-work-directory $SBOMZ_HOME                                             
+ cd $SBOMZ_HOME ;                                                               
+ awk '                                                                          
+ {                                                                              
+   gsub(/[ \t\r]+$/, "");                                                       
+   if (buf == "") {                                                             
+       buf = $0                                                                 
+   } else {                                                                     
+       sub(/^[ \t]+/, "", $0);                                                  
+   buf = buf $0                                                                 
+   };                                                                           
+                                                                                
+   q = buf;                                                                     
+   gsub(/[^"]/, "", q);                                                         
+                                                                                
+   if (length(q) % 2 == 0) {                                                    
+       gsub(/[ \t]*:[ \t]*/, ": ", buf);                                        
+       gsub(/[ \t]*,[ \t]*/, ", ", buf);                                        
+       print buf; buf = ""                                                      
+   }                                                                            
+ }                                                                              
+ ' /tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap.json >                          
+   /tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap_format.json ;                   
+                                                                                
+ iconv -f IBM-1047 -t UTF-8                                                     
+      /tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap_format.json >                
+      /tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap_ascii.json;                  
+                                                                                
+ chtag -t -c ISO8859-1                                                          
+     /tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap_ascii.json;                   
+                                                                                
+ sbomz validate                                                                 
+   @@signedSBOMfile@@                                                           
+ --mapping-config                                                               
+   /tmp/&USER._D&DATE._T&TIME..&PKGID._shiprmap_ascii.json                      
+ --key-path-public                                                              
+   $SBOMZ_HOME/ship_sbom_pub.key                                                
+ --config-work-directory $SBOMZ_HOME ;                                          
 //*#####################################################################        
 //*                                                                             
 //* Verify if Remote Staging Data Sets have been tampered with                  
@@ -87,7 +108,8 @@ $SBOMZ_HOME/ship_sbom_pub.key
 //RSDSVRFY EXEC PGM=IKJEFT01,COND=(0,NE),REGION=0M         C1BMXCOP             
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
-//SHIPRMAP DD DSN=&&SHIPRMAP,DISP=(OLD,PASS)                                    
+//SHIPRMAP DD PATHMODE=SIRWXU,FILEDATA=TEXT,                                    
+// PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._shiprmap_format.json'                
 //SYSEXEC  DD UNIT=SYSDA,SPACE=(CYL,(5,1,5)),                                   
 // DSN=&SYSEXEC,                                                                
 // RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PO                                         
@@ -99,62 +121,125 @@ RSDSVRFY
 /*                                                                              
 //REXXMOD  DD *,DLM='@@'                                                        
 /* REXX */                                                                      
-if ^ExistDDname('SHIPRMAP') Then Do                                             
-  Say 'RSDSVRFY01E DDname SHIPRMAP is not allocated.'                           
+if \ExistDDname('SHIPRMAP') Then Do                                             
+  say 'RSDSVRFY01E DDname SHIPRMAP is not allocated.'                           
   Return 8                                                                      
 End                                                                             
+                                                                                
 "execio * diskr shiprmap (stem shiprmap. finis"                                 
+                                                                                
 if shiprmap.0 = 0 then do                                                       
   say 'RSDSVRFY02E SHIPRMAP file is empty'                                      
   return 8                                                                      
 End                                                                             
+                                                                                
 /*                                                                              
   Build actual mapping table                                                    
 */                                                                              
 RSDSList = ''                                                                   
 RSDSx.= ''                                                                      
+                                                                                
 Do i=1 to shiprmap.0                                                            
+                                                                                
  If shiprmap.i \= '{' & shiprmap.i \= '}' Then Do                               
+                                                                                
    If pos(':',shiprmap.i) <> 0 then do                                          
+                                                                                
      j = i + 1                                                                  
      RSDS = strip(shiprmap.j)                                                   
      parse var RSDS '"' RSDS '"' .                                              
-     parse var RSDS RSDS "(" Member ")"                                         
+                                                                                
+     if substr(RSDS,1,1) = '/' then do                                          
+       /* USS File */                                                           
+       Element = substr(RSDS,LASTPOS('/',RSDS)+1,LENGTH(RSDS))                  
+       Element = strip(Element)                                                 
+       RSDS = substr(RSDS,1,LASTPOS('/',RSDS)-1)                                
+       RSDSstem = Translate(substr(RSDS,2),'.','/')                             
+       x = VALUE(value(RSDSstem).Element,1)                                     
+      end                                                                       
+     else do                                                                    
+       /* MVS dataset */                                                        
+       parse var RSDS RSDS "(" Element ")"                                      
+        x = VALUE(value(RSDS).Element,1)                                        
+      end                                                                       
+                                                                                
      if pos(RSDS,RSDSList) = 0 then do                                          
        RSDSList = RSDSList || RSDS || ';'                                       
      end                                                                        
-     x = VALUE(value(RSDS).member,1)                                            
+                                                                                
    End /* pos(':',shiprmap.i) <> 0 */                                           
+                                                                                
  End /* shiprmap.i NOT IN '{,}' */                                              
+                                                                                
 End /* Do i */                                                                  
+                                                                                
+                                                                                
 Loc = pos(';',RSDSList)                                                         
 Do while Loc <> 0                                                               
   RemoteStagingDS = substr(RSDSList,1,Loc-1)                                    
   RSDSList = substr(RSDSList,Loc+1)                                             
   /*                                                                            
-    Process every Remote Staging Data Set to validate if all members            
-    are in the Transmission List sent by Endevor LPAR                           
+    Process every Remote Staging Data Set or PATH to validate if all            
+    members or files are in the Transmission List sent by Endevor LPAR          
+    files are in the Transmission List sent by Endevor LPAR                     
   */                                                                            
-  x = outtrap(dirList.)                                                         
-  address TSO "listds '"RemoteStagingDS"' members"                              
-  x = outtrap(off)                                                              
-  k = 1                                                                         
-  do while pos('--MEMBERS--',dirList.k) = 0                                     
-   k = k + 1                                                                    
-  end                                                                           
-  do k = k + 1 to dirList.0                                                     
-    member = strip(dirList.k)                                                   
-    if VALUE(value(RemoteStagingDS).member) \= 1 then DO                        
-      say 'RSDSVRFY03E Remote Staging Data Set 'RemoteStagingDS ,               
-                       'has been tampered with.'                                
-      say '            Member 'member' has been added before' ,                 
-                      'Endevor Shipment Remote JCL Execution.'                  
-      return 12                                                                 
-    end                                                                         
-  end /* K = 7 */                                                               
+  select                                                                        
+    when substr(RemoteStagingDS,1,1) = '/' then do                              
+      /* USS Path */                                                            
+      dirCmd = 'ls 'RemoteStagingDS                                             
+      call bpxwunix dirCmd,,files.                                              
+                                                                                
+      do k=1 to files.0                                                         
+                                                                                
+        file = strip(files.k)                                                   
+        RSDSstem = Translate(substr(RemoteStagingDS,2),'.','/')                 
+        parse upper var RSDSstem RSDSstem .                                     
+        if VALUE(value(RSDSstem).file) \= 1 then DO                             
+          say 'RSDSVRFY04E Remote Staging PATH 'RemoteStagingDS ,               
+                          'has been tampered with.'                             
+          say '            File "'file'" was added to the Remote PATH after',   
+                          'shipment'                                            
+          say '            creation and before Endevor Shipment Remote JCL',    
+                          'execution started.'                                  
+          return 12                                                             
+        end                                                                     
+                                                                                
+      end /* Do k=1 */                                                          
+                                                                                
+    end /* substr(RemoteStagingDS,1,1) = '/' */                                 
+                                                                                
+    otherwise                                                                   
+      /* z/OS data set */                                                       
+        x = outtrap(dirList.)                                                   
+        address TSO "listds '"RemoteStagingDS"' members"                        
+        x = outtrap(off)                                                        
+                                                                                
+        k = 1                                                                   
+        do while pos('--MEMBERS--',dirList.k) = 0                               
+        k = k + 1                                                               
+        end                                                                     
+                                                                                
+        do k = k + 1 to dirList.0                                               
+          member = strip(dirList.k)                                             
+          if VALUE(value(RemoteStagingDS).member) \= 1 then DO                  
+            say 'RSDSVRFY03E Remote Staging Data Set 'RemoteStagingDS ,         
+                            'has been tampered with.'                           
+            say '            Member "'member'" was added to the Remote',        
+                            'dataset after shipment'                            
+            say '            creation and before Endevor Shipment Remote JCL',  
+                            'execution started.'                                
+            return 12                                                           
+          end                                                                   
+        end /* K = 7 */                                                         
+                                                                                
+  end /* select RemoteStagingDS */                                              
+                                                                                
   Loc = pos(';',RSDSList)                                                       
+                                                                                
 End /* Loc <> 0 */                                                              
+                                                                                
 return 0                                                                        
+                                                                                
 /*                                                                              
   Procedure ExistDDname allocated                                               
 */                                                                              

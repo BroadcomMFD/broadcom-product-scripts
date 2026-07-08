@@ -42,7 +42,7 @@
 //*#####################################################################        
 //FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          C1BMXFTP             
 //         REGION=2048K,TIME=800                                                
-//NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                     
+//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSUDUMP DD SYSOUT=Q                                                          

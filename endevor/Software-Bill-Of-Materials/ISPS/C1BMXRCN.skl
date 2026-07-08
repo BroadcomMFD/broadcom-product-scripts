@@ -153,7 +153,9 @@ $$
 )SET LOCALIP = &Z                                                               
 )REXX LOCALIP                                                                   
  call socket 'initialize','rsclient' /* initilize ip connexion */               
+                                                                                
  addr = socket('gethostid') /* retrieve ip addr                */               
+                                                                                
  parse var addr rt ipadd    /* parse rt = return code ipadd ip address*/        
  /* say 'ipaddress: 'ipadd */                                                   
  LOCALIP = ipadd                                                                
@@ -176,7 +178,8 @@ $$
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          
-//NETRC    DD DISP=SHR,DSN=&SYSUID..your.NETRC                                  
+//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
+//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
 //SYSOUT   DD SYSOUT=*                                                          
 //OUTPUT   DD SYSOUT=*                                                          
 //CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                   
@@ -195,19 +198,21 @@ QUIT
 )CM                                                                             
 )IF &XMETHOD EQ XCOM THEN )DO                                                   
 //C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXRCN             
-//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
-//STEPLIB  DD DISP=SHR,DSN=your.XCOM.R###.RUN.CBXGLOAD                          
+//         PARM=('TYPE=SCHEDULE,ACBNAME=XCOMA')                                 
+//STEPLIB  DD DISP=SHR,DSN=SYS3.XCOM.R120A.CBXGLOAD                             
 //         DD DISP=SHR,                                                         
-//            DSN=your.SCEERUN                                                  
+//            DSN=CEE.SCEERUN                                                   
+//SYSTCPD  DD DISP=SHR,                                                         
+//            DSN=SYS3.TCPIP.TCPPARMS(TCPDATA)                                 
 //XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=your.XCOM.R###.RUN.CBXGPARM                                   
+//            DSN=SYS3.XCOM.R120.PARM                                          
 //**********************************************************************        
 //*SYSTCPD  DD DISP=SHR,                                                        
-//*            DSN=your.TCPIP.TCPPARMS(TCPDATA)                                 
+//*            DSN=SYS3.TCPIP.TCPPARMS(TCPDATA)                                
 //*XCOMGLOB DD DISP=SHR,                                                        
-//*            DSN=your.XCOM.XCOMGLOB                                           
+//*            DSN=SYS3.XCOM.XCOMGLOB                                          
 //*XCOMREST DD DISP=SHR,                                                        
-//*            DSN=your.XCOM.XCOMREST                                           
+//*            DSN=SYS3.XCOM.XCOMREST                                          
 //XCOMPRNT DD SYSOUT=*                            * IEBCOPY MSGS                
 //SYSPRINT DD SYSOUT=*                            * TCP/IP MSGS                 
 //SYSTERM  DD SYSOUT=*                            * TCP/IP MSGS                 

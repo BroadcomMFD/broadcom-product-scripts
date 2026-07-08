@@ -1,3 +1,2 @@
-//SYSEXEC  DD DISP=SHR,DSN=your.ENDVLIB.SSC2.REXX  SCMM@REX                     
-//         DD DISP=SHR,DSN=your.ENDVLIB.ADMPROD.SSC2.REXX                       
+//SYSEXEC  DD DISP=SHR,DSN=SYS3.ENDV.ELIB.ADMTEST.SSC2.REXX  SCMM@REX          
 //SYSTSPRT DD SYSOUT=*                                                          
