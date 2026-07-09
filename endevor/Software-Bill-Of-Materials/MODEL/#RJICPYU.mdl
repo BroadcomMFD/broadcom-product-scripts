@@ -1,0 +1,21 @@
+@REM ****************************************************** #RJICPYU ***        
+@REM *    CONTENTS: Provides IF statemnts and SYSUT3, SYSUT4 for                
+@REM *              #RJICPY1.                                                   
+@REM *     PURPOSE: This prevents a JCL error, of extra SYSUT3 and              
+@REM *              SYSUT4, if there is nothing to be copied.                   
+@REM *                                                                          
+@REM *******************************************************************        
+@REM *                                                                          
+@REM *     P005812 Created this macro                                           
+@REM *                                                                          
+@SECTION=02   <=======================================================          
+@IF &RUNIT                                                                      
+//SYSUT3   DD   UNIT=&RUNIT,SPACE=(TRK,(5,5))                                   
+//SYSUT4   DD   UNIT=&RUNIT,SPACE=(TRK,(5,5))                                   
+@ENDIF                                                                          
+@REM If no remote unit, use host unit, which always has a value.                
+@REM It's set to 'SYSDA' by default.                                            
+@IFNOT &RUNIT                                                                   
+//SYSUT3   DD   UNIT=&HUNIT,SPACE=(TRK,(5,5))                                   
+//SYSUT4   DD   UNIT=&HUNIT,SPACE=(TRK,(5,5))                                   
+@ENDIF                                                                          
