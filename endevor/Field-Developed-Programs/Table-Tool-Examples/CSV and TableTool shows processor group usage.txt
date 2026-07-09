@@ -1,0 +1,157 @@
+//IBMUSERC JOB (0000),'Your Name',
+//         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
+//*
+//JOBLIB DD DISP=SHR,DSN=Your.Endevor.CSIQAUTU
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQAUTH
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQLOAD
+//*
+//************************************************************
+//*                                                          *
+//* This utility reports processor group usage by comparing  *
+//* element inventory against processor groups.              *
+//*                                                          *
+//************************************************************
+//*
+//*******************************************************
+//*  P A R T   O N E      ELEMENT COUNT FOR EACH P.GROUP*
+//*******************************************************
+//*-------------------------------------------------------------------
+//* CSV UTILITY FOR ELEMENTS
+//*-------------------------------------------------------------------
+//$$$$$$@1 EXEC PGM=NDVRC1,PARM='BC1PCSV0'
+//BSTIPT01 DD *
+LIST ELE * FROM ENV * STAGE *
+     TO DDNAME 'EXTRACTS'
+     OPTIONS   RETURN ALL.
+//EXTRACTS DD DSN=&&ELECSV,
+//         DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),
+//         DISP=(,PASS),SPACE=(CYL,(25,25),RLSE),UNIT=SYSDA
+//C1MSGS1  DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//*
+//***************************************************
+//* TABLE TOOL TO PULL OUT NECESSARY FIELDS         *
+//***************************************************
+//STEP2    EXEC PGM=IRXJCL,PARM='ENBPIU00 A'
+//TABLE    DD DSN=&&ELECSV,DISP=(OLD,DELETE)
+//SYSEXEC  DD DISP=SHR,DSN=Your.Endevor.CSIQCLS0
+//MODEL    DD *
+&oneline
+//OPTIONS  DD *
+  $TABLE_TYPE = "CSV"
+  if SITE_ID   = 'SITE ID' THEN $SKIPROW = 'Y'
+  p1 = substr(ENV_NAME,1,8)
+  p2 = substr(STG_#,1,1)
+  p3 = substr(SYS_NAME,1,8)
+  p4 = substr(TYPE_NAME,1,8)
+  p5 = substr(PROC_GRP_NAME,1,8)
+  oneline = p1 p2 p3 p4 p5 '0000001'
+//SYSTSPRT DD DUMMY
+//TBLOUT   DD DSN=&&ELEMENTS,DISP=(,PASS),SPACE=(CYL,(25,25),RLSE),
+//            UNIT=SYSDA,DCB=(RECFM=FB,LRECL=120,BLKSIZE=0)
+//*
+//**************************************************
+//* COUNT ELEMENTS FOR EACH INVENTORY AREA         *
+//**************************************************
+//STEP3    EXEC PGM=SORT
+//SYSOUT   DD DUMMY
+//SORTWK01 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTWK02 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTWK03 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTIN   DD DSN=&&ELEMENTS,DISP=(OLD,DELETE)
+//SORTOUT  DD DSN=&&ELECOUNT,DISP=(,PASS),SPACE=(CYL,(15,15),RLSE),
+//            UNIT=SYSDA,DCB=(RECFM=FB,LRECL=120,BLKSIZE=0)
+//SYSIN    DD *
+ SORT FIELDS=(1,38,CH,A)
+ SUM  FIELDS=(39,7,ZD)
+ END
+//*
+//*
+//*
+//*******************************************************
+//*  P A R T   T W O      PROCESSOR GROUPS              *
+//*******************************************************
+//*-------------------------------------------------------------------
+//* EXECUTE CSV UTILITY - get processor groups
+//*-------------------------------------------------------------------
+//$$$$$$@1 EXEC PGM=NDVRC1,PARM='BC1PCSV0'
+//BSTIPT01 DD *
+  LIST PROCESSOR GROUP *
+    FROM ENV * SYS * TYP * STAGE *
+      TO FILE CSVEXTR  .
+//CSVEXTR  DD DSN=&&PGRPCSV,DISP=(,PASS),
+//            DCB=(RECFM=VB,LRECL=4092,BLKSIZE=4096,DSORG=PS),
+//            UNIT=SYSDA,SPACE=(CYL,(5,5),RLSE)
+//C1MSGS1  DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//*
+//***************************************************
+//* TABLE TOOL TO PULL OUT NECESSARY FIELDS         *
+//***************************************************
+//STEP5    EXEC PGM=IRXJCL,PARM='ENBPIU00 A'
+//TABLE    DD DSN=&&PGRPCSV,DISP=(OLD,DELETE)
+//SYSEXEC  DD DISP=SHR,DSN=Your.Endevor.CSIQCLS0
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSTSIN  DD DUMMY
+//MODEL    DD *
+&oneline
+//OPTIONS  DD *
+  $TABLE_TYPE = "CSV"
+  if SITE_ID   = 'SITE ID' THEN $SKIPROW = 'Y'
+  p1 = substr(ENV_NAME,1,8)
+  p2 = substr(STG_#,1,1)
+  p3 = substr(SYS_NAME,1,8)
+  p4 = substr(TYPE_NAME,1,8)
+  p5 = substr(PROC_GRP_NAME,1,8)
+  p6 = substr(PROC_TYPE,1,1)
+  p7 = substr(PROC_NAME,1,8)
+  oneline = p1 p2 p3 p4 p5 p6 p7
+//TBLOUT   DD DSN=&&PGRPOUT,DISP=(,PASS),SPACE=(CYL,(15,15),RLSE),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=0),UNIT=SYSDA
+//*
+//******************************************************
+//* ELIMINATE DUPS THE P.GROUP CSV OUTPUT              *
+//******************************************************
+//STEP6    EXEC PGM=SORT
+//SYSOUT   DD DUMMY
+//SORTWK01 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTWK02 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTWK03 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTIN   DD DSN=&&PGRPOUT,DISP=(OLD,DELETE)
+//SORTOUT  DD DSN=&&SORTOUT,DISP=(,PASS),SPACE=(CYL,(15,15),RLSE),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=0),UNIT=SYSDA
+//SYSIN    DD *
+ SORT FIELDS=(1,80,CH,A)
+ SUM  FIELDS=NONE
+ END
+/*
+//********************************************
+//* put gen, del, mov processors on one line *
+//********************************************
+//STEP7    EXEC PGM=IKJEFT1B,PARM='%REX1LINE'
+//SYSEXEC  DD DISP=SHR,DSN=Your.Team.$REXX
+//SYSTSPRT DD DUMMY
+//SYSTSIN  DD DUMMY
+//FILEIN   DD DSN=&&SORTOUT,DISP=(OLD,DELETE)
+//FILEOUT  DD DSN=&&PGRP2OUT,DISP=(,PASS),SPACE=(CYL,(15,15),RLSE),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=0),UNIT=SYSDA
+//SYSIN    DD DUMMY
+//*
+//*
+//*
+//*******************************************************
+//*  P A R T   T H R E E  COMBINE P.GROUPS WITH E.COUNTS*
+//*******************************************************
+//**********************************************
+//* Merge p.group data with element count data *
+//**********************************************
+//STEP8    EXEC PGM=IKJEFT1B,PARM='%REXMERGE'
+//SYSEXEC  DD DISP=SHR,DSN=Your.Team.$REXX
+//SYSTSPRT DD DUMMY
+//SYSTSIN  DD DUMMY
+//FILEIN1  DD DSN=&&PGRP2OUT,DISP=(OLD,DELETE)
+//FILEIN2  DD DSN=&&ELECOUNT,DISP=(OLD,DELETE)
+//FILEOUT  DD SYSOUT=*
+//SYSIN    DD DUMMY
+//*

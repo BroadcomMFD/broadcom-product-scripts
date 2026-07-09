@@ -1,0 +1,369 @@
+/* rexx */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  on how to convert RACF cmds from ISRACR SDSF utility      */
+/*  to ACF2 commands with UID                                 */
+/*                                                            */
+/*  SYNTAX:  SDACFUID data_set_name                           */
+/*  where "data_set_name" is output of ISFACR utility         */
+/*                                                            */
+/*  Version 1.0 August 2024                                   */
+/*          1.1 August 23 2024                                */
+/*          1.2 August 27 2024                                */
+/*                                                            */
+/*  created by steve hosie 2024                               */
+/*                                                            */
+parse arg p1
+if length(p1) = 0 then
+ do
+  say 'No input dataset provided, please try again'
+  exit
+ end
+say p1
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ACF.TEMP.'last_qual
+udsn = strip(udsn)
+udsn = udsn||'.SDSFCMDS'
+x = 1
+ddname = "A"current_seconds
+sdname = "S"current_seconds
+/* for testing, otherwise take input P1 as dataset name */
+if length(p1) = 0 then
+  sdsf_dsn='HOSST03.SDSF.TEST.TXT'
+else
+  sdsf_dsn=p1
+/*                                */
+say 'Processing file' sdsf_dsn
+if sysdsn("'"sdsf_dsn"'") = ok then
+  "alloc f("sdname") da('"sdsf_dsn"') shr reu"
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(100 100)
+   TR DSORG(PS) RECFM(F B) LRECL(80) "
+"execio * diskr "sdname" (stem sdsf_racf. FINIS"
+total_racf_records = sdsf_racf.0
+sdsf_out.1 = '/* DO NOT RUN WITHOUT REVIEWING FIRST!!!!!           */'
+sdsf_out.2 = '/*                                                   */'
+sdsf_out.3 = '/* REVIEW and EDIT as needed                         */'
+sdsf_out.4 = '/*                                                   */'
+sdsf_out.5 = '/*                                                   */'
+sdsf_out.6 = 'SET Control(GSO)'
+sdsf_out.7 = 'INSERT SAFDEF.SDSF ID(SDSF) MODE(GLOBAL) -'
+sdsf_out.8 = 'RACROUTE(REQUEST=AUTH,CLASS=SDSF)'
+sdsf_out.9 = 'INSERT SAFDEF.WRITER ID(WRITER) MODE(GLOBAL) -'
+sdsf_out.10= 'RACROUTE(REQUEST=AUTH,CLASS=WRITER)'
+sdsf_out.11= 'INSERT SAFDEF.JESSPL ID(JESSPL) MODE(GLOBAL) -'
+sdsf_out.12= 'RACROUTE(REQUEST=AUTH,CLASS=JESSPOOL) '
+sdsf_out.13= 'INSERT SAFDEF.OPRCMDS ID(OPRCMDS) MODE(GLOBAL) -'
+sdsf_out.14= 'RACROUTE(REQUEST=AUTH,CLASS=OPERCMDS)'
+sdsf_out.15 = 'F ACF2,REFRESH(SAFDEF)'
+sdsf_out.16 = 'INSERT CLASMAP.SDSF RESOURCE(SDSF) '
+sdsf_out.16 = sdsf_out.16'RSRCTYPE(SDF) ENTITYLN(63)'
+sdsf_out.17 = 'INSERT CLASMAP.WRITER RESOURCE(WRITER) '
+sdsf_out.17 = sdsf_out.17'RSRCTYPE(WTR) ENTITYLN(39)'
+sdsf_out.18 = 'INSERT CLASMAP.JESSPL RESOURCE(JESSPOOL) '
+sdsf_out.18 = sdsf_out.18'RSRCTYPE(SPL) ENTITYLN(53)'
+sdsf_out.19 = 'INSERT CLASMAP.OPRCMDS RESOURCE(OPERCMDS) '
+sdsf_out.19 = sdsf_out.19 'RSRCTYPE(OPR) ENTITYLN(39)'
+sdsf_out.20 = 'F ACF2,REFRESH(CLASMAP)'
+sdsf_out.21 = 'SET CONTROL(GSO)'
+sdsf_out.22 = 'CHANGE INFODIR TYPES(R-RSDF) ADD'
+sdsf_out.23 = 'F ACF2,REFRESH(INFODIR)'
+sdsf_out.24 = 'F ACF2,REBUILD(SDF)'
+y = 24
+data_string = "DATA("
+owner_string = "OWNER("
+g_cnt = 1
+do until x > total_racf_records
+/* load all GSDSF records into Stem variable */
+  If ralter = "RALTER" then
+   do
+    if substr(sdsf_racf.x,9,5) = 'GSDSF' then
+      do
+        ralter_class = substr(sdsf_racf.x,9,5)
+        ralter_attr = substr(sdsf_racf.x,15,10)
+        res_name = substr(sdsf_racf.x,26,44)
+        res_name = substr(res_name,8,44)
+        res_pos = POS(')',res_name) - 1
+        res_name = substr(res_name,1,res_pos)
+        res_name = STRIP(res_name,,')')
+        res_name_index = index(res_name,'**')
+        res_name_index_neg = res_name_index - 1
+        if res_name_index > 0 then
+         do
+          res_name = substr(res_name,1,res_name_index_neg)
+          res_name = res_name||'-'
+         end
+        res_name_index = index(res_name,'*.*')
+        res_name_index_neg = res_name_index - 1
+        if res_name_index > 0 then
+         do
+          res_name = substr(res_name,1,res_name_index_neg)
+          res_name = res_name||'-.-'
+         end
+        res_name_index = index(res_name,'*')
+        res_name_index_neg = res_name_index - 1
+        if res_name_index > 0 then
+         do
+          res_name = substr(res_name,1,res_name_index_neg)
+          res_name = res_name||'-'
+         end
+        attr.g_cnt = ralter_attr' 'res_name
+        g_cnt = g_cnt + 1
+      end
+    x = x + 1
+   end
+end
+/* build X(GRP) insert for attributes */
+count = 1
+if g_cnt > 0 then
+do
+ line_check = substr(sdsf_racf.x,1,3)
+ sdsf_out.y = 'SET X(RGP)'
+ y = y + 1
+ ralter_attr = substr(attr.count,1,10)
+ attribute = ralter_attr
+ sdsf_out.y = 'INSERT 'attribute'RESOURCE TYPE(SDF) INCLUDE ( -'
+ y = y + 1
+ do until count > g_cnt
+      ralter_attr = substr(attr.count,1,10)
+   if ralter_attr = attribute then
+    do
+         ralter_attr = substr(attr.count,1,10)
+         res_name = substr(attr.count,11,44)
+         res_name = strip(res_name)
+         res_name = ' '||res_name
+         sdsf_out.y = res_name', -'
+         y = y + 1
+    end
+   else
+    do
+      back_one = y - 1
+      sdsf_out.back_one = res_name||')'
+      attribute = substr(attr.count,1,10)
+      if count < g_cnt then
+       do
+        sdsf_out.y = 'INSERT 'attribute'RESOURCE TYPE(SDF) INCLUDE( -'
+        y = y + 1
+       end
+    end
+    count = count + 1
+ end
+end
+x = 1
+do until x > total_racf_records
+  addgroup = substr(sdsf_racf.x,2,8)
+  ralter = substr(sdsf_racf.x,2,6)
+  permit = substr(sdsf_racf.x,2,6)
+  pos_data = POS('DATA(',sdsf_racf.x)
+  If addgroup = "ADDGROUP" then
+   do
+    sdsf_out.y = 'SET RESOURCE(SDF)'
+    y = y + 1
+    pos_owner = INDEX(sdsf_racf.x,' OWNER(')
+    length_xrole = pos_owner - 12
+    sdsf_xrole = substr(sdsf_racf.x,12,length_xrole)
+    sdsf_out.y = 'RECKEY GROUP ADD('sdsf_xrole'.SDSF'
+    sdsf_out.y = sdsf_out.y' UID('sdsf_xrole') SERVICE(READ,EXEC) '
+    sdsf_out.y = sdsf_out.y'ALLOW)'
+    y = y + 1
+   end
+  If permit = "PERMIT" then
+   do
+    if substr(sdsf_racf.x,9,5) = 'ATTR.' then
+     do
+       attr_role = substr(sdsf_racf.x,35,8)
+       attribute = substr(sdsf_racf.x,9,10)
+       pos_attr = POS(')',attr_role)
+       if pos_attr > 1 then
+         do
+           pos_attr = pos_attr - 1
+           attr_role = substr(attr_role,1,pos_attr)
+         end
+       attr_cmd = substr(sdsf_racf.x,9,9)
+       access_pos = POS('ACCESS(',sdsf_racf.x)
+       access_pos = access_pos + 7
+       attr_access = substr(sdsf_racf.x,access_pos,15)
+       access_last_pos = LASTPOS(')',sdsf_racf.x)
+       if access_last_pos > 0 then
+        do
+         access_last_pos = access_last_pos - access_pos
+         attr_access = substr(attr_access,1,access_last_pos)
+         if attr_access = 'ALTER' then
+            attr_access = 'ADD,DELETE,UPDATE,READ,EXEC'
+         else
+            if attr_access = 'CONTROL' then
+               attr_access = 'DELETE,UPDATE,READ,EXEC'
+            else
+              if attr_access = 'READ' then
+                attr_access = 'READ,EXEC'
+              else
+                if attr_access = 'UPDATE' then
+                   attr_access = 'UPDATE,READ,EXEC'
+        end
+      do
+        sdsf_out.y = 'SET RESOURCE(SDF)'
+        y = y + 1
+        sdsf_out.y = 'RECKEY 'attribute'ADD(UID('||attr_role
+        sdsf_out.y = sdsf_out.y||') SERVICE('||attr_access||') ALLOW)'
+        y = y + 1
+      end
+   end
+  else
+    /* handle all other permits */
+    do
+      class_pos = POS(' CLASS',sdsf_racf.x)
+      last_resname_char = class_pos - 9
+      resource_name = substr(sdsf_racf.x,9,last_resname_char)
+      class_pos = class_pos + 7
+      res_pos = POS('.',resource_name)
+      res_start = res_pos + 1
+      res_neg = res_pos - 1
+      res_length = length(resource_name)
+      res_length = res_length - res_pos
+      res_key = substr(resource_name,1,res_neg)
+      resname = substr(resource_name,res_start,res_length)
+      jesname = substr(resource_name,res_start,res_length)
+        resname_index = index(resname,'**')
+        resname_index_neg = resname_index - 1
+        if resname_index > 0 then
+         do
+          resname = substr(resname,1,resname_index_neg)
+          resname = resname||'-'
+         end
+        resname_index = index(resname,'*.*')
+        resname_index_neg = resname_index - 1
+        if resname_index > 0 then
+         do
+          resname = substr(resname,1,resname_index_neg)
+          resname = resname||'-.-'
+         end
+        resname_index = index(resname,'*')
+        resname_index_neg = resname_index - 1
+        if resname_index > 0 then
+         do
+          resname = substr(resname,1,resname_index_neg)
+          resname = resname||'-'
+         end
+      id_pos = POS(' ID(',sdsf_racf.x)
+      id_pos_neg = id_pos - class_pos - 1
+      class = substr(sdsf_racf.x,class_pos,id_pos_neg)
+      access_pos = POS(') ACCESS(',sdsf_racf.x)
+      id_pos = POS(') ID(',sdsf_racf.x)
+      id_pos = id_pos + 5
+      id_pos_last = access_pos - id_pos
+      role = substr(sdsf_racf.x,id_pos,id_pos_last)
+      access_pos = access_pos + 9
+      access_pos_last = LASTPOS(')',sdsf_racf.x) - access_pos
+      access = substr(sdsf_racf.x,access_pos,access_pos_last)
+      if class = 'SDSF' then
+         class = 'SDF'
+      if class = 'JESSPOOL' then
+         class = 'SPL'
+      if class = 'OPERCMDS' then
+         class = 'OPR'
+      if class = 'XFACILIT' then
+         class = 'XFC'
+      sdsf_out.y = 'SET RESOURCE('class')'
+      y = y + 1
+      if access = 'ALTER' then
+         access = 'ADD,DELETE,UPDATE,READ,EXEC'
+      else
+         if access = 'CONTROL' then
+            access = 'DELETE,UPDATE,READ,EXEC'
+         else
+           if access = 'READ' then
+             access = 'READ,EXEC'
+           else
+             if access = 'UPDATE' then
+               access = 'UPDATE,READ,EXEC'
+      If class = 'SPL' then
+         do
+           res_key = '********'
+           sdsf_out.y = '/*                                        */'
+           y = y + 1
+           sdsf_out.y = '/* REVIEW AND EDIT THE ******** as needed */'
+           y = y + 1
+           sdsf_out.y = '/* REVIEW AND EDIT THE resource name      */'
+           y = y + 1
+           sdsf_out.y = '/* as needed                              */'
+           y = y + 1
+           sdsf_out.y = '/*                                        */'
+           y = y + 1
+           find_asterisk = POS('*',jesname)
+           length_jesname = length(jesname)
+           if find_asterisk > 0 then
+             do
+               new_jes_name = STRREPLACE(jesname,'*','********')
+               jesname = new_jes_name
+             end
+           sdsf_out.y = 'RECKEY 'res_key' ADD('jesname' UID('role' -'
+          sdsf_out.y = sdsf_out.y||role') SERVICE('access') ALLOW)'
+           if length(sdsf_out.y) > 71 then
+            do
+              sdsf_out.y = 'RECKEY 'res_key' - '
+              y = y + 1
+              sdsf_out.y = 'ADD('jesname '-'
+              y = y + 1
+              sdsf_out.y = 'UID('role') SERVICE('access') ALLOW)'
+            end
+           y = y + 1
+        end
+      else
+        do
+          sdsf_out.y = 'RECKEY 'res_key' ADD('resname' UID('
+          sdsf_out.y = sdsf_out.y||role') SERVICE('access') ALLOW)'
+          if length(sdsf_out.y) > 71 then
+            do
+              sdsf_out.y = 'RECKEY 'res_key' ADD('resname' -'
+              y = y + 1
+              sdsf_out.y = 'UID('role') SERVICE('access') ALLOW)'
+              y = y + 1
+            end
+          else
+           y = y + 1
+        end
+    end
+  end
+  x = x + 1
+ end
+"execio * diskw "ddname" (stem sdsf_out. FINIS"
+say 'Processing Completed - Press Enter'
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+TIM = TIME()
+DAT = DATE()
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+/* call esmtype */
+"ISPEXEC EDIT DATASET('"udsn"')"
+address tso "free f("sdname")"
+address tso "free f("ddname")"
+return
+address tso "DELETE '"udsn"'"
+/*             */
+/*             */
+/* A FUNCTION TO DO A STRING REPLACE */
+STRREPLACE:
+ORIGINAL = ARG(1)
+OLDTXT = ARG(2)
+NEWTXT = ARG(3)
+/* YOU CAN CHANGE THE BELOW KEY (TMPTXT), WHICH IS USED AS A TEMPORARY
+POINTER TO IDENTIFY THE TEXT TO BE REPLACED */
+TMPTXT = '6A53CD2EW1F'
+NEWSTR = ORIGINAL
+DO WHILE POS(OLDTXT,NEWSTR) > 0
+NEWSTR = SUBSTR(NEWSTR, 1 , POS(OLDTXT,NEWSTR)-1) ||,
+TMPTXT || SUBSTR(NEWSTR, POS(OLDTXT,NEWSTR) + LENGTH(OLDTXT))
+END
+DO WHILE POS(TMPTXT,NEWSTR) > 0
+NEWSTR = SUBSTR(NEWSTR, 1 , POS(TMPTXT,NEWSTR)-1) ||,
+NEWTXT || SUBSTR(NEWSTR, POS(TMPTXT,NEWSTR) + LENGTH(TMPTXT))
+END
+RETURN NEWSTR
+/*             */
+/* END OF CODE */
+/*             */

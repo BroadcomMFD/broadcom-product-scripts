@@ -1,0 +1,146 @@
+/*  REXX  */
+
+  TRACE  Off
+
+/*    Performs masking on DB2 DDL statements                          */
+/*    Variable names in mask may use an underscore to                 */
+/*    replace values preceeded by multiple words.                     */
+/*    Masking characters:                                             */
+/*                                                                    */
+/* ?  Copies a corresponding single character from source             */
+/*    field to target field                                           */
+/*                                                                    */
+/* *  Copies 0 or more corresponding source characters                */
+/*    to target field                                                 */
+/*                                                                    */
+/* -  Removes the single character                                    */
+/*                                                                    */
+
+   WhatDDName = 'DB2MASK2'
+/* If DB2MASK# is allocated? If yes, then turn on Trace  */
+   isItThere = ,
+     BPXWDYN("INFO FI(EDCHKDD) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
+   If isItThere = 0 then Trace r
+  MY_RC = 0
+
+ /*  DB2 Masking routine for named output      */
+ /*    and possible output appending           */
+  Arg MYOUTDD
+
+  Mask. = ''
+  /* Cature Mask names ane values               */
+  /* Read Endevor's Masking rules in the MASKING data  */
+  "EXECIO * DISKR MASKING  (STEM mask.  FINIS "
+
+  ListMaskWords   = ''
+  Do m# = 1 to mask.0
+     msk = Strip(mask.m#)
+     posEqual = Pos('=',msk)
+     if posEqual = 0 then iterate ;
+     msk = overlay(' ',msk,posEqual)
+     text = Substr(msk,1,(posEqual-1))
+     if Words(text)/= 1 then iterate
+     MaskWord = Word(msk,1)
+     Upper MaskWord
+     ListMaskWords = ListMaskWords MaskWord
+     posValue = Wordindex(msk,2)
+     MaskValue = Strip(Substr(msk,posValue))
+     Say 'Found Mask for' MaskWord '=' MaskValue
+     MaskValue = Strip(MaskValue,"B",'"')
+     MaskValue = Strip(MaskValue,"B","'")
+     Mask.MaskWord = MaskValue
+  End ; /* Do m# = 1 to mask.0 */
+
+  Say Copies('-',70)
+
+  /* Apply mask values to Bind statement        */
+  /* Read the DB2#STMT  */
+  "EXECIO * DISKR DB2#STMT (Stem db2. Finis "
+  /* Scan each line of the Bind Statement */
+  Do b# = 1 to db2.0
+     DB2Statement = db2.b#
+     If Words(DB2Statement) = 0 then Iterate ;
+
+     /* Scan each Word of the Bind Statement */
+     Do m# = 1 to Words(ListMaskWords)
+        MaskWord = Word(ListMaskWords,m#)
+        SrchWord = Translate(MaskWord,' ','_') || ' '
+        WhereMaskString = Pos(SrchWord,DB2Statement)
+        If WhereMaskString < 1 then Iterate
+        OrigMask  = Mask.MaskWord
+        Mask  = OrigMask
+        If Mask = ''  then iterate
+        Call DoSubstitution
+        Leave
+     End; /* Do m# = 1 to Words(ListMaskWords) */
+
+  End /*  Do b# = 1 to db2.0 */
+
+  /* Write masked output to MYOUTDD       */
+  /*   (Do not close output to allow appending of data */
+  "EXECIO * DISKW" MYOUTDD "(Stem db2. "
+
+  EXIT (MY_RC) ;
+
+DoSubstitution :
+
+  Say 'Before:' DB2Statement
+  Sa= DB2Statement
+  Sa= WhereMaskString
+  Sa= MaskWord
+
+  /* Find Starting and Ending positions of the clause */
+  /* to be masked                                     */
+  maskEnd = WhereMaskString + length(MaskWord) - 1
+  ValueStarts = ,
+     maskEnd + WordIndex(Substr(DB2Statement, maskEnd+1),1)
+  BeforeChange = Word(Substr(DB2Statement, ValueStarts),1)
+  valueEnd = ValueStarts + Length(BeforeChange) - 1
+
+  /* Apply Mask to clause within the DB2 bind  */
+  /* This routine applies values in 'Mask'  */
+  /* to the value in 'BeforeChange'         */
+  SupportedWildCards = '?*-'
+  AfterChange = BeforeChange
+
+  If Mask = ' ' then Mask ='*' ;
+  Howlong = Length(Mask) + Length(AfterChange)
+  Do char# = 1 to Howlong
+     Maskchar = Substr(Mask,char#,1) ;
+     If maskchar = " " then Leave   ;
+     If maskchar = "?" then iterate ;
+     If maskchar = "*" then,
+        Do
+        tail = Substr(Mask,char# + 1)
+        Mask  = AfterChange || tail;
+        char# = Max(char#,length(AfterChange) )
+        Iterate ;
+        End;
+     If maskchar = "-" then,
+        Do
+        tail = Substr(AfterChange,char# + 1)
+        if char# > 1 then,
+           head = Substr(AfterChange,1,char# - 1)
+        else,
+           head = ''
+        AfterChange = head || tail;
+        Iterate ;
+        End;
+     Maskchar    = Substr(Mask,char#,1) ;
+     AfterChange = Overlay(Maskchar,AfterChange,char#)
+     If char# = Length(Mask) then,
+        AfterChange = Substr(AfterChange,1,char#)
+  End /* Do char# = 1 to Length(Mask) */
+
+  say 'Mask:'  OrigMask
+  If ValueStarts > 1 then,
+       head = Substr(DB2Statement,1,ValueStarts -1)
+  Else head = ''
+  DB2Statement = head || AfterChange || ,
+    Strip(Substr(DB2Statement,valueEnd + 1 ));
+  Say 'After: ' DB2Statement
+  Say Copies('-',70)
+
+  db2.b# = DB2Statement
+
+  Return

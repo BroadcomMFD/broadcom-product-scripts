@@ -2,6 +2,7 @@
 /* -------------------------------------------------------------- */
 /* This is a simple version that:                                 */
 /*  o Reuses a CCID value already on the element if CCID is blank */
+/*  o Validates a CCID with Service-Now                           */
 /*  o Reuses a comment value from element    if comment is blank  */
 /*  o Gives a friendly reminder if the SIGNOUT OVERRIDE is on     */
 /* -------------------------------------------------------------- */
@@ -39,14 +40,30 @@
    Message =''
    MessageCode = '    '
 
-   /* If CCID is left blank, then apply last used CCID  */
+   /* If CCID is left blank, then apply last used CCID        */
+   /* otherwise if it appears to be a ServiceNow  - validate  */
    If REQ_CCID = COPIES(' ',12) then Call Update_CCID;
+   Else,
+   If Substr(REQ_CCID,1,3) = 'PRB' |,
+      Substr(REQ_CCID,1,3) = 'CHG' then Call Validate_CCID;
 
    /* If COMMENT is left blank, then apply last used COMMENT */
    If MyRc < 8 &,
       REQ_COMMENT = COPIES(' ',40) then Call Update_COMMENT;
 
    sa= 'MyRc =' MyRc
+
+   If SRC_ENV_SYSTEM_NAME = 'ADMINSYS' |,
+      TGT_ENV_SYSTEM_NAME = 'ADMINSYS' then,
+      Do
+      hexAddress = D2X(ADDRESS_REQ_USER_DATA)
+      storrep = STORAGE(hexAddress,,'Endevor Admin Work')
+      hexAddress = D2X(ADDRESS_REQ_ALTER_WITH_UPDATE)
+      storrep = STORAGE(hexAddress,,'00000004'X)
+      hexAddress = D2X(Address_ECB_RETURN_CODE)
+      storrep = STORAGE(hexAddress,,'00000004'X)
+      Exit
+      End
 
    /* Did user specify OVERRIDE SIGNOUT ?                    */
    If MyRc = 0 & REQ_SISO_INDICATOR = 'Y' then
@@ -100,6 +117,62 @@ Update_CCID:
    hexAddress = D2X(Address_REQ_CCID)
    storrep = STORAGE(hexAddress,,Replace_CCID)
    MyRc = 4
+
+   Return;
+
+Validate_CCID:
+
+   /* build  STDENV input  */
+   CALL BPXWDYN ,
+      "ALLOC DD(STDENV) LRECL(080) BLKSIZE(24000) SPACE(1,1) ",
+             " RECFM(F,B) TRACKS ",
+             " NEW UNCATALOG REUSE ";
+   Queue "EXPORT PATH=$PATH:" ||,
+         "'/usr/IBM/python/lib/python#.##/'"
+   Queue "EXPORT VIRTUAL_ENV=" ||,
+         "'u/your/venv/lib/python#.##/site-packages/'"
+   "EXECIO 2 DISKW STDENV (finis"
+
+   /* build  BPXBATCH inputs and outputs */
+   /* build  STDPARM input */
+   CALL BPXWDYN ,
+      "ALLOC DD(STDPARM) LRECL(080) BLKSIZE(24000) SPACE(1,1) ",
+             " RECFM(F,B) TRACKS ",
+             " NEW UNCATALOG REUSE ";
+   Queue "sh cd " ||,
+         "u/your/venv/lib/python#.##/site-packages;"
+   Queue "python ServiceNow.py" REQ_CCID
+   "EXECIO 2 DISKW STDPARM (finis"
+
+   CALL BPXWDYN ,
+      "ALLOC DD(STDOUT) LRECL(200) BLKSIZE(20000) SPACE(5,5) ",
+             " RECFM(F,B) TRACKS ",
+             " NEW UNCATALOG REUSE ";
+   Notnow =,
+      "ALLOC DD(STDOUT) DA('IBMUSER.STDOUT') OLD REUSE "
+
+   CALL BPXWDYN "ALLOC DD(STDIN)  DUMMY SHR REUSE"
+   CALL BPXWDYN "ALLOC DD(STDERR) DA(*) SHR REUSE"
+
+   ADDRESS LINK 'BPXBATCH'
+
+   "EXECIO * DISKR STDOUT (Stem stdout. finis"
+   lastrec#   = stdout.0
+   lastrecord = Substr(stdout.lastrec#,1,40)
+
+   If Pos("Exists",lastrecord) = 0 then,
+      Do
+      Message = 'C1UEXTR2 - CCID ' REQ_CCID ||,
+                ' is not defined to Service-Now'
+      MessageCode = 'U012'
+      MyRc        = 8
+      End
+
+   CALL BPXWDYN "FREE  DD(STDENV) "
+   CALL BPXWDYN "FREE  DD(STDPARM)"
+   CALL BPXWDYN "FREE  DD(STDOUT) "
+   CALL BPXWDYN "FREE  DD(STDIN)  "
+   CALL BPXWDYN "FREE  DD(STDERR) "
 
    Return;
 

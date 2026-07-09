@@ -1,0 +1,140 @@
+//*-------------------------------------------------------------------          
+//*- If shipping from middle sections of the life cycle with----------          
+//*- promotion packages, then you may turn off the auto-CAST----------          
+//*- feature, and include this member in your Notification  ----------          
+//*- jobs. Then, promotion packages will be automatically   ----------          
+//*- CAST after all the Shipments are done.                 ----------          
+//*-                                                        ----------          
+//*- The LASTENVM and LASTSTGE variables designate when     ----------          
+//*- to stop this kind of auto Casting.                     ----------          
+//*- See the SHIP#FTP example shipment model.               ----------          
+//*-------------------------------------------------------------------          
+//*   Expected JCL symbols include:                                             
+//*     PACKAGE - the package name                                              
+//*     LASTENVM - last Environ name in the map ex. PRD / PROD .....            
+//*     LASTSTGE - last stage name   in the map ex. 2, P ....                   
+//*     DSPREFIX - prefix to use for a Shipment report                          
+//*-------------------------------------------------------------------          
+//*   Example SET statements for the JCL that includes this memeber:            
+//*                                                                             
+//*     //  SET PACKAGE='&Package'                                              
+//*     //  SET LASTENVM='PRD'                                                  
+//*     //  SET LASTSTGE='2'                                                    
+//*     //  SET DSPREFIX='&Hostprefix.D&Date6.T&Time6'                          
+//*                                                                             
+//*-------------------------------------------------------------------          
+//*   STEP 1 -- CSV UTILITY to collect Package information                      
+//*-------------------------------------------------------------------          
+//RUNCSVS  EXEC PGM=NDVRC1,REGION=4M,     Use CSV for pkg  SHIPCAST             
+//         PARM='BC1PCSV0'                                                      
+//*--                                                                           
+//   INCLUDE MEMBER=STEPLIB       <- ENDEVOR Steplib and CONLIB                 
+//*--                                                                           
+//BSTIPT01 DD  *,SYMBOLS=JCLONLY                                                
+    LIST PACKAGE SHIP                                                           
+      TO FILE CSVPKGE1                                                          
+      FROM PACKAGE '&PACKAGE'                                                   
+           OPTIONS .                                                            
+    LIST PACKAGE ID '&PACKAGE'                                                  
+      TO FILE CSVPKGE2                                                          
+           OPTIONS NOCSV .                                                      
+//CSVPKGE1 DD DSN=&&CSVFILE1,                                                   
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(NEW,PASS),                                                        
+//      SPACE=(TRK,(5,1),RLSE)                                                  
+//CSVPKGE2 DD DSN=&&CSVFILE2,                                                   
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),                        
+//      DISP=(NEW,PASS),                                                        
+//      SPACE=(TRK,(5,1),RLSE)                                                  
+//C1MSGS1  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//*-------------------------------------------------------------------          
+//*   STEP 2 -- Show CSV output (you may elect to skip this step)               
+//*-------------------------------------------------------------------          
+//SHOWME   EXEC PGM=IEBGENER,REGION=1024K Show CSV outputs SHIPCAST             
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1   DD  DSN=&&CSVFILE1,DISP=(OLD,PASS)                                   
+//         DD  DSN=&&CSVFILE2,DISP=(OLD,PASS)                                   
+//SYSUT2    DD SYSOUT=*                           OUTPUT FILE                   
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//*   STEP 3 -- Analyze CSV output to determine whether to CAST                 
+//*--------------------------------------------------------------------         
+//CASTQERY EXEC PGM=IRXJCL,COND=(4,LT),   Analyze CSV data SHIPCAST             
+//         PARM='ENBPIU00 PARMLIST'                                             
+//*--                                                                           
+//   INCLUDE MEMBER=CSIQCLS0      <- where is ENBPIU00                          
+//*--                                                                           
+//TABLE    DD  DSN=&&CSVFILE1,DISP=(OLD,DELETE)                                 
+//PARMLIST DD *                                                                 
+  NOTHING    NOTHING  PKGINFO   0                                               
+  MODEL      RESULTS  OPTIONS   A                                               
+  RESULTS    REPORT   NOTHING   1                                               
+//CSVALPKG DD  DSN=&&CSVFILE2,DISP=(OLD,DELETE)                                 
+//PKGINFO  DD *,SYMBOLS=JCLONLY                                                 
+* Examine the API output to find Promotion Target info                          
+  "EXECIO 1 DISKR CSVALPKG (Stem pkg. Finis"                                    
+  PromotionEnv = Strip(Substr(pkg.1,857,8))                                     
+  PromotionStg = Strip(Substr(pkg.1,865,1))                                     
+  Say '@PKGINFO Promotion Target is' PromotionEnv PromotionStg                  
+  If PromotionEnv='&LASTENVM' & PromotionStg='&LASTSTGE' then Exit              
+  If PromotionEnv = '   ' then Exit(0)                                          
+  $my_rc = 1                                                                    
+//MODEL    DD *                                                                 
+PKG_ID &PKG_ID Shipped to &DEST_ID &SUBMIT_DATE &SUBMIT_TIME                    
+  Promotion Package Target = &PromotionEnv &PromotionStg                        
+  HOST/RMOT =&HOST_STG_RC &HOST_TRANS_RC / &RMT_JOB_NAME &RMT_MOVE_RC           
+//OPTIONS  DD *                                                                 
+  $Table_Type = "CSV"                                                           
+  DEST_ID = LEFT(DEST_ID,8)                                                     
+  If RMT_MOVE_RC = " " then $my_rc = 4    /* wait for shipments */              
+  If RMT_MOVE_RC = " " then RMT_MOVE_RC = '?????'                               
+//*EPORT   DD SYSOUT=*   <- Show status of all package shipments                
+//RESULTS  DD DSN=&&RESULTS,                                                    
+//      DCB=(RECFM=FB,LRECL=080,BLKSIZE=8000,DSORG=PS),                         
+//      DISP=(NEW,PASS),                                                        
+//      SPACE=(TRK,(1,1),RLSE)                                                  
+//REPORT   DD SYSOUT=*                                                          
+//SYSTSPRT DD SYSOUT=*                                                          
+//SYSPRINT DD SYSOUT=*                                                          
+//DISPLAYS DD SYSOUT=*                                                          
+//NOTHING  DD DUMMY                                                             
+//SYSTSIN  DD DUMMY                                                             
+//*--------------------------------------------------------------------         
+//*   STEP 4 -- Write report to shipping dataset                                
+//*-------------------------------------------------------------------          
+//REPORT   EXEC PGM=IEBGENER,             Report Shippings SHIPCAST             
+//         COND=(1,NE,CASTQERY)                                                 
+//SYSPRINT  DD SYSOUT=*                           MESSAGES                      
+//SYSUT1    DD DSN=&&RESULTS,DISP=(OLD,DELETE)                                  
+//SYSUT2    DD DSN=&DSPREFIX..SHIPRPRT,                                         
+//          DCB=(RECFM=FB,LRECL=080,BLKSIZE=8000,DSORG=PS),                     
+//          DISP=(NEW,CATLG,KEEP),                                              
+//          SPACE=(TRK,(1,1),RLSE)                                              
+//SYSIN    DD DUMMY                               CONTROL STATEMENTS            
+//SYSUDUMP DD SYSOUT=*                                                          
+//*--------------------------------------------------------------------         
+//*   STEP 5 -- If promotion package, no errors, and not at the                 
+//*          -- end of the map, and all shipments are done, then                
+//*          -- Reset and Cast the package .                                    
+//*--------------------------------------------------------------------         
+//CASTPKGE EXEC PGM=NDVRC1,               Maybe  Cast      SHIPCAST             
+//         COND=(1,NE,CASTQERY),                                                
+//         PARM=ENBP1000,DYNAMNBR=1500                                          
+//EN$TRXIT  DD DUMMY                                                            
+//BSTERR    DD SYSOUT=*                                                         
+//EN$TROPT  DD SYSOUT=*                                                         
+//EN$TRESI  DD SYSOUT=*                                                         
+//EN$SMESI  DD SYSOUT=*                                                         
+//EN$SMRPT  DD SYSOUT=*                                                         
+//ENPSCLIN DD *,SYMBOLS=JCLONLY                                                 
+  RESET PACKAGE  '&PACKAGE' .                                                   
+   CAST PACKAGE  '&PACKAGE' .                                                   
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//BSTERR   DD SYSOUT=*                                                          
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//   INCLUDE MEMBER=STEPLIB       <- ENDEVOR Steplib and CONLIB                 
+//JCLOUT   DD DUMMY                                                             

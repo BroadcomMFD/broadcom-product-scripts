@@ -173,7 +173,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(SYSEXEC) ',
-              'DA(SYSMD32.NDVR.TEAM.REXX)  SHR REUSE'
+             'DA(YOURSITE.NDVR.TEAM.REXX) SHR REUSE'          
                   DELIMITED BY SIZE
              INTO ALLOC-TEXT
            END-STRING.

@@ -2,7 +2,9 @@
 
 This collection of mainframe tools is dependent upon IBM's ISPF. The items can only be used on the mainframe by users of Quick-Edit and Endevor. Although these tools are not available to  VS Code or Zowe users, some provide a user experience similar to one from a modern tool.
 
-Use the extension on each item to determine where the item needs to reside.
+You have a choice on how to upload to your mainframe:
+ 1. Use the extension on each item to determine where the item needs to reside. Upload the items you need individually.
+ 2. Look for a .bat file whose name matches a function you want to install. If you click on the .bat file in your cloned location, it will copy all the files you need into a .moveout fle. Then you can upload the single .moveout file to your mainframe, and use the @README member to know where everything goes.
 
 - rex items must reside in a REXX library, typically a SYSEXEC, SYSPROC or CSIQCLS0 library
 - pnl items must reside in an ISPF panel library, typically an ISPPLIB or a CSIQPENU library
@@ -23,6 +25,10 @@ If you have only one Endevor image, or multiples with matching variable informat
 These items can be referenced from either Quick-Edit or Endevor. They offer a way to create an Endevor package using only one screen while viewing a list of elements. Just  enter "TSO PACKAGE" on the command line, and the elements listed will be placed into a new package. You can choose whether MOVE, GENERATE or DELETE actions are to be performed on all listed elements. Then a job is submitted to CAST and optionally EXECUTE the package. This tool can easily be modified to create packages using your naming standard, and to enforce rules that must be followed at your site. 
 APIALPKG is an optional API program that can be used with the Package tool. It allows a user to create a new package by copying the content of an existing package. In this case, from any Quick-Edit or Endevor screen that shows a package name, enter "TSO PACKAGE" on the command line, move the cursor to the first character of the package name, and press 'Enter'. 
 
+If you want to dynamically adjust package names or content, based on inventory location, see the LOADTABL member and commented code in the REXX programs that show examples for its use.
+
+The **GTNXTSTG.rex** program can be used by **PACKAGE** to determine the next mapped Environment and StageId, from the current values. You can find **GTNXTSTG.rex** on the [Miscellaneous-items folder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/GTNXTSTG.rex).
+ 
 ## PDA and NOTIFY
 
 These members belong to a feature known as the "Parallel Development Alert". They can be used only by Quick-Edit users, and provide notifications to developers that the edited element is in parallel development. Notifications appear as note lines and indicate the locations, userids and CCIDs for each element found.  NOTIFY can be used to turn on or off the notifications for a single user. Either within PDA or within each renamed @SITE member there must be search instructions such as this example:

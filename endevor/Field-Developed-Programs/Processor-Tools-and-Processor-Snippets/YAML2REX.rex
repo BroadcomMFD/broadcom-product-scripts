@@ -1,5 +1,6 @@
 /*    REXX  - Convert YAML to REXX.                                  */
 /*     in some cases Stem arrays, to support Mainframe processing    */
+
    isItThere = ,
      BPXWDYN("INFO FI(YAML2REX) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then TraceRc = 1
@@ -31,6 +32,27 @@
       validrec = CloserLookAtYamlrecall() ;
       Call  YAMLRecordToRexx
    End /* Do y# = 1 to yaml.0  */
+
+   /* Provide final numeric values for rexx.### entries */
+   RexxCounter =  newRexx.0
+   NewRexxCounter = RexxCounter
+   ListNumberedRexx = ''
+   Do rx# = RexxCounter by -1 to 1
+      If Words(newRexx.rx#) < 2 then iterate;
+      RexxSymbol    = Word(newRexx.rx#,1)
+      tempSymbol    = Translate(RexxSymbol," ",".")
+      numberedInx   = Word(tempSymbol,Words(tempSymbol))
+      numericValue  = Verify(numberedInx,$Numbers)
+      If numericValue > 0 then Iterate
+      finalnumber = Word(tempSymbol,Words(tempsymbol))
+      wherelast = WordIndex(tempSymbol,Words(tempsymbol))
+      RexxVarb = Substr(RexxSymbol,1,wherelast-1) || '0'
+      If Wordpos(RexxVarb,ListNumberedRexx) > 0 then iterate
+      ListNumberedRexx = ListNumberedRexx RexxVarb
+      NewRexxCounter = NewRexxCounter +  1
+      newRexx.NewRexxCounter = RexxVarb '= ' finalnumber
+   End
+   newRexx.0 = NewRexxCounter
 
    /* Place Rexx statements onto the stack for caller */
    RexxCounter =  newRexx.0

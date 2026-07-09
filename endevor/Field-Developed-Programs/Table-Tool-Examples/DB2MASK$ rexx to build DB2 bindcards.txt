@@ -1,0 +1,154 @@
+/*  REXX  */
+
+  TRACE  Off
+   WhatDDName = 'DB2MASK$'
+/* If DB2MASK$ is allocated? If yes, then turn on Trace  */
+   isItThere = ,
+     BPXWDYN("INFO FI(EDCHKDD) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
+   If isItThere = 0 then Trace r
+
+  MY_RC = 0
+
+ /*  DB2 Masking routine for processors        */
+
+  Mask. = ''
+  /* Capture Mask names ane values              */
+  /* Read Endevor's Masking rules in the MASKING data  */
+  "EXECIO * DISKR MASKING  (STEM mask.  FINIS "
+
+  Do m# = 1 to mask.0
+     msk = Strip(mask.m#)
+     posEqual = Pos('=',msk)
+     if posEqual = 0 then iterate ;
+     msk = overlay(' ',msk,posEqual)
+     text = Substr(msk,1,(posEqual-1))
+     if Words(text)/= 1 then iterate
+     MaskWord = Word(msk,1)
+     posValue = Wordindex(msk,2)
+     MaskValue = Strip(Substr(msk,posValue))
+     Say 'Found Mask for' MaskWord '=' MaskValue
+     MaskValue = Strip(MaskValue,"B",'"')
+     MaskValue = Strip(MaskValue,"B","'")
+     Mask.MaskWord = MaskValue
+  End ; /* Do m# = 1 to mask.0 */
+
+  X = OUTTRAP(LINE.);
+
+  /* Apply mask values to Bind statement        */
+  /* Read the BINDSTMT  */
+  "EXECIO * DISKR BINDSTMT (Stem bind. Finis "
+
+  /* Scan each line of the Bind Statement */
+  Do b# = 1 to bind.0
+     BindStatement = Strip(substr(bind.b#,1,72))
+ /*  BindStatement = substr(BindStatement,1,72) */
+     If Words(BindStatement) = 0 then Iterate ;
+     If b# > 1 & b# < bind.0 &,
+        Substr(BindStatement,Length(BindStatement),1) /= '-' then,
+           BindStatement = BindStatement '-'
+
+     /* Scan each Word of the Bind Statement */
+     Do wrd# = 1 to Words(BindStatement)
+        pos_db2_1 = pos("BIND",BindStatement)
+        pos_db2_2 = pos("PLAN",BindStatement)
+        myword = Word(BindStatement,wrd#) ;
+        myword = Translate(myword,' ','(')
+        myword = Word(myword,1)
+        Mask  = Mask.myword
+        If Mask = ''  then iterate
+        tmp    = Translate(myword,' ','()-+');
+        stmt   = Word(tmp,1)
+        Say 'Before:' BindStatement
+
+        /* Find Starting and Ending positions of the clause */
+        /* to be masked                                     */
+        plc = Wordindex(BindStatement,wrd#)
+        startpos = Pos('(',BindStatement,plc)
+        endpos = Pos(')',BindStatement,plc)
+        clauseLen = endpos - startpos + 1
+        if plc = 0 then iterate ;
+        MaskValue = Substr(BindStatement,startpos,clauseLen)
+        MaskValue = Strip(MaskValue,'L','(')
+        MaskValue = Strip(MaskValue,'T',')')
+        MaskValue = Strip(MaskValue)
+        If Pos('.',MaskValue) > 0 then,
+           Do
+           wherePeriod = Pos('.',MaskValue)
+           Mask = Copies('-',wherePeriod) || Mask
+           End
+        OriginalLen = Length(MaskValue)
+        ValueStarts  = Pos(MaskValue,BindStatement) ;
+
+        /* Apply Mask to clause within the DB2 bind  */
+        Call ApplySingleMaskOverride ;
+        say 'Mask:'  Mask
+        MaskValue = Strip(MaskValue)
+        where = Wordindex(BindStatement,wrd#)
+        newvalue = stmt'('MaskValue')'
+        newvalue = Left(newvalue,Length(myword))
+        If ValueStarts > 1 then,
+             head = Substr(BindStatement,1,ValueStarts-1)
+        Else head = ''
+        BindStatement = head || MaskValue || ,
+          Strip(Substr(BindStatement,ValueStarts+OriginalLen)) ;
+        Say 'After: ' BindStatement
+        Say Copies('-',70)
+     End /* Do wrd# = 1 Words(BindStatement) */
+
+     bind.b# = BindStatement
+
+  End /*  Do b# = 1 to bind.0 */
+
+  /* Replace the member with the Masked data */
+  "EXECIO * DISKW BINDS    (Stem bind. Finis "
+
+  EXIT (MY_RC) ;
+
+ApplySingleMaskOverride:
+
+  /* This routine applies values in 'Mask'  */
+  /* to the value in 'MaskValue'            */
+  SupportedWildCards = '?*-^'
+
+  If Mask = ' ' then Mask ='*' ;
+  Do char# = 1 to Length(Mask)
+     maskchar = Substr(Mask,char#,1) ;
+     If maskchar = "?" then iterate ;
+     If maskchar = "*" then Leave ;
+     If maskchar = "-" then,
+        Do  /* use one character from the value */
+        tail = Substr(MaskValue,char# + 1)
+        head = Substr(MaskValue,1,char#)
+        MaskValue = Strip( head || tail)  ;
+        Iterate ;
+        End;
+     If maskchar = "^" then,
+        Do  /* eat one character from each .... */
+        /* eat a MaskValue char  */
+        if char# > Length(MaskValue) then,
+           tail = ''
+        else,
+           tail = Substr(MaskValue,char# + 1)
+        if char# > 1 then,
+           head = Substr(MaskValue,1,char# - 1)
+        else,
+           head = ''
+        MaskValue = Strip( head || tail)  ;
+        /* eat a Mask char too */
+        If char# > 1 then,
+           Mask = Substr(Mask,1,(char#-1)) || Substr(Mask,(char#+1))
+        Else,
+           Mask = Substr(Mask,2)
+        /* Mask char is changed for char# position */
+        char# = char# - 1
+        Iterate ;
+        End;
+     Maskchar    = Substr(Mask,char#,1) ;
+     MaskValue = Overlay(Maskchar,MaskValue,char#)
+     If char# = Length(Mask) then,
+        MaskValue = Substr(MaskValue,1,char#)
+  End /* Do char# = 1 to Length(Mask) */
+
+  Return
+
+

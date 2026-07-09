@@ -46,15 +46,12 @@
    /*                                                             */
    /*                                                             */
    /*----------------------------------------------------------*/
-
 /* Is TXTRPLCE allocated? If yes, then turn on Trace  */
    isItThere = ,
      BPXWDYN("INFO FI(TXTRPLCE) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
    If isItThere = 0 then TraceRc = 'Y'
-
    /* A processor provides these Endevor values as arguments */
    ARG Reference OnStack
-
    /* INPUTS are optional, but can name dataset names     */
    /* for OLDTXT and NEWTXT                               */
    isItThere = ,
@@ -69,7 +66,7 @@
       End; /* Do in# = 1 to inp.0 */
       If OLDTXT = '' then,
          Do
-         say 'TXTRPLCE: Execting an assignment for OLDTXT'
+         say 'TXTRPLCE: Expecting an assignment for OLDTXT'
          Exit(12)
          End ;  /* If OLDTXT = ''*/
       If NEWTXT = '' then NEWTXT = OLDTXT
@@ -78,7 +75,6 @@
       String= "ALLOC DD(NEWTXT) DA("NEWTXT") SHR REUSE"
       CALL BPXWDYN STRING;
       End;  /* If isItThere = 0 */
-
    /* Set Defaults / initial values....                        */
    $numbers   = '0123456789'   /* chars for numeric values   */
    AlphaChars   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -86,7 +82,6 @@
    ShowReplaceResults = 'Y'
    TXT.               = ''
    OptionsType        = 'REXX'
-
    Drop MaxReturnCode
    TXT.Reference.MaxReturnCode = 4   /* Value for MaxReturncode */
    TXT.Reference.where. = 'AFTER'    /* either BEFORE/AFTER */
@@ -96,9 +91,7 @@
    TXT.Reference.REPLACE. = ''
    TXT.Reference.Insertx. = ''
    TXT.Reference.InsertAtEnd. = ''
-
    NumberInstructions = 0     ; /* Assume zero, unless we find some*/
-
    If TraceRc = 'Y' then Trace r
    /* Get   Options for tailoring and processing the JCL       */
    /* If Options are in a YAML format, comment the 1st line    */
@@ -106,14 +99,13 @@
    If OnStack /= 'Stack' &,
       OnStack /= 'STACK' then,
       Call ProcessInputOptions; /* Must read and validate them */
-
    /* At this point, OPTIONS statements are validated as OK, */
    /* and are found on the stack...                          */
    NumberInstructions = QUEUED()
    If NumberInstructions = 0 then,
       Do
       Say 'TXTRPLCE: finds no instructions for tailoring'
-      Exit
+      Exit(4)
       End
    Do optCount = 1 to NumberInstructions
       Parse pull nextOption
@@ -121,21 +113,16 @@
          Say 'TXTRPLCE:' nextOption
       interpret nextOption
    End;
-
    /* Using Options tailor the JCL                */
    /* Yaml converted options are a bit different  */
    If OptionsType = 'YAML' then,
       Call TailorNEWTXTfromOldViaYaml;
    Else
       Call TailorNEWTXTfromOldViaOptions ;
-
    If TraceRc = 'Y' then,
       Say 'TXTRPLCE: exiting '
-
    Exit(1); /* Successful update       */
-
 ProcessInputOptions:
-
    /* Determine from 1st record if OPTIONS are in YAML format  */
    If  TraceRc = 'Y'  then Trace r
    "EXECIO 1 DISKR OPTIONS "    /* may be in Rexx or Yaml format*/
@@ -158,15 +145,47 @@ ProcessInputOptions:
       what = OPTVALDT(OPTIONS Y)
       OptionsType = 'Rexx'
       End ; /* If Substr(FirstOption,1,1) = '%' */
-
+   isItThere = ,
+     BPXWDYN("INFO FI(VARIABLE) INRTDSN(DSNVAR) INRDSNT(myDSNT)")
+   If isItThere = 0 then Call Process_VARIABLE_input
    NumberInstructions = QUEUED()
    Return;
-
+Process_VARIABLE_input:
+   /* Read the VARIABLE data (variables provided by Endevor) */
+   /* Variables can be mixture of C1* variables  of Endevor, */
+   /* processor variables and Site Symbol variables.         */
+   /* Append new instructions onto the Stack                 */
+   "EXECIO * DISKR VARIABLE ( Stem var. Finis"
+   If OptionsType = 'YAML' then,
+      VarPrefix = 'TXT.'Reference'.Change'
+   Else,
+      VarPrefix = 'TXT.'Reference
+   indx#= QUEUED() +1
+   Do v# = 1 to var.0
+      ndvrVariable = var.v#
+      whereText = WordIndex(ndvrVariable,1)
+      if whereText = 0 then Iterate;
+      If Substr(ndvrVariable,whereText,1) = '#' |,
+         Substr(ndvrVariable,whereText,1) = '*' then Iterate;
+      PARSE VAR ndvrVariable $keyword "=" $keyValue
+      $keyword = Strip($keyword)
+      $keyValue = Strip($keyValue)
+      Queue VarPrefix".Findtxt."indx# "='&"$keyword"'"
+      Queue VarPrefix".Replace."indx# "="$keyValue
+      If TraceRc = 'Y' then,
+         Do
+         Say 'TXTRPLCE:'
+         Say VarPrefix".Findtxt."indx# "='&"$keyword"'"
+         Say VarPrefix".Replace."indx# "="$keyValue
+         End
+      indx#= indx# +1
+   End; /*  Do v# = 1 to var.0 */
+   say   VarPrefix".Findtxt.0="indx#
+   Queue VarPrefix".Findtxt.0="indx#
+   Return;
 TailorNEWTXTfromOldViaYaml:
-
    /* Read the OLDTXT file           */
    "EXECIO * DISKR OLDTXT ( Stem txtrec. Finis"
-
    /* If anything is to be inserted at End, do it here */
    Do j# = 1 to txtrec.0
       If TXT.Reference.InsertAtEnd.j# = '' then leave;
@@ -174,8 +193,6 @@ TailorNEWTXTfromOldViaYaml:
       txtrec.txtrec# = TXT.Reference.InsertAtEnd.j#
       txtrec.0 = txtrec#
    End; /* Do j# = 1 to txtrec.0  */
-
-
    /* Scan each record of the text file */
    Do j# = 1 to txtrec.0
       textline = txtrec.j#
@@ -198,17 +215,14 @@ TailorNEWTXTfromOldViaYaml:
          If newDDnameTxt /= '' then,
             Do; Call ReplaceDDname; Iterate; end;
          End /* If Substr(textline,1,2) = '//' & ... */
-
 /*    If TraceRc = 'Y' then Trace r  */
       textline = txtrec.j#
-
       /* Execute the Search and replace string actions */
       Do rpl# = 1 to NumberInstructions
          findString = TXT.Reference.Change.FindTxt.rpl#
          If findString = '' then iterate;
          whereTxt = Pos(findString,textline)
          If whereTxt = 0 then iterate;
-
          replaceString = TXT.Reference.Change.Replace.rpl#
          If replaceString /= '' then,
             Do
@@ -222,18 +236,15 @@ TailorNEWTXTfromOldViaYaml:
             If insertWhere /= 'BEFORE' then,
                insertWhere = 'AFTER'
             Saved_textline = textline
-
             If inserttextlines /= '' &,
                ShowReplaceResults = 'Y' then,
                   Say 'Inserting Text lines' insertWhere,
                    findString
-
             If insertWhere = 'AFTER' then,
                Do
                Queue textline
                thistextlineQueued = 'Y'
                End
-
             Do yamlcounter = 1 to NumberInstructions
                textline =,
                   TXT.Reference.Change.Insertx.rpl#.yamlcounter
@@ -243,27 +254,20 @@ TailorNEWTXTfromOldViaYaml:
                   Say " In:"textline
                Queue textline
             End /* Do yamlcounter = 1 to $Opts.0 */
-
             If insertWhere /= 'AFTER' then,
                   Queue Saved_textline
             End /* else ..  If replaceString /= ''  */
-
       End; /* Do rpl# = 1 to NumberInstructions */
       /* Write line of JCL to output                   */
-
       If thistextlineQueued /= 'Y' then,
          Do
          Call ReplaceVariablesOnly;
-         Queue textline
+         If textline /= '' then Queue textline
          End
    End; /* Do j# = 1 to txtrec.0  */
-
    "EXECIO" QUEUED() "DISKW NEWTXT ( Finis"
-
    Return;
-
 TailorNEWTXTfromOldViaOptions:
-
    /* Read the OLDTXT file           */
    "EXECIO * DISKR OLDTXT ( Stem txtrec. Finis"
    /* Scan each record of the JCL    */
@@ -288,10 +292,8 @@ TailorNEWTXTfromOldViaOptions:
          If newDDnameTxt /= '' then,
             Do; Call ReplaceDDname; Iterate; end;
          End
-
 /*    If TraceRc = 'Y' then Trace r  */
       textline = txtrec.j#
-
       /* Execute the Search and replace string actions */
       Do rpl# = 1 to NumberInstructions
          findString = TXT.Reference.FindTxt.rpl#
@@ -325,20 +327,15 @@ TailorNEWTXTfromOldViaOptions:
             End /* else ..  If replaceString /= ''  */
       End; /* Do rpl# = 1 to NumberInstructions */
       /* Write line of TXT to output                   */
-
       If thistextlineQueued /= 'Y' then,
          Do
          Call ReplaceVariablesOnly;
          Queue textline
          End
    End; /* Do j# = 1 to txtrec.0  */
-
    "EXECIO" QUEUED() "DISKW NEWTXT ( Finis"
-
    Return;
-
 ReplaceDDname:
-
 /* If  TraceRc = 'Y'    then Trace r  */
    If ShowReplaceResults = 'Y' then,
       Say 'TXTRPLCE: Replacing the Step' thisStepName 'DDname',
@@ -388,14 +385,10 @@ ReplaceDDname:
       "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End /* Else */
-
    j# = j# +1;
    Call SkiptoNextLabel;
-
    Return
-
 SkiptoNextLabel:
-
    SkipThirdChars = ' *'
    /* Find next JCL line with a label in position 3 */
    Do forever
@@ -410,11 +403,8 @@ SkiptoNextLabel:
             End;
       j# = j# +1 ;
    End; /*  Do forever  */
-
    Return
-
 ReplaceText:
-
    Saved_textline = textline;
    If whereTXT = 1 then,
       textline = replaceString || ,
@@ -423,7 +413,6 @@ ReplaceText:
       textline = substr(textline,1,(whereTXT-1)) ||,
                 replaceString || ,
                 substr(textline,whereTXT+Length(findString))
-
    If ShowReplaceResults = 'Y' then,
       Do
       Say "Txt line" j# "Changed:"
@@ -433,11 +422,8 @@ ReplaceText:
       Else,
          Say " AF:***not-shown***"
       End
-
    Return
-
 ReplaceVariablesOnly:
-
       Do upd# = 1 to NumberInstructions
          If OptionsType = 'YAML' then,
             Do
@@ -455,11 +441,8 @@ ReplaceVariablesOnly:
          If whereTxt = 0 then iterate;
          Call ReplaceText;
       End; /* Do upd# = 1 to NumberInstructions */
-
    Return
-
 Inserttextlines:
-
    /* Apply Search and Replace actions to inserted lines */
    Save_textline = textline;
    textline = inserttextlines
@@ -472,12 +455,9 @@ Inserttextlines:
       If replaceString /= '' then,
          Call ReplaceText;
    End ;  /*Do rpl# = 1 to NumberInstructions */
-
    inserttextlines = textline /* line(s) to be inserted         */
    textline = Save_textline   /* The line that triggered insert */
-
    leadingSlashSlash = Pos('//',inserttextlines)
-
    If leadingSlashSlash = 1 then, /* Yes // in new jcl lines */
       Do Forever
       whereNextSlashSlash = Pos('//',inserttextlines,3)
@@ -499,7 +479,4 @@ Inserttextlines:
       "EXECIO 2 DISKW ERRORS (Finis"
       Exit(12)
       End /* Else */
-
-
    Return
-

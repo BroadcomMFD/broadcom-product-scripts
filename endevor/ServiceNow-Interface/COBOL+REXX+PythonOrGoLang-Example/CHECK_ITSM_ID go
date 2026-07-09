@@ -1,0 +1,259 @@
+package main
+
+import (
+ "crypto/tls"
+ "crypto/x509"
+ "encoding/json"
+ "fmt"
+ "io"
+ "log"
+ "net/http"
+ "os"
+ "strings"
+)
+
+const (
+ Certificate_Path  = "/u/users/ibmuser/certificates/service-now-com-chain.pem"
+ ServicenowURI     = "https://yournode.service-now.com"
+ Oauth_url         = "/oauth_token.do"
+ IncidentPath      = "/api/now/table/incident"
+ ChangeRequestPath = "/api/now/table/change_request"
+ queryParms        = "?sysparm_display_value=true&sysparm_query=number="
+ grant_type        = "grant_type=password"
+ client_id         = "client_id=your-client-id-name"
+ client_secret     = "client_secret=your-secret"
+ username          = "username=admin"
+ password          = "password=your-password"
+ contentType       = "application/x-www-form-urlencoded"
+
+ Jira_Certificate_Path = "/u/users/ibmuser/certificates/atlassian-net-chain.pem"
+ Jira_URI              = "https://yourname.atlassian.net"
+ JiraIssuePath         = "/rest/api/3/issue/"
+ JiraUserID            = "emailAddress@yoursite.com"
+ JiraAccessToken       = "111111111111111111111111111111111111111111111111222222222222222222222222222222222222222222222222" +
+  "33333333333333333333333333333333333333333333333344444444444444444444444444444444444444444444444"
+)
+
+type ServiceNow_Token struct {
+ AccessToken  string `json:"access_token"`
+ RefreshToken string `json:"refresh_token"`
+ Scope        string `json:"scope"`
+ TokenType    string `json:"token_type"`
+ ExpiresIn    int    `json:"expires_in"`
+}
+
+//***************************************************************************************************************************************
+// Function validate_ServiceNow :
+//
+// Returns TRUE if the SnowObj ID exists in the Jira Instance at resource resource_uri, Otherwise FALSE
+//
+//***************************************************************************************************************************************
+func validate_ServiceNow(resource_uri, SnowObj string) bool {
+
+ //****************************************************************
+ //READ Certificates from File for TLS connection
+ //****************************************************************
+
+ caCert, err := os.ReadFile(Certificate_Path)
+ if err != nil {
+  log.Fatal(err)
+ }
+ caCertPool := x509.NewCertPool()
+ caCertPool.AppendCertsFromPEM(caCert)
+
+ client := &http.Client{
+  Transport: &http.Transport{
+   TLSClientConfig: &tls.Config{
+    RootCAs: caCertPool,
+   },
+  },
+ }
+
+
+ //****************************************************************
+ // Get OAuth Token
+ //****************************************************************
+
+ payload := strings.NewReader(grant_type + "&" +
+  client_id + "&" +
+  client_secret + "&" +
+  username + "&" +
+  password)
+
+ res, err := client.Post(ServicenowURI+Oauth_url, contentType, payload)
+ if err != nil {
+  fmt.Printf("Error during POST Method to get Oauth Token: %s", err)
+  return false
+ }
+
+ body, err := io.ReadAll(res.Body)
+ res.Body.Close()
+
+ if res.StatusCode > 299 {
+  log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+ }
+
+ if err != nil {
+  log.Fatal(err)
+ }
+
+ var newToken ServiceNow_Token
+ err = json.Unmarshal(body, &newToken)
+
+ if err != nil {
+  log.Fatalf("No OAuth Token returned by ServiceNow Instance: %s.", ServicenowURI)
+  log.Fatal(err)
+ }
+
+ //****************************************************************
+ // Validate existance of the Snow Object using OAuth Token
+ //****************************************************************
+
+ req, _ := http.NewRequest("GET", ServicenowURI+resource_uri, nil)
+
+ req.Header.Add("Accept", "application/json")
+ req.Header.Add("Authorization", "Bearer "+newToken.AccessToken)
+
+ res, err = client.Do(req)
+
+ if err != nil {
+  fmt.Println("HTTP call failed:", err)
+  return false
+ }
+
+ defer res.Body.Close()
+ body, _ = io.ReadAll(res.Body)
+
+ var jsonData map[string]interface{}
+ err = json.Unmarshal(body, &jsonData)
+
+ if err != nil {
+  fmt.Printf("Error unmarshalling JSON: %v", err)
+  return false
+ }
+
+ dataArray, ok := jsonData["result"].([]interface{})
+ if !ok {
+  fmt.Println("Expected 'result' to be an array")
+  return false
+ }
+ if len(dataArray) == 0 {
+  fmt.Printf("ServiceNow object %s is not defined at %s.\n", SnowObj, ServicenowURI)
+  return false
+ } else {
+  fmt.Printf("ServiceNow object %s has been found in ServiceNow instance at %s.\n", SnowObj, ServicenowURI)
+  return true
+ }
+
+}
+
+//***************************************************************************************************************************************
+// Function validate_Jira :
+//
+// Returns TRUE if the JiraObj ID  exists in Jira Instance at resource_uri, Otherwise FALSE
+//
+//***************************************************************************************************************************************
+func validate_Jira(resource_uri, JiraObj string) bool {
+
+ //****************************************************************
+ // READ Certificates from File for TLS connection
+ //****************************************************************
+
+ caCert, err := os.ReadFile(Jira_Certificate_Path)
+ if err != nil {
+  log.Fatal(err)
+ }
+ caCertPool := x509.NewCertPool()
+ caCertPool.AppendCertsFromPEM(caCert)
+
+ client := &http.Client{
+  Transport: &http.Transport{
+   TLSClientConfig: &tls.Config{
+    RootCAs: caCertPool,
+   },
+  },
+ }
+
+ //****************************************************************
+ // GET Jira ITSM Object ID
+ //****************************************************************
+
+ req, _ := http.NewRequest("GET", Jira_URI+resource_uri, nil)
+ req.SetBasicAuth(JiraUserID, JiraAccessToken)
+ //req.Header.Add("Authorization", "Basic "+JiraAccessToken)
+ res, err := client.Do(req)
+
+ if err != nil {
+  fmt.Println("HTTP call failed:", err)
+  return false
+ }
+
+ defer res.Body.Close()
+ body, _ := io.ReadAll(res.Body)
+
+
+ switch HTTP_Code := res.StatusCode; {
+
+ case HTTP_Code == http.StatusNotFound:
+  fmt.Printf("Jira object %s is not defined at %s.\n", JiraObj, Jira_URI)
+  return false
+
+ case HTTP_Code == http.StatusOK:
+  fmt.Printf("Jira object %s has been found at %s.\n", JiraObj, Jira_URI)
+  return true
+
+ default:
+  fmt.Printf("Response from Jira failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+  return false
+ }
+}
+
+func main() {
+
+ //****************************************************************
+ // Get Parameters from caller
+ //****************************************************************
+ var ObjID string
+
+ if len(os.Args) > 1 {
+  ObjID = os.Args[1]
+ } else {
+  fmt.Printf("No parameter has been passed to this program\n")
+  os.Exit(8)
+ }
+
+ var requestURI string
+
+ switch SnowObjType := ObjID[0:3]; SnowObjType {
+
+ case "INC":
+  requestURI = IncidentPath + queryParms + ObjID
+  if validate_ServiceNow(requestURI, ObjID) {
+   os.Exit(0)
+  } else {
+   os.Exit(8)
+  }
+
+ case "CHG":
+  requestURI = ChangeRequestPath + queryParms + ObjID
+  if validate_ServiceNow(requestURI, ObjID) {
+   os.Exit(0)
+  } else {
+   os.Exit(8)
+  }
+
+ default:
+  if ObjID[0:2] == "EI" {
+   requestURI = JiraIssuePath + ObjID[0:2] + "-" + ObjID[2:]
+   if validate_Jira(requestURI, ObjID) {
+    os.Exit(0)
+   } else {
+    os.Exit(8)
+   }
+  } else {
+   fmt.Printf("ITSM Tool Object ID is not controlled: %s.\n", SnowObjType)
+   os.Exit(8)
+  }
+ }
+
+}

@@ -1,0 +1,130 @@
+//IBMUSERB JOB (0000),'Your Name',
+//         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
+//*
+//JOBLIB DD DISP=SHR,DSN=Your.Endevor.CSIQAUTU
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQAUTH
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQLOAD
+//*
+//************************************************************
+//*                                                          *
+//* This utility queries Endevor to produce a report showing *
+//* all elements in QA stage 2. The report is then emailed   *
+//* to a distribution list.                                  *
+//*                                                          *
+//************************************************************
+//**********************************************************
+//*  Delete work file                                      *
+//**********************************************************
+//JSTEP05  EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+ DELETE IBMUSER.TEMP.ELEMENT.CSV
+ SET MAXCC=0
+//*
+//**********************************************************
+//*  Build element list using CSV Utility                  *
+//**********************************************************
+//$$$$$$@1 EXEC PGM=NDVRC1,REGION=4M,
+//         PARM='BC1PCSV0'
+//BSTIPT01 DD *
+LIST ELEMENT *
+     FROM ENV * SYS * SUB * TYP * STAGE *
+     TO DDNAME 'TABLE'
+     OPTIONS   RETURN ALL .
+//TABLE    DD DSN=&&EXTRACTS,
+//      DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),
+//      DISP=(NEW,PASS),
+//      SPACE=(CYL,(5,1),RLSE)
+//C1MSGS1  DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//*
+//**********************************************************
+//*  Show contents of CSV file                             *
+//**********************************************************
+//SHOWME1  EXEC PGM=IEBGENER,REGION=1024K
+//SYSPRINT DD DUMMY
+//SYSUT1   DD DSN=&&EXTRACTS,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//*
+//**********************************************************
+//*  Table Tool - create element report                    *
+//**********************************************************
+//JSTEP15  EXEC PGM=IRXJCL,PARM='ENBPIU00 A',COND=(4,LT)
+//SYSEXEC  DD DISP=SHR,DSN=Your.Endevor.CSIQCLS0
+//TABLE    DD DSN=&&EXTRACTS,DISP=(OLD,DELETE)
+//HEADING  DD *
+Environ,S#,System,Subsys,Type,Element,Date,Time,Action,User
+//MODEL    DD *
+&src1
+//OPTIONS  DD *
+  IF $row# = 1 then X = BuildFromMODEL(HEADING)
+  IF ENV_NAME /= 'QA' THEN $SkipRow = 'Y'
+  IF STG_#    /= '2'  THEN $SkipRow = 'Y'
+  src1a = ENV_NAME || ',' || STG_# || ',' || SYS_NAME || ','
+  src1b = SBS_NAME || ',' || TYPE_NAME  || ',' || ELM_NAME  || ','
+  src1c = LAST_ACT_DATE || ',' || LAST_ACT_TIME || ','
+  src1d = LAST_ACT || ',' || LAST_ACT_USRID
+  src1  = src1a || src1b || src1c || src1d
+//TBLOUT   DD DSN=IBMUSER.TEMP.ELEMENT.CSV,DISP=(,CATLG,DELETE),
+//            SPACE=(CYL,(5,5),RLSE),UNIT=SYSDA,
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PS)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//DISPLAYS DD SYSOUT=*
+//SYSTSIN  DD DUMMY
+//*
+//**********************************************************
+//*  Show contents of Table Tool output                    *
+//**********************************************************
+//SHOWME2  EXEC PGM=IEBGENER,REGION=1024K
+//SYSPRINT DD DUMMY
+//SYSUT1   DD DSN=IBMUSER.TEMP.ELEMENT.CSV,DISP=SHR
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//*
+//**********************************************************
+//*  Build SMTP email with attachement                     *
+//**********************************************************
+//JSTEP20  EXEC PGM=IEBGENER
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUT2   DD DSN=&&HEADER,DISP=(,PASS),SPACE=(TRK,1),
+//            UNIT=SYSDA,DCB=(RECFM=FB,LRECL=80,BLKSIZE=0)
+//* RCPT TO:<peer.name@yoursite.com>
+//* TO:your.name@yoursite.com; peer.name@yoursite.com
+//SYSUT1   DD DATA,DLM=ZZ
+HELO node31
+MAIL FROM:<site.Mainframe@yoursite.com>
+RCPT TO:<your.name@yoursite.com>
+DATA
+FROM: site.Mainframe@yoursite.com
+TO:your.name@yoursite.com
+SUBJECT: Element Report
+MIME-VERSION: 1.0
+CONTENT-TYPE: MULTIPART/MIXED;BOUNDARY="MIME"
+--MIME
+
+site Endevor QA/2 element report  --  see attached
+
+--MIME
+CONTENT-TYPE: TEXT/PLAIN;NAME=QA_Element_Rpt.csv
+CONTENT-ENCODING: 7BIT
+CONTENT-DISPOSITION: ATTACHMENT;
+
+ZZ
+/*
+//**********************************************************
+//*  Send element report via SMTP as an attachment         *
+//**********************************************************
+//JSTEP25  EXEC PGM=IEBGENER
+//SYSUT2   DD SYSOUT=(B,CSSMTP)
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&HEADER,DISP=(OLD,DELETE)
+//         DD DISP=SHR,DSN=IBMUSER.TEMP.ELEMENT.CSV
+//*

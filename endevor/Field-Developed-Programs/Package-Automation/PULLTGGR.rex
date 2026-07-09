@@ -1,5 +1,14 @@
-/*  REXX  */
-/* Submit package shipment jobs from entry(ies) on Trigger */
+/*  REXX                                                             */
+/*                                                                   */
+/*      https://github.com/BroadcomMFD/broadcom-product-scripts      */
+/*                                                                   */
+/* This rexx is a called subroutine.                                 */
+/* It can be called by PKGESHIP during exit processing, or           */
+/* by a package Sweep job. (See SWEEPJOB) .                          */
+/*                                                                   */
+/* From data in SHIPRULE, BILDTGGR updates the Trigger file          */
+/* for each expected shipment. PULLTGGR submits package ship jobs.   */
+/*                                                                   */
 
    /* If a DDNAME of PULLTGGR is allocated, then Trace */
    WhatDDName = 'PULLTGGR'
@@ -120,6 +129,7 @@
         " ShipOutput SHLQ ",
         " AltIDAcctCode AltIDJobClass ",
         " Hostprefix Rmteprefix Transmissn ",
+        " HOSTHLQ    RMOTHLQ    XMITMETH   ",
         " Destin VNBLSDST SENDNODE Typrun Notify TARGnode "
 
 /*                                                                    */
@@ -137,15 +147,6 @@
       Time        = Substr($tablerec.trg#,Timepos,04) ;
       IF Date = TodaysDate &,
          Time > CurrentTime then iterate ;
-      /* Get Endevor Destination Definition */
-      /*  for file names and transmission  method */
-
-      /*
-      Do one of these:
-      Call  GetDestinationInfoViaAPI;
-         -- or --
-      Call  GetDestinationInfoViaCSV;
-      */
 
       Call  GetDestinationInfoViaCSV;
 
@@ -165,9 +166,11 @@
       if Length(Typrun) > 0 then,
          Typrun = ',TYPRUN='Typrun
 
+/*
       Notify      = Strip(Substr($tablerec.trg#,Notifypos,8)) ;
       if Length(Notify) < 2 then,
          Notify = '&SYSUID'
+*/
 
       seconds = '000001' /* Wait 1 second before submitting next*/
       Call WaitAwhile ;
@@ -197,7 +200,7 @@
          pos= $Starting_$position.$headingVariable
          If Substr(Jobnbr,1,1) > ' ' then,
             $tablerec.trg# = ,
-               Overlay(Jobnbr,$tablerec.trg#,Jobnumberpos);
+               Overlay(Jobnbr,$tablerec.trg#,Jobnumbpos);
          End
       Else,
          $tablerec.trg# = Overlay("?",$tablerec.trg#,Stpos) ;
@@ -238,7 +241,7 @@ UPDATE_MODEL_FROM_VARIABLES:
       End;
 
    "EXECIO * DISKR "MODEL "(STEM $Model. FINIS" ;
-   $delimiter = "^" ;
+   $delimiter = "|" ;
    STRING = "FREE DD(MODEL) "
    CALL BPXWDYN STRING;
 
@@ -431,64 +434,6 @@ ProcessTriggerFileHeading :
 
    Return ;
 
-GetDestinationInfoViaAPI:
-
-   /* Set values for Hostprefix and Rmteprefix */
-   /*     From the site definition             */
-
-   /*  Call API to Get Destination information  */
-
-
-   STRING = "ALLOC DD(BSTAPI)   SYSOUT(J) "
-   CALL BPXWDYN STRING;
-
-   STRING = "ALLOC DD(BSTERR)   SYSOUT(J) "
-   CALL BPXWDYN STRING;
-
-   STRING = "ALLOC DD(APIMSGS) LRECL(133) BLKSIZE(13300) ",
-              " DSORG(PS) ",
-              " SPACE(1,1) RECFM(F,B) TRACKS ",
-              " NEW UNCATALOG REUSE ";
-   CALL BPXWDYN STRING;
-
-   STRING = "ALLOC DD(APILIST) LRECL(2048) BLKSIZE(22800) ",
-              " DSORG(PS) ",
-              " SPACE(1,1) RECFM(V,B) TRACKS ",
-              " NEW UNCATALOG REUSE ";
-   CALL BPXWDYN STRING;
-
-   /*  Call API to Get Destination information  */
-   parm =    Left(Destination'*',7)
-
-   /* Call APIALDST to get Destination information */
-
-   ADDRESS LINKMVS "APIALDST parm"
-   RETURN_RC = RC ;
-   If RETURN_RC > 0 then,
-      DO
-      parm = 'DDN:STEPLIB,APIALDST,'parm
-      ADDRESS LINKMVS 'CONCALL' "parm"
-      SA= 'CANNOT GET INFORMATION FROM ENDEVOR' ;
-      EXIT
-      END ;
-   "EXECIO * DISKR APILIST ( Stem apiDestinations. FINIS"
-   Sa= 'Messages from PULLTGGR:'
-   Hostprefix = Strip(Substr(apiDestinations.1,079,14))
-   Rmteprefix = Strip(Substr(apiDestinations.1,113,14))
-   Transmissn = Strip(Substr(apiDestinations.1,051,11))
-   TARGnode   = Strip(Substr(apiDestinations.1,062,08))
-
-   STRING = "FREE  DD(APILIST)"
-   CALL BPXWDYN STRING;
-   STRING = "FREE  DD(APIMSGS)"
-   CALL BPXWDYN STRING;
-   STRING = "FREE  DD(BSTAPI) "
-   CALL BPXWDYN STRING;
-   STRING = "FREE  DD(BSTERR) "
-   CALL BPXWDYN STRING;
-
-   Return ;
-
 GetDestinationInfoViaCSV:
 
    /* Set values for Hostprefix and Rmteprefix */
@@ -561,8 +506,11 @@ GetDestinationInfoViaCSV:
 
      Sa= 'Messages from PULLTGGR:'
      Hostprefix = HOST_DSN_PREFIX
+     HOSTHLQ    = HOST_DSN_PREFIX
      Rmteprefix = REMOTE_DSN_PREFIX
+     RMOTHLQ    = REMOTE_DSN_PREFIX
      Transmissn = TRANS_DESC
+     XMITMETH   = TRANS_DESC
      TARGnode   = TRANS_NODE
   End; /* Do rec# = 1 to API.0 */
 

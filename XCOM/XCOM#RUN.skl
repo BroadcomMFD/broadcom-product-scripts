@@ -1,0 +1,12 @@
+//*-------------------------------------------------------------------
+//XCOMJOB  EXEC PGM=XCOMJOB,   <- Transmit Files 2 server  XCOM#RUN
+// PARM=('TYPE=EXECUTE')
+//STEPLIB  DD  DISP=SHR,
+//             DSN=Your/XCOM/hlq.CBXGLOAD      * XCOM LOAD MODULES
+//         DD  DISP=SHR,
+//             DSN=CEE.SCEERUN                   * IBM LE RUNTIME
+//XCOMCNTL DD  DISP=SHR,
+//             DSN=your.XCOM.SVW.CBXGPARM       * CONTROL LIBRARY
+//CAOESTOP DD DUMMY
+//SYSIN01  DD DSN=&&COMMANDS,DISP=(OLD,DELETE)             XCOM#RUN
+//*-------------------------------------------------------------------

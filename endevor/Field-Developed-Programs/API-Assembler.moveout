@@ -1,0 +1,2324 @@
+./  ADD  NAME=@README                     
+These items come from the Endevor GitHub at 
+https://github.com/BroadcomMFD/broadcom-product-scripts 
+------------------------------------------------------- 
+These are asm          : APIAEADD APIAERET APIAESCL APIALAPP APIALBKO APIALDIR APIALDST APIALELM APIALPKG APIALSUM APIAPBKO 
+These are jcl          : JCLAEADD JCLAEELM JCLAERET JCLALAPP JCLALDIR JCLALELM JCLALPKG 
+./  ADD  NAME=APIAEADD                
+APIAEADD TITLE 'ENDEVOR - API to Add/Update elements '
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO ADD AN ELEMENT INTO eNDEVOR .
+*
+*   HOW TO USE:  PASS Endevor element information  WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*
+*  //STEP1    EXEC PGM=NDVRC1,
+*  // PARM='APIAEADDSMPLPRODCATSNDVR*       *       API*      ALIAS'
+*  //*PARM='APIAEADD-ENV----SYS-----SUB-----TYPE----ELEMENT---ddname ..
+*  //*                       ...  ccid(12)    comment(40)'
+*  //*PARM='APIAEADD----+--8----+--8----+--8----+--8--------10S'
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIAEADD,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHAEADD DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIAEADD CSECT
+APIAEADD AMODE 31
+APIAEADD RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+         USING APIAEADD,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO parm
+*
+*                                      Parameter contains Endevor info
+*                                      AEADD_RQ_ENV    (8)
+*                                      AEADD_RQ_SYSTEM (8)
+*                                      AEADD_RQ_SUBSYS (8)
+*                                      AEADD_RQ_TYPE   (8)
+*                                      AEADD_RQ_ELM    (10)
+*                                      AEADD_RQ_DDN    (8)
+*                                      AEADD_RQ_CCID   (12)
+*                                      AEADD_RQ_COMM   (40)
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+         USING SAVEAREA,R13            ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=AEADD_RQ,BLOCK=AEADD_RQ
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '   DDNAME for Messages
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '  DDNAME for list out
+*
+         MVC   AEADD_RQ_ENV,0(R6)          Move Environment
+         MVC   AEADD_RQ_SYSTEM(8),08(R6)   Move SYSTEM
+         MVC   AEADD_RQ_SUBSYS(8),16(R6)   Move SUBSYS
+         MVC   AEADD_RQ_TYPE(8),24(R6)     Move TYPE
+         MVC   AEADD_RQ_ELM(10),32(R6)     Move Element
+         MVC   AEADD_RQ_DDN(8),42(R6)      Move DDNAME for output
+         MVC   AEADD_RQ_CCID(10),50(R6)    Move CCID
+         MVC   AEADD_RQ_COMM(40),62(R6)    Move Comment
+*
+         MVI   AEADD_RQ_UPDT,C'Y'          Request Update if present
+         MVI   AEADD_RQ_OVESIGNO,C'Y'      Request Override signout
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,AEADD_RQ
+         ST    R14,4(0,R1)
+         OI    4(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIAERET                
+APIAERET TITLE 'ENDEVOR - API LIST ELEMENT LOCATIONS '
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE BACKOUT INFO.
+*
+*   HOW TO USE:  PASS Endevor element information  WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*
+*  //STEP1    EXEC PGM=NDVRC1,
+*  // PARM='APIAERETSMPLPRODCATSNDVR*       *       API*      *'
+*  //*PARM='APIAERET-ENV----SYS-----SUB-----TYPE----ELEMENT---S'
+*  //*PARM='APIAERET----+--8----+--8----+--8----+--8--------10S'
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIAERET,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHAERET DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIAERET CSECT
+APIAERET AMODE 31
+APIAERET RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+         USING APIAERET,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO package id in parm
+*
+*                                      Parameter contains Endevor info
+*                                      AERET_RQ_ENV    (8)
+*                                      AERET_RQ_SYSTEM (8)
+*                                      AERET_RQ_SUBSYS (8)
+*                                      AERET_RQ_TYPE   (8)
+*                                      AERET_RQ_ELM    (10)
+*                                      AERET_RQ_STG_ID (1)
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+         USING SAVEAREA,R13            ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=AERET_RQ,BLOCK=AERET_RQ
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '   DDNAME for Messages
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '  DDNAME for list out
+*
+         MVC   AERET_RQ_ENV,0(R6)          Move Environment
+         MVC   AERET_RQ_SYSTEM(8),08(R6)   Move SYSTEM
+         MVC   AERET_RQ_SUBSYS(8),16(R6)   Move SUBSYS
+         MVC   AERET_RQ_TYPE(8),24(R6)     Move TYPE
+         MVC   AERET_RQ_ELM(10),32(R6)     Move Element
+         MVC   AERET_RQ_STG_ID(1),42(R6)   Move STG_ID
+         MVC   AERET_RQ_DDN(8),43(R6)      Move DDNAME for output
+         MVI   AERET_RQ_NO_SIGNO,C'Y'      Request w/o Signout
+         MVI   AERET_RQ_EXPAND,C'Y'        Request with Expand
+         MVI   AERET_RQ_REPLACE,C'Y'       Request REPLACE
+         MVI   AERET_RQ_SEARCH,C'Y'        Request SEARCH
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,AERET_RQ
+         ST    R14,4(0,R1)
+         OI    4(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIAESCL                
+APIAESCL TITLE 'ENDEVOR - API SAMPLE ASSEMBLER PROGRAM'
+*  THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF
+*  "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE
+*  FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES
+*  ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE
+*  CORRECTED.
+*
+*  This API executes standard Enedevor element action SCL as
+*      provoded by the caller in its parameter .                 
+*      WRITTEN BY DAN WALTHER 
+*
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO EXERCISE EACH OF THE ELEMENT ACTIONS.
+*
+*                ADD, DELETE, GENERATE, MOVE, PRINT ELEMENT, PRINT
+*                MEMBER, RETRIEVE, SIGNIN, TRANSFER AND UPDATE.
+*
+*   HOW TO USE:  POPULATE THE CONTROL AND REQUEST BLOCKS WITH THE
+*                DESIRED VALUES.
+*                ASSEMBLE AND LINK-EDIT THIS MODULE.
+*
+*   LINK EDIT:   AMODE=31,RMODE=24,RENT,REUS (RECOMMENDED)
+*                OR
+*                AMODE=24,RMODE=24,RENT,REUS
+*
+*   REGISTERS ON ENTRY:
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    3A                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS     0D
+***********************************************************************
+* API CONTROL BLOCK
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHAUSCL DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+***********************************************************************
+APIAESCL CSECT
+APIAESCL AMODE 31
+APIAESCL RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+        USING APIAESCL,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         SLR   R9,R9
+         ICM   R9,B'1100',0(R6)
+         SRL   R9,16
+*
+         C     R9,=F'2000'
+         BH    BADEND
+         LA    R8,2(,R6)               POINT TO PARMS (SCL STMTS)
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*   PERFORM SCL ACTION
+************************************************************
+*
+         API$INIT STG=AUSCL_RQ,BLOCK=AUSCL_RQ
+*
+         MVI   AUSCL_RQ_SCLTYPE,AUSCL_RQ_SCLTYPE_E
+         LA    R6,AUSCL_RQ_SCL1        POINT TO SCL IN API BLOCK
+         LR    R7,R9                   COPY PARM LENGTH
+         MVCL  R6,R8                   COPY SCL STMTS IN PARM
+*
+************************************************************
+* SCL ELEMENT REQUEST
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '   DDNAME for Messages
+*        The APILIST dd is not needed, and causes RC:4
+*        MVC   AACTL_LIST_DDN(8),=C'APILIST '  DDNAME for list out
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,AUSCL_RQ
+         ST    R14,4(0,R1)
+         OI    4(R1),X'80'
+*
+*
+************************************************************
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE FROM CALL
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+BADEND   DS    0H
+         LA    R15,17                       SET BAD RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIALAPP                
+APIALAPP TITLE 'ENDEVOR - API LIST PACKAGE Approvers     '
+*  THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF
+*  "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE
+*  FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES
+*  ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE
+*  CORRECTED.
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE Approver info.
+*
+*   HOW TO USE:  PASS THE PACKAGE NAME IN THE PARM WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIALAPP,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+** your  CSIQOPTN(ENHALAPP)
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHALAPP DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIALAPP CSECT
+APIALAPP AMODE 31
+APIALAPP RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+        USING APIALAPP,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO package id in parm
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XAPP000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=ALAPP_RQ,BLOCK=ALAPP_RQ
+         API$INIT STG=ALAPP_RS,BLOCK=ALAPP_RS
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '
+*
+         MVC   ALAPP_RQ_PKGID(16),0(R6) Move package id to request
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,ALAPP_RQ
+         ST    R14,4(0,R1)
+         LA    R14,ALAPP_RS
+         ST    R14,8(0,R1)
+         OI    8(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIALBKO                
+APIALBKO TITLE 'ENDEVOR - API LIST PACKAGE BACKOUT INFO'
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE BACKOUT INFO.
+*
+*   HOW TO USE:  PASS THE PACKAGE NAME IN THE PARM WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIALBKO,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+** CAPRD.SIQ7006.SOURCE(ENHALBKO)
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHALBKO DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIALBKO CSECT
+APIALBKO AMODE 31
+APIALBKO RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+        USING APIALBKO,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO package id in parm
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=ALBKO_RQ,BLOCK=ALBKO_RQ
+         API$INIT STG=ALBKO_RS,BLOCK=ALBKO_RS
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '
+*
+         MVC   ALBKO_RQ_PKGID(16),0(R6) Move package id to request
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,ALBKO_RQ
+         ST    R14,4(0,R1)
+         LA    R14,ALBKO_RS
+         ST    R14,8(0,R1)
+         OI    8(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIALDIR                
+APIALDIR TITLE 'ENDEVOR - API to Extract Footprint info'
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO GET footprint information for
+*                a Dataset & Member .
+*
+*   HOW TO USE:  PASS Endevor element information  WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*
+*  //STEP1    EXEC PGM=NDVRC1,
+*  // PARM='APIALDIRSMPLPRODCATSNDVR*       *       API*      ALIAS'
+*  //*PARM='APIALDIR-Mbr--->Dataset-------(44)------------------->.
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIALDIR,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHALDIR DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIALDIR CSECT
+APIALDIR AMODE 31
+APIALDIR RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+         USING APIALDIR,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO parm
+*
+*                                      Parameter contains Endevor info
+*                                      ALDIR_RQ_MBR(10)
+*                                      ALDIR_RQ_DDN(08)
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+         USING SAVEAREA,R13            ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=ALDIR_RQ,BLOCK=ALDIR_RQ
+         API$INIT STG=ALDIR_RS,BLOCK=ALDIR_RS
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '   DDNAME for Messages
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '  DDNAME for list out
+*
+         MVC   ALDIR_RQ_MBR(10),0(R6)      Move member name
+         MVC   ALDIR_RQ_DDN(08),10(R6)     Move DDName
+         MVC   ALDIR_RQ_MBR_THRU,=C'          '  Clear thru mbr name
+*
+         MVI   ALDIR_RQ_CSECT,C'N'         Request no List of CSECTs
+         MVI   ALDIR_RQ_SUBDIR,C'N'        Request no subdirectories
+         MVI   AACTL_SHUTDOWN,C'Y'
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,ALDIR_RQ
+         ST    R14,4(0,R1)
+         OI    4(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIALDST                
+APIALDST TITLE 'ENDEVOR - API LIST DESTINATION    INFO   '                      
+*  THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+*  "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+*  FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+*  ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+*  CORRECTED.                                                                   
+*                                                                               
+*  /* WRITTEN BY DAN WALTHER */                                                 
+***********************************************************************         
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE                     
+*                ENDEVOR API TO EXTRACT ENDEVOR Destination     INFO.           
+*                                                                               
+*   HOW TO USE:  PASS THE destination  IN THE PARM WITH THE PROGRAM             
+*                CALL.                                                          
+*          EXAMPLE:                                                             
+*                EXEC PGM=NDVRC1,                                               
+*                PARM='CONCALL,DDN:STEPLIB,APIALDST,<destid>'                   
+*                                                                               
+*   REGISTER USAGE:                                                             
+*                R2     -> SAVE RETURN CODE                                     
+*                R3     -> SAVE REASON CODE                                     
+*                R12    -> BASE PROGRAM                                         
+*                R13    -> STANDARD USAGE........                               
+*                R15    -> RETURN CODE FROM CALL                                
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE                 
+*                                                                               
+***********************************************************************         
+*   WORKAREA                                                                    
+***********************************************************************         
+WORKAREA DSECT                                                                  
+SAVEAREA DS    18F                                                              
+WPARMLST DS    4F                      PARAMETER LIST                           
+WCNT     DS    H                       ACTION COUNTER                           
+         DS    0D                                                               
+***********************************************************************         
+* API CONTROL BLOCK                                                             
+** CAPRD.SIQ7006.SOURCE(ENHALPKG)                                               
+***********************************************************************         
+         ENHAACTL DSECT=NO                                                      
+***********************************************************************         
+* API ACTION REQUEST BLOCKS                                                     
+***********************************************************************         
+         ENHALDST DSECT=NO                                                      
+WORKLN   EQU   *-WORKAREA                                                       
+***********************************************************************         
+*   REQISTER EQUATES                                                            
+***********************************************************************         
+R0       EQU   0                                                                
+R1       EQU   1                                                                
+R2       EQU   2                                                                
+R3       EQU   3                                                                
+R4       EQU   4                                                                
+R5       EQU   5                                                                
+R6       EQU   6                                                                
+R7       EQU   7                                                                
+R8       EQU   8                                                                
+R9       EQU   9                                                                
+R10      EQU   10                                                               
+R11      EQU   11                                                               
+R12      EQU   12                                                               
+R13      EQU   13                                                               
+R14      EQU   14                                                               
+R15      EQU   15                                                               
+APIALDST CSECT                                                                  
+APIALDST AMODE 31                                                               
+APIALDST RMODE ANY                                                              
+***********************************************************************         
+*   HOUSEKEEPING                                                                
+***********************************************************************         
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)                  
+         LR    R12,R15                 POINT TO THIS PROGRAM                    
+        USING APIALDST,R12                                                      
+***********************************************************************         
+*   VALIDATE PARM LEN                                                           
+***********************************************************************         
+*                                                                               
+         L     R6,0(,R1)                                                        
+         LA    R6,2(,R6)               POINT TO package id in parm              
+*                                                                               
+***********************************************************************         
+*   GET STORAGE FOR WORKAREA                                                    
+***********************************************************************         
+         L     R0,=A(WORKLN)           GET SIZE OF W.A                          
+         GETMAIN R,LV=(0)              GET WORKING STORAGE                      
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)                  
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)                  
+         LR    R13,R1                  POINT R13 TO OUR STACK                   
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY                  
+         SPACE ,                                                                
+************************************************************                    
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE                          
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY            
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST          
+*        IS WRITTEN TO THE LIST DATA SET.                                       
+************************************************************                    
+*                                                                               
+XSCL000  DS    0H                                                               
+************************************************************                    
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE                          
+************************************************************                    
+*                                                                               
+         API$INIT STG=AACTL,BLOCK=AACTL                                         
+         API$INIT STG=ALDST_RQ,BLOCK=ALDST_RQ                                   
+         API$INIT STG=ALDST_RS,BLOCK=ALDST_RS                                   
+*                                                                               
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '                                    
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '                                   
+*                                                                               
+         MVI   ALDST_RQ_DESTID,C' '     Blank out dest name                     
+         MVC   ALDST_RQ_DESTID+1(6),ALDST_RQ_DESTID      "                      
+         MVC   ALDST_RQ_DESTID(7),0(R6) Move Dest name  to request              
+*                                                                               
+************************************************************                    
+*        BUILD PARMLIST                                                         
+************************************************************                    
+         LA    R1,WPARMLST                                                      
+         LA    R14,AACTL                                                        
+         ST    R14,0(0,R1)                                                      
+         LA    R14,ALDST_RQ                                                     
+         ST    R14,4(0,R1)                                                      
+         LA    R14,ALDST_RS                                                     
+         ST    R14,8(0,R1)                                                      
+         OI    8(R1),X'80'                                                      
+************************************************************                    
+*                                                                               
+*        CALL THE ENDEVOR API INTERFACE PROGRAM                                 
+************************************************************                    
+XCALLAPI DS    0H                                                               
+         L     R15,=V(ENA$NDVR)                                                 
+         BALR  R14,R15                                                          
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE              
+         LR    R3,R0                     HOLD ONTO THE REASON CODE              
+************************************************************                    
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.                    
+************************************************************                    
+XSHUTDWN DS    0H                                                               
+         API$INIT STG=AACTL,BLOCK=AACTL                                         
+         MVI   AACTL_SHUTDOWN,C'Y'                                              
+         LA    R1,WPARMLST                                                      
+         LA    R14,AACTL                                                        
+         ST    R14,0(0,R1)                                                      
+         OI    0(R1),X'80'                                                      
+         L     R15,=V(ENA$NDVR)                                                 
+         BALR  R14,R15                                                          
+***********************************************************************         
+* PROGRAM EXIT                                                                  
+***********************************************************************         
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS                    
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA               
+*   CLEAN UP THIS PROGRAM'S STORAGE                                             
+         L     R0,=A(WORKLN)                GET SIZE                            
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE                        
+         LR    R15,R2                       SET RETURN CODE                     
+         L     R14,12(R13)                                                      
+         LM    R0,R12,20(R13)                                                   
+         BSM   0,R14                        RETURN                              
+         END                                                                    
+          
+./  ADD  NAME=APIALELM                
+APIALELM TITLE 'ENDEVOR - API LIST ELEMENT LOCATIONS '                  00010000
+*********************************************************************** 00020000
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE             00030000
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE BACKOUT INFO.   00040000
+*                                                                       00050000
+*   HOW TO USE:  PASS Endevor element information  WITH THE PROGRAM     00060000
+*                CALL.                                                  00070000
+*          EXAMPLE:                                                     00080000
+*                                                                       00090000
+*  //STEP1    EXEC PGM=NDVRC1,                                          00100000
+*  // PARM='APIALELMSMPLPRODCATSNDVR*       *       API*      *'        00110000
+*  //*PARM='APIALELM-ENV----SYS-----SUB-----TYPE----ELEMENT---S'        00120000
+*  //*PARM='APIALELM----+--8----+--8----+--8----+--8--------10S'        00130000
+*                EXEC PGM=NDVRC1,                                       00140000
+*                PARM='CONCALL,DDN:STEPLIB,APIALELM,PR#BACKOUT#TEST1'   00150000
+*                                                                       00160000
+*   REGISTER USAGE:                                                     00170000
+*                R2     -> SAVE RETURN CODE                             00180000
+*                R3     -> SAVE REASON CODE                             00190000
+*                R12    -> BASE PROGRAM                                 00200000
+*                R13    -> STANDARD USAGE........                       00210000
+*                R15    -> RETURN CODE FROM CALL                        00220000
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE         00230000
+*                                                                       00240000
+*********************************************************************** 00250000
+*   WORKAREA                                                            00260000
+*********************************************************************** 00270000
+WORKAREA DSECT                                                          00280000
+SAVEAREA DS    18F                                                      00290000
+WPARMLST DS    4F                      PARAMETER LIST                   00300000
+WCNT     DS    H                       ACTION COUNTER                   00310000
+         DS    0D                                                       00320000
+*********************************************************************** 00330000
+* API CONTROL BLOCK                                                     00340000
+*********************************************************************** 00350000
+         ENHAACTL DSECT=NO                                              00360000
+*********************************************************************** 00370000
+* API ACTION REQUEST BLOCKS                                             00380000
+*********************************************************************** 00390000
+         ENHALELM DSECT=NO                                              00400000
+WORKLN   EQU   *-WORKAREA                                               00410000
+*********************************************************************** 00420000
+*   REQISTER EQUATES                                                    00430000
+*********************************************************************** 00440000
+R0       EQU   0                                                        00450000
+R1       EQU   1                                                        00460000
+R2       EQU   2                                                        00470000
+R3       EQU   3                                                        00480000
+R4       EQU   4                                                        00490000
+R5       EQU   5                                                        00500000
+R6       EQU   6                                                        00510000
+R7       EQU   7                                                        00520000
+R8       EQU   8                                                        00530000
+R9       EQU   9                                                        00540000
+R10      EQU   10                                                       00550000
+R11      EQU   11                                                       00560000
+R12      EQU   12                                                       00570000
+R13      EQU   13                                                       00580000
+R14      EQU   14                                                       00590000
+R15      EQU   15                                                       00600000
+APIALELM CSECT                                                          00610000
+APIALELM AMODE 31                                                       00620000
+APIALELM RMODE ANY                                                      00630000
+*********************************************************************** 00640000
+*   HOUSEKEEPING                                                        00650000
+*********************************************************************** 00660000
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)          00670000
+         LR    R12,R15                 POINT TO THIS PROGRAM            00680000
+         USING APIALELM,R12                                             00690000
+*********************************************************************** 00700000
+*   VALIDATE PARM LEN                                                   00710000
+*********************************************************************** 00720000
+*                                                                       00730000
+         L     R6,0(,R1)                                                00740000
+         LA    R6,2(,R6)               POINT TO package id in parm      00750000
+*                                                                       00760000
+*                                      Parameter contains Endevor info  00770000
+*                                      ALELM_RQ_ENV    (8)              00780000
+*                                      ALELM_RQ_SYSTEM (8)              00790000
+*                                      ALELM_RQ_SUBSYS (8)              00800000
+*                                      ALELM_RQ_TYPE   (8)              00810000
+*                                      ALELM_RQ_ELM    (10)             00820000
+*                                      ALELM_RQ_STG_ID (1)              00830000
+*                                                                       00840000
+*********************************************************************** 00850000
+*   GET STORAGE FOR WORKAREA                                            00860000
+*********************************************************************** 00870000
+         L     R0,=A(WORKLN)           GET SIZE OF W.A                  00880000
+         GETMAIN R,LV=(0)              GET WORKING STORAGE              00890000
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)          00900000
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)          00910000
+         LR    R13,R1                  POINT R13 TO OUR STACK           00920000
+         USING SAVEAREA,R13            ESTABLISH ADDRESSIBILIY          00930000
+         SPACE ,                                                        00940000
+************************************************************            00950000
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE                  00960000
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY    00970000
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST  00980000
+*        IS WRITTEN TO THE LIST DATA SET.                               00990000
+************************************************************            01000000
+*                                                                       01010000
+XSCL000  DS    0H                                                       01020000
+************************************************************            01030000
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE                  01040000
+************************************************************            01050000
+*                                                                       01060000
+         API$INIT STG=AACTL,BLOCK=AACTL                                 01070000
+         API$INIT STG=ALELM_RQ,BLOCK=ALELM_RQ                           01080000
+         API$INIT STG=ALELM_RS,BLOCK=ALELM_RS                           01090000
+*                                                                       01100000
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '   DDNAME for Messages      01110000
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '  DDNAME for list out      01120000
+*                                                                       01130000
+         MVC   ALELM_RQ_ENV,0(R6)          Move Environment             01140000
+         MVC   ALELM_RQ_SYSTEM(8),08(R6)   Move SYSTEM                  01150000
+         MVC   ALELM_RQ_SUBSYS(8),16(R6)   Move SUBSYS                  01160000
+         MVC   ALELM_RQ_TYPE(8),24(R6)     Move TYPE                    01170000
+         MVC   ALELM_RQ_ELM(10),32(R6)     Move Element                 01180000
+         MVC   ALELM_RQ_STG_ID(1),42(R6)   Move STG_ID                  01190000
+*                                                                       01200000
+************************************************************            01210000
+*        BUILD PARMLIST                                                 01220000
+************************************************************            01230000
+         LA    R1,WPARMLST                                              01240000
+         LA    R14,AACTL                                                01250000
+         ST    R14,0(0,R1)                                              01260000
+         LA    R14,ALELM_RQ                                             01270000
+         ST    R14,4(0,R1)                                              01280000
+         LA    R14,ALELM_RS                                             01290000
+         ST    R14,8(0,R1)                                              01300000
+         OI    8(R1),X'80'                                              01310000
+************************************************************            01320000
+*                                                                       01330000
+*        CALL THE ENDEVOR API INTERFACE PROGRAM                         01340000
+************************************************************            01350000
+XCALLAPI DS    0H                                                       01360000
+         L     R15,=V(ENA$NDVR)                                         01370000
+         BALR  R14,R15                                                  01380000
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE      01390000
+         LR    R3,R0                     HOLD ONTO THE REASON CODE      01400000
+************************************************************            01410000
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.            01420000
+************************************************************            01430000
+XSHUTDWN DS    0H                                                       01440000
+         API$INIT STG=AACTL,BLOCK=AACTL                                 01450000
+         MVI   AACTL_SHUTDOWN,C'Y'                                      01460000
+         LA    R1,WPARMLST                                              01470000
+         LA    R14,AACTL                                                01480000
+         ST    R14,0(0,R1)                                              01490000
+         OI    0(R1),X'80'                                              01500000
+         L     R15,=V(ENA$NDVR)                                         01510000
+         BALR  R14,R15                                                  01520000
+*********************************************************************** 01530000
+* PROGRAM EXIT                                                          01540000
+*********************************************************************** 01550000
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS            01560000
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA       01570000
+*   CLEAN UP THIS PROGRAM'S STORAGE                                     01580000
+         L     R0,=A(WORKLN)                GET SIZE                    01590000
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE                01600000
+         LR    R15,R2                       SET RETURN CODE             01610000
+         L     R14,12(R13)                                              01620000
+         LM    R0,R12,20(R13)                                           01630000
+         BSM   0,R14                        RETURN                      01640000
+         END                                                            01650000
+          
+./  ADD  NAME=APIALPKG                
+APIALPKG TITLE 'ENDEVOR - API LIST PACKAGE HEADER INFO   '
+*  THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF
+*  "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE
+*  FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES
+*  ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE
+*  CORRECTED.
+*
+*  /* WRITTEN BY DAN WALTHER     */
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE BACKOUT INFO.
+*
+*   HOW TO USE:  PASS THE PACKAGE NAME IN THE PARM WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIALPKG,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+** CAPRD.SIQ7006.SOURCE(ENHALPKG)
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHALPKG DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIALPKG CSECT
+APIALPKG AMODE 31
+APIALPKG RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+        USING APIALPKG,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO package id in parm
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=ALPKG_RQ,BLOCK=ALPKG_RQ
+         API$INIT STG=ALPKG_RS,BLOCK=ALPKG_RS
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '
+*
+         MVC   ALPKG_RQ_PKGID(16),0(R6) Move package id to request
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,ALPKG_RQ
+         ST    R14,4(0,R1)
+         LA    R14,ALPKG_RS
+         ST    R14,8(0,R1)
+         OI    8(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=APIALSUM                
+APIALSUM TITLE 'ENDEVOR - API LIST PACKAGE ACTION SUMMARY'                      
+*  THESE ROUTINES ARE DISTRIBUTED BY THE CA TECHNOLOGIES STAFF                  
+*  "AS IS".  NO WARRANTY, EITHER EXPRESSED OR IMPLIED, IS MADE                  
+*  FOR THEM.  CA TECHNOLOGIES CANNOT GUARANTEE THAT THE ROUTINES                
+*  ARE ERROR FREE, OR THAT IF ERRORS ARE FOUND, THEY WILL BE                    
+*  CORRECTED.                                                                   
+*                                                                               
+*  /* WRITTEN BY DAN WALTHER */                                                 
+***********************************************************************         
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE                     
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE BACKOUT INFO.           
+*                                                                               
+*   HOW TO USE:  PASS THE PACKAGE NAME IN THE PARM WITH THE PROGRAM             
+*                CALL.                                                          
+*          EXAMPLE:                                                             
+*                EXEC PGM=NDVRC1,                                               
+*                PARM='CONCALL,DDN:STEPLIB,APIALSUM,PR#BACKOUT#TEST1'           
+*                                                                               
+*   REGISTER USAGE:                                                             
+*                R2     -> SAVE RETURN CODE                                     
+*                R3     -> SAVE REASON CODE                                     
+*                R12    -> BASE PROGRAM                                         
+*                R13    -> STANDARD USAGE........                               
+*                R15    -> RETURN CODE FROM CALL                                
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE                 
+*                                                                               
+***********************************************************************         
+*   WORKAREA                                                                    
+***********************************************************************         
+WORKAREA DSECT                                                                  
+SAVEAREA DS    18F                                                              
+WPARMLST DS    4F                      PARAMETER LIST                           
+WCNT     DS    H                       ACTION COUNTER                           
+         DS    0D                                                               
+***********************************************************************         
+* API CONTROL BLOCK                                                             
+** CAPRD.SIQ7006.SOURCE(ENHALSUM)                                               
+***********************************************************************         
+         ENHAACTL DSECT=NO                                                      
+***********************************************************************         
+* API ACTION REQUEST BLOCKS                                                     
+***********************************************************************         
+         ENHALSUM DSECT=NO                                                      
+WORKLN   EQU   *-WORKAREA                                                       
+***********************************************************************         
+*   REQISTER EQUATES                                                            
+***********************************************************************         
+R0       EQU   0                                                                
+R1       EQU   1                                                                
+R2       EQU   2                                                                
+R3       EQU   3                                                                
+R4       EQU   4                                                                
+R5       EQU   5                                                                
+R6       EQU   6                                                                
+R7       EQU   7                                                                
+R8       EQU   8                                                                
+R9       EQU   9                                                                
+R10      EQU   10                                                               
+R11      EQU   11                                                               
+R12      EQU   12                                                               
+R13      EQU   13                                                               
+R14      EQU   14                                                               
+R15      EQU   15                                                               
+APIALSUM CSECT                                                                  
+APIALSUM AMODE 31                                                               
+APIALSUM RMODE ANY                                                              
+***********************************************************************         
+*   HOUSEKEEPING                                                                
+***********************************************************************         
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)                  
+         LR    R12,R15                 POINT TO THIS PROGRAM                    
+        USING APIALSUM,R12                                                      
+***********************************************************************         
+*   VALIDATE PARM LEN                                                           
+***********************************************************************         
+*                                                                               
+         L     R6,0(,R1)                                                        
+         LA    R6,2(,R6)               POINT TO package id in parm              
+*                                                                               
+***********************************************************************         
+*   GET STORAGE FOR WORKAREA                                                    
+***********************************************************************         
+         L     R0,=A(WORKLN)           GET SIZE OF W.A                          
+         GETMAIN R,LV=(0)              GET WORKING STORAGE                      
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)                  
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)                  
+         LR    R13,R1                  POINT R13 TO OUR STACK                   
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY                  
+         SPACE ,                                                                
+************************************************************                    
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE                          
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY            
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST          
+*        IS WRITTEN TO THE LIST DATA SET.                                       
+************************************************************                    
+*                                                                               
+XSCL000  DS    0H                                                               
+************************************************************                    
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE                          
+************************************************************                    
+*                                                                               
+         API$INIT STG=AACTL,BLOCK=AACTL                                         
+         API$INIT STG=ALSUM_RQ,BLOCK=ALSUM_RQ                                   
+         API$INIT STG=ALSUM_RS,BLOCK=ALSUM_RS                                   
+*                                                                               
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '                                    
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '                                   
+*                                                                               
+         MVC   ALSUM_RQ_PKGID(16),0(R6) Move package id to request              
+*                                                                               
+************************************************************                    
+*        BUILD PARMLIST                                                         
+************************************************************                    
+         LA    R1,WPARMLST                                                      
+         LA    R14,AACTL                                                        
+         ST    R14,0(0,R1)                                                      
+         LA    R14,ALSUM_RQ                                                     
+         ST    R14,4(0,R1)                                                      
+         LA    R14,ALSUM_RS                                                     
+         ST    R14,8(0,R1)                                                      
+         OI    8(R1),X'80'                                                      
+************************************************************                    
+*                                                                               
+*        CALL THE ENDEVOR API INTERFACE PROGRAM                                 
+************************************************************                    
+XCALLAPI DS    0H                                                               
+         L     R15,=V(ENA$NDVR)                                                 
+         BALR  R14,R15                                                          
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE              
+         LR    R3,R0                     HOLD ONTO THE REASON CODE              
+************************************************************                    
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.                    
+************************************************************                    
+XSHUTDWN DS    0H                                                               
+         API$INIT STG=AACTL,BLOCK=AACTL                                         
+         MVI   AACTL_SHUTDOWN,C'Y'                                              
+         LA    R1,WPARMLST                                                      
+         LA    R14,AACTL                                                        
+         ST    R14,0(0,R1)                                                      
+         OI    0(R1),X'80'                                                      
+         L     R15,=V(ENA$NDVR)                                                 
+         BALR  R14,R15                                                          
+***********************************************************************         
+* PROGRAM EXIT                                                                  
+***********************************************************************         
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS                    
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA               
+*   CLEAN UP THIS PROGRAM'S STORAGE                                             
+         L     R0,=A(WORKLN)                GET SIZE                            
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE                        
+         LR    R15,R2                       SET RETURN CODE                     
+         L     R14,12(R13)                                                      
+         LM    R0,R12,20(R13)                                                   
+         BSM   0,R14                        RETURN                              
+         END                                                                    
+          
+./  ADD  NAME=APIAPBKO                
+APIAPBKO TITLE 'ENDEVOR - API EXEC PACKAGE BACKOUT '
+***********************************************************************
+*   DESCRIPTION: THIS SAMPLE PROGRAM ISSUES REQUESTS TO THE
+*                ENDEVOR API TO EXTRACT ENDEVOR PACKAGE BACKOUT INFO.
+*
+*   HOW TO USE:  PASS THE PACKAGE NAME IN THE PARM WITH THE PROGRAM
+*                CALL.
+*          EXAMPLE:
+*                EXEC PGM=NDVRC1,
+*                PARM='CONCALL,DDN:STEPLIB,APIAPBKO,PR#BACKOUT#TEST1'
+*
+*   REGISTER USAGE:
+*                R2     -> SAVE RETURN CODE
+*                R3     -> SAVE REASON CODE
+*                R12    -> BASE PROGRAM
+*                R13    -> STANDARD USAGE........
+*                R15    -> RETURN CODE FROM CALL
+*   ==>                 -> WE USE STANDARD STACK SAVEAREA USAGE
+*
+***********************************************************************
+*   WORKAREA
+***********************************************************************
+WORKAREA DSECT
+SAVEAREA DS    18F
+WPARMLST DS    4F                      PARAMETER LIST
+WCNT     DS    H                       ACTION COUNTER
+         DS    0D
+***********************************************************************
+* API CONTROL BLOCK
+** CAPRD.SIQ7006.SOURCE(ENHAPBKO)
+***********************************************************************
+         ENHAACTL DSECT=NO
+***********************************************************************
+* API ACTION REQUEST BLOCKS
+***********************************************************************
+         ENHAPBKO DSECT=NO
+WORKLN   EQU   *-WORKAREA
+***********************************************************************
+*   REQISTER EQUATES
+***********************************************************************
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+APIAPBKO CSECT
+APIAPBKO AMODE 31
+APIAPBKO RMODE ANY
+***********************************************************************
+*   HOUSEKEEPING
+***********************************************************************
+         SAVE  (14,12)                 SAVE CALLERS REG 12(13)
+         LR    R12,R15                 POINT TO THIS PROGRAM
+        USING APIAPBKO,R12
+***********************************************************************
+*   VALIDATE PARM LEN
+***********************************************************************
+*
+         L     R6,0(,R1)
+         LA    R6,2(,R6)               POINT TO package id in parm
+*
+***********************************************************************
+*   GET STORAGE FOR WORKAREA
+***********************************************************************
+         L     R0,=A(WORKLN)           GET SIZE OF W.A
+         GETMAIN R,LV=(0)              GET WORKING STORAGE
+         ST    R1,8(R13)               STORE NEW STACK +8(OLD)
+         ST    R13,4(R1)               STORE OLD STACK +4(NEW)
+         LR    R13,R1                  POINT R13 TO OUR STACK
+        USING SAVEAREA,R13             ESTABLISH ADDRESSIBILIY
+         SPACE ,
+************************************************************
+*        INITIALIZE AND POPULATE THE CONTROL STRUCTURE
+*        NOTE: IF ANY INVENTORY MANAGEMENT MESSAGES ARE ISSUED, THEY
+*        ARE WRITTEN TO THE MSG DATA SET. THE OUTPUT FROM THIS REQUEST
+*        IS WRITTEN TO THE LIST DATA SET.
+************************************************************
+*
+XSCL000  DS    0H
+************************************************************
+*        INITIALIZE AND POPULATE THE REQUEST STRUCTURE
+************************************************************
+*
+         API$INIT STG=AACTL,BLOCK=AACTL
+         API$INIT STG=APBKO_RQ,BLOCK=APBKO_RQ
+*
+         MVC   AACTL_MSG_DDN(8),=C'APIMSGS '
+         MVC   AACTL_LIST_DDN(8),=C'APILIST '
+*
+         MVC   APBKO_RQ_PKGID(16),0(R6) Move package id to request
+*
+************************************************************
+*        BUILD PARMLIST
+************************************************************
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         LA    R14,APBKO_RQ
+         ST    R14,4(0,R1)
+         OI    4(R1),X'80'
+************************************************************
+*
+*        CALL THE ENDEVOR API INTERFACE PROGRAM
+************************************************************
+XCALLAPI DS    0H
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+         LR    R2,R15                    HOLD ONTO THE RETURN CODE
+         LR    R3,R0                     HOLD ONTO THE REASON CODE
+************************************************************
+* SHUTDOWN THE API SERVER. ONLY THE AACTL BLOCK IS REQUIRED.
+************************************************************
+XSHUTDWN DS    0H
+         API$INIT STG=AACTL,BLOCK=AACTL
+         MVI   AACTL_SHUTDOWN,C'Y'
+         LA    R1,WPARMLST
+         LA    R14,AACTL
+         ST    R14,0(0,R1)
+         OI    0(R1),X'80'
+         L     R15,=V(ENA$NDVR)
+         BALR  R14,R15
+***********************************************************************
+* PROGRAM EXIT
+***********************************************************************
+         LR    R5,R13                  SAVE SAVEAREA ADDRESS
+         L     R13,4(R13)              POINT TO PREVIOUS SAVEAREA
+*   CLEAN UP THIS PROGRAM'S STORAGE
+         L     R0,=A(WORKLN)                GET SIZE
+         FREEMAIN R,A=(R5),LV=(R0)          FREE STORAGE
+         LR    R15,R2                       SET RETURN CODE
+         L     R14,12(R13)
+         LM    R0,R12,20(R13)
+         BSM   0,R14                        RETURN
+         END
+          
+./  ADD  NAME=JCLAEADD                
+//IBMUSERE JOB (55800000),
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
+//      NOTIFY=&SYSUID
+//*-------------------------------------------------------------------*
+//*---EXECUTE API PROGRAM TO ADD/UPDATE                ---------------*
+//*-------------------------------------------------------------------*
+//STEP1    EXEC PGM=NDVRC1,
+// PARM='APIAEADDSMPLTESTCONCURNTCONC0001PARM    APIAEADD  MYJCL   '
+//*PARM='APIAEADD-ENV----SYS-----SUB-----TYPE----ELEMENT---DDNAME  '
+//*PARM='APIAEADD----+--8----+--8----+--8----+--8--------10-------8'
+//SELECTN  DD *
+  C1DEFLTS
+//MYJCL    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.JCL(APIAEADD)
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB
+//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//SYSOUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//APIMSGS DD   DSN=&&APIMSGS,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APILIST DD   DSN=&&APILIST,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//SYSIN    DD  *
+AACTL APIMSGS APILIST
+ALELM AA SMPLPRODE*       *       IPROCCOM  PROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+//SYSINX   DD  *
+AACTL APIMSGS APILIST
+ALELM F  SMPLPRODE*       *       IPROCCOM  PROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+AACTL APIMSGS APILIST
+ALELM F  SMPLPRODE*       PROCESS I#GOLONGERPROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+*    V - COLUMN 6 = PATH SETTING
+*      = ' ' FOR LOGICAL
+*      = 'L' FOR LOGICAL
+*      = 'P' FOR PHYSICAL
+*     V - COLUMN 7 = RETURN SETTING
+*       = ' ' FOR FIRST FOUND
+*       = 'F' FOR FIRST FOUND
+*       = 'A' FOR ALL FOUND
+*      V - COLUMN 8 = SEARCH SETTING
+*       = ' ' FOR FIRST
+*       = 'A' FOR ALL
+*       = 'B' FOR BETWEEN
+*       = 'E' FOR NEXT
+*       = 'N' FOR NO
+*       = 'R' FOR RANGE
+*       V - COLUMN 9 = UNUSED
+*        VVVVVVVV - COLUMN 10-17 ENVIRONMENT NAME
+*                V - COLUMN 18 = STAGE ID
+*                 VVVVVVVV - COLUMN 19-26 SYSTEM NAME
+*                         VVVVVVVV - COLUMN 27-34 SUBSYSTEM NAME
+*    COLUMN 35-44 = ELEMENT NAME  VVVVVVVVVV
+*    COLUMN 45-52 = TYPE NAME               VVVVVVVV
+*    COLUMN 53-60 = TO-ENV NAME                     VVVVVVVV
+*    COLUMN 61    = TO-STAGE ID                             V
+*    COLUMN 62-71 = THRU-ELEMENT NAME                        VVVVVVVVV
+* NOTE: IF BETWEEN/RANGE SETTINGS ARE USED, YOU NEED TO SPECIFY
+*       TO-ENV AND TO-STAGE, OTHERWISE LEAVE BLANK.
+//NOTNOW  DD *
+AACTL APIMSGS APILIST
+ALELM    SMPLPROD*FINANCE *       FAPASM01  *
+RUN
+AACTLY
+RUN
+QUIT
+//*
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APIMSGS,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APILIST,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+          
+./  ADD  NAME=JCLAEELM                
+//A0LY6ZZA JOB 23177,'(415) DAN WALTHER',CLASS=U,
+//    MSGCLASS=T,REGION=25M,NOTIFY=&SYSUID
+//*-------------------------------------------------------------------*
+//*  COPIED FROM SYSI.NDVR70.JCLLIB(BC1JAAPI)                         *
+//*   (C) 2005 COMPUTER ASSOCIATES INTERNATIONAL, INC.                *
+//*    Executes the ENTBJAPI API program (Endevor provided)           *
+//*-------------------------------------------------------------------*
+//PREP     EXEC PGM=IEFBR14
+//MSGFILE  DD  DSN=&&MSG3FILE,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//ELEMLIST DD  DSN=&&EXT1ELM,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(CYL,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//*-------------------------------------------------------------------*
+//STEP1    EXEC PGM=NDVRC1,PARM='ENTBJAPI',REGION=4096K
+//CONLIB   DD DISP=SHR,DSN=SYS1.NDVR70.CONLIB
+//STEPLIB  DD DISP=SHR,DSN=SYS1.NDVR70.AUTHLIB
+//         DD DISP=SHR,DSN=SYS1.NDVR70.CONLIB
+//SYSOUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//SYMDUMP  DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//MSGFILE  DD  DSN=&&MSG3FILE,DISP=(MOD,PASS)
+//ELEMLIST DD  DSN=&&EXT1ELM,DISP=(MOD,PASS)
+//SYSIN    DD  *
+* RECORD ID IS IN COLUMNS 1-5
+*    V - COLUMN 6 = PATH SETTING
+*      = ' ' FOR LOGICAL
+*      = 'L' FOR LOGICAL
+*      = 'P' FOR PHYSICAL
+*     V - COLUMN 7 = RETURN SETTING
+*       = ' ' FOR FIRST FOUND
+*       = 'F' FOR FIRST FOUND
+*       = 'A' FOR ALL FOUND
+*      V - COLUMN 8 = SEARCH SETTING
+*       = ' ' FOR FIRST
+*       = 'A' FOR ALL
+*       = 'B' FOR BETWEEN
+*       = 'E' FOR NEXT
+*       = 'N' FOR NO
+*       = 'R' FOR RANGE
+*       V - COLUMN 9 = UNUSED
+*---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
+***** AEELM = EXTRACT ELEMENT STRUCTURE INFORMATION
+*    V - COLUMN 6 = FORMAT SETTING
+*       = ' ' FOR NO FORMAT, JUST EXTRACT ELEMENT
+*       = 'B' FOR ENDEVOR BROWSE DISPLAY FORMAT
+*       = 'C' FOR ENDEVOR CHANGE DISPLAY FORMAT
+*       = 'H' FOR ENDEVOR HISTORY DISPLAY FORMAT
+*     V - COLUMN 7 = RECORD TYPE SETTING
+*       = 'E' FOR ELEMENT
+*       = 'C' FOR COMPONENT
+*        VVVVVVVV - COLUMN 10-17 ENVIRONMENT NAME
+*                V - COLUMN 18 = STAGE ID
+*                 VVVVVVVV - COLUMN 19-26 SYSTEM NAME
+*                         VVVVVVVV - COLUMN 27-34 SUBSYSTEM NAME
+*    COLUMN 35-44 = ELEMENT NAME  VVVVVVVVVV
+*    COLUMN 45-52 = TYPE NAME               VVVVVVVV
+*    COLUMN 53-54 = VERSION                         VV
+*    COLUMN 55-56 = LEVEL                             VV
+*---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
+AACTL MSGFILE ELEMLIST
+AEELMBCA TEST    UWARETRAN*
+RUN
+AACTLY
+RUN
+QUIT                                                                    00030000
+//*
+//*  PRINT ANY MESSAGES
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&MSG3FILE,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&EXT1ELM,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*          
+./  ADD  NAME=JCLAERET                
+//IBMUSERE JOB (55800000),
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
+//      NOTIFY=&SYSUID
+//*-------------------------------------------------------------------*
+//*---CAPRD.SIQ1206A.JCLLIB(BC1JAAPI) < PROVIDED MODEL ---------------*
+//*-------------------------------------------------------------------*
+//STEP1    EXEC PGM=NDVRC1,
+// PARM='APIAERETSMPLPRODCATSNDVRENDEVOR ASM     APIAERET  PHERE    '
+//*PARM='APIAERET-ENV----SYS-----SUB-----TYPE----ELEMENT---SDDNAME--'
+//*PARM='APIAERET----+--8----+--8----+--8----+--8--------10S-------8'
+//STEPLIBX DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB
+//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//SYSOUT   DD  SYSOUT=*
+//HERE     DD DSN=IBMUSER.ENDEVOR.APIAERET,
+//            DISP=(NEW,CATLG,KEEP),
+//            UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=24000)
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//APIMSGS DD   DSN=&&APIMSGS,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APILIST DD   DSN=&&APILIST,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//SYSIN    DD  *
+AACTL APIMSGS APILIST
+ALELM AA SMPLPRODE*       *       IPROCCOM  PROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+//SYSINX   DD  *
+AACTL APIMSGS APILIST
+ALELM F  SMPLPRODE*       *       IPROCCOM  PROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+AACTL APIMSGS APILIST
+ALELM F  SMPLPRODE*       PROCESS I#GOLONGERPROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+*    V - COLUMN 6 = PATH SETTING
+*      = ' ' FOR LOGICAL
+*      = 'L' FOR LOGICAL
+*      = 'P' FOR PHYSICAL
+*     V - COLUMN 7 = RETURN SETTING
+*       = ' ' FOR FIRST FOUND
+*       = 'F' FOR FIRST FOUND
+*       = 'A' FOR ALL FOUND
+*      V - COLUMN 8 = SEARCH SETTING
+*       = ' ' FOR FIRST
+*       = 'A' FOR ALL
+*       = 'B' FOR BETWEEN
+*       = 'E' FOR NEXT
+*       = 'N' FOR NO
+*       = 'R' FOR RANGE
+*       V - COLUMN 9 = UNUSED
+*        VVVVVVVV - COLUMN 10-17 ENVIRONMENT NAME
+*                V - COLUMN 18 = STAGE ID
+*                 VVVVVVVV - COLUMN 19-26 SYSTEM NAME
+*                         VVVVVVVV - COLUMN 27-34 SUBSYSTEM NAME
+*    COLUMN 35-44 = ELEMENT NAME  VVVVVVVVVV
+*    COLUMN 45-52 = TYPE NAME               VVVVVVVV
+*    COLUMN 53-60 = TO-ENV NAME                     VVVVVVVV
+*    COLUMN 61    = TO-STAGE ID                             V
+*    COLUMN 62-71 = THRU-ELEMENT NAME                        VVVVVVVVV
+* NOTE: IF BETWEEN/RANGE SETTINGS ARE USED, YOU NEED TO SPECIFY
+*       TO-ENV AND TO-STAGE, OTHERWISE LEAVE BLANK.
+//NOTNOW  DD *
+AACTL APIMSGS APILIST
+ALELM    SMPLPROD*FINANCE *       FAPASM01  *
+RUN
+AACTLY
+RUN
+QUIT
+//*
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APIMSGS,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APILIST,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+          
+./  ADD  NAME=JCLALAPP                
+//IBMUSERT JOB (0000),
+//         CLASS=A,MSGCLASS=X,REGION=4M,
+//         NOTIFY=&SYSUID
+//*==================================================================*
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL)
+// SET PACKAGE=CONT#ZAXJ1908178
+// SET PACKAGE=FINA#YECQ4226795
+//*==================================================================*
+//*-------------------------------------------------------------------*
+//LSTBKOUT EXEC PGM=NDVRC1,
+//         PARM='CONCALL,DDN:STEPLIB,APIALAPP,&PACKAGE'
+//*        PARM='APIALAPP,FINA#YECQ4226795'
+//   INCLUDE MEMBER=STEPLIB            <- Endevor STEPLIB +
+//SYSOUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//APIAPP   DD  SYSOUT=*
+//APIMSGS  DD  DSN=&&MSG3FILE,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APILIST  DD DSN=&&APIALAPP,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=20480)
+//*
+//*  PRINT ANY MESSAGES
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&MSG3FILE,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APIALAPP,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*        DD DISP=SHR,DSN=YOUR.SIQ126S1.CONLIB
+          
+./  ADD  NAME=JCLALDIR                
+//IBMUSERA JOB (55800000),
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
+//      NOTIFY=&SYSUID
+//*-------------------------------------------------------------------*
+//*---EXECUTE API PROGRAM TO ADD/UPDATE                ---------------*
+//*-------------------------------------------------------------------*
+//STEP1    EXEC PGM=NDVRC1,
+// PARM='APIALDIRFINAPS03  LOADLIBT'
+//*PARM='APIALDIR----+--|-1----+--|-1----+----2----+----3
+//*PARM='APIALDIR.MBR ---->DDNAME  >'
+//SELECTN  DD DISP=SHR,DSN=IBMUSER.ENDEVOR.SELECTN(C1DEFLTS)
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB
+//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//LOADLIBT DD DISP=SHR,DSN=CAPRD.NDVR.SMPLTEST.LOADLIB
+//SYSOUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//APIMSGS  DD  SYSOUT=*
+//APIMSGX DD   DSN=&&APIMSGS,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APILIST DD   DSN=&&APILIST,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=VB,LRECL=4096,BLKSIZE=0)
+//*---------------------------------------------------
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APIMSGS,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APILIST,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+          
+./  ADD  NAME=JCLALELM                
+//IBMUSERE JOB (55800000),
+//      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,
+//      NOTIFY=&SYSUID
+//*-------------------------------------------------------------------*
+//*---CAPRD.SIQ1206A.JCLLIB(BC1JAAPI) < PROVIDED MODEL ---------------*
+//*-------------------------------------------------------------------*
+//STEP1    EXEC PGM=NDVRC1,
+// PARM='APIALELMSMPLPRODCATSNDVR*       ASM     *         *'
+//*PARM='APIALELM-ENV----SYS-----SUB-----TYPE----ELEMENT---S'
+//*PARM='APIALELM----+--8----+--8----+--8----+--8--------10S'
+//STEPLIBX DD DISP=SHR,DSN=CAPRD.SIQ126S1.USER.AUTHLIB
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB
+//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//SYSOUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//APIMSGS DD   DSN=&&APIMSGS,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APILIST DD   DSN=&&APILIST,DISP=(MOD,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//SYSIN    DD  *
+AACTL APIMSGS APILIST
+ALELM AA SMPLPRODE*       *       IPROCCOM  PROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+//SYSINX   DD  *
+AACTL APIMSGS APILIST
+ALELM F  SMPLPRODE*       *       IPROCCOM  PROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+AACTL APIMSGS APILIST
+ALELM F  SMPLPRODE*       PROCESS I#GOLONGERPROCINCL
+RUN
+AACTLY
+RUN
+QUIT
+*    V - COLUMN 6 = PATH SETTING
+*      = ' ' FOR LOGICAL
+*      = 'L' FOR LOGICAL
+*      = 'P' FOR PHYSICAL
+*     V - COLUMN 7 = RETURN SETTING
+*       = ' ' FOR FIRST FOUND
+*       = 'F' FOR FIRST FOUND
+*       = 'A' FOR ALL FOUND
+*      V - COLUMN 8 = SEARCH SETTING
+*       = ' ' FOR FIRST
+*       = 'A' FOR ALL
+*       = 'B' FOR BETWEEN
+*       = 'E' FOR NEXT
+*       = 'N' FOR NO
+*       = 'R' FOR RANGE
+*       V - COLUMN 9 = UNUSED
+*        VVVVVVVV - COLUMN 10-17 ENVIRONMENT NAME
+*                V - COLUMN 18 = STAGE ID
+*                 VVVVVVVV - COLUMN 19-26 SYSTEM NAME
+*                         VVVVVVVV - COLUMN 27-34 SUBSYSTEM NAME
+*    COLUMN 35-44 = ELEMENT NAME  VVVVVVVVVV
+*    COLUMN 45-52 = TYPE NAME               VVVVVVVV
+*    COLUMN 53-60 = TO-ENV NAME                     VVVVVVVV
+*    COLUMN 61    = TO-STAGE ID                             V
+*    COLUMN 62-71 = THRU-ELEMENT NAME                        VVVVVVVVV
+* NOTE: IF BETWEEN/RANGE SETTINGS ARE USED, YOU NEED TO SPECIFY
+*       TO-ENV AND TO-STAGE, OTHERWISE LEAVE BLANK.
+//NOTNOW  DD *
+AACTL APIMSGS APILIST
+ALELM    SMPLPROD*FINANCE *       FAPASM01  *
+RUN
+AACTLY
+RUN
+QUIT
+//*----------------------------------------------------------------------
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APIMSGS,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&APILIST,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*          
+./  ADD  NAME=JCLALPKG                
+//IBMUSERI JOB  (44500000,BL01),'DAN-WALTHER',CLASS=A,PRTY=6,
+//    MSGCLASS=X,NOTIFY=IBMUSER,REGION=7M
+//*-------------------------------------------------------------------*
+//*  ENDEVOR JCL STATEMENTS                                           *
+//    SET PACKAGE='BO#HATM2408#2MOV'
+//    SET PACKAGE='Q#LDKP5804211698'
+//*  SEE CAPRD.SIQ126S1.JCLLIB(BC1JAAPI)                              *
+//*-------------------------------------------------------------------*
+//ENDES000 EXEC PGM=NDVRC1,
+// PARM='APIALPKG&PACKAGE '
+//*PARM='CONCALL,DDN:MYLIB,APIALPKG,MSGOUT  LISTOUT BO#HATM2408#2MOV '
+//*PARM='CONCALL,DDN:MYLIB,APIALPKG,MSGOUT  LISTOUT QA*              '
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ126S1.AUTHLIB
+//         DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ126S1.CONLIB
+//MYLIB    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.LOADLIB
+//MSGOUT   DD  DSN=&&MSGOUT,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APIMSGS  DD SYSOUT=*
+//APILIST  DD  DSN=&&PKGLIST,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(CYL,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//SYMDUMP  DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//DISPLAYS DD SYSOUT=*
+//*-------------------------------------------------------------------*
+//*
+//*  PRINT ANY MESSAGES
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&MSGOUT,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED PACKAGE LIST
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD  DSN=&&PKGLIST,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*-------------------------------------------------------------------*
+//*-------------------------------------------------------------------*
+//
+//*-------------------------------------------------------------------*
+//*     TEST API                                                   **
+//*-------------------------------------------------------------------*
+//TEST     EXEC PGM=NDVRC1,
+//         PARM='APIALPKGPR BACKOUT TEST1'
+//*        PARM='APIALPKGPR DANSUP2SUMTHG'
+//*        PARM='CONCALL,DDN:STEPLIB,APIALPKG,PR DANSUP2SUMTHG'
+//*        PARM='CONCALL,DDN:STEPLIB,APIALPKG,PR DIPITYDODAH  '
+//*        PARM='CONCALL,DDN:STEPLIB,APIALPKG,PR FINARP2 PGMS '
+//*        PARM='CONCALL,DDN:STEPLIB,APIALPKG,PR BACKOUT TEST1'
+//STEPLIB  DD DISP=SHR,DSN=CAPRD.SIQ1206A.AUTHLIB
+//CONLIB   DD DISP=SHR,DSN=CAPRD.SIQ1206A.CONLIB
+//SYSOUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//BSTERR   DD  SYSOUT=*
+//BSTAPI   DD  SYSOUT=*
+//APIMSGS  DD  DSN=&&MSG3FILE,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=133,BLKSIZE=13300)
+//APILIST  DD DSN=&&EXT1ELM,DISP=(NEW,PASS),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=VB,LRECL=2048,BLKSIZE=22800)
+//*
+//*  PRINT ANY MESSAGES
+//STEP2    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&MSG3FILE,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*
+//*  PRINT EXTRACTED ELEMENT
+//STEP3    EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY
+//SYSUT1   DD DSN=&&EXT1ELM,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//*        DD DISP=SHR,DSN=CAPRD.SIQ1206A.CONLIB
+          

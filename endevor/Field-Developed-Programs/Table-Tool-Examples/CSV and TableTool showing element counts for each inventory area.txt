@@ -1,0 +1,105 @@
+//IBMUSERA JOB (0000),'Your Name',
+//         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
+//*
+//JOBLIB DD DISP=SHR,DSN=Your.Endevor.CSIQAUTU
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQAUTH
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQLOAD
+//*
+//************************************************************
+//*                                                          *
+//* This utility queries Endevor to produce a report showing *
+//* element counts for each Environment, Stage, System,      *
+//* Subsystem, and Type.                                     *
+//*                                                          *
+//************************************************************
+//**********************************************************
+//*  Build element list using CSV Utility                  *
+//**********************************************************
+//$$$$$$@1 EXEC PGM=NDVRC1,REGION=4M,PARM='BC1PCSV0'
+//BSTIPT01 DD *
+LIST ELEMENT *
+     FROM ENV * SYS * SUB * TYPE  *  STAGE *
+     TO DDNAME 'TABLE'
+     OPTIONS   RETURN ALL .
+//TABLE    DD DSN=&&EXTRACTM,
+//            DCB=(RECFM=FB,LRECL=1800,BLKSIZE=9000,DSORG=PS),
+//            DISP=(MOD,PASS),
+//            SPACE=(CYL,(5,5),RLSE)
+//C1MSGS1  DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//*
+//**********************************************************
+//* Show contents of CSV file (for debugging)              *
+//**********************************************************
+//SHOWME1  EXEC PGM=IEBGENER,REGION=1024K
+//SYSPRINT DD DUMMY
+//SYSUT1   DD DSN=&&EXTRACTM,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//*
+//**********************************************************
+//* Using Endevor's TableTool utility, read the element    *
+//* data and build a formatted list.                       *
+//* ==> TableTool utility;  IPRFX.IQUAL.CSIQCLS0(ENBPIU00) *
+//**********************************************************
+//STEP20   EXEC PGM=IRXJCL,PARM='ENBPIU00 A',COND=(4,LT)
+//SYSEXEC  DD DISP=SHR,DSN=Your.Endevor.CSIQCLS0
+//TABLE    DD DSN=&&EXTRACTM,DISP=(OLD,PASS)
+//MODEL    DD *
+&oneline
+//OPTIONS  DD *
+  $Table_Type = "CSV"
+  IF RCD_TYPE  = 'RCD TYPE' THEN $SkipRow = 'Y'
+  IF TYPE_NAME /= 'COBOL'   THEN $SkipRow = 'Y'
+  p1 = substr(ENV_NAME,1,8)
+  p2 = substr(STG_ID,1,1)
+  p3 = substr(SYS_NAME,1,8)
+  p4 = substr(SBS_NAME,1,8)
+  p5 = substr(TYPE_NAME,1,8)
+  oneline = p1 p2 p3 p4 p5 '0000001'
+//TBLOUT   DD DSN=&&ELEMENTS,DISP=(,PASS),SPACE=(CYL,(5,5),RLSE),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=0,DSORG=PS)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//DISPLAYS DD SYSOUT=*
+//SYSTSIN  DD DUMMY
+//*
+//**********************************************************
+//* Show contents                                          *
+//**********************************************************
+//SHOWME2  EXEC PGM=IEBGENER,REGION=1024K
+//SYSPRINT DD DUMMY
+//SYSUT1   DD DSN=&&ELEMENTS,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//*
+//**********************************************************
+//* Using SORT, count the elements for each inventory area *
+//**********************************************************
+//STEP25   EXEC PGM=SORT
+//SYSOUT   DD DUMMY
+//SORTWK01 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTWK02 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTWK03 DD UNIT=SYSDA,SPACE=(CYL,(50,20))
+//SORTIN   DD DSN=&&ELEMENTS,DISP=(OLD,DELETE)
+//SORTOUT  DD DSN=&&ELECOUNT,DISP=(,PASS),SPACE=(CYL,(15,15),RLSE),
+//            UNIT=SYSDA,DCB=(RECFM=FB,LRECL=80,BLKSIZE=0)
+//SYSIN    DD *
+ SORT FIELDS=(1,38,CH,A)
+ SUM  FIELDS=(39,7,ZD)
+ END
+//*
+//**********************************************************
+//* Add header lines                                       *
+//**********************************************************
+//STEP30   EXEC PGM=IEBGENER
+//SYSUT1   DD *
+Env      S System   Subsys   Type     Elements
+-------- - -------- -------- -------- -------
+/*
+//         DD DSN=&&ELECOUNT,DISP=(OLD,DELETE)
+//SYSUT2   DD SYSOUT=*
+//SYSPRINT DD DUMMY
+//SYSIN    DD DUMMY

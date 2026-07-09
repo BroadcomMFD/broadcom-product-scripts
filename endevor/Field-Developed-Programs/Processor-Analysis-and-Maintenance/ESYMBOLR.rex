@@ -1,0 +1,46 @@
+ /* REXX   */
+   TRACE Off;
+   ADDRESS ISPEXEC,
+   "VGET (ZSCREEN) SHARED"
+   Table = 'C1SYMBS' || ZSCREEN
+  ADDRESS ISPEXEC
+     "TBSTATS "Table" STATUS1(STATUS1) STATUS2(STATUS2)"
+  /* FOR TABLE STATUS...                                             */
+  /*  1 = TABLE EXISTS IN THE TABLE INPUT LIBRARY CHAIN              */
+  /*  2 = TABLE DOES NOT EXIST IN THE TABLE INPUT LIBRARY CHAIN      */
+  /*  3 = TABLE INPUT LIBRARY IS NOT ALLOCATED.                      */
+  /*                                                                 */
+  /*  1 = TABLE IS NOT OPEN IN THIS LOGICAL SCREEN                   */
+  /*  2 = TABLE IS OPEN IN NOWRITE MODE IN THIS LOGICAL SCREEN       */
+  /*  3 = TABLE IS OPEN IN WRITE MODE IN THIS LOGICAL SCREEN         */
+  /*  4 = TABLE IS OPEN IN SHARED NOWRITE MODE IN THIS LOGICAL SCREEN*/
+  /*  5 = TABLE IS OPEN IN SHARED WRITE MODE IN THIS LOGICAL SCREEN. */
+  "TBQUERY "Table" KEYS(KEYLIST) NAMES(VARLIST) ROWNUM(ROWNUM)"
+  IF RC > 0 THEN EXIT
+  KEYLIST = TRANSLATE(KEYLIST," ","()',");
+  VARLIST = TRANSLATE(VARLIST," ","()',");
+  VARLIST = Strip(KEYLIST) STRIP(VARLIST);
+  SA= "KEYLIST=" VARLIST;
+  VariableCount = Words(VARLIST) ROWNUM
+  "TBTOP   "Table
+  maxLen = 12
+  DO Row# = 1 TO ROWNUM
+     "TBSKIP "TABLE
+     tmp = Left(VARSISYM,12) '="' || Strip(VARUSPVA) || '"'
+     If Length(tmp) > maxLen then maxlen = Length(tmp)
+     queue tmp
+  End /* DO Row# = 1 TO ROWNUM */
+  Push "Largest_record_size = " maxLen
+  ADDRESS TSO,
+    "ALLOC F(TBLSAVE)",
+        "LRECL(100) BLKSIZE(24000) SPACE(5,5)",
+           "RECFM(F B) TRACKS ",
+           "NEW UNCATALOG REUSE "     ;
+  ADDRESS TSO,
+  "EXECIO" QUEUED() "DISKW TBLSAVE (FINIS"
+  ADDRESS ISPEXEC "LMINIT DATAID(DDID) DDNAME(TBLSAVE)"
+  ADDRESS ISPEXEC "VIEW DATAID(&DDID)"
+  ADDRESS ISPEXEC "LMFREE DATAID(&DDID)"
+  ADDRESS TSO,
+    "FREE F(TBLSAVE)"
+  EXIT ;

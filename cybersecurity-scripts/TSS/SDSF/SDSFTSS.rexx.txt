@@ -1,0 +1,200 @@
+/* rexx */
+/*                                                            */
+/*  Broadcom has provided this REXX as an example of the      */
+/*  on how to convert RACF cmds from ISRACR SDSF utility      */
+/*  to TSS commands                                           */
+/*                                                            */
+/*  SYNTAX:  SDSFTSS data_set_name                            */
+/*  where "data_set_name" is output of ISFACR utility         */
+/*                                                            */
+/*  Version 1.0 March 2024                                    */
+/*          1.1 September 2024                                */
+/*                                                            */
+/*  created by steve hosie March 20 2024                      */
+/*                                                            */
+parse arg p1
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.ATSS.TEMP.'last_qual
+udsn = strip(udsn)
+udsn = udsn||'.SDSFCMDS'
+x = 1
+ddname = "A"current_seconds
+sdname = "S"current_seconds
+/* for testing, otherwise take input P1 as dataset name */
+if length(p1) = 0 then
+ do
+  say 'No dataset name provided, please try again'
+  exit
+ end
+else
+  sdsf_dsn=p1
+/*                                */
+say 'Processing file' sdsf_dsn
+if sysdsn("'"sdsf_dsn"'") = ok then
+  "alloc f("sdname") da('"sdsf_dsn"') shr reu"
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(25 15)
+   TR DSORG(PS) RECFM(F B) LRECL(80) BLKSIZE(3120)"
+"execio * diskr "sdname" (stem sdsf_racf. FINIS"
+total_racf_records = sdsf_racf.0
+sdsf_out.1 = '/*                                  */'
+sdsf_out.2 = '/* REVIEW AND EDIT BEFORE EXECUTING */'
+sdsf_out.3 = '/*                                  */'
+sdsf_out.4 = 'TSS ADD(owndept)SDSF(ISF)'
+sdsf_out.5 = 'TSS ADD(owndept)JESSPOOL(sysid.)'
+sdsf_out.6 = 'TSS ADD(owndept)OPERCMDS(MVS.)'
+sdsf_out.7 = 'TSS ADD(owndept)OPERCMDS(JES2.)'
+sdsf_out.8 = 'TSS ADD(owndept)WRITER(JES2.)'
+sdsf_out.9 = 'TSS ADD(owndept)XFACILIT(HZS.)'
+y = 9
+data_string = "DATA("
+owner_string = "OWNER("
+g_cnt = 1
+do until x > total_racf_records
+/* load all GSDSF records into Stem variable */
+  If ralter = "RALTER" then do
+    if substr(sdsf_racf.x,9,5) = 'GSDSF' then
+      do
+        ralter_class = substr(sdsf_racf.x,9,5)
+        ralter_attr = substr(sdsf_racf.x,15,10)
+        res_name = substr(sdsf_racf.x,26,44)
+        attr.g_cnt = ralter_attr' 'res_name
+        g_cnt = g_cnt + 1
+      end
+    x = x + 1
+  end
+end
+x = 1
+do until x > total_racf_records
+  addgroup = substr(sdsf_racf.x,2,8)
+  ralter = substr(sdsf_racf.x,2,6)
+  permit = substr(sdsf_racf.x,2,6)
+  pos_data = POS('DATA(',sdsf_racf.x)
+  If addgroup = "ADDGROUP" then
+   do
+    pos_owner = INDEX(sdsf_racf.x,' OWNER(')
+    length_xrole = pos_owner - 12
+    sdsf_xrole = substr(sdsf_racf.x,12,length_xrole)
+    pos_data = INDEX(sdsf_racf.x,' DATA(')
+    pos_data_start = pos_data + 7
+    pos_data_last = index(sdsf_racf.x,"')")
+    pos_data_last = pos_data_last - pos_data_start
+    sdsf_desc = SUBSTR(sdsf_racf.x,pos_data_start,pos_data_last)
+    sdsf_out.y = 'TSS CRE('sdsf_xrole')TYPE(PROFILE)DEPT(owndept)'
+    sdsf_out.y = sdsf_out.y"NAME('"sdsf_desc"')"
+    if length(sdsf_out.y) > 71 then
+     do
+      sdsf_out.y = 'TSS CRE('sdsf_xrole')TYPE(PROFILE)DEPT(owndept) -'
+      y = y + 1
+      sdsf_out.y = "NAME('"sdsf_desc"')"
+     end
+    y = y + 1
+   end
+  If permit = "PERMIT" then
+   do
+    if substr(sdsf_racf.x,19,5) = 'CLASS' then
+     do
+       attr_role = substr(sdsf_racf.x,35,8)
+       attr_role = STRIP(attr_role,,')')
+       last_pos_attr = lastpos(attr_role,')')
+       attr_cmd = substr(sdsf_racf.x,9,9)
+       access_pos = POS('ACCESS(',sdsf_racf.x)
+       access_pos = access_pos + 7
+       attr_access = substr(sdsf_racf.x,access_pos,15)
+       access_last_pos = LASTPOS(')',sdsf_racf.x)
+       if access_last_pos > 0 then
+        do
+         access_last_pos = access_last_pos - access_pos
+         attr_access = substr(attr_access,1,access_last_pos)
+         if attr_access = 'ALTER' then
+            attr_access = 'ALL'
+        end
+      do
+      /* process permits for GSDSF items direct to roles */
+       attr_cnt = 1
+       do until attr_cnt > g_cnt
+         If attr_cmd = substr(attr.attr_cnt,1,9) then
+           do
+             resname = STRIP(substr(attr.attr_cnt,18,44))
+             resname = STRIP(resname,,')')
+             resname = STRIP(resname,,'(')
+            /* create sdsf_TSS_commands */
+             sdsf_out.y = 'TSS PER('attr_role')SDSF('resname')'
+             sdsf_out.y = sdsf_out.y'ACCESS('attr_access')'
+             if length(sdsf_out.y) > 71 then
+              do
+               sdsf_out.y = 'TSS PER('attr_role')SDSF('resname') -'
+               y = y + 1
+               sdsf_out.y = 'ACCESS('attr_access')'
+              end
+             y = y + 1
+           end
+           attr_cnt = attr_cnt + 1
+       end
+      end
+   end
+  else
+    /* handle all other permits */
+    do
+      class_pos = POS(' CLASS',sdsf_racf.x)
+      last_resname_char = class_pos - 9
+      resource_name = substr(sdsf_racf.x,9,last_resname_char)
+      class_pos = class_pos + 7
+      res_pos = POS('.',resource_name)
+      res_start = res_pos + 1
+      res_neg = res_pos - 1
+      res_length = length(resource_name)
+      res_length = res_length - res_pos
+      res_key = substr(resource_name,1,res_neg)
+      resname = substr(resource_name,res_start,res_length)
+      id_pos = POS(' ID(',sdsf_racf.x)
+      id_pos_neg = id_pos - class_pos - 1
+      class = substr(sdsf_racf.x,class_pos,id_pos_neg)
+      access_pos = POS(') ACCESS(',sdsf_racf.x)
+      id_pos = POS(') ID(',sdsf_racf.x)
+      id_pos = id_pos + 5
+      id_pos_last = access_pos - id_pos
+      role = substr(sdsf_racf.x,id_pos,id_pos_last)
+      access_pos = access_pos + 9
+      access_pos_last = LASTPOS(')',sdsf_racf.x) - access_pos
+      access = substr(sdsf_racf.x,access_pos,access_pos_last)
+      if access = 'ALTER' then
+         access = 'ALL'
+      if class = 'JESSPOOL' then
+       do
+       end
+      sdsf_out.y = 'TSS PER('role')'class'('resource_name')'
+      sdsf_out.y = sdsf_out.y'ACCESS('access')'
+      if length(sdsf_out.y) > 71 then
+       do
+        sdsf_out.y = 'TSS PER('role')'class'('resource_name') -'
+        y = y + 1
+        sdsf_out.y = 'ACCESS('access')'
+       end
+      y = y + 1
+    end
+  end
+  x = x + 1
+ end
+"execio * diskw "ddname" (stem sdsf_out. FINIS"
+say 'Processing Completed - Press Enter'
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+TIM = TIME()
+DAT = DATE()
+STATUS = MSG('ON')
+STATUS = MSG('OFF')
+/* call esmtype */
+"ISPEXEC EDIT DATASET('"udsn"')"
+address tso "free f("sdname")"
+address tso "free f("ddname")"
+return
+/* address tso "DELETE '"udsn"'" */
+exit
+/*             */                                                       01810004
+/* END OF CODE */                                                       01820004
+/*             */                                                       01830004

@@ -3,7 +3,7 @@
 //*==================================================================*
 //*- To run the Package Monitory report                   -------
 //*--------------------------------------------------------------
-// JCLLIB  ORDER=(SYSMD32.NDVR.TEAM.JCL.CSV)
+// JCLLIB  ORDER=(YOURSITE.NDVR.TEAM.JCL.CSV)
 //*==================================================================*
 //   EXPORT SYMLIST=(*)           <- make JCL symbols available
 //*** STEP 1 -- EXECUTE CSV UTILITY to find APPROVED and EXEC packages
@@ -41,7 +41,7 @@
 //SELECTS  DD *
   $Table_Type = "CSV"
   $StripData = 'N' ;
-  DESTTABLusers='FCFE FCAE FCMA FCOG SWEF'
+  DESTTABLusers='APP1 APP2 APP3 APP4 TEST'
   tday= DATE(S)
   today = Substr(tday,1,4)'/'Substr(tday,5,2)'/'Substr(tday,7)
   BaseDate = DATE('B')

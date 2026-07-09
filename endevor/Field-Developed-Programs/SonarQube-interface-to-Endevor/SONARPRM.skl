@@ -1,0 +1,8 @@
+  NOTHING  NOTHING  SETUP   0                                                   
+  MDL#JOB  JCL#JOB  NOTHING 1                                                   
+  MDL#RCV  JCL#RCV  NOTHING 1                                                   
+  MDL#RUN  JCL#RUN  NOTHING 1                                                   
+  MODEL    TBLOUT   NOTHING 1                                                   
+  NOTHING  REPORT   WAIT#1  1                                                   
+  NOTHING  REPORT   WAIT#2  1                                                   
+  NOTHING  REPORT   WAIT#3  1                                                   

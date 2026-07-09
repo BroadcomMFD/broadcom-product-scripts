@@ -1,0 +1,30 @@
+//CONSOLID JOB (0000),
+//         CLASS=A,MSGCLASS=X,REGION=4M,
+//         NOTIFY=&SYSUID
+//*==================================================================*
+//SUPERC  EXEC PGM=ISRSUPC,                                            *0004
+//            PARM=(LONGL,LINECMP,                                      0005
+//            'UPDSEQ0',                                                0006
+//            '')                                                       0007
+//NEWDD  DD DSN=&NEWDD(&NEWMBR),                                        0008
+//          DISP=SHR                                                    0009
+//OLDDD  DD DSN=&OLDDD(&OLDMBR),                                        0010
+//          DISP=SHR                                                    0011
+//OUTDD  DD DSN=&LISTINGS(&MYMBR),                                      0028
+//          DISP=SHR                                                    0028
+//DELDD  DD DSN=&&&&DELTA,                                              0015
+//          DISP=(NEW,PASS),UNIT=3390,                                  0015
+//          DCB=(LRECL=80,BLKSIZE=13680),                               0016
+//          SPACE=(13680,(15,30),RLSE)                                  0017
+//*                                                                     0018
+//*==================================================================*
+//*= (optionally save the SUPERC "delta")============================*
+//*==================================================================*
+//SAVDLTA EXEC PGM=IEBGENER,COND=(0,LE)                                 0019
+//SYSPRINT DD  DUMMY                                                    0020
+//SYSUT1 DD DSN=&&&&DELTA,                                              0021
+//          DISP=(SHR,DELETE)                                           0021
+//SYSUT2 DD DSN=&UPDATES(&MYMBR),                                       0022
+//          DISP=SHR                                                    0022
+//SYSIN    DD  DUMMY                                                    0023
+//*                                                                     0024

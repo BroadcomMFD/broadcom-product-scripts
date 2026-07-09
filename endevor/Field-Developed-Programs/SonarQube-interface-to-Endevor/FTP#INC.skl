@@ -1,0 +1,15 @@
+//*----------                                                                   
+//FTP1     DD *,SYMBOLS=JCLONLY                            FTP#INC              
+  OPEN '&IPADDRSS'                                                              
+  ASCII                                                                         
+//FTP2     DD *  <- All kinds of Stage info                FTP#INC              
+  PUT '&Dataset(&Member)' +                                                     
+       &Member.&extension                                                       
+//FTP2XX   DD *  <- All kinds of Stage info   **NOT USED** FTP#INC              
+  PUT '&Dataset(&Member)' +                                                     
+      \&Folder\&Member.&extension                                               
+//FTP3     DD *  <- All kinds of Stage info                FTP#INC              
+  PUT '&SonarWorkfile(TRANSMIT)' +                                              
+      &uniqueName.lst                                                           
+  QUIT                                                                          
+//*----------                                                                   

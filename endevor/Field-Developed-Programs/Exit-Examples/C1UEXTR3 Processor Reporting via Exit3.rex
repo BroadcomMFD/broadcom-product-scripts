@@ -10,7 +10,7 @@
    CALL BPXWDYN STRING;
 
 /* Indicate your choices here.....                                */
-   LoggingPrefix = 'SYSMD32.NDVR.LOGGING'
+   LoggingPrefix = 'YOURSITE.NDVR.LOGGING'
    HowManyEntries= 20
 
    /* If C1UEXTR3 is allocated to anything, turn on Trace  */
@@ -41,9 +41,10 @@
    Message =''
    MessageCode = '    '
 /*
-   If TGT_ENV_TYPE_OF_BLOCK = 'C' then,
-   If SRC_ENV_IO_TYPE = 'I' then,
 */
+   If SRC_ENV_SYSTEM_NAME = 'ADMINSYS' |,
+      TGT_ENV_SYSTEM_NAME = 'ADMINSYS' then,
+      Say REQ_USER_DATA
 
    sa= SRC_ENV_TYPE_OF_BLOCK
    sa= TGT_ENV_TYPE_OF_BLOCK

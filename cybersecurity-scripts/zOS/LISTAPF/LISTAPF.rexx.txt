@@ -1,0 +1,67 @@
+/*REXX ***************************************************************/ 00001006
+/* ----------------------------------------------------------------  */ 00002006
+/* Purpose:  This REXX exec provides an effient method to            */ 00003006
+/* interactively list the APF and placing the output                 */ 00004006
+/* into a temp dataset to allow scrolling, browsing and searching    */ 00005006
+/* ----------------------------------------------------------------  */ 00006006
+/*  This rexx is an example of the art of the possible               */ 00007006
+/*                                                                   */ 00009006
+/* ----------------------------------------------------------------  */ 00009606
+/*  Syntax:  LISTAPF                                                 */ 00009706
+/*                                                                   */ 00009806
+/* trace(i) */                                                          00020800
+current_seconds = TIME(S)                                               00021100
+last_qual = "D"current_seconds                                          00021200
+user = userid()                                                         00021300
+udsn = user'.TSS.TEMP.'last_qual'.LISTAPF'                              00021400
+udsn = strip(udsn)                                                      00021500
+ddname = "A"current_seconds                                             00021600
+                                                                        00021700
+if sysdsn("'"udsn"'") = OK then                                         00021800
+  "alloc f("ddname") da('"udsn"') shr reu"                              00021900
+else                                                                    00022000
+  "alloc f("ddname") da('"udsn"') NEW SP(200 200)                       00023000
+   TR DSORG(PS) RECFM(F B) LRECL(133)"                                  00024000
+i = 1                                                                   00025000
+                                                                        00026005
+numeric digits 20 /* need this for D2X/C2D  */                          00029000
+CVT = C2D(STORAGE(10,4)) /* CVT Pointer */                              00030000
+CVTAUTHL = C2D(STORAGE(D2X(CVT + 484),4))                               00040000
+if CVTAUTHL = C2D('7FFFF001'x) then                                     00050005
+  do                                                                    00051005
+    /* The APF Table is Dynamic, not Static */                          00060005
+    CVTECVT = C2D(STORAGE(D2X(CVT + 140),4))                            00061005
+    ECVTCSVT = C2D(STORAGE(D2X(CVTECVT + 228),4))                       00062005
+    APF_PTR = c2d(storage(d2x(ECVTCSVT+12),4))                          00063005
+    CUR = c2d(storage(d2x(APF_PTR+8),4))                                00064005
+    LAST = c2d(storage(d2x(APF_PTR+12),4))                              00065005
+    do forever                                                          00066005
+      DATASET = storage(d2x(CUR+24),44)                                 00067005
+      if substr(DATASET,1,1) \= '00'x then    /* Its not deleted */     00068005
+        do                                                              00068105
+          VOL_SMS = storage(d2x(CUR+4),1)                               00069005
+          IF bitand(VOL_SMS,'80'x) = '80'x then VOLUME = 'SMS   '       00069105
+          ELSE VOLUME = STORAGE(D2X(CUR+68),6)                          00069205
+          /* Here we list the found items */                            00069305
+          apf_rec.i = volume strip(dataset)                             00069405
+          i = i + 1                                                     00069505
+        end                                                             00069605
+      if CUR = LAST then leave                                          00069705
+      else CUR = C2D(STORAGE(D2X(CUR+8),4))                             00069805
+     END /* Do */                                                       00069905
+   END /* End of Dynamic */                                             00070005
+                                                                        00080005
+"EXECIO * DISKW "ddname" (stem apf_rec. finis"                          00124600
+IF RC > 1 THEN DO                                                       00126000
+          SAY "STORAGE OF COMMAND OUTPUT FAILED. EXECIO RC=" RC         00127000
+          SAY "TRUNCATED OUTPUT MAY BE VIEWED IN" udsn                  00128000
+          EXIT                                                          00129000
+          END                                                           00130000
+ELSE                                                                    00140000
+/*   the ISPEXEC command below can be changed to just browse */         00150000
+/*   if needed.  ISPEXEC BROWSE DATASET(" DSN ")  */                    00160000
+"ISPEXEC EDIT DATASET('"udsn"')"                                        00170000
+STATUS = MSG('OFF')                                                     00171003
+address tso "FREE F("ddname")"                                          00180000
+address tso "DELETE '"udsn"'"                                           00190000
+exit(0)                                                                 00200000

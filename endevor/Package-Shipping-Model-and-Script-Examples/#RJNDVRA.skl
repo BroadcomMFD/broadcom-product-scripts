@@ -1,0 +1,24 @@
+@REM ************************************************************
+@REM * THESE STEPS WILL EXECUTE AFTER THE COPY TO THE REMOTE TGT
+@REM ************************************************************
+//* START #RJNDVRA
+//*  Do Not execute for Package Backout:
+@IF &ZZCICSNEWC
+//*--------------------------------------------------------------------
+//* These steps are inserted only if CICSNEWC  is shipped in Package
+//* START SCRIPT for CICS newcopies
+//*--------------------------------------------------------------------
+//CICS01   EXEC PGM=IEBPTPCH   * THEN PUNCH OUT MEMBERS    #RJNDVRA
+//SYSPRINT DD   SYSOUT=*
+//SYSUT1   DD   DISP=SHR,
+//         DSN=&ZZCICSNEWC
+//SYSUT2   DD   SYSOUT=*
+//SYSIN    DD  *
+ PUNCH TYPORG=PO
+//*
+//CICS02   EXEC PGM=IEFBR14    * more to do ..........     #RJNDVRA
+//*
+//CICS03   EXEC PGM=IEFBR14    * more to do ..........     #RJNDVRA
+//*--------------------------------------------------------------------
+@ENDIF
+//* End   #RJNDVRA

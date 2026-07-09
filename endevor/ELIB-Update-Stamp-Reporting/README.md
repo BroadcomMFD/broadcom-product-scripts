@@ -1,4 +1,8 @@
 # Endevor ELIB Update Stamp reporting
+
+These samples are provided as is and are not officially supported (see [license](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/LICENSE
+) for more information).
+
 This entry is a follow-up to the 
 [Announcement on the Endevor Community site](https://community.broadcom.com/mainframesoftware/discussion/important-notice-for-endevor-elib-users) regarding Endevor ELIBS. The item in this folder gives you a method for reporting on your ELIB datasets, to determine whether any action is necessary.
 

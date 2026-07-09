@@ -1,0 +1,22 @@
+//&Jobname JOB (&MyAccountingCode),                                             
+//   'CAST PACKAGE',CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID                           
+//*==================================================================*          
+// JCLLIB  ORDER=(&MySEN2Library,                                               
+//           &MySENULibrary)                                                    
+//*==================================================================*          
+//*===== If you want all package CAST actions to be performed        *          
+//*===== in batch, then set the Force_CAST_in_Batch option in        *          
+//*===== C1UEXTR7, and this JCL will submit a batch CAST.            *          
+//*==================================================================*          
+//ENBP1000 EXEC PGM=NDVRC1,PARM=ENBP1000,                  CAST#JCL             
+//         DYNAMNBR=1500,REGION=4096K                                           
+//   INCLUDE MEMBER=STEPLIB                                                     
+//*C1UEXTR7 DD DUMMY     <- Trace REXX exit                                     
+//ENPSCLIN DD *                                                                 
+  CAST PACKAGE '&PECB_PACKAGE_ID'.                                              
+//C1MSGS1  DD SYSOUT=*                                                          
+//C1MSGS2  DD SYSOUT=*                                                          
+//REPORT   DD SYSOUT=*                                                          
+//SYSUDUMP DD SYSOUT=*                                                          
+//SYMDUMP  DD DUMMY                                                             
+//JCLOUT   DD DUMMY                                                             

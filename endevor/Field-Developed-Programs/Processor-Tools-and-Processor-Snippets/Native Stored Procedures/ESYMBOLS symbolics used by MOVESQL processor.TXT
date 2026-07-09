@@ -1,0 +1,57 @@
+ESYMBOLS TITLE 'SITE-WIDE SYMBOLICS TABLE'
+***********************************************************************
+*  COPYRIGHT (C) 2022 BROADCOM. ALL RIGHTS RESERVED.                  *
+*  NAME:        ESYMBOLS                                              *
+*  DESCRIPTION: Site-Wide Symbolics Definition Table                  *
+*  FUNCTION:    Define symbolics for use in element type definitions  *
+*               and processors.                                       *
+***********************************************************************
+* DEPLOY FOR TEST (D4T) MAPPING                                       *
+***********************************************************************
+* ATST (DEV)
+         $ESYMBOL SYMNAME=#ATSTD4T,                                    X
+               SYMDATA='Y'
+         $ESYMBOL SYMNAME=#ATSTLDB,                                    X
+               SYMDATA='Your.Team.DEV.ATST.LOADLIB'
+         $ESYMBOL SYMNAME=#ATSTLDC,                                    X
+               SYMDATA='Your.Team.DEV.ATST.CICSLOAD'
+         $ESYMBOL SYMNAME=#ATSTLST,                                    X
+               SYMDATA='Your.Team.DEV.ATST.LISTLIB'
+         $ESYMBOL SYMNAME=#ATSTDBR,                                    X
+               SYMDATA='Your.Team.DEV.ATST.DBRM'
+* BTST (DEV)
+         $ESYMBOL SYMNAME=#BTSTD4T,                                    X
+               SYMDATA='Y'
+         $ESYMBOL SYMNAME=#BTSTLDB,                                    X
+               SYMDATA='Your.Team.DEV.BTST.LOADLIB'
+         $ESYMBOL SYMNAME=#BTSTLDC,                                    X
+               SYMDATA='Your.Team.DEV.BTST.CICSLOAD'
+         $ESYMBOL SYMNAME=#BTSTLST,                                    X
+               SYMDATA='Your.Team.DEV.BTST.LISTLIB'
+         $ESYMBOL SYMNAME=#BTSTDBR,                                    X
+               SYMDATA='Your.Team.DEV.BTST.DBRM'
+* CTST (DEV)
+         $ESYMBOL SYMNAME=#CTSTD4T,                                    X
+               SYMDATA='Y'
+         $ESYMBOL SYMNAME=#CTSTLDB,                                    X
+               SYMDATA='Your.Team.DEV.CTST.LOADLIB'
+         $ESYMBOL SYMNAME=#CTSTLDC,                                    X
+               SYMDATA='Your.Team.DEV.CTST.CICSLOAD'
+         $ESYMBOL SYMNAME=#CTSTLST,                                    X
+               SYMDATA='Your.Team.DEV.CTST.LISTLIB'
+         $ESYMBOL SYMNAME=#CTSTDBR,                                    X
+               SYMDATA='Your.Team.DEV.CTST.DBRM'
+*
+*
+*
+*Symbol Definition Examples:                                          *
+*
+* Example DSN High Level Qualifier:
+         $ESYMBOL SYMNAME=#HLQ,SYMDATA='Your.Application.HLQ'
+*
+*
+***********************************************************************
+* LAST INVOCATION - END THE TABLE GENERATION
+*---------------------------------------------------------------------*
+         $ESYMBOL CALL=END
+         END

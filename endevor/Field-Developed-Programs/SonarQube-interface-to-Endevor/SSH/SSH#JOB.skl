@@ -1,0 +1,41 @@
+//SSH#JOB1  EXEC PGM=BPXBATSL,                             SSH#JOB
+//   PARM='PGM /opt/tectia/bin/sftpg3 -B //DD:PARMINDD -D 2'
+//STDIN 	DD  DUMMY
+//STDOUT	DD  SYSOUT=*
+//STDERR	DD  SYSOUT=*
+//STDENV	DD  *
+  export _BPXK_AUTOCVT=ON
+  export _BPX_BATCH_UMASK=0022
+  export _BPX_SHAREAS=NO
+  export _EDC_ADD_ERRNO2=1
+  export HOME=<endevordir>
+  export LOGNAME=<altid>
+/*
+//PARMINDD  DD  *
+open <remoteid?@<remoteURL>
+site RECFM=FB
+site LRECL=80
+ascii
+cd /opt/xxx/inbound/
+sput //'&SonarWorkfile(LINUX)' &Unique_Name.sh
+quit ;
+/*
+//SSH#JOB2  EXEC PGM=BPXBATSL                              SSH#JOB
+//STDIN 	DD  DUMMY
+//STDOUT	DD  SYSOUT=*
+//STDERR	DD  SYSOUT=*
+//STDENV	DD  *
+  export _BPXK_AUTOCVT=ON
+  export _BPX_BATCH_UMASK=0022
+  export _BPX_SHAREAS=NO
+  export _EDC_ADD_ERRNO2=1
+  export HOME=<endevordir>
+  export LOGNAME=<altid>
+/*
+//STDPARM   DD  *
+PGM /opt/tectia/bin/sshg3 -D 2 <remoteid>@<remoteURL>
+ls -l /opt/xxx/inbound/&Unique_Name.sh;
+/bin/sh -x /opt/xxx/inbound/&Unique_Name.sh 1>&2;
+echo REMOTE_RC:$? 1>&2;
+exit;
+/*

@@ -1,0 +1,13 @@
+/*                              REXX                                 */
+/*********************************************************************/
+/* THIS UTILITY READS A SUPFI BATCH REPORT TO DETERMINE IF A         */
+/* STORED PROCEDURE EXISTS.                                          */
+/* RC=0 MEANS THE STORED PROCEDURE IS NEW.  RC=1 MEANS IT EXISTS     */
+/*********************************************************************/
+  'EXECIO * DISKR FILEIN (STEM TABLE.'
+   DO # = 1 TO TABLE.0
+     IF POS('|              0 |',TABLE.#) > 0 THEN EXIT(0)
+     IF POS('|              1 |',TABLE.#) > 0 THEN EXIT(1)
+   END
+   SAY 'DB2SPCHK REXX ERROR: DID NOT FIND REPORT LINE'
+   EXIT(12)

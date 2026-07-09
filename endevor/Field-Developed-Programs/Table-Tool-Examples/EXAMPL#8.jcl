@@ -1,10 +1,10 @@
-//IBMUSERE JOB (55800000),                                              00010000
+//IBMUSERE JOB (0000),                                                  00010000
 //      'ENDEVOR JOB',MSGLEVEL=(1,1),CLASS=B,REGION=0M,MSGCLASS=A,      00030000
 //      NOTIFY=&SYSUID                                                  00040000
 //*-------------------------------------------------------------------  00050000
 //  SET WORKLIB=IBMUSER.PARMS                                           00060000
-//  SET CSIQCLS0=CAPRD.NDVR.PROD.CATSNDVR.CSIQCLS0                      00070000
-//  SET NDVR#HLQ=CAPRD.NDVR.V180CA06                                    00080000
+//  SET CSIQCLS0=YOUR.NDVR.PROD.ADMINSYS.CSIQCLS0                      00070000 
+//  SET NDVR#HLQ=YOUR.NDVR.V180CA06                                    00080000 
 //*-------------------------------------------------------------------  00090000
 //*   Report processor usage                                            00100000
 //*   Outputs:                                                          00110000
@@ -222,3 +222,4 @@ LIST ELEMENT                                                            00540000
 //TBLOUT   DD SYSOUT=*                                                  02230000
 //NOTUSED  DD DISP=SHR,DSN=&WORKLIB(NOTUSED)                            02240000
 //*-------------------------------------------------------------------- 02250000
+                                                                                

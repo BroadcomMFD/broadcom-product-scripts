@@ -1,0 +1,12 @@
+* WAIT#2 input for the Table Tool step during Cast
+  If $row# = 0 then $SkipRow = 'Y'
+  ReportingDSN = ReportingPFX || '.#2'
+* a longer wait for the File Transmission to finish
+  wait1 = max(wait1,5)
+  wait2 = WAITFILE(ReportingDSN 25 wait1)
+  say "ReportingDSN " ReportingDSN "is returned after" wait2 "waits"
+  if wait2 = 0 then, +
+     Do; Say 'WAIT#2 -#2 is lost'; Exit(12); end
+  cmd = "ALLOC DD(STATUS2) DA("ReportingDSN") OLD REUSE "
+  CALL BPXWDYN  cmd
+  MODEL = 'STATUS2'

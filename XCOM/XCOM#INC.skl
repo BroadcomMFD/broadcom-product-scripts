@@ -1,0 +1,19 @@
+//XCOM1    DD *,SYMBOLS=JCLONLY                            XCOM#INC
+TYPE=SEND
+IPNAME=192.0.2.1
+IPPORT=####
+CKPT=0
+FILEOPT=REPLACE
+FILETYPE=FILE
+USERID=user2
+PASSWORD=pwd2
+*
+//XCOM2    DD *,SYMBOLS=JCLONLY                            XCOM#INC
+FILE=/your/uss/inbound/&Member.&extension
+LFILE=&Dataset(&Member)
+*
+NEWXFER
+//XCOM3    DD *                                            XCOM#INC
+FILE=/your/uss/inbound/&Unique_Name.lst
+LFILE=&SonarWorkfile(TRANSMIT)
+*

@@ -1,0 +1,77 @@
+/*REXX ***************************************************************/
+/* ----------------------------------------------------------------  */
+/* Purpose:  This REXX exec provides an effient method to            */
+/* interactively reduce the amount of typing, capture the output     */
+/* into a temporary dataset, place the professional into browse or   */
+/* edit mode, allow scrolling up/down as well as the ability to      */
+/* seach usign TSO Find commands as desired for listing of any       */
+/* ACID defined.                                                     */
+/* ----------------------------------------------------------------  */
+/*  This rexx is an example of the art of the possible               */
+/*  in using TSS interactively.                                      */
+/*                                                                   */
+/*  Broadcom has provided this REXX as an example of the             */
+/*  TSS commands, capturing output and displaying to the professional*/
+/*  allowing for scrolling, searching, etc.                          */
+/*                                                                   */
+/* ----------------------------------------------------------------  */
+/*  Syntax:  LST acid where "acid" is any ACID defined in TSS        */
+/*           LST STC will list the STC Table                         */
+/*                                                                   */
+/*  Options: LST acid PROF this would list DATA(ALL,PROFILE)         */
+/*           LST acid PASS this would list DATA(ALL,PASSWORD)        */
+/*                                                                   */
+/* TSO LST acid can be used anywhere within TSO including during     */
+/* split screen sessions and can be used multiple times to drill     */
+/* down into display information as desired.                         */
+/*                                                                   */
+/* trace(i) */
+parse arg p1 p2
+if p1 = '' then
+ do
+  say 'NO ACID to list provided'
+   return
+ end
+current_seconds = TIME(S)
+last_qual = "D"current_seconds
+user = userid()
+udsn = user'.TSS.TEMP.'last_qual'.'p1
+udsn = strip(udsn)
+ddname = "A"current_seconds
+
+if sysdsn("'"udsn"'") = OK then
+  "alloc f("ddname") da('"udsn"') shr reu"
+else
+  "alloc f("ddname") da('"udsn"') NEW SP(200 200)
+   TR DSORG(PS) RECFM(F B) LRECL(133)"
+
+STATUS = MSG('OFF')
+STATUS = MSG('ON')
+"ISPEXEC VGET (DATA) PROFILE"
+X=OUTTRAP('REC.')
+"ISPEXEC VPUT (DATA) PROFILE"
+upper p2
+if p2 = 'PROF' THEN DO
+    "TSS list("p1")data(all,profile)"
+    end
+ELSE
+  if p2 = 'PASS' then do
+    "TSS list("p1")data(all,password)"
+    end
+  else
+   do
+    "TSS list("p1")data(all)"
+   end
+"execio * diskw "ddname" (stem REC. finis"
+IF RC > 1 THEN DO
+          SAY "STORAGE OF COMMAND OUTPUT FAILED. EXECIO RC=" RC
+          SAY "TRUNCATED OUTPUT MAY BE VIEWED IN" udsn
+          EXIT
+          END
+ELSE
+/*   the ISPEXEC command below can be changed to just browse */
+/*   if needed.  ISPEXEC BROWSE DATASET(" DSN ")  */
+"ISPEXEC EDIT DATASET('"udsn"')"
+address tso "FREE F("ddname")"
+address tso "DELETE '"udsn"'"
+exit(0)

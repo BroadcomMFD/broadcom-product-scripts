@@ -1,6 +1,7 @@
        PROCESS DYNAM OUTDD(DISPLAYS)
       *****************************************************************
-      * DESCRIPTION: THIS PGM IS CALLED before Element processing     *
+      * https://github.com/BroadcomMFD/broadcom-product-scripts
+      * DESCRIPTION: C1UEXT02 is called before Element processing.    *
       *              It gathers Endevor info from the exit blocks     *
       *              then calls REXX program C1UEXTR2.                *
       *                                                               *
@@ -14,6 +15,9 @@
       *               DELIMITED BY SIZE                               *
       *          INTO ALLOC-TEXT                                      *
       *    END-STRING.                                                *
+      *                                                               *
+      *  Change the .REXX dataset name to the name of your dataset    *
+      *  that contains your C1UEXTR2 Rexx program.                    *
       *****************************************************************
       ** see also EAGGXCOB for Calling IRXEXEC - the IBM example      *
       ** for calling IRXEXEC from a Cobol program                     *
@@ -51,19 +55,21 @@
        01  IRXEXEC-PGM                       PIC X(08) VALUE 'IRXEXEC'.
 
        01 WS-VARIABLES.
-          03  WS-POINTER                   PIC 9(8)  COMP.
-          03  WS-WORK-ADDRESS-ADR          PIC S9(8) COMP SYNC .
-          03  WS-WORK-ADDRESS-PTR          REDEFINES WS-WORK-ADDRESS-ADR
+          03 WS-POINTER                    PIC 9(8)  COMP.
+          03 WS-WORK-ADDRESS-ADR           PIC S9(8) COMP SYNC .
+          03 WS-WORK-ADDRESS-PTR           REDEFINES WS-WORK-ADDRESS-ADR
                                            USAGE IS POINTER .
-          03  ADDRESS-ECB-RETURN-CODE      PIC 9(10) .
-          03  ADDRESS-ECB-MESSAGE-CODE     PIC 9(10) .
-          03  ADDRESS-ECB-MESSAGE-LENGTH   PIC 9(10) .
-          03  ADDRESS-ECB-MESSAGE-TEXT     PIC 9(10) .
-          03  ADDRESS-REQ-SISO-INDICATOR   PIC 9(10) .
-          03  ADDRESS-REQ-CCID             PIC 9(10) .
-          03  ADDRESS-REQ-COMMENT          PIC 9(10) .
-          03  WS-INSPECT-CCID              PIC X(12) .
-          03  WS-INSPECT-COMMENT           PIC X(40) .
+          03 ADDRESS-ECB-RETURN-CODE       PIC 9(10) .
+          03 ADDRESS-ECB-MESSAGE-CODE      PIC 9(10) .
+          03 ADDRESS-ECB-MESSAGE-LENGTH    PIC 9(10) .
+          03 ADDRESS-ECB-MESSAGE-TEXT      PIC 9(10) .
+          03 ADDRESS-REQ-SISO-INDICATOR    PIC 9(10) .
+          03 ADDRESS-REQ-CCID              PIC 9(10) .
+          03 ADDRESS-REQ-COMMENT           PIC 9(10) .
+          03 ADDRESS-REQ-USER-DATA         PIC 9(10) .
+          03 ADDRESS-REQ-ALTER-WITH-UPDATE PIC 9(10) .
+          03 WS-INSPECT-CCID               PIC X(12) .
+          03 WS-INSPECT-COMMENT            PIC X(40) .
 
 
        01 BPXWDYN PIC X(8) VALUE 'BPXWDYN'.
@@ -180,6 +186,16 @@
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-REQ-COMMENT .
 
+           SET  WS-WORK-ADDRESS-PTR TO
+                ADDRESS OF REQ-USER-DATA .
+           MOVE WS-WORK-ADDRESS-ADR
+                                TO ADDRESS-REQ-USER-DATA .
+
+           SET  WS-WORK-ADDRESS-PTR TO
+                ADDRESS OF REQ-ALTER-WITH-UPDATE .
+           MOVE WS-WORK-ADDRESS-ADR
+                                TO ADDRESS-REQ-ALTER-WITH-UPDATE .
+
       *****
       ***** / Convert COBOL exit block Datanames into Rexx \
       *****
@@ -223,6 +239,18 @@
                   'Address_REQ_CCID = '
                      DELIMITED BY SIZE
                    ADDRESS-REQ-CCID
+                     DELIMITED BY SIZE
+                  ';'
+                     DELIMITED BY SIZE
+                  'Address_REQ_USER_DATA = '
+                     DELIMITED BY SIZE
+                   ADDRESS-REQ-USER-DATA
+                     DELIMITED BY SIZE
+                  ';'
+                     DELIMITED BY SIZE
+                  'Address_REQ_ALTER_WITH_UPDATE = '
+                     DELIMITED BY SIZE
+                   ADDRESS-REQ-ALTER-WITH-UPDATE
                      DELIMITED BY SIZE
                   ';'
                      DELIMITED BY SIZE
@@ -577,7 +605,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(REXFILE2) ',
-                 'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                 'DA(YOURSITE.NDVR.REXX)'
                       DELIMITED BY SIZE
                         ' SHR REUSE'
                       DELIMITED BY SIZE
@@ -592,7 +620,7 @@
 
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(SYSEXEC) ',
-                 'DA(SYSMD32.NDVR.ADMIN.ENDEVOR.ADM1.CLSTREXX)'
+                 'DA(YOURSITE.NDVR.REXX)'
                       DELIMITED BY SIZE
                         ' SHR REUSE'
                       DELIMITED BY SIZE

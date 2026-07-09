@@ -1,0 +1,110 @@
+//IBMUSERF JOB (0000),'Your Name',
+//         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
+//*
+//JOBLIB DD DISP=SHR,DSN=Your.Endevor.CSIQAUTU
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQAUTH
+//       DD DISP=SHR,DSN=Your.Endevor.CSIQLOAD
+//*
+//*************************************************************
+//* DB2 using YAML:                                           *
+//*  This utility pulls in a YAML control card (built from a  *
+//*  Changeman 100 report) to get the stage/system/subsys     *
+//*  DB2 settings and build a bind card template.             *
+//*                                                           *
+//*************************************************************
+//*-------------------------------------------------------------------
+//**    get YAML OPTIONS element for system FINANCE
+//*-------------------------------------------------------------------
+//GETSOPTS EXEC PGM=IEBUPDTE
+//SYSPRINT DD DUMMY
+//SYSIN    DD *
+./  REPRO NEW=PS,NAME=FINANCE
+//SYSUT1   DD DISP=SHR,DSN=Your.Team.$YAML
+//SYSUT2   DD DSN=&&YAMLDB2,DISP=(,PASS),
+//            UNIT=SYSDA,SPACE=(TRK,(01,1)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=16000)
+//*
+//*-------------------------------------------------------------------
+//**    get program BINDCTL element
+//*-------------------------------------------------------------------
+//GETBCTL  EXEC PGM=IEBUPDTE
+//SYSPRINT DD DUMMY
+//SYSIN    DD *
+./  REPRO NEW=PS,NAME=FINARP01
+//SYSUT1   DD DISP=SHR,DSN=Your.Team.$BINDCTL
+//SYSUT2   DD DSN=&&BINDCTL,DISP=(,PASS),
+//            UNIT=SYSDA,SPACE=(TRK,(05,10),RLSE),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=16000)
+//*
+//**=================================================================**
+//BILDMASK EXEC PGM=IRXJCL,PARM='ENBPIU00 PARMLIST'
+//SYSEXEC  DD DISP=SHR,DSN=Your.Endevor.CSIQCLS0
+//         DD DISP=SHR,DSN=Your.Team.$REXX
+//SYSTSPRT DD SYSOUT=*
+//SHOWMASK DD SYSOUT=*
+//PARMLIST DD *
+  NOTHING   NOTHING   OPTIONS   0
+  MASKMODL  MASKING   OPTIONS1  A
+  MASKMODL  SHOWMASK  OPTIONS1  A
+//TABLE    DD *
+* Do
+  *
+//YAMLDB2   DD DSN=&&YAMLDB2,DISP=(OLD,DELETE)
+//YAML2REX  DD DUMMY   <- Turn on/off Trace
+//OPTIONS   DD *       <- Convert YAML to REXX
+* Convert YAML to REXX   **
+ Call YAML2REX 'YAMLDB2'
+ HowManyYamls = QUEUED();
+ If HowManyYamls < 1 then, +
+    Do; Say 'YAML2REX: Not finding any Rexx converted from YAML'; +
+    Exit(8); +
+    End;
+ Say 'HowManyYamls=' HowManyYamls
+ Do yaml# =1 to HowManyYamls; +
+    Parse pull yaml2rexx; +
+    Interpret yaml2rexx ; +
+ End
+//OPTIONS1  DD *
+*  Now build Outputs from Rexx created from YAML
+  DB2System    = Value('QA.FINANCE.FINQ4.DB2_Subsytem_ID')
+  DB2Package   = Value('QA.FINANCE.FINQ4.Package_Target_Pattern')
+  DB2Qualifier = Value('QA.FINANCE.FINQ4.Bind_Qualifier_Target_Pat.')
+  DB2Explain   = 'YES'
+  DB2Owner     = Value('QA.FINANCE.FINQ4.Bind_Owner_Target_Pattern')
+//****** MASKING ************************************************
+//MASKMODL  DD *                                <-Build 'MASK' for DB2
+  DSN       = '&DB2System'
+  PACKAGE   = '&DB2Package'
+  QUALIFIER = '&DB2Qualifier'
+  EXPLAIN   = '&DB2Explain'
+  OWNER     = '&DB2Owner'
+  MEMBER    = '&C1ELEMENT'
+  MEMBER    = 'FINARP01'
+//MASKING   DD DSN=&&TEMPLATE,DISP=(,PASS),      <-Output Mask
+//     SPACE=(TRK,(1,1)),UNIT=SYSDA,
+//     LRECL=080,RECFM=FB,BLKSIZE=0
+//*
+//*--------------------------------------------------------------------
+//*-- Apply 'Template' to Bind Statement to build new Binds  ----------
+//*--------------------------------------------------------------------
+//DB2MASK2 EXEC PGM=IKJEFT1B,PARM='DB2MASK$'
+//SYSEXEC  DD DISP=SHR,DSN=Your.Team.$REXX
+//MASKING  DD DSN=&&TEMPLATE,DISP=(OLD,PASS)
+//BINDSTMT DD DSN=&&BINDCTL,DISP=(OLD,PASS)
+//SYSTSIN  DD DUMMY
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD DUMMY
+//BINDS    DD DISP=(NEW,PASS),DSN=&&DB2BINDS,
+//            UNIT=SYSDA,SPACE=(TRK,(1,1)),
+//            RECFM=FB,LRECL=80,BLKSIZE=8000
+//*
+//*--------------------------------------------------------------------
+//*--- Show the generated DB2Bind Statements, if not executing them ---
+//*--------------------------------------------------------------------
+//SHOWBIND EXEC PGM=IEBGENER
+//SYSPRINT DD DUMMY
+//SYSUT1   DD DSN=&&DB2BINDS,DISP=(OLD,PASS)
+//SYSUT2   DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUDUMP DD SYSOUT=*
+//*
