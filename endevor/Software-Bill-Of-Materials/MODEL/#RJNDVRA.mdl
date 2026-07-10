@@ -1,0 +1,40 @@
+@REM ****************************************************** #RJNDVRA ***        
+@REM *    CONTENTS: ENDEVOR/MVS - POST-SHIP SCRIPT EXECUTION (AFTER)            
+@REM *     PURPOSE: THIS MEMBER CONTAINS THE SCRIPT FOR EXECUTION               
+@REM *              AFTER THE REMOTE COPY TO THE TARGET LIBRARIES               
+@REM *              HAS TAKEN PLACE.                                            
+@REM *                                                                          
+@REM * THIS MEMBER IS INCLUDED '@INCLUDE=(A)' IN #RJICPY1 AND #RJFCPY1.         
+@REM *                                                                          
+@REM * THE SYMBOLS &ZZSCRIPT1 AND &ZZSCRIPT2, IN USE IN THIS SAMPLE,            
+@REM * ARE NAMED BASED UPON THE LAST QUALIFIER OF THE HOST SCRIPT DATA          
+@REM * SET NAME (SCRIPT1 AND SCRIPT2).                                          
+@REM * THE LAST QUALIFIER OF THE DSN IS PREFIXED BY &ZZ TO CREATE THE           
+@REM * SYMBOL NAME. THESE SYMBOLS SHOULD BE CHANGED TO MATCH THE LAST           
+@REM * QUALIFIER OF THE SCRIPT DATA SETS IN USE AT YOUR SITE...AND              
+@REM * DON'T FORGET THE &ZZ PREFIX.                                             
+@REM *                                                                          
+@REM * THE VALUE OF THE &ZZ SYMBOLS, WHEN SUBSTITUTED, IS THE NAME OF           
+@REM * THE SCRIPT REMOTE STAGING DATA SET. ALL MEMBERS CONTAINED IN THE         
+@REM * SCRIPT REMOTE STAGING DATA SET ARE OUTPUT COMPONENTS OF THE              
+@REM * PACKAGE OR PACKAGES BEING SHIPPED.                                       
+@REM *                                                                          
+@REM *******************************************************************        
+@REM * THESE STEPS WILL EXECUTE AFTER THE COPY TO THE REMOTE TARGET             
+@REM *******************************************************************        
+//* START #RJNDVRA                                                              
+@IF &ZZSCRIPT1                                                                  
+//* START SCRIPT 1                                                              
+//ASCRIPT1 EXEC PGM=IEFBR14            DATA SET SCRIPT1    #RJNDVRA             
+//DD1      DD   DISP=SHR,                                                       
+//         DSN=&ZZSCRIPT1                                                       
+//* END SCRIPT 1                                                                
+@ENDIF                                                                          
+@IF &ZZSCRIPT2                                                                  
+//* START SCRIPT 2                                                              
+//ASCRIPT2 EXEC PGM=IEFBR14            DATA SET SCRIPT2    #RJNDVRA             
+//DD1      DD   DISP=SHR,                                                       
+//         DSN=&ZZSCRIPT2                                                       
+//* END SCRIPT 2                                                                
+@ENDIF                                                                          
+//* END #RJNDVRA                                                                

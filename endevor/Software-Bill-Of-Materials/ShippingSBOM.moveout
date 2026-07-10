@@ -1067,7 +1067,7 @@ QUIT
 //*  NODE NAME           &NODENAME                                              
 //*  *******************************************************************        
 //*---------------------------------------------------------- #PSNFTPE          
-//SUBFTP01 EXEC PGM=FTP,COND=(4,LT)                                             
+//SUBFTP01 EXEC PGM=FTP,COND=(4,LT)                        #PSNFTPE             
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          
@@ -1102,7 +1102,7 @@ QUIT
 //*---------------------------------------------------------- #PSNFTPJ          
 //* EXECUTE FTP COMMANDS ------------------------------------ #PSNFTPJ          
 //*---------------------------------------------------------- #PSNFTPJ          
-//FTP      EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),             #PSNFTPJ          
+//FTP      EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          #PSNFTPJ             
 //         REGION=2048K,TIME=800                              #PSNFTPJ          
 //*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
 //NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
@@ -1718,7 +1718,7 @@ FILE=&ARPAXDSN
 //* SBOM Signature validation                                                   
 //*                                                                             
 //*#####################################################################        
-//SBOMVRFY EXEC PGM=BPXBATCH,REGION=0M                                          
+//SBOMVRFY EXEC PGM=BPXBATCH,REGION=0M                     #RJICPY1             
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
 // PATH='/tmp/&USER_D&DATE_T&TIME..&PKGID._sbom.out',                           
@@ -1763,7 +1763,7 @@ OCOPY INDD(SBOMASC)  OUTDD(SBOMEBC) TEXT CONVERT((BPXFX311)) TO1047
 //* TEMP STEP to VALIDATE COPY and TRANSLATION                                  
 //*                                                                             
 //*#####################################################################        
-//PROCESSP EXEC PGM=IEBGENER,COND=(0,LT)                                        
+//PROCESSP EXEC PGM=IEBGENER,COND=(0,LT)                   #RJICPY1             
 //SYSPRINT DD  DUMMY                                                            
 //SYSIN    DD  DUMMY                                                            
 //SYSUT2   DD  SYSOUT=*                                                         
@@ -1773,7 +1773,7 @@ OCOPY INDD(SBOMASC)  OUTDD(SBOMEBC) TEXT CONVERT((BPXFX311)) TO1047
 //* GET STAGING DATA SETS HASHES FROM SBOM                                      
 //*                                                                             
 //*#####################################################################        
-//GETHASH  EXEC PGM=IKJEFT01,COND=(0,NE),REGION=0M                              
+//GETHASH  EXEC PGM=IKJEFT01,COND=(0,NE),REGION=0M         #RJICPY1             
 //*STEPLIB  DD DISP=SHR,DSN=REXX.SEAGLPA                                        
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
@@ -1804,7 +1804,7 @@ HASHSBOM
 //* VALIDATE SBOM HASHES AGAINST REMOTE STAGING DATA SETS HASHES                
 //*                                                                             
 //*#####################################################################        
-//CHKHASH  EXEC PGM=BPXBATCH,COND=(0,NE)                                        
+//CHKHASH  EXEC PGM=BPXBATCH,COND=(0,NE)                   #RJICPY1             
 //STDOUT   DD SYSOUT=*                                                          
 //STDERR   DD SYSOUT=*                                                          
 //STDPARM  DD *,SYMBOLS=JCLONLY                                                 
@@ -1818,7 +1818,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* COPY OF STAGING DATA SETS TO PRODUCTION DATA SETS                           
 //*                                                                             
 //*#####################################################################        
-//JS01     EXEC PGM=IEBCOPY,COND=(0,NE)                        #RJICPY1         
+//JS01     EXEC PGM=IEBCOPY,COND=(0,NE)                    #RJICPY1             
 //SYSPRINT DD   SYSOUT=*                                                        
 @INCLUDE=U                                                                      
 @ENDIF                                                                          
@@ -1840,7 +1840,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* DELETE STAGING DATS SETS                                                    
 //*                                                                             
 //*#####################################################################        
-//JS02     EXEC PGM=IDCAMS,COND=(0,NE)                         #RJICPY1         
+//JS02     EXEC PGM=IDCAMS,COND=(0,NE)                     #RJICPY1             
 //SYSPRINT DD   SYSOUT=*                                                        
 @ENDIF                                                                          
 @SECTION=05   <=======================================================          
@@ -1868,7 +1868,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //*                                                                             
 //*#####################################################################        
 //*                                                                             
-//BPXBAT   EXEC PGM=BPXBATCH,COND=(0,NE)                       #RJICPY1         
+//BPXBAT   EXEC PGM=BPXBATCH,COND=(0,NE)                   #RJICPY1             
 //STDOUT   DD   SYSOUT=*                                                        
 //STDERR   DD   SYSOUT=*                                                        
 //STDPARM  DD   DISP=SHR,                                                       
@@ -1882,7 +1882,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* DELETE USS FILES                                                            
 //*                                                                             
 //*#####################################################################        
-//JS03     EXEC PGM=IDCAMS,COND=(0,NE)                         #RJICPY1         
+//JS03     EXEC PGM=IDCAMS,COND=(0,NE)                     #RJICPY1             
 //SYSPRINT DD   SYSOUT=*                                                        
 //SYSIN    DD   *                                                               
 @ENDIF                                                                          
@@ -2174,7 +2174,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* Tailor AHJOB                                                                
 //*                                                                             
 //*#####################################################################        
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXCOM             
 //SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
 //XXCC     DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
@@ -2189,7 +2189,7 @@ SH sha256 -c /tmp/&USER._D&DATE._T&TIME..hash.out
 //* Transmit SBOM to REMOTE SYSTEM                                              
 //*                                                                             
 //*#####################################################################        
-//C1BMXCOM EXEC PGM=XCOMJOB,                                                    
+//C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXCOM             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=SHARE.XCOM.CBXGLOAD                                  
 //         DD DISP=SHR,                                                         
@@ -2243,13 +2243,13 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE              
 //SYSIN    DD  DSN=&&&&XXCC,DISP=(OLD,PASS)                                     
 //* *================================================================* *        
-//PRTXXCC  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PRTXXCC  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXCOM             
 //SYSUT1   DD DSN=&&&&XXCC,DISP=(OLD,PASS)                                      
 //SYSUT2   DD SYSOUT=*                                                          
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSIN    DD DUMMY                                                             
 //*                                                                             
-//PRTCNTL  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//PRTCNTL  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXCOM             
 //SYSUT1   DD DISP=SHR,                                                         
 //         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
 //SYSUT2   DD SYSOUT=*                                                          
@@ -2257,7 +2257,7 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //SYSIN    DD DUMMY                                                             
 //*                                                                             
 //* *================================================================* *        
-//&VNBXSTP EXEC PGM=XCOMJOB,COND=(12,LE,NDVRSHIP),                              
+//&VNBXSTP EXEC PGM=XCOMJOB,COND=(12,LE,NDVRSHIP),         C1BMXCOM             
 //         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
 //STEPLIB  DD DISP=SHR,DSN=&I@PRFX..XCOM.CBXGLOAD                               
 //         DD DISP=SHR,                                                         
@@ -2278,7 +2278,7 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //SYSIN01  DD DISP=SHR,                                                         
 //         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)         
 //* *================================================================* *        
-//CONTROLD EXEC PGM=IDCAMS                                                      
+//CONTROLD EXEC PGM=IDCAMS                                 C1BMXCOM             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSIN    DD *                                                                 
  DELETE &VNBSHHLI..D&VNB6DATE..T&VNB6TIME..XCOMCMD.FILE(CONTROL)                
@@ -2324,7 +2324,7 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //* Tailor AHJOB                                                                
 //*                                                                             
 //*#####################################################################        
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXFTP             
 //SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
 //XFTC     DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
@@ -2340,7 +2340,7 @@ FILE=/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //*  FTP SBOM file to Remote LPAR                                               
 //*                                                                             
 //*#####################################################################        
-//FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),                               
+//FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),          C1BMXFTP             
 //         REGION=2048K,TIME=800                                                
 //NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
@@ -2358,8 +2358,8 @@ PUT /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID._sbom.json
 //*  FTP validation script to remote                                            
 //*                                                                             
 //*#####################################################################        
-//FTPSBOM  EXEC PGM=IEFBR14                                                     
-//*FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),                              
+//FTPSBOM  EXEC PGM=IEFBR14                                C1BMXFTP             
+//*FTPSBOM  EXEC PGM=FTP,PARM='(EXIT',COND=(4,LT),         C1BMXFTP             
 //*         REGION=2048K,TIME=800                                               
 //NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
 //SYSTSPRT DD SYSOUT=*                                                          
@@ -2380,7 +2380,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 //*                                                                             
 //*#####################################################################        
 //*                                                                             
-//&VNBXSTP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
+//&VNBXSTP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)         C1BMXFTP             
 //SYSUT1   DD DSN=&&&&XFTC,DISP=(OLD,PASS)                                      
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
 //SYSPRINT DD SYSOUT=*                                                          
@@ -2404,7 +2404,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 )CM                                                                             
 //* *----------------------------------------------* ISPSLIB(C1BMXHCN) *        
 //*                                                                             
-//CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                       C1BMXHCN         
+//CONFEXEC EXEC PGM=NDVRC1,REGION=4096K,                   C1BMXHCN             
 //    PARM='&VNBCPARM,CONF,HXMT,EX,****,&VNBCDEST'                              
 //*                                                                             
 //C1BMXDTM DD DSN=&&&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                   
@@ -2418,7 +2418,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 //* *----------------------------------------------------------------* *        
 //* *----------------------------------------------------------------* *        
 //*                                                                             
-//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,             C1BMXHCN         
+//CONFABND EXEC PGM=NDVRC1,REGION=4096K,COND=ONLY,         C1BMXHCN             
 //   PARM='&VNBCPARM,CONF,HXMT,AB,****,********'                                
 //*                                                                             
 //C1BMXDTM DD DSN=&&&&XDTM,DISP=(MOD,PASS),SPACE=(TRK,(1,0)),                   
@@ -2541,7 +2541,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 //* ENDEVOR PACKAGE SHIPMENT UTILITY                                            
 //*                                                                             
 //*#####################################################################        
-//NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),                           
+//NDVRSHIP EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),      C1BMXJOB             
 //         PARM='&VNBCPARM SHIP &ZPREFIX '                                      
 //*                                                                             
 )IM C1BMXLIB                                                                    
@@ -2710,7 +2710,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 )CM  SHARED DASD.  THE JOB EXECUTES TSO IN BATCH AND THE INPUT (SYSTSIN)        
 )CM  CONTAINS A SUBMIT COMMAND TO RUN AHJOB.                                    
 )CM                                                                             
-)CM //COPYSTMT EXEC PGM=IEBGENER                                                
+)CM //COPYSTMT EXEC PGM=IEBGENER                           C1BMXLOC             
 )CM //SYSUT1   DD DSN=&&CHJOBDSN,DISP=(OLD,PASS)                                
 )CM //SYSUT2   DD SYSOUT=*,DCB=(RECFM=FB,LRECL=80)                              
 )CM //SYSPRINT DD SYSOUT=*                                                      
@@ -2726,7 +2726,7 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 //*S1       SET DATE=&&LYYMMDD                                                  
 //*S2       SET TIME=&&LHHMMSS                                                  
 //*S3       SET USER=&&SYSUID                                                   
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXLOC             
 //SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
 //XLCC     DD DSN=&&&&XLCC,DISP=(OLD,PASS)                                      
 //AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
@@ -2740,388 +2740,296 @@ PUT /u/users/gonjo08/rexxobj/HASHSBOM
 //* *===============================================* CSIQSENU(C1BMXLOC)        
 //* *==================================================================*        
 //*                                                                             
-//&VNBXSTP EXEC PGM=IKJEFT01,COND=(12,LE,NDVRSHIP)                              
+//&VNBXSTP EXEC PGM=IKJEFT01,COND=(12,LE,NDVRSHIP)         C1BMXLOC             
 //SYSTSIN  DD DSN=&&&&XLCC,DISP=(OLD,PASS)                                      
 //SYSTSPRT DD SYSOUT=*                                                          
 //SYSOUT   DD SYSOUT=*                                                          
           
 ./  ADD  NAME=C1BMXNDM                
-)CM  PACKAGE SHIPMENT BATCH JCL - NETWORK DM XMISSION - CSIQSENU(C1BMXNDM)      
-)CM                                                                             
-)CM  THIS SKELETON IS USED TO TRANSMIT STAGING DATASETS AND "RUN JOB"           
-)CM  COMMANDS VIA NETWORK DATA MOVER.                                           
-)CM                                                                             
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *        
-)CM                                                                             
-)CM  TAILORING INSTRUCTIONS:                                                    
-)CM                                                                             
-)CM  1.  MODIFY THE "LINKLIB", "NETMAP", "MSG", AND "PROCESS.LIB"               
-)CM      DSNAMES USING SITE SPECIFIC PREFIX, QUALIFIER, AND NAME.               
-)CM                                                                             
-)CM  2.  IF YOU NEED A SIGNON STATEMENT MODIFY THE SIGNON STATEMENT             
-)CM      IN THE &VNBXSTP JOB STEP USING SITE SPECIFIC SIGNON DATA.              
-)CM      ADDITIONAL KEYWORDS AND CONNECT:DIRECT CONTROL STATEMENTS              
-)CM      OTHER THAN SIGNON MAY ALSO BE ADDED. IF A SIGNON STATEMENT             
-)CM      IS NOT NEEDED, DELETE THE SYSIN DD AND SIGNON STATEMENT                
-)CM      IN THE &VNBXSTP JOB STEP AND CODE A SYSIN DD ON THE                    
-)CM      CONNCMD.FILE DD STATEMENT.                                             
-)CM                                                                             
-)IM C1BMXSBD                                                                    
-//* *==============================================================* *          
-//* *===========================================* CSIQSENU(C1BMXNDM) *          
-//* *==============================================================* *          
-//* *==============================================================* *          
-//*#####################################################################        
-//*                                                                             
-//* Tailor AHJOB                                                                
-//*                                                                             
-//*#####################################################################        
-//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                                        
-//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
-//XXCC     DD DSN=&&&&XNWC,DISP=(OLD,PASS)                                      
-//AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)                                
-//SYSTSPRT DD SYSOUT=*                                                          
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSTSIN  DD *,SYMBOLS=JCLONLY                                                 
-    MODAHJOB     +                                                              
-      &VPHPKGID  +                                                              
-      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json                        
-//*#####################################################################        
-//*                                                                             
-//* Transmit SBOM to REMOTE SYSTEM                                              
-//*                                                                             
-//*#####################################################################        
-//*DCTXSBOM EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)                 
-//*STEPLIB  DD  DISP=SHR,                   NDM LOAD MODULES                    
-//*             DSN=&I@PRFX..NDM.LINKLIB                                        
-//*DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP                     
-//*             DSN=&I@PRFX..NDM.NETMAP                                         
-//*DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET                 
-//*             DSN=&I@PRFX..NDM.MSG                                            
-//*DMPUBLIB DD  DISP=SHR,                                                       
-//*             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE             
-//*SYSPRINT DD  SYSOUT=*    ******************************************          
-//*NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *          
-//*DMPRINT  DD  SYSOUT=*    ******************************************          
-//*SYSUDUMP DD  SYSOUT=*                                                        
-//*SYMDUMP  DD DUMMY                                                            
-//*SYSIN    DD  *                                                               
-//* SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                           
-//*         DD  DISP=SHR,                                                       
-//*         DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT)         
-//* *==============================================================* *          
-//* *===========================================* CSIQSENU(C1BMXNDM) *          
-//* *==============================================================* *          
-//PROCESSI EXEC PGM=IEBUPDTE,PARM=NEW,COND=(12,LE,NDVRSHIP)                     
-//SYSPRINT DD  SYSOUT=*                                                         
-//SYSUT2   DD  DISP=(NEW,CATLG),UNIT=&T@DISK,                                   
-//*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE,             
-//             DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE,                
-//             SPACE=(CYL,(1,1,25)),                                            
-//             DCB=(RECFM=FB,LRECL=80)                                          
-//SYSUT1   DD  DUMMY                                                            
-//SYSIN    DD  DISP=SHR,                                                        
-//             DSN=&I@PRFX..&I@QUAL..CSIQOPTN(#PS#NDM)                          
-//* *==============================================================* *          
-//PROCESSP EXEC PGM=IEBUPDTE,PARM=MOD,COND=(12,LE,NDVRSHIP)                     
-//SYSPRINT DD  SYSOUT=*                                                         
-//SYSUT1   DD  DISP=OLD,                                                        
-//             DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE                 
-//*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
-//SYSUT2   DD  DISP=OLD,                                                        
-//             DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE                 
-//*            DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
-//SYSIN    DD  DSN=&&&&XNWC,DISP=(OLD,PASS)                                     
-//* *==============================================================* *          
-//PRTXNWCP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
-//SYSUT1   DD DSN=&&&&XNWC,DISP=(OLD,PASS)                                      
-//SYSUT2   DD SYSOUT=*                                                          
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSIN    DD DUMMY                                                             
-//* *==============================================================* *          
-//PRTXSUB  EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
-//SYSUT1   DD *                                                                 
-  SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                             
-//         DD DISP=OLD,                                                         
-//         DSN=GONJO08.D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT)             
-//SYSUT2   DD SYSOUT=*                                                          
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSIN    DD DUMMY                                                             
-//* *==============================================================* *          
-//&VNBXSTP EXEC PGM=IEFBR14,REGION=2048K,COND=(12,LE,NDVRSHIP)                  
-//* *==============================================================* *          
-//SUBMITD  EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)                                
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSIN    DD *                                                                 
- DELETE &VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE(SUBMIT) NONVSAM         
+)CM  PACKAGE SHIPMENT BATCH JCL - NETWORK DM XMISSION - CSIQSENU(C1BMXNDM)
+)CM
+)CM  THIS SKELETON IS USED TO TRANSMIT STAGING DATASETS AND "RUN JOB"
+)CM  COMMANDS VIA NETWORK DATA MOVER.
+)CM
+)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+)CM
+)CM  TAILORING INSTRUCTIONS:
+)CM
+)CM  1.  MODIFY THE "LINKLIB", "NETMAP", "MSG", AND "PROCESS.LIB"
+)CM      DSNAMES USING SITE SPECIFIC PREFIX, QUALIFIER, AND NAME.
+)CM
+)CM  2.  IF YOU NEED A SIGNON STATEMENT MODIFY THE SIGNON STATEMENT
+)CM      IN THE &VNBXSTP JOB STEP USING SITE SPECIFIC SIGNON DATA.
+)CM      ADDITIONAL KEYWORDS AND CONNECT:DIRECT CONTROL STATEMENTS
+)CM      OTHER THAN SIGNON MAY ALSO BE ADDED. IF A SIGNON STATEMENT
+)CM      IS NOT NEEDED, DELETE THE SYSIN DD AND SIGNON STATEMENT
+)CM      IN THE &VNBXSTP JOB STEP AND CODE A SYSIN DD ON THE
+)CM      CONNCMD.FILE DD STATEMENT.
+)CM
+)IM C1BMXSBD
+//* *==============================================================* *
+//* *===========================================* CSIQSENU(C1BMXNDM) *
+//* *==============================================================* *
+//* *==============================================================* *
+//*#####################################################################
+//*
+//* Tailor AHJOB
+//*
+//*#####################################################################
+//CHGAHJOB EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXNDM
+//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE
+//XXCC     DD DSN=&&&&XNWC,DISP=(OLD,PASS)
+//AHJOBDSN DD DSN=&&&&AHJOBDSN,DISP=(OLD,DELETE)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSTSIN  DD *,SYMBOLS=JCLONLY
+    MODAHJOB     +
+      &VPHPKGID  +
+      /tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json
+//*#####################################################################
+//*
+//* Transmit SBOM to REMOTE SYSTEM
+//*
+//*#####################################################################
+//SBOMESSI EXEC PGM=IEBUPDTE,PARM=NEW,COND=(12,LE,NDVRSHIP)
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DISP=(NEW,CATLG),UNIT=&T@DISK,
+//             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE,
+//             SPACE=(CYL,(3,1,25)),
+//             DCB=(RECFM=FB,LRECL=80)
+//SYSUT1   DD  DUMMY
+//SYSIN    DD  *
+./ ADD NAME=SUBSBOM
+./ NUMBER NEW1=1,INCR=1
+***********************************************************
+//* *==============================================================* *
+//SBOMESSP EXEC PGM=IEBUPDTE,PARM=MOD,COND=(12,LE,NDVRSHIP)
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  DISP=OLD,
+//             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE
+//SYSUT2   DD  DISP=OLD,
+//             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE
+//SYSIN    DD  *,SYMBOLS=JCLONLY
+./ CHANGE NAME=SUBSBOM
+./ NUMBER SEQ1=00000001,NEW1=00000010,INCR=00000010,INSERT=YES
+      SUBMIT PROC=XMITSBOM
+./ ADD NAME=XMITSBOM
+XMITSBOM PROCESS SNODE=&XNODE
+COPYSBOM COPY -
+         FROM (PNODE DISP=SHR -
+          DSN='/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json' -
+          SYSOPTS="DATATYPE=BINARY XLATE=NO"
+         TO  -
+          DSN='/tmp/&&USER._D&&DATE._T&&TIME..&VPHPKGID_sbom.json' -
+          SYSOPTS="DATATYPE=BINARY XLATE=NO"
+//* *==============================================================* *
+//*****************************************************************
+//*
+//* Barclays Example - XMIT SBOM to Remote LPAR.
+//*
+//*****************************************************************
+//DCTXSBOM EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)
+//DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP
+//             DSN=TZLD.NDM.NETMAP
+//DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET
+//             DSN=TZLD.NDM.MSG
+//DMPUBLIB DD  DISP=SHR,
+//             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE
+//SYSPRINT DD  SYSOUT=*    ******************************************
+//NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *
+//DMPRINT  DD  SYSOUT=*    ******************************************
+//SYSUDUMP DD  SYSOUT=*
+//SYMDUMP  DD DUMMY
+//SYSIN    DD  DSN=&&TEMP1,DISP=(OLD,PASS)
+//         DD  DISP=SHR,
+//         DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE(SUBSBOM)
+//* *==============================================================* *
+//DELMEM   EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+ DEL NDY.D&DTE..T&TME..SBOMCMD.FILE(SUBSBOM) NONVSAM
+ DEL NDY.D&DTE..T&TME..SBOMCMD.FILE(XMITSBOM) NONVSAM
+//DFILSBOM EXEC PGM=IEFBR14,COND=(0,NE,DELMEM)
+//PDS      DD  DISP=(OLD,DELETE,DELETE),
+//             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE
+//* *==============================================================* *
+//* *===========================================* CSIQSENU(C1BMXNDM) *
+//* *==============================================================* *
+//*#####################################################################
+//*
+//* End of SBOM Transmission to REMOTE SYSTEM
+//*
+//*#####################################################################
+//PROCESSI EXEC PGM=IEBUPDTE,PARM=NEW,COND=(12,LE,NDVRSHIP)
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DISP=(NEW,CATLG),UNIT=&T@DISK,
+//             DSN=NDY.D&DTE..T&TME..CONNCMD.FILE,
+//             SPACE=(CYL,(1,1,25)),
+//             DCB=(RECFM=FB,LRECL=80)
+//SYSUT1   DD  DUMMY
+//SYSIN    DD  DISP=SHR,
+//             DSN=&I@PRFX..&I@QUAL..CSIQOPTN(#PS#NDM)
+//* *==============================================================* *
+//PROCESSP EXEC PGM=IEBUPDTE,PARM=MOD,COND=(12,LE,NDVRSHIP)
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  DISP=OLD,
+//             DSN=NDY.D&DTE..T&TME..CONNCMD.FILE
+//SYSUT2   DD  DISP=OLD,
+//             DSN=NDY.D&DTE..T&TME..CONNCMD.FILE
+//SYSIN    DD  DSN=&&&&XNWC,DISP=(OLD,PASS)
+//*****************************************************************
+//*
+//* Barclays Example - XMITing files to Remote LPAR.
+//*
+//*****************************************************************
+//&VNBXSTP EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)
+//DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP
+//             DSN=TZLD.NDM.NETMAP
+//DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET
+//             DSN=TZLD.NDM.MSG
+//DMPUBLIB DD  DISP=SHR,
+//             DSN=NDY.D&DTE..T&TME..SBOMCMD.FILE
+//SYSPRINT DD  SYSOUT=*    ******************************************
+//NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *
+//DMPRINT  DD  SYSOUT=*    ******************************************
+//SYSUDUMP DD  SYSOUT=*
+//SYMDUMP  DD  DUMMY
+//SYSIN    DD  DSN=&&TEMP1,DISP=(OLD,PASS)
+//         DD  DISP=SHR,
+//         DSN=NDY.D&DTE..T&TME..CONNCMD.FILE(SUBMIT)
+//* *==============================================================* *
+//SUBMITD  EXEC PGM=IDCAMS,COND=(12,LE,NDVRSHIP)           C1BMXNDM
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *,SYMBOLS=JCLONLY
+ DELETE NDY.D&DTE..T&TME..CONNCMD.FILE(SUBMIT) NONVSAM
           
 ./  ADD  NAME=C1BMXRCN                
-)CM  PACKAGE SHIPMENT BATCH JCL - CONFIRMATION - ISPSLIB(C1BMXRCN)              
-)CM                                                                             
-)CM  THIS SKELETON IS USED TO CONFIRM THE EXECUTION OF THE IEBCOPY JOB AT       
-)CM  THE REMOTE SITE (COPY STAGING DATASETS TO PRODUCTION SATASETS).  IT        
-)CM  IS INCLUDED IN SKELETON ISPSLIB(C1BMXJOB).                                 
-)CM                                                                             
-)CM  THIS SKELETON IS READ BY THE SHIPMENT STAGING UTILITY AND IS USED          
-)CM  TO BUILD PART OF THE REMOTE JOB WHICH COPIES STAGING DATASETS INTO         
-)CM  THEIR RESPECTIVE PRODUCTION DATASETS.  THERE ARE TWO IEBGENER STEPS        
-)CM  WHICH WRITE JCL TO THE INTERNAL READER.  BASED ON CONDITION CODES,         
-)CM  ONLY ONE OF THE GENER STEPS WILL EXECUTE.  THE JOB STREAM WHICH IS         
-)CM  GENERED INTO THE INTERNAL READER WILL EXECUTE AT THE HOST AND CAUSE        
-)CM  THE SHIPMENT RECORD TO BE UPDATED.                                         
-)CM                                                                             
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)CM  NO TAILORING IS NECESSARY FOR THIS SKELETON.  HOWEVER, IT CAN BE           
-)CM  MODIFIED TO GIVE MORE SPECIFIC INFORMATION ABOUT THE RESULTS OF            
-)CM  THE COPYING PROCESS (CF. ADMINISTRATORS GUIDE - "SHIPMENT                  
-)CM  TRACKING AND CONFIRMATION").                                               
-)CM                                                                             
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)CM                                                                             
-)CM REXX XMETHOD XNODE                                                          
-)CM   TRACE R                                                                   
-)CM   SAY 'XMETHOD==> 'XMETHOD                                                  
-)CM   SAY 'XNODE  ==> 'XNODE                                                    
-)CM ENDREXX                                                                     
-//* *----------------------------------------------* ISPSLIB(C1BMXRCN) *        
-//*                                                                             
-//* *==================================================================*        
-//* *  INSTREAM DATASET CONTAINING REMOTE CONFIRMATION JCL                      
-//* *==================================================================*        
-//*                                                                             
-//VERIFYOK IF  (^ABEND AND                                                      
-//             SBOMVRFY.RC = 0 AND                                              
-//             CHKHASH.RC = 0) THEN                                             
-//*                                                                             
-//CONFCOPY EXEC PGM=IEBGENER                                                    
-//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
-)IM C1BMXHJC                                                                    
-//CONFEXEC EXEC PGM=NDVRC1,                                                     
-//   PARM='&VNBCPARM,CONF,RCPY,EX,****,$DEST_ID'                                
-)IM C1BMXLIB OPT                                                                
-//**********************************************************************        
-//*  MOVE PACKAGE' SBOM IN ENDEVOR ADMIN ENVIRONMENT                   *        
-//**********************************************************************        
-//NDVRBAT  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LE),                           
-//  PARM='C1BM3000'                                                             
-)IM C1BMXLIB                                                                    
-//**********************************************************************        
-//*             SORT WORK FILES                                        *        
-//**********************************************************************        
-//SORTWK01 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
-//SORTWK02 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
-//SORTWK03 DD UNIT=3390,SPACE=(CYL,(1,2))                                       
-//C1TPDD01 DD UNIT=3390,SPACE=(CYL,5),                                          
-//            DCB=(RECFM=VB,LRECL=260)                                          
-//C1TPDD02 DD UNIT=3390,SPACE=(CYL,5),                                          
-//            DCB=(RECFM=VB,LRECL=260)                                          
-//**********************************************************************        
-//*  OUTPUT DATA SETS                                                  *        
-//**********************************************************************        
-//C1MSGS1  DD SYSOUT=*                                                          
-//C1MSGS2  DD SYSOUT=*                                                          
-//C1PRINT  DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=133)                                
-//SYSUDUMP DD SYSOUT=*                                                          
-//SYMDUMP  DD DUMMY                                                             
-//SYSOUT   DD SYSOUT=*                                                          
-//**********************************************************************        
-//*  REQUEST DATA SET                                                  *        
-//**********************************************************************        
-//BSTIPT01 DD *                                                                 
-  SET STOPRC 16 .                                                               
-  MOVE ELEMENT '&VPHPKGID'                                                      
-    FROM                                                                        
-      ENVIRONMENT 'ADM' SYSTEM 'ADMMY' SUBSYSTEM 'PACKAGES'                     
-      TYPE 'SBOM' STAGE NUMBER 1                                                
-    OPTIONS CCID 'PKGSBOM' COMMENTS "ADD NEW PACKAGE SBOM"                      
-      WITH HISTORY                                                              
-  .                                                                             
-//* *----------------------------------------------* C1BMXRCN (CONT.)  *        
-$$                                                                              
-)IF &XMETHOD = LOCAL THEN )DO                                                   
-//SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
-)ENDDO                                                                          
-)ELSE )DO                                                                       
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
-//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
-)IF &XMETHOD EQ XCOM THEN )DO                                                   
-//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
-//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
-)IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
-//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
-//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
-)ENDDO                                                                          
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSIN    DD DUMMY                                                             
-//*                                                                             
-//VERIFYOK ELSE                                                                 
-//*                                                                             
-//CONFABND EXEC PGM=IEBGENER                                                    
-//SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
-)IM C1BMXHJC                                                                    
-//ABNDEXEC EXEC PGM=NDVRC1,                                                     
-//  PARM='&VNBCPARM,CONF,RCPY,AB,****,$DEST_ID'                                 
-//*                                                                             
-)IM C1BMXLIB OPT                                                                
-//* *----------------------------------------------* C1BMXRCN (CONT.)  *        
-$$                                                                              
-)IF &XMETHOD = LOCAL THEN )DO                                                   
-//SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
-)ENDDO                                                                          
-)ELSE )DO                                                                       
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
-//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
-)IF &XMETHOD EQ XCOM THEN )DO                                                   
-//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
-//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
-)IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
-//SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
-//         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
-)ENDDO                                                                          
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSIN    DD DUMMY                                                             
-//*                                                                             
-//VERIFYOK ENDIF                                                                
-//*                                                                             
-)IF &XMETHOD NE LOCAL THEN )DO                                                  
-)SET LOCALIP = &Z                                                               
-)REXX LOCALIP                                                                   
- call socket 'initialize','rsclient' /* initilize ip connexion */               
-                                                                                
- addr = socket('gethostid') /* retrieve ip addr                */               
-                                                                                
- parse var addr rt ipadd    /* parse rt = return code ipadd ip address*/        
- /* say 'ipaddress: 'ipadd */                                                   
- LOCALIP = ipadd                                                                
- return                                                                         
-)ENDREXX                                                                        
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)CM  Transmission method selected FTP                                           
-)CM                                                                             
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
-//* *----------------------------------------------* ISPSLIB(#NFTPRCN) *        
-//*                                                                             
-//* *==================================================================*        
-//* *  FTP CONFIRMATION JCL TO HOST LPAR                                        
-//* *==================================================================*        
-//*                                                                             
-//SUBFTP01 EXEC PGM=FTP,COND=((0,GT),EVEN)                                      
-//ABNLIGNR DD DUMMY                                                             
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSABEND DD SYSOUT=*                                                          
-//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
-//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
-//SYSOUT   DD SYSOUT=*                                                          
-//OUTPUT   DD SYSOUT=*                                                          
-//CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                   
-//INPUT    DD *                                                                 
-&LOCALIP                                                                        
-SITE FILETYPE=JES                                                               
-PUT //DD:CONFJCL                                                                
-STOP                                                                            
-QUIT                                                                            
-)ENDDO                                                                          
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)CM  Transmission method selected XCOM                                          
-)CM                                                                             
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)IF &XMETHOD EQ XCOM THEN )DO                                                   
-//C1BMXCOM EXEC PGM=XCOMJOB,                                                    
-//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
-//STEPLIB  DD DISP=SHR,DSN=DE25.XCOM.R120.RUN.CBXGLOAD                          
-//         DD DISP=SHR,                                                         
-//            DSN=CEE.SCEERUN                                                   
-//XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=DE25.XCOM.R120.RUN.CBXGPARM                                   
-//**********************************************************************        
-//*SYSTCPD  DD DISP=SHR,                                                        
-//*            DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
-//*XCOMGLOB DD DISP=SHR,                                                        
-//*            DSN=SHARE.XCOM.XCOMGLOB                                          
-//*XCOMREST DD DISP=SHR,                                                        
-//*            DSN=SHARE.XCOM.XCOMREST                                          
-//XCOMPRNT DD SYSOUT=*                            * IEBCOPY MSGS                
-//SYSPRINT DD SYSOUT=*                            * TCP/IP MSGS                 
-//SYSTERM  DD SYSOUT=*                            * TCP/IP MSGS                 
-//**********************************************************************        
-//*LCLDS01  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                  
-//SYSIN01  DD *,SYMBOLS=JCLONLY                                                 
-TYPE=SEND                                                                       
-ID=CONFRMT                                                                      
-HOLDCOUNT=0                                                                     
-XTCNET=CONFRMT                                                                  
-XTCJOB=J0001AR                                                                  
-XTCGOODREL=J0001DEL                                                             
-USERID=&&USER                                                                   
-FILETYPE=JOB                                                                    
-LFILE=&&USER..D&&DATE..T&&TIME..CONFJCL                                         
-FILEOPT=CREATE                                                                  
-IPNAME=&LOCALIP                                                                 
-IPPORT=08044                                                                    
-UNIT=SYSDA                                                                      
-)ENDDO                                                                          
-)IF &XMETHOD EQ NETWORK_DM THEN )DO                                             
-//* *==============================================================* *          
-//CRTCMDF  EXEC PGM=IEFBR14,COND=(12,LE,NDVRSHIP)                               
-//CMDFILE  DD  DISP=(NEW,CATLG),UNIT=&T@DISK,                                   
-//             DSN=&&USER..D&&DATE..T&&TIME..CONNCMD.FILE,                      
-//             SPACE=(CYL,(1,1,25)),                                            
-//             DCB=(RECFM=FB,LRECL=80)                                          
-//* *==============================================================* *          
-//PROCESSP EXEC PGM=IEBGENER,COND=(12,LE,NDVRSHIP)                              
-//SYSPRINT DD  DUMMY                                                            
-//SYSIN    DD  DUMMY                                                            
-//SYSUT2   DD  DISP=OLD,                                                        
-//             DSN=&&USER..D&&DATE..T&&TIME..CONNCMD.FILE(SUBRMTJ)              
-//SYSUT1   DD  *,SYMBOLS=JCLONLY                                                
-SUBRMTJ  PROCESS SNODE=TCPNAME=&LOCALIP                                         
-STEPNWDM RUN JOB (SNODE DSN=&&USER..D&&DATE..T&&TIME..CONFJCL)          )       
-//* *==============================================================* *          
-//&VNBXSTP EXEC PGM=DMBATCH,REGION=2048K,COND=(12,LE,NDVRSHIP)                  
-//STEPLIB  DD  DISP=SHR,                   NDM LOAD MODULES                     
-//             DSN=&I@PRFX..NDM.LINKLIB                                         
-//DMNETMAP DD  DISP=SHR,                   NDM NETWORK MAP                      
-//             DSN=&I@PRFX..NDM.NETMAP                                          
-//DMMSGFIL DD  DISP=SHR,                   NDM MESSAGE DATASET                  
-//             DSN=&I@PRFX..NDM.MSG                                             
-//DMPUBLIB DD  DISP=SHR,                                                        
-//             DSN=&VNBSHHLI..D&VNB6DATE..T&VNB6TIME..CONNCMD.FILE              
-//SYSPRINT DD  SYSOUT=*    ******************************************           
-//NDMCMNDS DD  SYSOUT=*    *      ****      REPORTS      ****       *           
-//DMPRINT  DD  SYSOUT=*    ******************************************           
-//SYSUDUMP DD  SYSOUT=*                                                         
-//SYMDUMP  DD DUMMY                                                             
-//SYSIN    DD  *                                                                
-  SIGNON USERID=NDM_USER_ID NODE=NDM_HOST_NODE_NAME                             
-      SUBMIT PROC=SUBRMTJ                                               00000010
-//* *==============================================================* *          
-)ENDDO                                                                          
-)ENDDO                                                                          
+REM   In Windows, execute this command file to collect all Package
+@ECHO OFF
+ECHO ./  ADD  NAME=@README                     > ShippingSBOM.moveout
+These items come from the Endevor GitHub at
+  https://github.com/BroadcomMFD/broadcom-product-scripts
+ECHO These are asm          : C1LSTBKO >> ShippingSBOM.moveout
+ECHO These are rex/CSIQCLS0 : CMPNTGEN MODAHJOB >> ShippingSBOM.moveout
+ECHO These are skl/CSIQSENU : #NFTPRCN #PSNFTP1 #PSNFTP6 #PSNFTPE #PSNFTPJ #PSNFTPP #PSNFTPS #PSXCOME #PSXCOMP #PSXCOMS #RJ0 #RJFCPY1 #RJFCPY2 #RJICPY1 #RJICPY2 #RJICPYL #RJICPYU #RJNDVRA #RJNDVRA #RJNDVRB #RJNDVRS C1BMXCOM C1BMXEOJ C1BMXFTP #PSNWDMT #PSNWDM8 C1BMXNDM C1BMXHCN C1BMXIN C1BMXJOB C1BMXLIB C1BMXLOC C1BMXRCN C1BMXSBD HASHSBOM SCMM@REX >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1LSTBKO                >> ShippingSBOM.moveout
+TYPE ASM\C1LSTBKO.asm   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=CMPNTGEN                >> ShippingSBOM.moveout
+TYPE REXX\CMPNTGEN.rex   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=MODAHJOB                >> ShippingSBOM.moveout
+TYPE REXX\MODAHJOB.rex   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#NFTPRCN                >> ShippingSBOM.moveout
+TYPE ISPS\#NFTPRCN.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNFTP1                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNFTP1.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNFTP6                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNFTP6.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNFTPE                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNFTPE.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNFTPJ                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNFTPJ.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNFTPP                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNFTPP.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNFTPS                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNFTPS.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSXCOME                >> ShippingSBOM.moveout
+TYPE ISPS\#PSXCOME.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSXCOMP                >> ShippingSBOM.moveout
+TYPE ISPS\#PSXCOMP.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSXCOMS                >> ShippingSBOM.moveout
+TYPE ISPS\#PSXCOMS.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJ0                >> ShippingSBOM.moveout
+TYPE ISPS\#RJ0.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJFCPY1                >> ShippingSBOM.moveout
+TYPE ISPS\#RJFCPY1.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJFCPY2                >> ShippingSBOM.moveout
+TYPE ISPS\#RJFCPY2.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJICPY1                >> ShippingSBOM.moveout
+TYPE ISPS\#RJICPY1.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJICPY2                >> ShippingSBOM.moveout
+TYPE ISPS\#RJICPY2.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJICPYL                >> ShippingSBOM.moveout
+TYPE ISPS\#RJICPYL.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJICPYU                >> ShippingSBOM.moveout
+TYPE ISPS\#RJICPYU.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJNDVRA                >> ShippingSBOM.moveout
+TYPE ISPS\#RJNDVRA.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJNDVRA                >> ShippingSBOM.moveout
+TYPE ISPS\#RJNDVRA.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJNDVRB                >> ShippingSBOM.moveout
+TYPE ISPS\#RJNDVRB.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#RJNDVRS                >> ShippingSBOM.moveout
+TYPE ISPS\#RJNDVRS.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXCOM                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXCOM.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXEOJ                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXEOJ.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXFTP                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXFTP.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNWDMT                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNWDMT.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=#PSNWDM8                >> ShippingSBOM.moveout
+TYPE ISPS\#PSNWDM8.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXNDM                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXNDM.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXHCN                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXHCN.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXIN                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXIN.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXJOB                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXJOB.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXLIB                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXLIB.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXLOC                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXLOC.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXRCN                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXRCN.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=C1BMXSBD                >> ShippingSBOM.moveout
+TYPE ISPS\C1BMXSBD.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=HASHSBOM                >> ShippingSBOM.moveout
+TYPE ISPS\HASHSBOM.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+ECHO ./  ADD  NAME=SCMM@REX                >> ShippingSBOM.moveout
+TYPE ISPS\SCMM@REX.skl   >> ShippingSBOM.moveout
+ECHO.          >> ShippingSBOM.moveout
+REM
           
 ./  ADD  NAME=C1BMXSBD                
 //* *==============================================* ISPSLIB(C1BMXSBD) *        
@@ -3140,7 +3048,7 @@ STEPNWDM RUN JOB (SNODE DSN=&&USER..D&&DATE..T&&TIME..CONFJCL)          )
 //*S2       SET TIME=&LHHMMSS                                                   
 //*S3       SET USER=&SYSUID                                                    
 //*S4       SET PKGID=&VPHPKGID                                                 
-//LSTPKGID EXEC PGM=NDVRC1,                                                     
+//LSTPKGID EXEC PGM=NDVRC1,                                C1BMXSBD             
 //         PARM='CONCALL,DDN:CONLIB,BC1PCSV0'                                   
 )IM C1BMXLIB                                                                    
 //CSVIPT01 DD *,SYMBOLS=JCLONLY                                                 
@@ -3176,7 +3084,7 @@ STEPNWDM RUN JOB (SNODE DSN=&&USER..D&&DATE..T&&TIME..CONFJCL)          )
 //* Generate Source Output COmponents and Ship data sets components             
 //*                                                                             
 //*#####################################################################        
-//CMPNTGEN EXEC PGM=IKJEFT01,COND=(4,LT)                                        
+//CMPNTGEN EXEC PGM=IKJEFT01,COND=(4,LT)                   C1BMXSBD             
 )IM C1BMXLIB                                                                    
 //**********************************************************************        
 //*  REXX DATA SETS                                                    *        
@@ -3267,7 +3175,7 @@ STEPNWDM RUN JOB (SNODE DSN=&&USER..D&&DATE..T&&TIME..CONFJCL)          )
 //* COPY CSVs AND COMPONENT LISTING TO USS IN ASCII FORMAT                      
 //*                                                                             
 //*#####################################################################        
-//ASCIIOUT EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)                           
+//ASCIIOUT EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)      C1BMXSBD             
 //SYSTSPRT DD SYSOUT=*                                                          
 //*                                                                             
 //LSTPKIN  DD DISP=(OLD,DELETE),DSN=&&&&LSTPKGID                                
@@ -3296,7 +3204,7 @@ OCOPY INDD(LSTCMIN) OUTDD(LSTCMOUT) TEXT CONVERT((BPXFX311)) FROM1047
 //*  GENERATE PACKAGE SBOM FROM FILES                                           
 //*                                                                             
 //*#####################################################################        
-//SBOMZGEN EXEC PGM=BPXBATCH,REGION=0M,COND=(4,LT)                              
+//SBOMZGEN EXEC PGM=BPXBATCH,REGION=0M,COND=(4,LT)         C1BMXSBD             
 //EN$TRXIT DD  SYSOUT=*                                                         
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
@@ -3329,7 +3237,7 @@ sbomz endevor sbom
 //* SBOM SIGN                                                                   
 //*                                                                             
 //*#####################################################################        
-//SBOMSIGN EXEC PGM=BPXBATCH,REGION=0M                                          
+//SBOMSIGN EXEC PGM=BPXBATCH,REGION=0M                     C1BMXSBD             
 //STDIN    DD DUMMY                                                             
 //STDOUT   DD DUMMY                                                             
 //STDERR   DD PATHOPTS=(OWRONLY,OCREAT,OTRUNC),                                 
@@ -3348,7 +3256,7 @@ $HOME/sbom/ship_sbom_pvt.key
 //* STDOUT and STDERR to HFS files.                                             
 //*                                                                             
 //*#####################################################################        
-//SBMEBCDI EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)                           
+//SBMEBCDI EXEC PGM=IKJEFT01,DYNAMNBR=300,COND=(4,LT)      C1BMXSBD             
 //SYSTSPRT DD SYSOUT=*                                                          
 //HFSOUT   DD PATHMODE=SIRWXU,                                                  
 // PATH='/tmp/&&USER_D&&DATE_T&&TIME..&VPHPKGID_sbom.json'                      
@@ -3375,7 +3283,7 @@ OCOPY INDD(HFSERRS) OUTDD(STDERRLS) TEXT CONVERT((BPXFX311)) TO1047
 //*  ADD SBOM TO ENDEVOR ADMIN ENVIRONMENT                   *                  
 //*                                                                             
 //*#####################################################################        
-//NDVRADD  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),                           
+//NDVRADD  EXEC PGM=NDVRC1,DYNAMNBR=1500,COND=(4,LT),      C1BMXSBD             
 //  PARM='C1BM3000'                                                             
 )IM C1BMXLIB                                                                    
 //**********************************************************************        
@@ -4201,7 +4109,7 @@ InitializeVars:
 return                                                                          
           
 ./  ADD  NAME=SCMM@REX                
-//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE                                  
+//SYSEXEC  DD DISP=SHR,DSN=GONJO08.CNTL.SOURCE             SCMM@REX             
 //         DD DISP=SHR,DSN=CADEMO.ENDV.PRCS.ADMTEST.REXXEXEC                    
 //SYSTSPRT DD SYSOUT=*                                                          
           

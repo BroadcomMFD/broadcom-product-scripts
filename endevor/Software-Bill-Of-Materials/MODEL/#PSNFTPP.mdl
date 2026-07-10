@@ -1,0 +1,58 @@
+@REM *******************************************************************        
+@REM *                                                                          
+@REM * (C) 1987,2005 COMPUTER ASSOCIATES INTERNATIONAL, INC.                    
+@REM *                                                                          
+@REM * NAME: #PSNFTPP                                                           
+@REM *                                                                          
+@REM *    CONTENTS: ENDEVOR/MVS - TRANSMIT PARTITIONED DATASET                  
+@REM * TRANSMITTER: NETVIEW FILE TRANSFER PROGRAM (FTP)                         
+@REM *     PURPOSE: TRANSMIT A PARTITIONED DATASET TO THE REMOTE SITE.          
+@REM *                                                                          
+@REM * NOTE: IF NOT SPECIFIED, THE SPACE PARAMETERS DEFAULT TO THE              
+@REM *       CHARACTERISTICS OF THE SENDING DATA SET, OR IF NOT                 
+@REM *       AVAILABLE, TO THE FTP DEFAULTS FOR THE SENDING/RECEIVING           
+@REM *       DATA SET TYPE (PO==>PO, PO==>PS).                                  
+@REM *******************************************************************        
+@REM * PARAMETERS PROVIDED ARE FOR NETVIEW FILE TRANSFER PROGRAM V2             
+@REM *******************************************************************        
+@REM                                                                            
+@IF &FDSN                                                                       
+@REM FUNCTION=ADD XMODE=TO,RMTLU=&NODENAME -                                    
+@REM              SFILEORG=PO,RFILEORG=PO -                                     
+@REM              SFILEID='&FDSN' -                                             
+@REM              RFILEID='&TDSN' -                                             
+@REM              RSTATOPT=MUSTNOTEXIST -                                       
+@REM              RSPCUNIT=CYL -                                                
+@REM              RSPCPRIM=&PRISPACE,RSPCSEC=&SECSPACE,RDIRBLK=&DIRBLKS         
+@REM              WAIT=YES,WAITTIME=10 -                                        
+@ENDIF                                                                          
+@IF &RVOLSER                                                                    
+@REM              RVOLSER=&RVOLSER -                                            
+@ENDIF                                                                          
+@IF &FDSN                                                                       
+@REM          RUNIT=&UNIT                                                       
+@ENDIF                                                                          
+@REM *******************************************************************        
+@REM * COMMENTED OUT PARAMETERS BELOW ARE PROVIDED FOR:                         
+@REM *    NETVIEW FILE TRANSFER PROGRAM V1                                      
+@REM *******************************************************************        
+@REM FUNCTION=ADD XMODE=TO,SFTYPE=PO,RFTYPE=PO,WAIT=YES -                       
+@REM          REMNODE=&NODENAME -                                               
+@REM          SFILEID='&FDSN' -                                                 
+@REM          RFILEID='&TDSN' -                                                 
+@REM          RTDISP=CAT,RSPCUNIT=CYL -                                         
+@REM          RDIRBLK=&DIRBLKS -                                                
+@REM          RSPCPRIM=&PRISPACE -                                              
+@REM          RSPCSEC=&SECSPACE -                                               
+@REM *******************************************************************        
+@IF &FDSN                                                                       
+&NODENAME                                                                       
+BINARY                                                                          
+LCD '&FDSN'                                                                     
+MKDIR '&TDSN' +                                                                 
+(LIKE '&FDSN'                                                                   
+CD '&TDSN'                                                                      
+MPUT *                                                                          
+QUIT                                                                            
+;#PSNFTPP                                                                       
+@ENDIF                                                                          

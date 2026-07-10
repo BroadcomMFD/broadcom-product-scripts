@@ -1,0 +1,21 @@
+@REM ****************************************************** #PSNFTP1 ***        
+@REM *    CONTENTS: ENDEVOR/MVS - START PROCESSING A NEW DESTINATION            
+@REM * TRANSMITTER: NETVIEW FILE TRANSFER PROGRAM (FTP)                         
+@REM *     PURPOSE: CREATE ORDERED JCL WHICH IS RELATED TO A NEW                
+@REM *              DESTINATION BEING PROCESSED BY NETVIEW FTP.                 
+@REM *******************************************************************        
+@REM                                                                            
+@PASS=10                                                                        
+&HJOBCARDS                       NEW JOB FOR EACH DESTINATION                   
+@REM                    #PSNFTP2 (PASS=10) FOR EACH PARTITIONED DATASET         
+@REM                             SUPPLY TRANSMISSION JCL AND CONTROL            
+@REM                             CARDS                                          
+@REM                    #PSNFTP6 (PASS=10) FOR EACH SEQUENTIAL DATASET          
+@REM                             SUPPLY TRANSMISSION JCL AND CONTROL            
+@REM                             CARDS                                          
+@REM                    #PSNFTP8 (PASS=10) EXECUTE THE COPY/DELETE JOB          
+@REM                             AND THE HOST CONFIRMATION JOBSTEP              
+@PASS=20                                                                        
+@IF HDISP=DELETE                                                                
+@INCLUDE=D                                                                      
+@ENDIF                                                                          

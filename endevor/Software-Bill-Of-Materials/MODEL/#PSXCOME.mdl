@@ -1,0 +1,63 @@
+@REM ****************************************************** #PSXCOME ***        
+@REM *    CONTENTS: ENDEVOR/MVS - TRANSMIT AND EXECUTE THE REMOTE JOB           
+@REM * TRANSMITTER: CA-XCOM                                                     
+@REM *     PURPOSE: SUBMIT THE REMOTE COPY/DELETE JOB.  THE HOLDCOUNT           
+@REM *              WILL DELAY ITS EXECUTION UNTIL ALL FILES HAVE BEEN          
+@REM *              TRANSMITTED TO THE REMOTE NODE.  SUBMIT THE HOST            
+@REM *              STAGING DATASET DELETION JOB.  THE HOLDCOUNT WILL           
+@REM *              DELAY ITS EXECUTION UNTIL THE REMOTE COPY/DELETE            
+@REM *              JOB HAS BEEN EXECUTED.                                      
+@REM *******************************************************************        
+@REM                                                                            
+TYPE=SEND                                                                       
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+XTCJOB=J&D4.AR                                                                  
+XTCGOODREL=J&D4.DEL                                                             
+HOLDCOUNT=&FILECOUNT                                                            
+FILETYPE=JOB                                                                    
+FILEOPT=CREATE                                                                  
+@IF &NODENAME                                                                   
+LU=&NODENAME                                                                    
+@ENDIF                                                                          
+@IF &IPNAME                                                                     
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+@ENDIF                                                                          
+UNIT=&RUNIT                                                                     
+LFILE=&AHJOBDSN                                                                 
+HOLD=NO                                                                         
+@REM                                                                            
+@IF HDISP=DELETE                                                                
+@IFAND &NODENAME                                                                
+*                                                                               
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+XTCJOB=J&D4.DEL                                                                 
+HOLDCOUNT=0                                                                     
+FILETYPE=JOB                                                                    
+FILEOPT=CREATE                                                                  
+LU=&NODENAME                                                                    
+UNIT=&RUNIT                                                                     
+LFILE=&SHIPHLI..D&SHIPDATE..T&SHIPTIME..XCOMCMD.FILE(&DESTID.D)                 
+HOLD=YES                                                                        
+@ENDIF                                                                          
+@IF HDISP=DELETE                                                                
+@IFAND &IPNAME                                                                  
+*                                                                               
+NEWXFER                                                                         
+TYPE=SEND                                                                       
+XTCNET=T&SHIPTIME                                                               
+ID=T&SHIPTIME                                                                   
+XTCJOB=J&D4.DEL                                                                 
+HOLDCOUNT=0                                                                     
+FILETYPE=JOB                                                                    
+FILEOPT=CREATE                                                                  
+IPNAME=&IPNAME                                                                  
+IPPORT=&IPPORT                                                                  
+UNIT=&RUNIT                                                                     
+LFILE=&SHIPHLI..D&SHIPDATE..T&SHIPTIME..XCOMCMD.FILE(&DESTID.D)                 
+HOLD=YES                                                                        
+@ENDIF                                                                          
