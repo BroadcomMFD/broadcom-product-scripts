@@ -85,7 +85,7 @@ $$
 //OUTPUT   DD SYSOUT=*                                                          
 //CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                   
 //INPUT    DD *                                                                 
-10.175.81.102                                                                   
+<node name / IP address>                                                                   
 SITE FILETYPE=JES                                                               
 PUT //DD:CONFJCL                                                                
 STOP                                                                            

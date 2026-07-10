@@ -1,0 +1,20 @@
+@REM ****************************************************** #RJICPY6 ***        
+@REM *    CONTENTS: ENDEVOR/MVS - PROCESS DELETABLE SEQUENTIAL DATA SETS        
+@REM *     PURPOSE: GENERATE AN IDCAMS DELETE STATEMENT FOR STAGING             
+@REM *              DATASETS WHEN REMOTE STAGING DISP=DELETE                    
+@REM *              (SEE #RJICPY1 FOR DETAILS)                                  
+@REM *******************************************************************        
+@REM *                                                                          
+@SECTION=07   <=======================================================          
+@IF &DJOBDSN                                                                    
+ DELETE '&DJOBDSN' NONVSAM                                                      
+@ENDIF                                                                          
+@IF &DXRFDSN                                                                    
+ DELETE '&DXRFDSN' NONVSAM                                                      
+@ENDIF                                                                          
+@IF &DPAXDSN                                                                    
+ DELETE '&DPAXDSN' NONVSAM                                                      
+@ENDIF                                                                          
+@IF &DUCDDSN                                                                    
+ DELETE '&DUCDDSN' NONVSAM                                                      
+@ENDIF                                                                          

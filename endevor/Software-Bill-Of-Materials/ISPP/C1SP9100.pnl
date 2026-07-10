@@ -1,0 +1,38 @@
+)ATTR DEFAULT(%+_)                                                              
+       /* % TYPE(TEXT) INTENS(HIGH)      DEFAULTS DISPLAYED FOR      */         
+       /* + TYPE(TEXT) INTENS(LOW)       INFORMATION ONLY            */         
+       /* _ TYPE(INPUT) INTENS(HIGH) CAPS(ON) JUST(LEFT)             */         
+   $ TYPE(INPUT) INTENS(LOW) PAD(_)                                             
+   ! TYPE(INPUT) INTENS(LOW) PAD(NULLS)                                         
+    TYPE(OUTPUT) INTENS(LOW)                                                   
+   | TYPE(OUTPUT) INTENS(HIGH)                                                  
+)BODY                                                                           
+%SHIP -----------------------  CONFIRM SHIPMENT  -------------------------------
+%OPTION  ===>_VARWKCMD                                                         +
++                                                                               
++ %SH+- Ship |VPHPKGID        +to Destination|VNBSSDST+                         
++                                                                               
++                                                                               
++  PKG/BACKOUT%===>_VNBSRQST+                                                   
++                                                                               
++  SHIPMENT COMMAND FILE PREFIX ===>_VNBSHHLI+(XCOM AND CONNECT:DIRECT)         
++                                                                               
+)INIT                                                                           
+  .HELP = CITP9100                                                              
+)PROC                                                                           
+ *REXX(*,VPHPKGID)                                                              
+   SA= 'C1SP9100 VPHPKGID: 'VPHPKGID                                            
+   SA= 'VARWKSEL: 'VARWKSEL                                                     
+   SA= 'VDDDSTID: 'VDDDSTID                                                     
+   SA= 'VDDXMETH: 'VDDXMETH                                                     
+   SA= 'VDDXNODE: 'VDDXNODE                                                     
+   SA= 'VDDDESCR: 'VDDDESCR                                                     
+   SA= 'VDDDSTID: 'VDDDSTID                                                     
+   SA= 'VDDXIPNM: 'VDDXIPNM                                                     
+   SA= 'VDDXIPPT: 'VDDXIPPT                                                     
+   SA= 'VNBSQDSP: 'VNBSQDSP                                                     
+   SA= 'VARWKCMD: 'VARWKCMD                                                     
+   RETURN                                                                       
+ *ENDREXX                                                                       
+ VPUT (VPHPKGID) PROFILE                                                        
+)END                                                                            

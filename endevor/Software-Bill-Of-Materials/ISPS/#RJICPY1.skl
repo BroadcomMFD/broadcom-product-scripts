@@ -45,7 +45,7 @@ sbomz sign verify-json-file
 $SBOMZ_HOME/ship_sbom_pub.key                                                   
 --config-work-directory $SBOMZ_HOME ;                                           
 x=$? ;                                                                          
-if [ $x -eq 0 ];                                                                
+if  $x -eq 0 ;                                                                
 then cp  "@@signedSBOMfile@@"                                                   
          "$SBOMZ_HOME/pkgs/&PKGID._sbom.json";                                  
      exit 0;                                                                    
