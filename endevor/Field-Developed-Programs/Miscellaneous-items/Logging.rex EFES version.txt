@@ -1,0 +1,36 @@
+/* REXX */
+/* Capture outputs produced by the active job, and write them     */
+/* to the LOGGING ddname                                          */
+ Trace O
+ delstack
+ MyJobName = MVSVAR('SYMDEF',JOBNAME ) /*Returns JOBNAME */
+
+ rc = ejesrexx('initapi')
+ queue "status;sreset;jname myjob" MyJobName";DA"
+ queue "showcols jobname jobid records"
+ queue ""
+ address ejes "execapi (prefix JOB_" /* Invoke HOLD */
+
+ do jobrow=1 to JOB_Lines
+   address ejes "execapi 0 'locate" jobrow "' (prefix JOB_"
+   say "Processing " JOB_JobName"("JOB_JobId")"
+   dsn = JOB_JobName"."JOB_JobId".workfile"
+   address ejes "execapi 0 ':ed' (prefix EX_"
+   if EX_FunName = "EXTRACT" then,
+   do
+     address ejes "execapi 0 ':<"dsn"><><><><><><><><CYL><10><10><*>'"
+     if word(EJES_Msg.1,1) = "EJES162" then,
+     do
+       rc=bpxwdyn("alloc dd(wkf)",
+       "da("sysvar(syspref)"."dsn") old reuse")
+       "execio * diskr" wkf "(stem" spool. "open finis)"
+       "execio * diskw" LOGGING "(stem" spool.
+       rc=bpxwdyn("free dd(wkf)")
+       say "Read " spool.0 "records from job"
+       "delete" dsn
+     end
+   end
+ end /* jobrow */
+ ejesrc = ejesrexx('termapi')
+ exit
+
