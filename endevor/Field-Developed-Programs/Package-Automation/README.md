@@ -18,7 +18,7 @@ On each Lpar where portions of this collection will run:
 
  - Place the REXX items into a new or existing library of your choice. 
  - Enter the name the REXX library into the Exit program you choose to use
-     - C1UEXT07 for Automated Executions and Shipments 
+     - C1UEXT07-Package-Automation for Automated Executions and Shipments 
      - C1UEXSHP for Automated Shipments only 
  - The WHEREIAM.rex member is not a part of the configuration, 
  but is provided to help identify names you should use as @site member names. 
@@ -98,7 +98,10 @@ The commnenting will allow you to reveiew your package shipping (and other) jobs
 
 ## The return of Package Shipments via Package Notes
 
-This feature was removed for a while, but has been returned on request. You can format text strings in package notes, or use the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex) (in the **ISPF-tools-for-Quick-Edit-and-Endevor** folder) to fill in notes for a package. 
+This feature was removed for a while, but has been returned. You can use the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex) in the [**ISPF-tools-for-Quick-Edit-and-Endevor**](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) folder, or do your formatting of text strings into the  package notes. Then, the package creator, and approvers can tailor the notes to select which pre-configured destinations are applicable for the package.  
+
+When the package Executes and the notes are formatted in this manner, as package shipping instructions, then shipments will be limited to those referenced by the package notes. Here is an example of package Notes that request shipments for a package.
+
 
       .........1.........2.........3.........4.........5.........6
   1.  ____________________________________________________________
@@ -111,7 +114,7 @@ This feature was removed for a while, but has been returned on request. You can 
   8.  NO TESTBOX : 20260526 0000 TEST0022            ELM CNT: 1   
 
 
-When the package Executes and the notes are formatted as package shipping instructions, then shipments are limited to those referenced by the package notes. Here is an example of package Notes that request shipments for a package.
+
 
 ## A word about the dependency on Comma Separated Value data
 
