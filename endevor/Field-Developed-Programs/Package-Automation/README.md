@@ -1,33 +1,28 @@
 # Package-Automation
 
-This collection provides two opportunities to introduce automation for package actions:
+Two primary opportunities exist within this collection to introduce automation for package actions:
+Package Executions: Automated immediately when the package status updates to "APPROVED" and the execution window is open.
+Package Shipments: Automated as soon as the status changes to "EXECUTED" and defined shipment rules indicate the package should be dispatched to one or more destinations.
 
-  - Automate Package Executions as soon as the package status changes to "APPROVED", and the Execution window is open.
-  - Automate Package Shipments as soon as the package status changes to "EXECUTED", and your "Rules" for package shipments indicate that the package should be Shipped to one or more destinations.
+When both processes are automated, granting final approval to a package seamlessly triggers execution, which is then immediately followed by shipments to all designated destinations.
 
-If both actions are automated, then (for example) the final approval given to a package would kick off a package execution, and followed immediately by package shipments to multiple destinations.
-
-Whether a triggering action is performed manually, by a zowe command, a sweep job, the Endevor web interface, or any other means, the Package Automation follow-up actions, based on an Endevor exit, remain consistently the same.
+The automated follow-up actions driven by the Endevor exit remain completely consistent, regardless of whether the triggering CAST or APPROVE action is initiated manually, via a zowe command, a sweep job, the Endevor web interface, or through any other method.
 
 ## Package Automation on Multiple Endevor images
 
-Some Endevor administrators have responsibility for multiple Endevor images, where details like the life cycle map, job card information and dataaset names differ from one image to the next. 
-To manage the variations from multiple images, the instructions and members listed below are provided, and allow the majority of remaining items to be left unchanged.
+Some Endevor administrators manage multiple Endevor images, each featuring unique lifecycle maps, job card details, and dataset naming conventions. To accommodate these variations while leaving most other configuration elements intact, follow the instructions below regarding the provided members:
 
-On each Lpar where portions of this collection will run:
+Perform these setup steps on every LPAR where components of this collection will execute:
+ - Deploy the REXX components into a designated new or existing library.
+ - Enter within your chosen Exit program the name of this REXX library:
+Use C1UEXT07-Package-Automation for handling both automated executions and shipments.
+Use C1UEXSHP if you only require automated shipments.
+ - Utilize the WHEREIAM.rex utility to establish your site-specific configurations:
+Although it is not part of the active operational configuration, this member helps identify the specific naming structure needed for your @site member names.
+Run WHEREIAM.rex without modifications to identify the appropriate name for the current @site member, then adjust the contents to align with that LPAR's parameters.
 
- - Place the REXX items into a new or existing library of your choice. 
- - Enter the name the REXX library into the Exit program you choose to use
-     - C1UEXT07-Package-Automation for Automated Executions and Shipments 
-     - C1UEXSHP for Automated Shipments only 
- - The WHEREIAM.rex member is not a part of the configuration, 
- but is provided to help identify names you should use as @site member names. 
- Execute the WHEREIAM.rex (as is) to determine the name to give to the member currently named @site. 
- Then tailor the content to reflect values for the Lpar. 
+For instance, if running the collection on LPARs named SYS1 and SYS7, the utility will direct you to create members named @SYS1 and @SYS7, where you will specify your Rules, Trigger files, and other localized values.
 
-    For example, if you intend to execute the collection on Lpars named SYS1 and SYS7, 
-  then WHEREIAM.rex will instruct you to create members @SYS1 and @SYS7 respectively. 
-  The names you use for the Rules and Trigger files (and other values) must entered into the @SYS1 and @SYS7 members. 
   
 ## Automate Package Executions
 

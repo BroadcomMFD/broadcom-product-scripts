@@ -8,10 +8,10 @@ In each case the REXX operates on fields in the exit blocks using variable names
 
 References to ispf messages can be removed from the code if you prefer, or to use them find them in the **ISPF-tools-for-Quick-Edit-and-Endevor** folder.
 
-The **C1UEXT02 Reuse CCID and Comment** member offers an approach for re-using CCID and Comment values, waiving the requirement for them with each software change. Only the first software change requires them, and if left blank on subsequent changes the values entered the first time are used again. If you have users on Quick-Edit and/or Endevor, then include the **CIUU01.ispfmsg** item too.
+The **C1UEXT02 Reuse CCID and Comment** member offers an approach for re-using CCID and Comment values, waiving the requirement for them with each software change. Only the first software change requires them, and if left blank on subsequent changes the values entered the first time are used again. Also include the **CIUU01.ispfmsg** item with this exit.
 
-The members named **WithRexDriver** show the use of COBOL exit "stubs" that rely on Rex routines to perform actions. There are many exit features you can choose to use. However, watch for comments in the driver programs C1UEXTR2 and C1UEXTR7 for references to locations of their subroutines.
+The members named **WithRexDriver** show the use of COBOL exit "stubs" that rely on Rexx "driver" routines to perform actions. There are several encoded features you can choose to use. However, watch for comments in the driver programs **C1UEXTR2** and **C1UEXTR7** for references to locations of their subroutines.
 
 See additional examples of Endevor exits in the **[Package-Automation](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Package-Automation)** folder.
 
-The exit 3 that was previously here has been rmoved. It was available to log Endevor actions, and will soon be depreciated. Watch for upcoming Broadcom announcements for an new logging feature.
+The exit 3 that was previously here has been removed. It was available to log Endevor actions, and is now depreciated. Watch the [Endevor Community website](https://community.broadcom.com/communities/communityhomeblogs?CommunityKey=592eb6c9-73f7-460f-9aa9-e5194cdafcd2) for announcements. 
