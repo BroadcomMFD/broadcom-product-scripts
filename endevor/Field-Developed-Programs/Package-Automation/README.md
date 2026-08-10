@@ -96,11 +96,13 @@ You can find the code for JCLCOMMT.rex in the [ISPF-tools-for-Quick-Edit-and-End
 
 The commnenting will allow you to reveiew your package shipping (and other) jobs, and know the element or member name that contains the lines of JCL.
 
-## The return of Package Shipments via Package Notes
+## Designating Package Shipments via Package Notes
 
-This feature was removed for a while, but has been returned. You can use the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex) in the [**ISPF-tools-for-Quick-Edit-and-Endevor**](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) folder, or do your formatting of text strings into the  package notes. Then, the package creator, and approvers can tailor the notes to select which pre-configured destinations are applicable for the package.  
+With this option, you can place package shipment expectations into the package notes at the time the package is created. Package reviewers can review expected shipments and make adjustments as needed. After the package executes, only entries remaining in the Notes trigger package shipments. There can be up to 8 destinations entered - one for each Note line - for a package.
 
-When the package Executes and the notes are formatted in this manner, as package shipping instructions, then shipments will be limited to those referenced by the package notes. Here is an example of package Notes that request shipments for a package.
+If you use the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex) in the [**ISPF-tools-for-Quick-Edit-and-Endevor**](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) folder, you can further automate this feature. SHIPRULE entries that match the package content are copied into the package Notes automatically. Or, if you prefer, do your automation or formatting of text strings when the package is being created. 
+
+Package notes must be formatted in this manner - as package shipping instructions.  
 
 
       .........1.........2.........3.........4.........5.........6
@@ -110,10 +112,16 @@ When the package Executes and the notes are formatted in this manner, as package
   4.  ____________________________________________________________
   5.  ____________________________________________________________
   6.  TO DESTIN1 : 20260526 0000 PRD#DD01                         
-  7.  NO DESTIN2 : 20260526 0000 PRD#DD02                         
+  7.  TO DESTIN2 : 20260526 0000 PRD#DD02                         
   8.  NO TESTBOX : 20260526 0000 TEST0022            ELM CNT: 1   
 
+To omit the shipment to a Destination, then simply change the "TO" at the front of a Note line to "NO".
 
+If you choose this option do not use the COBOL exit in the **Package Automation** folder. Instead, use these found in the [Exit-Examples](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Exit-Examples) folder:
+
+ - **C1UEXT07 WithRexDriver.cob** - the more generic package exit program
+ - **C1UEXTR7 WithRexDriver.rex** - the REXX subroutine that handles many  conditions beyond Package Automation. You may need to remove or comment out references you do not need in C1UEXTR7, but preserve the calls to the 
+ PKGEXECT and PKGESHIP Rexx items in this folder.
 
 
 ## A word about the dependency on Comma Separated Value data

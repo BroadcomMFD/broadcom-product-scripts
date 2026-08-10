@@ -1,7 +1,7 @@
 /*   REXX  */
 
    /* Use the variable and value you have for Package name */
-   Package = 'FINA#AESN5715429'
+   Arg Package ;
 
    /* Initially the package has quorum=0 for all Approver Grps */
    Highest_QUORUM_CNT = 0

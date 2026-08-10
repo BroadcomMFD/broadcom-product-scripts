@@ -10,7 +10,7 @@ References to ispf messages can be removed from the code if you prefer, or to us
 
 The **C1UEXT02 Reuse CCID and Comment** member offers an approach for re-using CCID and Comment values, waiving the requirement for them with each software change. Only the first software change requires them, and if left blank on subsequent changes the values entered the first time are used again. If you have users on Quick-Edit and/or Endevor, then include the **CIUU01.ispfmsg** item too.
 
-The members named **WithRexDriver** show the use of COBOL exit "stubs" that rely on Rex routines to perform actions. 
+The members named **WithRexDriver** show the use of COBOL exit "stubs" that rely on Rex routines to perform actions. There are many exit features you can choose to use. However, watch for comments in the driver programs C1UEXTR2 and C1UEXTR7 for references to locations of their subroutines.
 
 See additional examples of Endevor exits in the **[Package-Automation](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Package-Automation)** folder.
 

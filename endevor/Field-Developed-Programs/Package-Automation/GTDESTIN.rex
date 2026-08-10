@@ -7,6 +7,8 @@
   REMOTE_DSN_PREFIX = "?"
   TRANS_DESC        = "?"
   TRANS_NODE        = "?"
+  HOST_DSN_DISP     = "?"
+  REMOTE_DSN_DISP   = "?"
   STRING = "ALLOC DD(C1MSGS1) DUMMY "
   STRING = "ALLOC DD(C1MSGS1) SYSOUT(A) "
   CALL BPXWDYN STRING;
@@ -50,6 +52,7 @@
   $table_variables = translate($table_variables,"@","(") ;
   WantedCSVVariables= "HOST_DSN_PREFIX REMOTE_DSN_PREFIX ",
                       "TRANS_DESC TRANS_NODE",
+                      "HOST_DSN_DISP REMOTE_DSN_DISP"
   $detail = apiDestinations.2
   /* Parse CSV fields in the Detail record until done */
   Do $column =  1 to Words($table_variables)
@@ -62,7 +65,8 @@
   CALL BPXWDYN "FREE DD(BSTAPI)" ;
   If TRANS_DESC = 'LOCAL' then,
      REMOTE_DSN_PREFIX = HOST_DSN_PREFIX
-  Return HOST_DSN_PREFIX REMOTE_DSN_PREFIX TRANS_DESC TRANS_NODE
+  Return HOST_DSN_PREFIX REMOTE_DSN_PREFIX TRANS_DESC TRANS_NODE,
+         HOST_DSN_DISP REMOTE_DSN_DISP
 ParseDetailCSVline:
   /* Find the data for the current $column */
   $dlmchar = Substr($detail,1,1);

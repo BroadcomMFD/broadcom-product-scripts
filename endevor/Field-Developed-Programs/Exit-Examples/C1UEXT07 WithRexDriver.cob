@@ -3,15 +3,10 @@
        PROGRAM-ID. C1UEXT07.
       *****************************************************************
       * DESCRIPTION: THIS PGM IS CALLED for misc Package actions.
-      *              It gathers Endevor info from the exit blocks
-      *              then calls REXX program C1UEXTR7.
-      ************************************************************
-      *   https://github.com/BroadcomMFD/broadcom-product-scripts
-      ************************************************************
-      * Change the Dataset references within this program:       *
-      * 1) Find all "DA("                                        *
-      * 2) Change each dataset name to your REXX library         *
-      ************************************************************
+      *              It gathers Endevor info from the exit blocks     *
+      *              then calls REXX program C1UEXTR7.                *
+      *   Together they can force CAST actions to be in Batch.        *
+      *****************************************************************
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
@@ -30,7 +25,6 @@
           03  WS-PECB-NDVR-HIGH-RC           PIC 9999 .
           03  WS-DISPLAY-NUMBER-FOR4         PIC 9(04) .
           03  WS-DISPLAY-NUMBER-FOR9         PIC 9(09) .
-                                                                        00490200
        01  PGM                                   PIC X(8).
        01  MYSMTP-MESSAGE                        PIC X(80).
        01  MYSMTP-USERID                         PIC X(8).
@@ -54,7 +48,6 @@
           03  ADDRESS-MYSMTP-TEXT            PIC 9(09) .
           03  ADDRESS-MYSMTP-URL             PIC 9(09) .
           03  ADDRESS-MYSMTP-EMAIL-IDS       PIC 9(09) .
-                                                                        00510000
           03  ADDRESS-PECB-NDVR-EXIT-RC      PIC 9(09) .
           03  ADDRESS-PECB-MESSAGE-ID        PIC 9(09) .
           03  ADDRESS-PECB-MESSAGE           PIC 9(09) .
@@ -142,7 +135,7 @@
       ****    PECB-USER-BATCH-JOBNAME(1:7) NOT = 'PL05958'
       ****    GOBACK.
       ****
-*********  DISPLAY 'C1UEXTT7: GOT INTO C1UEXTT7'.
+*********  DISPLAY 'C1UEXT07: GOT INTO C1UEXTT7'.
 *********  MOVE PECB-FUNCTION-CODE TO WS-DISPLAY-NUMBER-FOR9.
 *********  DISPLAY 'PECB-FUNCTION-CODE=' WS-DISPLAY-NUMBER-FOR9.
            IF  SETUP-EXIT-OPTIONS
@@ -165,8 +158,6 @@
 *********    to support automated package shipping
                MOVE 'Y'   TO PECB-AFTER-EXEC
                MOVE 'Y'   TO PECB-REQ-ELEMENT-ACTION-BIBO
-               MOVE 'Y'   TO PECB-BEFORE-BACKOUT
-               MOVE 'Y'   TO PECB-BEFORE-BACKIN
                MOVE 'Y'   TO PECB-AFTER-BACKOUT
                MOVE 'Y'   TO PECB-AFTER-BACKIN
 *********    to support submission of package Execute jobs
@@ -319,7 +310,8 @@
               'PECB_ACT_REC_EXIST_FLAG="' PECB-ACT-REC-EXIST-FLAG '";'
               'PECB_APP_REC_EXIST_FLAG="' PECB-APP-REC-EXIST-FLAG '";'
               'PECB_BAC_REC_EXIST_FLAG="' PECB-BAC-REC-EXIST-FLAG '";'
-              'PECB_REQUEST_RETURNCODE=' WS-PECB-REQUEST-RETURNCODE ';'
+              'PECB_REQUEST_RETURNCODE='
+                          WS-PECB-REQUEST-RETURNCODE ';'
               'PECB_NDVR_HIGH_RC = ' WS-PECB-NDVR-HIGH-RC ';'
               'PREQ_BACKOUT_ENABLED="' PREQ-BACKOUT-ENABLED '";'
               'Address_PREQ_BACKOUT_ENABLED='
@@ -350,10 +342,9 @@
               WITH POINTER WS-POINTER .
 *********  For these text fields, make sure none use a double quote
 *********  character. This ensures the integrity of the REXX
-           IF (REVIEW-PACKAGE OR CAST-PACKAGE) AND
-              PECB-AFTER                       AND
-              PECB-SUCCESSFUL-RECORD-SENT      AND
-              PAPP-GROUP-NAME(1:1) IS ALPHABETIC
+           IF PAPP-QUORUM-COUNT > 0 AND
+              (REVIEW-PACKAGE OR
+                (CAST-PACKAGE AND PECB-AFTER) )
               MOVE PAPP-QUORUM-COUNT TO WS-DISPLAY-NUMBER-FOR4
               STRING
                 'CALL_REASON="' WS-CALLING-REASON '";'
@@ -445,6 +436,11 @@
            IF RETURN-CODE NOT = 0
                DISPLAY 'C1UEXT07: BAD CALL TO IRXJCL - RC = '
                         RETURN-CODE
+               MOVE 'C1UEXT07: Unable to connect to REXX (500)'
+                        TO PECB-MESSAGE
+               MOVE 132 TO PECB-ERROR-MESS-LENGTH
+               MOVE 8   TO PECB-NDVR-EXIT-RC
+               GOBACK
            END-IF
            MOVE 0           TO RETURN-CODE
            .
@@ -481,6 +477,10 @@
            IF REXX-RETURN-CODE NOT = 0
                DISPLAY 'C1UEXT07: IRXEXEC RETURN CODE = '
                        REXX-RETURN-CODE
+               MOVE 'C1UEXT07: Unable to connect to REXX (800)'
+                        TO PECB-MESSAGE
+               MOVE 132 TO PECB-ERROR-MESS-LENGTH
+               MOVE 8   TO PECB-NDVR-EXIT-RC
            END-IF
            CANCEL IRXEXEC-PGM
            .
@@ -524,7 +524,7 @@
            MOVE SPACES TO ALLOC-TEXT.
            IF PECB-BATCH-MODE
               STRING 'ALLOC DD(SYSEXEC) ',
-                'DA(YOURSITE.NDVR.REXX)'
+                'DA(YOUR.NDVR.REXX)'
                      DELIMITED BY SIZE
                         ' SHR REUSE'
                      DELIMITED BY SIZE
@@ -532,7 +532,7 @@
               END-STRING
            ELSE
               STRING 'ALLOC DD(REXFILE7) ',
-                'DA(YOURSITE.NDVR.REXX)'
+                'DA(YOUR.NDVR.REXX)'
                      DELIMITED BY SIZE
                         ' SHR REUSE'
                      DELIMITED BY SIZE
