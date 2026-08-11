@@ -1,33 +1,28 @@
 # Package-Automation
 
-This collection provides two opportunities to introduce automation for package actions:
+Two primary opportunities exist within this collection to introduce automation for package actions:
+Package Executions: Automated immediately when the package status updates to "APPROVED" and the execution window is open.
+Package Shipments: Automated as soon as the status changes to "EXECUTED" and defined shipment rules indicate the package should be dispatched to one or more destinations.
 
-  - Automate Package Executions as soon as the package status changes to "APPROVED", and the Execution window is open.
-  - Automate Package Shipments as soon as the package status changes to "EXECUTED", and your "Rules" for package shipments indicate that the package should be Shipped to one or more destinations.
+When both processes are automated, granting final approval to a package seamlessly triggers execution, which is then immediately followed by shipments to all designated destinations.
 
-If both actions are automated, then (for example) the final approval given to a package would kick off a package execution, and followed immediately by package shipments to multiple destinations.
-
-Whether a triggering action is performed manually, by a zowe command, a sweep job, the Endevor web interface, or any other means, the Package Automation follow-up actions, based on an Endevor exit, remain consistently the same.
+The automated follow-up actions driven by the Endevor exit remain completely consistent, regardless of whether the triggering CAST or APPROVE action is initiated manually, via a zowe command, a sweep job, the Endevor web interface, or through any other method.
 
 ## Package Automation on Multiple Endevor images
 
-Some Endevor administrators have responsibility for multiple Endevor images, where details like the life cycle map, job card information and dataaset names differ from one image to the next. 
-To manage the variations from multiple images, the instructions and members listed below are provided, and allow the majority of remaining items to be left unchanged.
+Some Endevor administrators manage multiple Endevor images, each featuring unique lifecycle maps, job card details, and dataset naming conventions. To accommodate these variations while leaving most other configuration elements intact, follow the instructions below regarding the provided members:
 
-On each Lpar where portions of this collection will run:
+Perform these setup steps on every LPAR where components of this collection will execute:
+ - Deploy the REXX components into a designated new or existing library.
+ - Enter within your chosen Exit program the name of this REXX library:
+Use C1UEXT07-Package-Automation for handling both automated executions and shipments.
+Use C1UEXSHP if you only require automated shipments.
+ - Utilize the WHEREIAM.rex utility to establish your site-specific configurations:
+Although it is not part of the active operational configuration, this member helps identify the specific naming structure needed for your @site member names.
+Run WHEREIAM.rex without modifications to identify the appropriate name for the current @site member, then adjust the contents to align with that LPAR's parameters.
 
- - Place the REXX items into a new or existing library of your choice. 
- - Enter the name the REXX library into the Exit program you choose to use
-     - C1UEXT07 for Automated Executions and Shipments 
-     - C1UEXSHP for Automated Shipments only 
- - The WHEREIAM.rex member is not a part of the configuration, 
- but is provided to help identify names you should use as @site member names. 
- Execute the WHEREIAM.rex (as is) to determine the name to give to the member currently named @site. 
- Then tailor the content to reflect values for the Lpar. 
+For instance, if running the collection on LPARs named SYS1 and SYS7, the utility will direct you to create members named @SYS1 and @SYS7, where you will specify your Rules, Trigger files, and other localized values.
 
-    For example, if you intend to execute the collection on Lpars named SYS1 and SYS7, 
-  then WHEREIAM.rex will instruct you to create members @SYS1 and @SYS7 respectively. 
-  The names you use for the Rules and Trigger files (and other values) must entered into the @SYS1 and @SYS7 members. 
   
 ## Automate Package Executions
 
@@ -96,6 +91,40 @@ You can find the code for JCLCOMMT.rex in the [ISPF-tools-for-Quick-Edit-and-End
 
 The commnenting will allow you to reveiew your package shipping (and other) jobs, and know the element or member name that contains the lines of JCL.
 
+## Designating Package Shipments via Package Notes
+
+With this option, you can place package shipment expectations into the package notes at the time the package is created. Package reviewers can review expected shipments and make adjustments as needed. After the package executes, only entries remaining in the Notes trigger package shipments. There can be up to 8 destinations entered - one for each Note line - for a package.
+
+If you use the [Package Builder](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor/Package.rex) in the [**ISPF-tools-for-Quick-Edit-and-Endevor**](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/ISPF-tools-for-Quick-Edit-and-Endevor) folder, you can further automate this feature. SHIPRULE entries that match the package content are copied into the package Notes automatically. Or, if you prefer, do your automation or formatting of text strings when the package is being created. 
+
+Package notes must be formatted in this manner - as package shipping instructions.  
+
+
+      .........1.........2.........3.........4.........5.........6
+  1.  ____________________________________________________________
+  2.  ____________________________________________________________
+  3.  ____________________________________________________________
+  4.  ____________________________________________________________
+  5.  ____________________________________________________________
+  6.  TO DESTIN1 : 20260526 0000 PRD#DD01                         
+  7.  TO DESTIN2 : 20260526 0000 PRD#DD02                         
+  8.  NO TESTBOX : 20260526 0000 TEST0022            ELM CNT: 1   
+
+To omit the shipment to a Destination, then simply change the "TO" at the front of a Note line to "NO".
+
+If you choose this option do not use the COBOL exit in the **Package Automation** folder. Instead, use these found in the [Exit-Examples](https://github.com/BroadcomMFD/broadcom-product-scripts/tree/main/endevor/Field-Developed-Programs/Exit-Examples) folder:
+
+ - **C1UEXT07 WithRexDriver.cob** - the more generic package exit program
+ - **C1UEXTR7 WithRexDriver.rex** - the REXX subroutine that handles many  conditions beyond Package Automation. You may need to remove or comment out references you do not need in C1UEXTR7, but preserve the calls to the 
+ PKGEXECT and PKGESHIP Rexx items in this folder.
+
+
+## A word about the dependency on Comma Separated Value data
+
+The use of extracts and parsing of CSV data, increases the longevity of the solution. For product release upgrades, if field lengths are changed, or new fields are added, there is no impact since field lengths and positions are automatically determined by the CSV heading. 
+
+
+
 ## Items outside of this folder, that might be a part of your solution: 
 
 
@@ -110,3 +139,15 @@ The commnenting will allow you to reveiew your package shipping (and other) jobs
 **ENTBJAPI** - see member BC1JAAPI in your CSIQJCL library.
 
 [**BKOUTLOG**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/Package-Backout-Logging/endevor/Field-Developed-Programs/Package-Automation/Package-Backout-Logging/BKOUTLOG.rex) - for logging package Backout and BackIn actions. (currently in a branch)
+
+If you are submitting Package Automation jobs under the Endevor Alt id, then find these modules:
+
+
+[**SWAP2ALT**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/SWAP2ALT.rex
+) to execute in your REXX exits and to enforce actions to run under the Endevor Altid
+
+[**SWAP2USR**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Processor-Tools-and-Processor-Snippets/SWAP2USR.rex) to return processing back to the users' id.
+
+Also review the [**USE_Alitd setting on the C1UEXITS**](https://techdocs.broadcom.com/us/en/ca-mainframe-software/devops/ca-endevor-software-change-manager/19-0/securing/data-set-security/alternate-id-and-user-exits.html) setting, and for your exit, set the **USE_ALTID** value is to **+**.
+
+[**WTO#MSG**](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Miscellaneous-items/WTO%23MSG.asm) - This utility allows you to notify others of specific site events by sending text strings, such as error messages, to the system log. This ensures that critical incidents receive the necessary attention for follow-up. Once these messages are logged, automation tools like OPS/MVS can scan the system log and initiate the appropriate responsive actions automatically.
