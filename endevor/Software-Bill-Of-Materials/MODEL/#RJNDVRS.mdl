@@ -1,0 +1,37 @@
+@REM ****************************************************** #RJNDVRS ***        
+@REM *    CONTENTS: ENDEVOR/MVS - POST-SHIP SCRIPT EXECUTION (AFTER)            
+@REM *     PURPOSE: THIS MEMBER CONTAINS THE SCRIPT HASH VALIDATION             
+@REM *              BEFORE THE REMOTE COPY TO THE TARGET LIBRARIES              
+@REM *              HAS TAKEN PLACE.                                            
+@REM *                                                                          
+@REM * THIS MEMBER IS INCLUDED '@INCLUDE=(S)' IN #RJICPY1 AND #RJFCPY1.         
+@REM *                                                                          
+@REM *******************************************************************        
+@REM * THESE STEPS WILL EXECUTE BEFORE THE COPY TO THE REMOTE TARGET            
+@REM *******************************************************************        
+//* START #RJNDVRS                                                              
+@SECTION=01   <=======================================================          
+@IF &ANY2COPY                                                                   
+//CHKHASH  EXEC PGM=IEFBR14                                #RJNDVRS             
+//SYSPRINT DD   SYSOUT=*                                                        
+@ENDIF                                                                          
+@REM *----------------------------------------------------------------          
+@REM #RJICPY2 @SECTION=01 GENS AN INDD CARD AND AN OUTDD CARD PER PDS           
+@REM *----------------------------------------------------------------          
+@SECTION=02   <=======================================================          
+@IF &RDDN                                                                       
+@IFAND &TDSN                                                                    
+//&TDDN  DD  DISP=SHR,  REMOTE STAGING DATA SET                                 
+//         DSN=&TDSN                                                            
+@ENDIF                                                                          
+@SECTION=03   <=======================================================          
+@IF &ANY2COPY                                                                   
+//SYSIN    DD   *                                                               
+@ENDIF                                                                          
+@SECTION=04   <=======================================================          
+@IF &RDDN                                                                       
+@IFAND &TDSN                                                                    
+@REM COPY      INDD=((&TDDN,R)),OUTDD=&RDDN                                     
+ INCLUDE=#RJICPYL                              P003154                          
+@ENDIF                                                                          
+//* END #RJNDVRS                                                                

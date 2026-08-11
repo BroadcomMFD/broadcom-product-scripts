@@ -34,8 +34,8 @@
 //* *==================================================================*        
 //*                                                                             
 //VERIFYOK IF  (^ABEND AND                                                      
-//             SBOMVRFY.RC = 0 AND                                              
-//             CHKHASH.RC = 0) THEN                                             
+//             HASHVRFY.RC = 0 AND                                              
+//             RSDSVRFY.RC = 0) THEN                                            
 //*                                                                             
 //CONFCOPY EXEC PGM=IEBGENER                               C1BMXRCN             
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
@@ -75,10 +75,14 @@
   SET STOPRC 16 .                                                               
   MOVE ELEMENT '&VPHPKGID'                                                      
     FROM                                                                        
-      ENVIRONMENT 'ADM' SYSTEM 'ADMMY' SUBSYSTEM 'PACKAGES'                     
-      TYPE 'SBOM' STAGE NUMBER 1                                                
-    OPTIONS CCID 'PKGSBOM' COMMENTS "ADD NEW PACKAGE SBOM"                      
-      WITH HISTORY                                                              
+      ENVIRONMENT  'ADM'                                                        
+      SYSTEM       'SSC2'                                                       
+      SUBSYSTEM    'PACKAGES'                                                   
+      TYPE         'SBOM'                                                       
+      STAGE NUMBER 1                                                            
+    OPTIONS CCID 'PKGSBOM'                                                      
+            COMMENTS "MOVE PACKAGE &VPHPKGID SBOM"                              
+            WITH HISTORY                                                        
   .                                                                             
 //* *----------------------------------------------* C1BMXRCN (CONT.)  *        
 $$                                                                              
@@ -113,7 +117,7 @@ $$
 //SYSUT1   DD DATA,DLM=$$              JOB SHIPPED BACK TO HOST                 
 )IM C1BMXHJC                                                                    
 //ABNDEXEC EXEC PGM=NDVRC1,                                C1BMXRCN             
-//  PARM='&VNBCPARM,CONF,RCPY,AB,****,$DEST_ID'                                 
+//  PARM='&VNBCPARM,CONF,RCPY,GE,0012,$DEST_ID'                                 
 //*                                                                             
 )IM C1BMXLIB OPT                                                                
 //* *----------------------------------------------* C1BMXRCN (CONT.)  *        
@@ -174,7 +178,7 @@ $$
 //ABNLIGNR DD DUMMY                                                             
 //SYSPRINT DD SYSOUT=*                                                          
 //SYSABEND DD SYSOUT=*                                                          
-//NETRC    DD DISP=SHR,DSN=GONJO08.ENDEVOR.NETRC(SHIPPING)                      
+//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
 //*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
 //SYSOUT   DD SYSOUT=*                                                          
 //OUTPUT   DD SYSOUT=*                                                          
@@ -194,19 +198,21 @@ QUIT
 )CM                                                                             
 )IF &XMETHOD EQ XCOM THEN )DO                                                   
 //C1BMXCOM EXEC PGM=XCOMJOB,                               C1BMXRCN             
-//         PARM=('TYPE=SCHEDULE,DFLTAB=XCOMDFLT')                               
-//STEPLIB  DD DISP=SHR,DSN=DE25.XCOM.R120.RUN.CBXGLOAD                          
+//         PARM=('TYPE=SCHEDULE,ACBNAME=XCOMA')                                 
+//STEPLIB  DD DISP=SHR,DSN=SYS3.XCOM.R120A.CBXGLOAD                             
 //         DD DISP=SHR,                                                         
 //            DSN=CEE.SCEERUN                                                   
+//SYSTCPD  DD DISP=SHR,                                                         
+//            DSN=SYS3.TCPIP.TCPPARMS(TCPDATA)                                 
 //XCOMCNTL DD DISP=SHR,                                                         
-//            DSN=DE25.XCOM.R120.RUN.CBXGPARM                                   
+//            DSN=SYS3.XCOM.R120.PARM                                          
 //**********************************************************************        
 //*SYSTCPD  DD DISP=SHR,                                                        
-//*            DSN=SHARE.TCPIP.TCPPARMS(TCPDATA)                                
+//*            DSN=SYS3.TCPIP.TCPPARMS(TCPDATA)                                
 //*XCOMGLOB DD DISP=SHR,                                                        
-//*            DSN=SHARE.XCOM.XCOMGLOB                                          
+//*            DSN=SYS3.XCOM.XCOMGLOB                                          
 //*XCOMREST DD DISP=SHR,                                                        
-//*            DSN=SHARE.XCOM.XCOMREST                                          
+//*            DSN=SYS3.XCOM.XCOMREST                                          
 //XCOMPRNT DD SYSOUT=*                            * IEBCOPY MSGS                
 //SYSPRINT DD SYSOUT=*                            * TCP/IP MSGS                 
 //SYSTERM  DD SYSOUT=*                            * TCP/IP MSGS                 

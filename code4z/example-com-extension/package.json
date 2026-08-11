@@ -30,6 +30,11 @@
 				"command": "com.example.report.enhanced",
 				"title": "Enhanced Report on a Dataset",
 				"category": "example.com"
+			},
+			{
+				"command": "com.example.state.clear",
+				"title": "Clear Enhanced Report State",
+				"category": "example.com"
 			}
 		],
 		"configuration": [
@@ -48,9 +53,9 @@
 	},
 	"devDependencies": {
 		"@types/node": "^22.13.9",
-		"@types/vscode": "^1.98.0",
-		"@vscode/vsce": "^2.25.0",
-		"typescript": "^5.8.2"
+		"@types/vscode": "^1.120.0",
+		"@vscode/vsce": "^3.9.2",
+		"typescript": "^6.0.3"
 	},
 	"scripts": {
 		"check": "tsc --pretty",

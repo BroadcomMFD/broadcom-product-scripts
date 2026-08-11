@@ -74,6 +74,32 @@ Returns the Job Accounting code for the job currently running. Example call:
 
 The routine is useful if your job submits another job, and needs to keep the accounting code the same for both jobs. 
 
+## LOGGING
+
+You can capture outputs for a running job by including a step like this one in the JCL.
+
+
+    ///  IF (RC > 08) THEN                                                
+    //LOGRESLT  EXEC PGM=IKJEFT1B,PARM='LOGGING'                         
+    //SYSTSIN   DD  DUMMY                                                
+    //LOGGING  DD DSN=&SYSUID..LOGGING.&SYSJOBNM..&SYSJOBID,             
+    //  DISP=(MOD,CATLG,KEEP),                                           
+    //  UNIT=3390,SPACE=(CYL,(1,05)),                                    
+    //  DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0)                              
+    //SYSEXEC   DD  DISP=SHR,DSN=Your.Rexxlib
+    //SYSTSPRT  DD SYSOUT=*                                              
+    //  ENDIF                                                            
+                                           
+You can log the outputs, scan them, email them, or do whatever you need to do.
+
+## WTO#MSG
+
+
+The WTO#MSG utility allows you to notify others of specific site events by sending text strings, such as error messages, to the system log. This ensures that critical incidents receive the necessary attention for follow-up. Once these messages are logged, automation tools like OPS/MVS can scan the system log and initiate the appropriate responsive actions automatically. 
+
+See comments within the source for example calls to WTO#MSG.
+
+
 ## Endevor-Processor-Includes.md
 
 This document offers steps to be taken to allow processors to reference "Include" members/elements.
