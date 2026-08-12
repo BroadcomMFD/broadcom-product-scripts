@@ -17,7 +17,7 @@ Leveraging content from the [Exit-Examples](https://github.com/BroadcomMFD/broad
 - Associate an approver group with one or more Group-level and/or personal email addresses
 - Easily tailor your own email content
 
-**C1UEXTR7.rex** is an example Rexx subroutine to the package exit programs, for example [C1UEXT07](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/C1UEXT07.cob) in the **Package Automation** folder, or [C1UEXTT7](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/SonarQube-interface-to-Endevor/C1UEXTT7.cob) in the **SonarQube-interface-to-Endevor** folder. This version processes Approver Group names, provided by the exit, and calls **SENDMAIL.rex** to deliver email. 
+**C1UEXTR7.rex** is an example Rexx subroutine to the package exit programs, for example [C1UEXT07](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/Package-Automation/C1UEXT07-Package-Automation.cob) in the **Package Automation** folder, or [C1UEXTT7](https://github.com/BroadcomMFD/broadcom-product-scripts/blob/main/endevor/Field-Developed-Programs/SonarQube-interface-to-Endevor/C1UEXTT7.cob) in the **SonarQube-interface-to-Endevor** folder. This version processes Approver Group names, provided by the exit, and calls **SENDMAIL.rex** to deliver email. 
 A subroutine to **SENDMAIL.rex** is the **GTEMADDS.rex** which provides a list of email addresses for each Approver Group. 
 
 Code your own version of **GTEMADDS.rex** to associate your Approver Groups to email addresses, following the example content.
