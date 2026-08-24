@@ -1,59 +1,47 @@
-)REXX VNBCPARM VNBSQDSP VPHPKGID OVERIDSN
- /* REXX CODE */
-  TRACE off
-  WHERE = 'C1BMXIN    '
-  tmparm = Translate(VNBCPARM,' ',',')
-  PkgInfo  = GETSYRSB(VPHPKGID) ; /* get sys/sub from pkg name*/
-  If Words(PkgInfo) = 2 then,
-     C1SUBSYS = Word(PkgInfo,1);  /* get sys/sub from pkg name*/
-  Else,
-     C1SUBSYS = 'NA'
-  tmpShip= Strip(VNBSQDSP)
-  tmpShip= Strip(tmpShip,'T','.')
-  whereOut = Wordpos('OPT',tmpShip)
-  SHIPOUT = Word(tmpShip,whereOut+1)
-  SENTFROM = SYSVAR(SYSNODE)
-
-  Sa= 'C1BMXIN is preparing' OVERIDSN
-
-  "ALLOC F(OVERRIDE)  DA('"OVERIDSN"') ",
-         "LRECL(80)   BLKSIZE(24000) SPACE(1,1)",
-         "RECFM(F B) TRACKS DIR(5) ",
-         "UNIT(3390) VOLUME(TSOC32) ",
-         "NEW CATALOG KEEP  "     ;
-  "FREE  F(OVERRIDE) "
-
-  "ALLOC F(OVERRIDE)  DA('"OVERIDSN"(OVERRIDE)') ",
-         "UNIT(3390) VOLUME(TSOC32) SHR REUSE "
-  PUSH "//* Package Shipment Details    (C1BMXIN) **"
-  PUSH "//  SET SENTFROM='"SENTFROM"'"
-  PUSH "//  SET REQUEST='"SHIPOUT"'"
-  PUSH "//  SET DESTIN='"Strip(VNBLSDST)"'"
-  PUSH "//  SET PACKAGE='"VPHPKGID"'"
-  PUSH "//  SET C1SUBSYS='"C1SUBSYS"'"
-  PUSH "//* Package Shipment Details    (C1BMXIN) **"
-  "EXECIO 8 DISKW OVERRIDE (FINIS"
-  "FREE  F(OVERRIDE) "
-
+)CM Capture Package shipping variables for JCL substitutions
+)CM Choose which )REXX ... )ENDREXX sections work for you
+)CM ----------
+)CM ----------  Get Package, Destination and pkg/Bko values
+)REXX VNBSQDSP PKGID DESTIN HOSTHLQ RMOTHLQ ACCOUNT OUTRBAK SHIPPER
   TRACE Off
-  If SHIPOUT = 'BAC' then,
-     Do
-     "ALLOC F(OVERRIDE)  DA('"OVERIDSN"(BACKOUT1)') ",
-            "UNIT(3390) VOLUME(TSOC32) SHR REUSE "
-     PUSH "//IGNORE   DD   DATA,DLM=@@"
-     PUSH "//COPIES   EXEC PGM=IEFBR14  *PKG BACKOUT*"
-     "EXECIO 2 DISKW OVERRIDE (FINIS"
-     "FREE  F(OVERRIDE) "
-
-     "ALLOC F(OVERRIDE)  DA('"OVERIDSN"(BACKOUT2)') ",
-            "UNIT(3390) VOLUME(TSOC32) SHR REUSE "
-     PUSH "@@"
-     "EXECIO 1 DISKW OVERRIDE (FINIS"
-     "FREE  F(OVERRIDE) "
-     End
-
+  WHEREAMI = 'C1BMXIN1'
+  PARSE VAR VNBSQDSP STR "'" PKGID "' TO DEST " DESTIN " OPT" TAIL '.'
+  DESTIN = STRIP(DESTIN)
+  OUTRBAK = STRIP(STRIP(TAIL,'T','.'))
+   SiteData = GTDESTIN(DESTIN)
+   HOSTHLQ     = Word(SiteData,1)
+   RMOTHLQ     = Word(SiteData,2)
+   XMITMETH    = Word(SiteData,3)
+   TRANS_NODE  = Word(SiteData,4)
+  ACCOUNT = GETACCTC()
+  SHIPPER = USERID()
 )ENDREXX
-)CM  PACKAGE SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
+)CM ----------
+)CM ----------  Get Date and Time variables from VNBCPARM
+)REXX VNBCPARM DATE8 TIME8 DATE6 TIME6
+  TRACE off
+  WHEREAMI = 'C1BMXIN2'
+  PARSE VAR VNBCPARM STR "," DATE8 "," TIME8
+  SA = DATE8
+  DATE6 = Substr(DATE8,3)
+  TIME8 = Strip(TIME8)
+  TIME6 = Substr(TIME8,1,6)
+)ENDREXX
+)CM ----------
+)CM ---Delete this section, unless you need ite-Specific variables.
+)CM ---Values from variable names of the @SITE member
+)CM ---must be assigned to valid 8-byte ISPF variable names.
+)REXX  CSIQCLS0 ORDERDSN
+  TRACE Off
+  WHEREAMI = 'C1BMXIN3'
+  WHERE = 'C1BMXIN Get local variables '
+  WhereIam =  Strip(Left("@"MVSVAR(SYSNAME),8)) ;
+  interpret 'Call' WhereIam "'MyCLS0Library'"
+  CSIQCLS0  = Result
+  interpret 'Call' WhereIam "'AltIDOrderfile'"
+  ORDERDSN  = Result
+)ENDREXX
+)CM  PKGID SHIPMENT BATCH JCL - SYSIN CARD IMAGES - ISPSLIB(C1BMXIN)
 )CM
 )CM  THIS SKELETON IS USED TO GENERATE "SHIP" COMMANDS USED AS INPUT
 )CM  TO C1BMX000.
@@ -65,3 +53,36 @@
 )CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 )CM
 &VNBSQDSP
+//* *==============================================================* *
+//* *==============================================================* *
+//* *= Substitute variables in the Remote JCL       ===============* *
+//* *==============================================================* *
+//TAILOR   EXEC PGM=IKJEFT1B,PARM='ENBPIU00 A',            C1BMXIN
+//         COND=(4,LT)
+//TABLE    DD *      If necessary replace these for your xmit method
+* MODEL    TBLOUT
+  AHJOB    AHJOB
+  C1BMXFTC C1BMXFTC
+//AHJOB    DD DSN=&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN..AHJOB,
+//         DISP=SHR
+//C1BMXFTC DD DSN=&&&&XFTC,DISP=(OLD,PASS)
+//OPTIONS  DD *,SYMBOLS=JCLONLY  **These variables are substituted**
+  ACCCOUNT = '&ACCOUNT'
+  Destin   = '&DESTIN'
+  Package  = '&PKGID'
+  OUTRBAK  = '&OUTRBAK'
+  SENDNODE = SYSVAR(SYSNODE)
+  DATE6    = '&DATE6'
+  TIME6    = '&TIME6'
+  SHIPPER  = '&SHIPPER'
+  HOSTLIBS = '&HOSTHLQ..D&DATE6..T&TIME6..&DESTIN'
+  RMOTLIBS = '&RMOTHLQ..D&DATE6..T&TIME6..&DESTIN'
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//APIMSG   DD SYSOUT=*
+//BSTAPI   DD SYSOUT=*
+//BSTERR   DD SYSOUT=*
+//SHOWME   DD SYSOUT=*
+//SYSTSIN  DD DUMMY
+//SYSTSPRT DD SYSOUT=*
+//* *===================================================== C1BMXIN / *
+//* *===================================================== C1BMXIN / *
