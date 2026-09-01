@@ -1,0 +1,18 @@
+//#5864CP JOB NOTIFY=#5864,MSGCLASS=Q TYPRUN=HOLD
+//*MAIN SYSTEM=SY41
+//*====================================================================*
+//*=== Use SUPERC to compare two load modules                          *
+//*====================================================================*
+// SET SELECT=14
+// SET SELECT=7
+//*====================================================================*
+//STEP1 EXEC PGM=IRXJCL,PARM='ENBPIU00 &SELECT'
+//TABLE    DD DISP=SHR,DSN=#5864.TABLES(LOADCMPR)
+//MODEL    DD DISP=SHR,DSN=#5864.MODELS(LOADCMPR)
+//OPTIONS  DD DUMMY
+//SYSEXEC  DD DISP=SHR,DSN=SYSX.ENDV19DE.CSIQCLS0
+//SYSTSPRT DD SYSOUT=*
+//TBLOUT   DD SYSOUT=(A,INTRDR)
+//TBLOUTX  DD SYSOUT=*
+//*====================================================================*
+
