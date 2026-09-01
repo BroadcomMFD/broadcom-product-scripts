@@ -151,11 +151,11 @@ public class Demo {
    */
   private static void loginAndLogout(String basePath, String username, String password) {
     // Authenticate with username and password.
-    String sessionToken = login(basePath, username, password);
+    boolean authenticated = login(basePath, username, password);
 
-    // Log out by invalidating the session token.
-    if (sessionToken != null) {
-      logout(basePath, sessionToken);
+    // Log out by invalidating the session.
+    if (authenticated) {
+      logout(basePath);
     }
   }
 
@@ -196,10 +196,10 @@ public class Demo {
     }
 
     // Authenticate with username and password.
-    String sessionToken = login(basePath, username, password);
+    boolean authenticated = login(basePath, username, password);
 
     // If authentication is unsuccessful, then return.
-    if (sessionToken == null) {
+    if (!authenticated) {
       System.out.println("User not authenticated. " + MESSAGE_TERMINATING_OPERATION);
       return;
     }
@@ -207,7 +207,7 @@ public class Demo {
     try {
       // List the repositories which are accessible to the user.
       System.out.println(System.lineSeparator() + "Listing repositories.");
-      List<Integer> repositoryIds = ListRepositories.listRepository(basePath, sessionToken);
+      List<Integer> repositoryIds = ListRepositories.listRepository(basePath);
 
       // If no repository is found, then return.
       if (repositoryIds.isEmpty()) {
@@ -224,7 +224,7 @@ public class Demo {
         System.out
             .println(System.lineSeparator() + "Listing reports for repository id " + repositoryId);
         reportHandles = ListReports
-            .listReportsWithFilters(basePath, sessionToken, repositoryId, reportListFilter);
+            .listReportsWithFilters(basePath, repositoryId, reportListFilter);
         if (!reportHandles.isEmpty()) {
           selectedRepositoryId = repositoryId;
           break;
@@ -243,7 +243,7 @@ public class Demo {
           System.lineSeparator() + "Displaying the content of report for report handle "
               + reportHandle);
       PrintReportContent
-          .printReportContent(basePath, sessionToken, selectedRepositoryId, reportHandle);
+          .printReportContent(basePath, selectedRepositoryId, reportHandle);
 
     } catch (IOException e) {
       System.out.println("Exception during http processing: " + e.getMessage());
@@ -252,8 +252,8 @@ public class Demo {
           .getHttpStatus() + ". Error message: " + e.getApplicationErrorMessages());
     }
 
-    // Log out by invalidating the session token.
-    logout(basePath, sessionToken);
+    // Log out by invalidating the session.
+    logout(basePath);
   }
 
 
@@ -314,10 +314,10 @@ public class Demo {
     }
 
     // Authenticate with username and password.
-    String sessionToken = login(basePath, username, password);
+    boolean authenticated = login(basePath, username, password);
 
     // If authentication is not successful then return.
-    if (sessionToken == null) {
+    if (!authenticated) {
       System.out.println("User not authenticated. " + MESSAGE_TERMINATING_OPERATION);
       return;
     }
@@ -325,7 +325,7 @@ public class Demo {
     try {
       // List the repository accessible to the user.
       System.out.println(System.lineSeparator() + "Listing repositories.");
-      List<Integer> repositoryIds = ListRepositories.listRepository(basePath, sessionToken);
+      List<Integer> repositoryIds = ListRepositories.listRepository(basePath);
 
       // If no repository found then return.
       if (repositoryIds.isEmpty()) {
@@ -343,7 +343,7 @@ public class Demo {
             System.lineSeparator() + "Listing cross-report index names for repositoryId "
                 + repositoryId);
         crossReportIndexNamesHandles = ListCrossReportIndex
-            .listCrossReportIndexNames(basePath, sessionToken, repositoryId,
+            .listCrossReportIndexNames(basePath, repositoryId,
                 crossReportIndexNamesFilter);
 
         if (!crossReportIndexNamesHandles.isEmpty()) {
@@ -368,7 +368,7 @@ public class Demo {
             System.lineSeparator() + "Listing cross-report index values for nameHandle "
                 + crossReportIndexNamesHandle);
         crossReportIndexValuesHandles = ListCrossReportIndex
-            .listCrossReportIndexValues(basePath, sessionToken, selectedRepositoryId,
+            .listCrossReportIndexValues(basePath, selectedRepositoryId,
                 crossReportIndexNamesHandle, crossReportIndexValuesFilter);
 
         if (!crossReportIndexValuesHandles.isEmpty()) {
@@ -392,7 +392,7 @@ public class Demo {
             System.lineSeparator() + "Listing cross-report index values reports for valueHandle "
                 + crossReportIndexValuesHandle);
         crossReportIndexValueReportsHandles = ListCrossReportIndex
-            .listCrossReportIndexValueReports(basePath, sessionToken, selectedRepositoryId,
+            .listCrossReportIndexValueReports(basePath, selectedRepositoryId,
                 selectedCrossReportIndexNamesHandle, crossReportIndexValuesHandle);
 
         if (!crossReportIndexValueReportsHandles.isEmpty()) {
@@ -412,7 +412,7 @@ public class Demo {
       System.out.println(System.lineSeparator()
           + "Displaying the content of report for cross report index value reportHandle "
           + crossReportIndexValueReportHandle);
-      PrintReportContent.printReportContent(basePath, sessionToken, selectedRepositoryId,
+      PrintReportContent.printReportContent(basePath, selectedRepositoryId,
           crossReportIndexValueReportHandle);
 
     } catch (IOException e) {
@@ -423,8 +423,8 @@ public class Demo {
               .getHttpStatus() + ". Error message: " + e.getApplicationErrorMessages());
     }
 
-    // Log out by invalidating the session token.
-    logout(basePath, sessionToken);
+    // Log out by invalidating the session.
+    logout(basePath);
   }
 
   /**
@@ -433,13 +433,13 @@ public class Demo {
    * @param basePath Application server HTTPS address and port.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
-   * @return Generated session token (guid) or null.
+   * @return {@code true} if authentication succeeded, {@code false} otherwise.
    */
-  private static String login(String basePath, String username, String password) {
+  private static boolean login(String basePath, String username, String password) {
     System.out.println("Authenticating with username and password." + System.lineSeparator());
-    String sessionToken = null;
     try {
-      sessionToken = Authentication.loginWithUserName(basePath, username, password);
+      Authentication.loginWithUserName(basePath, username, password);
+      return true;
     } catch (IOException e) {
       System.out.println("Exception during http processing: " + e.getMessage());
     } catch (ApiQueryException e) {
@@ -448,7 +448,7 @@ public class Demo {
               + ". Error message: " + e.getApplicationErrorMessages());
     }
 
-    return sessionToken;
+    return false;
   }
 
   /**
@@ -465,15 +465,11 @@ public class Demo {
    * Logout from the application and process errors which may have occurred.
    *
    * @param basePath Application server HTTPS address and port.
-   * @param sessionToken Session token to be invalidated.
    */
-  private static void logout(String basePath, String sessionToken) {
-
-    assert sessionToken != null;
-
-    System.out.println("Logging out - invalidating the session token." + System.lineSeparator());
+  private static void logout(String basePath) {
+    System.out.println("Logging out - invalidating the session." + System.lineSeparator());
     try {
-      Authentication.logout(basePath, sessionToken);
+      Authentication.logout(basePath);
     } catch (IOException e) {
       System.out.println("Exception during http processing: " + e.getMessage());
     } catch (ApiQueryException e) {
