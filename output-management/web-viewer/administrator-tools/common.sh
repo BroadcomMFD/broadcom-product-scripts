@@ -31,8 +31,8 @@ declare -A _STATUS
 # Key is concatenated server name and repository id.
 # Value is the repository metadata as supported by parseRepositoryMetadata().
 declare -A _REPOSITORIES
-# Authenticated session token for each Server.
-# Key is server name. Value is a session token.
+# Authenticated session for each Server.
+# Key is server name. Value is the session cookie as a "name=value" string.
 declare -A _SESSIONS
 # User credentials (username and password).
 declare -A _CREDENTIALS
@@ -42,15 +42,19 @@ function apiLogin() {
     local userName="$2"
     local userPassword="$3"
     local responseHeaders="$(mktemp)"
+    local cookieJar="$(mktemp)"
     local -A server
+
+    trap 'rm -f "${cookieJar}"' RETURN
 
     getServer "server" "$serverName"
 
     curl --request POST \
         --silent --show-error \
         --output /dev/null --dump-header "${responseHeaders}" \
+        --cookie-jar "${cookieJar}" \
         --basic --user "${userName}:${userPassword}" \
-        "${server[api]}/v1/view/login" 
+        "${server[api]}/v1/view/login"
 
     if [ $? -ne 0 ]; then
         return 1
@@ -60,14 +64,14 @@ function apiLogin() {
         return 2
     fi
 
-    local guid
-    guid=$(sed -nr 's/^guid: ([[:alnum:]]{64})[[:space:]]*$/\1/p' "${responseHeaders}" | tr -d '\r\n')
+    local sessionCookie
+    sessionCookie=$(awk -F'\t' '$6 ~ /brcmwv_s_d[0-9]+$/ { print $6"="$7 }' "${cookieJar}")
 
-    if [ -z "${guid}" ]; then
+    if [ -z "${sessionCookie}" ]; then
         return 3
     fi
 
-    saveSession "${serverName}" "${guid}"
+    saveSession "${serverName}" "${sessionCookie}"
     return 0
 }
 
@@ -96,7 +100,7 @@ function apiRequest() {
         curl --request "${httpMethod}" \
             --silent --show-error \
             --output "${responseBody}" --dump-header "${responseHeaders}" \
-            --header "guid: $(getSession "${serverName}")" \
+            --cookie "$(getSession "${serverName}")" \
             --header "Content-Type: ${contentType}" \
             --data @"${requestBodyFile}" \
             "${server[api]}/${apiEndpoint}"
@@ -104,7 +108,7 @@ function apiRequest() {
         curl --request "${httpMethod}" \
             --silent --show-error \
             --output "${responseBody}" --dump-header "${responseHeaders}" \
-            --header "guid: $(getSession "${serverName}")" \
+            --cookie "$(getSession "${serverName}")" \
             "${server[api]}/${apiEndpoint}"
     fi
 
@@ -298,9 +302,9 @@ function isServerOld() {
 
 function saveSession() {
     local serverName="$1"
-    local guid="$2"
+    local sessionCookie="$2"
 
-    _SESSIONS[${serverName}]="${guid}"
+    _SESSIONS[${serverName}]="${sessionCookie}"
 }
 
 function getSession() {
