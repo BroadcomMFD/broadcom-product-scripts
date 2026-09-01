@@ -1,0 +1,286 @@
+//*******************************************************************
+//**                                                               **
+//**    COBOL COMPILE AND LINK-EDIT PROCESSOR
+//**                                                               **
+//*******************************************************************
+//GCOBOLJJ PROC AAAX='',
+//             ALIASPFX='SYSDE32.NDVR.ALIAS',
+//             CPARMA='LIB,LIST',
+//             CPARMZ='NOSSR',
+//*            CSIQCLS0=CARSMINI.NDVR.R1801.CSIQCLS0,
+//             @CICSLOD='SYSSHR.CTS540.GA.CICS.RSU1912.SDFHLOAD',
+//             OTHRCPY1='',
+//             OTHRCPY2='',
+//             OTHRCPY3='',
+//             OTHRLOD1='',
+//             OTHRLOD2='',
+//             OTHRLOD3='',
+//*   Top of SETSTMTS                                                   00000010
+//             CIICOMP='SYS1.COB2COMP',                                 00000600
+//*            CIILIB='SYS1.COB2LIB',                                   00000500
+//             CIILIB='IGY.SIGYCOMP',                                   00000500
+//             CLECOMP='IGY.SIGYCOMP',                                  00000200
+//             CLELKED='CEE.SCEELKED',                                  00000400
+//             CLERUN='CEE.SCEERUN',                                    00000300
+//             CSIQCLS0='SYSSHR.NDVR.CSIQCLS0',                         00001100
+//             CSYSLIB='&HLQ..COPYBOOK',                                00001100
+//             EXPINC=N,                                                00001500
+//             FOOTPINT='&C1FOOTPRT(39,25)',                            00001500
+//             GROUP='SMPL',                                            00000800
+//             LINK='&HLQ..LINK',                                       00000110
+//             LISTLIB='&HLQ..LISTLIB',                                 00000100
+//             LOADBTCH='&HLQ..LOADLIB',                                00001600
+//             LOADCICS='&HLQ..LOADCICS',                               00001600
+//             LSYSLIB='&LOADBTCH',                                     00001700
+//             MONITOR=COMPONENTS,                                      00002200
+//             OPTIONS='&HLQ..OPTIONS',                                 00000110
+//             PARMCOB='LIB,NOSEQ,OBJECT,APOST,',                       00002300
+//             PARMLNK='LIST,MAP,XREF',                                 00002400
+//             HLQ='SYSDE32.NDVR.&C1ENVMNT..&C1SY..&C1SU.',             00000700
+//             SYSOUT=,                                                 00002500
+//             WRKUNIT=3390,                                            00002600
+//*   End of SETSTMTS                                                   00002700
+//            ZZZZZZ=
+//**********************************************************************
+//*   ALLOCATE TEMPORARY LISTING DATASETS                              *
+//**********************************************************************
+//INIT     EXEC PGM=BC1PDSIN,MAXRC=0
+//C1INIT01 DD DSN=&&COBLIST,DISP=(,PASS),
+//            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
+//            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//C1INIT02 DD DSN=&&LNKLIST,DISP=(,PASS),
+//            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
+//            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//C1INIT03 DD DSN=&&OPTIONE,DISP=(,PASS),
+//            UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)
+//*--------------------------------------------------------------------
+//*---- XPEDITOR allocated ?-------------------------------------------
+//*--------------------------------------------------------------------
+//XPEDITOR EXEC PGM=TESTDDNM,PARM=XPEDITOR
+//STEPLIB  DD  DISP=SHR,DSN=SYSDE32.NDVR.ADMIN.ENDEVOR.ADM1.LOADLIB
+//*--------------------------------------------------------------------
+//*---------------------------------------------------------------
+//**  Get program specific OPTIONS for ELEMENT (IF one EXISTS)  **
+//*---------------------------------------------------------------
+//GET#OPTE EXEC PGM=IEBUPDTE,COND=(4,LT),MAXRC=4
+//SYSPRINT DD DUMMY
+//SYSIN    DD  *
+./  REPRO NEW=PS,NAME=&C1ELEMENT
+//SYSUT1   DD DISP=SHR,DSN=&OPTIONS,
+//            MONITOR=COMPONENTS,ALLOC=LMAP
+//SYSUT2   DD DSN=&&OPTIONE,DISP=(OLD,PASS)
+//*-------------------------------------------------------------------
+//*     MQSERIES Requested in program OPTIONS ?                    **
+//*-------------------------------------------------------------------
+//MQSERIES EXEC PGM=IRXJCL,PARM='ENBPIU00 1 x',
+//         COND=(4,LT),MAXRC=1
+//TABLE    DD *
+*  MQSeries      $my_rc
+   Y              1
+   *              0
+//OPTIONS  DD DSN=&&OPTIONE,DISP=(OLD,PASS)
+//MODEL    DD DUMMY
+//TBLOUT   DD DUMMY
+//SYSTSPRT DD SYSOUT=*
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//*-------------------------------------------------------------------
+//*     CISC PRE-compiling ?                                       **
+//*-------------------------------------------------------------------
+//CICSPC   EXEC PGM=IRXJCL,PARM='ENBPIU00 1 x',
+//         COND=(4,LT),MAXRC=1
+//TABLE    DD *
+*  CICSPC        $my_rc
+   Y              1
+   *              0
+//OPTIONS  DD DSN=&&OPTIONE,DISP=(OLD,PASS)
+//MODEL    DD DUMMY
+//TBLOUT   DD DUMMY
+//SYSTSPRT DD SYSOUT=*
+//SYSEXEC  DD DISP=SHR,DSN=&CSIQCLS0
+//*********************************************************************
+//* READ SOURCE AND EXPAND INCLUDES
+//*********************************************************************
+//CONWRITE EXEC PGM=CONWRITE,COND=(4,LT),MAXRC=0,
+// PARM='EXPINCL(&EXPINC)'
+//ELMOUT   DD DSN=&&ELMOUT,DISP=(,PASS),
+//            UNIT=&WRKUNIT,SPACE=(TRK,(100,100),RLSE),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=0),
+//            MONITOR=&MONITOR
+//*******************************************************************
+//**    CICS Pre-compile                                           **
+//*******************************************************************
+//CICSPRE EXEC PGM=DFHECP1$,           *PRECOMPILE COMPONENT
+//             PARM=('COBOL3,APOST,DEBUG,NOSEQ,SP,CPSM'),
+//*            REGION=0M,
+//             COND=(1,NE,CICSPC)
+//STEPLIB   DD DISP=SHR,DSN=&@CICSLOD
+//SYSIN     DD DSN=&&ELMOUT,DISP=(OLD,DELETE)
+//SYSPRINT  DD SYSOUT=*
+//SYSPUNCH  DD DISP=(NEW,PASS),DSN=&&ELMOUT,
+//             UNIT=(SYSDA,3),SPACE=(CYL,(5,25),RLSE),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=4080)
+//*******************************************************************
+//**    COMPILE THE ELEMENT                                        **
+//*******************************************************************
+//COMPILE  EXEC PGM=CONPARMX,COND=(4,LT),MAXRC=4,
+//             PARM=(IGYCRCTL,'(&CPARMA)','$$$$DFLT','&C1PRGRP',
+//             '&C1ELEMENT','(&CPARMZ)','Y','N')
+//STEPLIB  DD  DISP=SHR,DSN=IGY.SIGYCOMP
+//PARMSDEF DD  DSN=&OPTIONS,
+//             MONITOR=&MONITOR,ALLOC=LMAP,
+//             DISP=SHR
+//*******************************************************************
+//*     COPYLIB CONCATENATIONS                                     **
+//*******************************************************************
+//SYSLIB   DD DISP=(,DELETE),DSN=&&COPYLIB,
+//    UNIT=&WRKUNIT,SPACE=(TRK,(1,1,1),RLSE),
+//    DSORG=PO,RECFM=FB,LRECL=80,BLKSIZE=27920
+//*    Alias libraries if found \
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..COPYLIB1,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..COPYLIB2,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..COPYLIB3,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..COPYLIB4,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//*    Alias libraries if found  /
+//         DD  DSN=&CSYSLIB,
+//             MONITOR=&MONITOR,ALLOC=LMAP,
+//             DISP=SHR
+//  IF (&OTHRCPY1 GE 'A') THEN
+//         DD DSN=&OTHRCPY1,ALLOC=COND,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//  IF (&OTHRCPY2 GE 'A') THEN
+//         DD DSN=&OTHRCPY2,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//  IF (&OTHRCPY3 GE 'A') THEN
+//         DD DSN=&OTHRCPY3,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//*
+//  IF (MQSERIES.RC =1) THEN
+//         DD DISP=SHR,DSN=MQM.V9R0M0.SCSQCOBC
+//*        DD DISP=SHR,DSN=MQS.V800.SCSQCOBC
+//  ENDIF
+//SYSIN    DD  DSN=&&ELMOUT,DISP=(OLD,PASS)
+//SYSLIN   DD  DSN=&&SYSLIN,DISP=(,PASS,DELETE),
+//             UNIT=&WRKUNIT,SPACE=(TRK,(100,100),RLSE),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=0),
+//             FOOTPRNT=CREATE
+//SYSUT1   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSUT2   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSUT3   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSUT4   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSUT5   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSUT6   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSUT7   DD  UNIT=&WRKUNIT,SPACE=(CYL,(5,3))
+//SYSPRINT DD  DSN=&&COBLIST,DISP=(OLD,PASS)
+//*******************************************************************
+//**  GET PROGRAM SPECIFIC LINK    ELEMENT (IF IT EXISTS)          **
+//*******************************************************************
+//GET#LINK EXEC PGM=IEBUPDTE,COND=(4,LT),MAXRC=4
+//SYSPRINT DD DUMMY
+//SYSIN    DD  *
+./  REPRO NEW=PS,NAME=&C1ELEMENT
+//SYSUT1   DD DISP=SHR,DSN=&LINK,
+//            MONITOR=COMPONENTS,ALLOC=LMAP
+//SYSUT2    DD DSN=&&LINKCARD,DISP=(,PASS),
+//            UNIT=&WRKUNIT,SPACE=(TRK,(10,10)),
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)
+//*******************************************************************
+//**    LINK EDIT THE ELEMENT                                      **
+//*******************************************************************
+//LKED     EXEC PGM=CONPARMX,COND=(4,LT),MAXRC=4,
+//             PARM=(IEWL,'()','$$$$DFLT','&C1PRGRP',
+//             '&C1ELEMENT','()','Y','N')
+//PARMSDEF DD  DSN=&OPTIONS,
+//             MONITOR=&MONITOR,ALLOC=LMAP,
+//             DISP=SHR
+//SYSLIN   DD  DSN=&&SYSLIN,DISP=(OLD,DELETE)
+//  IF (GET#LINK.RUN AND GET#LINK.RC = 0) THEN
+//         DD DSN=&&LINKCARD,DISP=(OLD,DELETE)
+//  ENDIF
+//  IF (MQSERIES.RC =1) AND ('&C1PRGRP(1,4)' EQ 'CICS') THEN
+//         DD *
+  INCLUDE SYSLIB(CSQCSTUB)
+//  ENDIF
+//  IF (MQSERIES.RC =1) AND ('&C1PRGRP(1,4)' NE 'CICS') THEN
+//         DD *
+  INCLUDE SYSLIB(CSQBSTUB)
+//  ENDIF
+//  IF ('&C1PRGRP(1,4)' EQ 'CICS') THEN
+//SYSLMOD  DD  DSN=&LOADCICS(&C1ELEMENT),
+//             MONITOR=&MONITOR,
+//             FOOTPRNT=CREATE,
+//             DISP=SHR
+//  ELSE
+//SYSLMOD  DD  DSN=&LOADBTCH(&C1ELEMENT),
+//             MONITOR=&MONITOR,
+//             FOOTPRNT=CREATE,
+//             DISP=SHR
+//  ENDIF
+//SYSLIB   DD DISP=(,DELETE),DSN=&&LOADLIB,
+//    UNIT=&WRKUNIT,SPACE=(TRK,(1,1,1),RLSE),
+//    DSORG=PO,RECFM=U,LRECL=0,BLKSIZE=32760
+//*    Alias libraries if found \
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..LOADLIB1,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..LOADLIB2,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..LOADLIB3,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//         DD  DSN=&ALIASPFX..&C1SUBSYS..LOADLIB4,
+//             DISP=SHR,ALLOC=COND,MONITOR=COMPONENTS
+//*    Alias libraries if found  /
+//         DD  DSN=&LSYSLIB,
+//             MONITOR=&MONITOR,ALLOC=LMAP,
+//             DISP=SHR
+//  IF (&OTHRLOD1 GE 'A') THEN
+//         DD DSN=&OTHRLOD1,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//  IF (&OTHRLOD2 GE 'A') THEN
+//         DD DSN=&OTHRLOD2,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//  IF (&OTHRLOD3 GE 'A') THEN
+//         DD DSN=&OTHRLOD3,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//*
+//  IF (MQSERIES.RC =1) THEN
+//         DD DSN=MQM.V9R0M0.SCSQLOAD,
+//            DISP=SHR,MONITOR=COMPONENTS
+//  ENDIF
+//* IF PROCESSOR GROUP IS CIINBL THEN ALLOC COB2 CALL LIBRARY COB2LIB
+//         DD  DSN=&CLELKED,
+//             DISP=SHR
+//SYSUT1   DD  UNIT=&WRKUNIT,SPACE=(CYL,(1,1))
+//SYSPRINT DD  DSN=&&LNKLIST,DISP=(OLD,PASS)
+//*******************************************************************
+//*     STORE THE LISTINGS IF:  &LISTLIB=LISTING LIBRARY NAME       *
+//*******************************************************************
+//STORLIST EXEC PGM=CONLIST,MAXRC=0,PARM=STORE,COND=EVEN,
+//           EXECIF=(&LISTLIB,NE,NO)
+//C1LLIBO  DD DSN=&LISTLIB,DISP=SHR,
+//            MONITOR=&MONITOR
+//C1BANNER DD UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
+//            DCB=(RECFM=FBA,LRECL=121,BLKSIZE=0)
+//LIST01   DD DSN=&&COBLIST,DISP=(OLD,DELETE)
+//LIST02   DD DSN=&&LNKLIST,DISP=(OLD,DELETE)
+//*******************************************************************
+//*     PRINT THE LISTINGS IF:  &LISTLIB=NO                         *
+//*******************************************************************
+//PRNTLIST EXEC PGM=CONLIST,MAXRC=0,PARM=PRINT,COND=EVEN,
+//           EXECIF=(&LISTLIB,EQ,NO)
+//C1BANNER DD UNIT=&WRKUNIT,SPACE=(TRK,(1,1)),
+//            DCB=(RECFM=FBA,LRECL=121,BLKSIZE=0,DSORG=PS)
+//C1PRINT  DD SYSOUT=&SYSOUT,
+//            DCB=(RECFM=FBA,LRECL=133,BLKSIZE=0,DSORG=PS)
+//LIST01   DD DSN=&&COBLIST,DISP=(OLD,DELETE)
+//LIST02   DD DSN=&&LNKLIST,DISP=(OLD,DELETE)
+//**
