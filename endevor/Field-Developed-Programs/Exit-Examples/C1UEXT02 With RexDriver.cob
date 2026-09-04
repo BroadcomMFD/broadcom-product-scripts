@@ -1,7 +1,6 @@
        PROCESS DYNAM OUTDD(DISPLAYS)
       *****************************************************************
-      * https://github.com/BroadcomMFD/broadcom-product-scripts
-      * DESCRIPTION: C1UEXT02 is called before Element processing.    *
+      * DESCRIPTION: THIS PGM IS CALLED before Element processing     *
       *              It gathers Endevor info from the exit blocks     *
       *              then calls REXX program C1UEXTR2.                *
       *                                                               *
@@ -9,15 +8,12 @@
       *              Change the DSN to a secure dataset.(2 places)    *
       *                                                               *
       *    STRING 'ALLOC DD(REXFILE2) ', <--look for REXFILE2/SYSEXEC *
-      *          'DA(ESS.ENDEVOR.EXIT.REXX)'  <----- here             *
+      *          'DA(Your.Endevor.CLSTREXX)'  <----- here             *
       *               DELIMITED BY SIZE                               *
       *                 ' SHR REUSE'                                  *
       *               DELIMITED BY SIZE                               *
       *          INTO ALLOC-TEXT                                      *
       *    END-STRING.                                                *
-      *                                                               *
-      *  Change the .REXX dataset name to the name of your dataset    *
-      *  that contains your C1UEXTR2 Rexx program.                    *
       *****************************************************************
       ** see also EAGGXCOB for Calling IRXEXEC - the IBM example      *
       ** for calling IRXEXEC from a Cobol program                     *
@@ -36,10 +32,12 @@
        FILE-CONTROL.
        DATA DIVISION.
        FILE SECTION.
+
       *****************************************************************
       * W O R K I N G  S T O R A G E                                  *
       *****************************************************************
        WORKING-STORAGE SECTION.
+
        77  WS-TRACE                          PIC X    VALUE 'N'.
        77  FLAGS                             PIC S9(8) BINARY.
        77  REXX-RETURN-CODE                  PIC S9(8) BINARY.
@@ -48,38 +46,42 @@
        77  EXECBLK-PTR                       POINTER.
        77  ARGTABLE-PTR                      POINTER.
        77  EVALBLK-PTR                       POINTER.
+
        01  IRXJCL                            PIC X(6)  VALUE 'IRXJCL'.
        01  IRXEXEC-PGM                       PIC X(08) VALUE 'IRXEXEC'.
+
        01 WS-VARIABLES.
-          03 WS-POINTER                    PIC 9(8)  COMP.
-          03 WS-WORK-ADDRESS-ADR           PIC S9(8) COMP SYNC .
-          03 WS-WORK-ADDRESS-PTR           REDEFINES WS-WORK-ADDRESS-ADR
+          03  WS-POINTER                   PIC 9(8)  COMP.
+          03  WS-WORK-ADDRESS-ADR          PIC S9(8) COMP SYNC .
+          03  WS-WORK-ADDRESS-PTR          REDEFINES WS-WORK-ADDRESS-ADR
                                            USAGE IS POINTER .
-          03 ADDRESS-ECB-RETURN-CODE       PIC 9(10) .
-          03 ADDRESS-ECB-MESSAGE-CODE      PIC 9(10) .
-          03 ADDRESS-ECB-MESSAGE-LENGTH    PIC 9(10) .
-          03 ADDRESS-ECB-MESSAGE-TEXT      PIC 9(10) .
-          03 ADDRESS-REQ-SISO-INDICATOR    PIC 9(10) .
-          03 ADDRESS-REQ-CCID              PIC 9(10) .
-          03 ADDRESS-REQ-COMMENT           PIC 9(10) .
-          03 ADDRESS-REQ-USER-DATA         PIC 9(10) .
-          03 ADDRESS-REQ-ALTER-WITH-UPDATE PIC 9(10) .
-          03 WS-INSPECT-CCID               PIC X(12) .
-          03 WS-INSPECT-COMMENT            PIC X(40) .
+          03  ADDRESS-ECB-RETURN-CODE      PIC 9(10) .
+          03  ADDRESS-ECB-MESSAGE-CODE     PIC 9(10) .
+          03  ADDRESS-ECB-MESSAGE-LENGTH   PIC 9(10) .
+          03  ADDRESS-ECB-MESSAGE-TEXT     PIC 9(10) .
+          03  ADDRESS-REQ-SISO-INDICATOR   PIC 9(10) .
+          03  ADDRESS-REQ-CCID             PIC 9(10) .
+          03  ADDRESS-REQ-COMMENT          PIC 9(10) .
+          03  WS-INSPECT-CCID              PIC X(12) .
+          03  WS-INSPECT-COMMENT           PIC X(40) .
+
+
        01 BPXWDYN PIC X(8) VALUE 'BPXWDYN'.
        01 ALLOC-STRING.
           05 ALLOC-LENGTH PIC S9(4) BINARY VALUE 100.
           05 ALLOC-TEXT   PIC X(100).
+
       * The block of data below is passed to the REXX program C1UEXTR2
       * to ensure new elements are Registered.
       * The bulk of the logic is found in C1UEXTR2
        01  ELM-C1UEXTR2-PARMS-IRXJCL.
          02  ELM-EXECUTE-PARMS-IRXJCL-TOP.
-           03 PARM-LENGTH           PIC X(02) VALUE X'0FA9'.            00004500
+           03 PARM-LENGTH           PIC X(02) VALUE X'0F89'.            00004500
            03 REXX-NAME             PIC X(08) VALUE 'C1UEXTR2'.
            03 FILLER                PIC X(01) VALUE SPACE .
          02  ELM-EXECUTE-PARMS-IRXEXEC.                                 00004800
            03 WS-REXX-STATEMENTS    PIC X(4000).
+
        01  EXECBLK.
            05 EXECBLK-ACRYN                  PIC X(08) VALUE 'IRXEXECB'.
            05 EXECBLK-LENGTH                 PIC S9(8) BINARY
@@ -92,6 +94,7 @@
            05 EXECBLK-DSNPTR                 POINTER   VALUE NULL.
            05 EXECBLK-DSNLEN                 PIC 9(04) COMP
                                                        VALUE 0.
+
        01  EVALBLK.
            05 EVALBLK-EVPAD1                 PIC S9(8) BINARY
                                                        VALUE 0.
@@ -102,6 +105,7 @@
            05 EVALBLK-EVPAD2                 PIC S9(8) BINARY
                                                        VALUE 0.
            05 EVALBLK-EVDATA                 PIC X(256).
+
        01  ARGUMENT.
            02 ARGUMENT-1                     OCCURS 1 TIMES.
               05 ARGSTRING-PTR               POINTER.
@@ -110,10 +114,13 @@
                                                        VALUE -1.
            02 ARGSTRING-LAST2                PIC S9(8) BINARY
                                                        VALUE -1.
+
+
       *-----------------------------------------------------------------
        LINKAGE SECTION.
       *-----------------------------------------------------------------
        COPY EXITBLKS.
+
        PROCEDURE DIVISION USING
                           EXIT-CONTROL-BLOCK
                           REQUEST-INFO-BLOCK
@@ -123,8 +130,10 @@
                           TGT-ENVIRONMENT-BLOCK
                           TGT-ELEMENT-MASTER-INFO-BLOCK
                           TGT-FILE-CONTROL-BLOCK.
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: RETURN-CODE =' RETURN-CODE  .
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Entered'
                  ' SRC-ENV-TYPE-OF-BLOCK=' SRC-ENV-TYPE-OF-BLOCK
@@ -133,53 +142,59 @@
                  ' SRC-ENV-IO-TYPE=' SRC-ENV-IO-TYPE
                  ' TGT-ENV-IO-TYPE=' TGT-ENV-IO-TYPE
            END-IF.
+
            IF PACKAGE-INSPECT THEN GOBACK.
+
            MOVE SPACES TO WS-REXX-STATEMENTS .
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Setting up addresses ' .
+
            SET  WS-WORK-ADDRESS-PTR TO
                 ADDRESS OF ECB-RETURN-CODE .
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-ECB-RETURN-CODE .
+
            SET  WS-WORK-ADDRESS-PTR TO
                 ADDRESS OF ECB-MESSAGE-CODE.
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-ECB-MESSAGE-CODE.
+
            SET  WS-WORK-ADDRESS-PTR TO
                 ADDRESS OF ECB-MESSAGE-LENGTH.
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-ECB-MESSAGE-LENGTH .
+
            SET  WS-WORK-ADDRESS-PTR TO
                 ADDRESS OF ECB-MESSAGE-TEXT  .
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-ECB-MESSAGE-TEXT   .
+
            SET  WS-WORK-ADDRESS-PTR TO
                 ADDRESS OF REQ-CCID  .
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-REQ-CCID .
+
            SET  WS-WORK-ADDRESS-PTR TO
                 ADDRESS OF REQ-COMMENT .
            MOVE WS-WORK-ADDRESS-ADR
                                 TO ADDRESS-REQ-COMMENT .
-           SET  WS-WORK-ADDRESS-PTR TO
-                ADDRESS OF REQ-USER-DATA .
-           MOVE WS-WORK-ADDRESS-ADR
-                                TO ADDRESS-REQ-USER-DATA .
-           SET  WS-WORK-ADDRESS-PTR TO
-                ADDRESS OF REQ-ALTER-WITH-UPDATE .
-           MOVE WS-WORK-ADDRESS-ADR
-                                TO ADDRESS-REQ-ALTER-WITH-UPDATE .
+
       *****
       ***** / Convert COBOL exit block Datanames into Rexx \
       *****
       *****
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: removing quote chars ' .
+
            MOVE 1 TO WS-POINTER.
+
            INSPECT REQ-CCID               REPLACING ALL '"' BY X'7D'.
            INSPECT REQ-COMMENT            REPLACING ALL '"' BY X'7D'.
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Stringing ECB vars   ' .
+
            STRING
                   'ECB_TSO_BATCH_MODE = "'
                      DELIMITED BY SIZE
@@ -208,18 +223,6 @@
                   'Address_REQ_CCID = '
                      DELIMITED BY SIZE
                    ADDRESS-REQ-CCID
-                     DELIMITED BY SIZE
-                  ';'
-                     DELIMITED BY SIZE
-                  'Address_REQ_USER_DATA = '
-                     DELIMITED BY SIZE
-                   ADDRESS-REQ-USER-DATA
-                     DELIMITED BY SIZE
-                  ';'
-                     DELIMITED BY SIZE
-                  'Address_REQ_ALTER_WITH_UPDATE = '
-                     DELIMITED BY SIZE
-                   ADDRESS-REQ-ALTER-WITH-UPDATE
                      DELIMITED BY SIZE
                   ';'
                      DELIMITED BY SIZE
@@ -310,9 +313,11 @@
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
            END-STRING.
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Stringing SRC vars   '
                       'SRC-ENV-IO-TYPE=' SRC-ENV-IO-TYPE .
+
            IF SRC-ENV-LENGTH GREATER THAN ZERO
               MOVE SRC-ELM-ACTION-CCID TO WS-INSPECT-CCID
               INSPECT WS-INSPECT-CCID
@@ -321,6 +326,7 @@
                  WS-INSPECT-COMMENT
               INSPECT WS-INSPECT-COMMENT
                  REPLACING ALL '"' BY X'7D'
+
               INSPECT WS-INSPECT-CCID     REPLACING ALL '"' BY X'7D'
               INSPECT WS-INSPECT-COMMENT  REPLACING ALL '"' BY X'7D'
               STRING
@@ -351,6 +357,7 @@
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
               END-STRING
+
               STRING
                   'SRC_ENV_ENVIRONMENT_NAME = "'
                      DELIMITED BY SIZE
@@ -388,12 +395,6 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-                  'SRC_ENV_USER_DATA = "'
-                     DELIMITED BY SIZE
-                   SRC-ELM-USER-DATA
-                     DELIMITED BY SIZE
-                  '";'
-                     DELIMITED BY SIZE
                   'SRC_ENV_TYPE_OF_BLOCK = "'
                      DELIMITED BY SIZE
                    SRC-ENV-TYPE-OF-BLOCK
@@ -410,9 +411,11 @@
               WITH POINTER WS-POINTER
               END-STRING
               END-IF .
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Stringing TGT vars   '
            END-IF .
+
            IF TGT-ENV-LENGTH GREATER THAN ZERO
               STRING
                   'TGT_ENV_ENVIRONMENT_NAME = "'
@@ -451,12 +454,6 @@
                      DELIMITED BY SIZE
                   '";'
                      DELIMITED BY SIZE
-                  'TGT_ENV_USER_DATA = "'
-                     DELIMITED BY SIZE
-                   TGT-ELM-USER-DATA
-                     DELIMITED BY SIZE
-                  '";'
-                     DELIMITED BY SIZE
                   'TGT_ENV_TYPE_OF_BLOCK = "'
                      DELIMITED BY SIZE
                    TGT-ENV-TYPE-OF-BLOCK
@@ -484,6 +481,7 @@
               INTO   WS-REXX-STATEMENTS
               WITH POINTER WS-POINTER
               END-STRING
+
               IF TGT-ENV-TYPE-OF-BLOCK = 'C'
                  MOVE TGT-ELM-ACTION-CCID TO WS-INSPECT-CCID
                  INSPECT WS-INSPECT-CCID
@@ -492,6 +490,7 @@
                     WS-INSPECT-COMMENT
                  INSPECT WS-INSPECT-COMMENT
                     REPLACING ALL '"' BY X'7D'
+
                  STRING
                     'TGT_ELM_ACTION_CCID = "'
                        DELIMITED BY SIZE
@@ -512,9 +511,11 @@
            END-IF.
       ***** \ Convert COBOL exit block Datanames into Rexx /
       *****
+
            IF WS-TRACE = 'Y' THEN
               DISPLAY 'C1UEXT02: Calling Rexx'
            END-IF.
+
       *****IF TSO
               MOVE 'C1UEXTR2'             TO EXECBLK-MEMBER
               MOVE  4000                  TO ARGSTRING-LENGTH(1)
@@ -533,8 +534,11 @@
       *****   END-IF
       *****   PERFORM 2201-FREE-SYSEXEC
       *****END-IF .
+
            MOVE 0           TO RETURN-CODE .
+
            GOBACK.
+
        1800-REXX-CALL-VIA-IRXEXEC.
            SET ARGSTRING-PTR (1)           TO ARGUMENT-PTR .
            CALL 'SET-ARGUMENT-POINTER'  USING ARGTABLE-PTR
@@ -545,6 +549,7 @@
                                               EVALBLK .
            MOVE 536870912         TO FLAGS
            MOVE 0                 TO REXX-RETURN-CODE .
+
       *--- CALL THE REXX EXEC ---
            CALL IRXEXEC-PGM USING EXECBLK-PTR
                                   ARGTABLE-PTR
@@ -556,16 +561,20 @@
                                   DUMMY-ZERO
                                   DUMMY-ZERO
                                   REXX-RETURN-CODE.
+
            IF REXX-RETURN-CODE NOT = 0
                DISPLAY 'C1UEXT02: IRXEXEC RETURN CODE = '
                        REXX-RETURN-CODE
            END-IF
+
            CANCEL IRXEXEC-PGM
            .
+
       *****************************************************************
       **  Allocate DD REXFILE for TSO processing
       *****************************************************************
        2100-ALLOCATE-REXFILE.
+
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(REXFILE2) ',
                  'DA(YOURSITE.NDVR.REXX)'
@@ -575,10 +584,12 @@
                  INTO ALLOC-TEXT
            END-STRING.
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
+
       *****************************************************************
       **  Allocate DD SYSEXEC for batch processing
       *****************************************************************
        2101-ALLOCATE-SYSEXEC.
+
            MOVE SPACES TO ALLOC-TEXT .
            STRING 'ALLOC DD(SYSEXEC) ',
                  'DA(YOURSITE.NDVR.REXX)'
@@ -588,34 +599,45 @@
                  INTO ALLOC-TEXT
            END-STRING.
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
+
       *****************************************************************
       **  DYNAMICALLY DE-ALLOCATE UNNEEDED REXX FILES
       *****************************************************************
        2200-FREE-REXFILES.
+
            MOVE 'FREE  DD(REXFILE2)' TO ALLOC-TEXT
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
+
       *****************************************************************
       **  CALL BPXWDYN TO PREFORM REQUIRED REXX FUNCTIONS
        2201-FREE-SYSEXEC.
+
            MOVE 'FREE  DD(SYSEXEC)' TO ALLOC-TEXT
            PERFORM 9000-DYNAMIC-ALLOC-DEALLOC .
+
       *****************************************************************
       **  CALL BPXWDYN TO PREFORM REQUIRED REXX FUNCTIONS
        9000-DYNAMIC-ALLOC-DEALLOC.
+
            CALL BPXWDYN USING ALLOC-STRING
+
            IF RETURN-CODE NOT = ZERO OR
               WS-TRACE = 'Y' THEN
                DISPLAY 'C1UEXT02: ALLOCATION result: RETURN CODE = '
                        RETURN-CODE
                DISPLAY ALLOC-TEXT
            END-IF
+
            MOVE SPACES TO ALLOC-TEXT
            .
+
+
       ******************************************************************
       *  BEGIN NESTED PROGRAMS USED TO SET THE POINTERS OF DATA AREAS
       *  THAT ARE BEING PASSED TO IRXEXEC SO THAT A REXX ROUTINE CAN
       *  PASS DATA (OTHER THAN A RETURN CODE) BACK TO A COBOL PROGRAM.
       ******************************************************************
+
       ******** SET-ARG1-POINTER ********
        IDENTIFICATION DIVISION.
        PROGRAM-ID. SET-ARG1-POINTER.
@@ -625,11 +647,13 @@
        LINKAGE SECTION.
          77 ARG-PTR                        POINTER.
          77 ARG1                           PIC X(16).
+
        PROCEDURE DIVISION USING ARG-PTR
                                 ARG1.
            SET ARG-PTR TO ADDRESS OF ARG1
            GOBACK.
        END PROGRAM SET-ARG1-POINTER.
+
       ******** SET-ARGUMENT-POINTER ********
        IDENTIFICATION DIVISION.
        PROGRAM-ID. SET-ARGUMENT-POINTER.
@@ -649,6 +673,7 @@
            SET ARGTABLE-PTR TO ADDRESS OF ARGUMENT
            GOBACK.
        END PROGRAM SET-ARGUMENT-POINTER.
+
       ******** SET-EXECBLK-POINTER ********
        IDENTIFICATION DIVISION.
        PROGRAM-ID. SET-EXECBLK-POINTER.
@@ -671,6 +696,7 @@
            SET EXECBLK-PTR TO ADDRESS OF EXECBLK
            GOBACK.
        END PROGRAM SET-EXECBLK-POINTER.
+
       ******** SET-EVALBLK-POINTER ********
        IDENTIFICATION DIVISION.
        PROGRAM-ID. SET-EVALBLK-POINTER.
