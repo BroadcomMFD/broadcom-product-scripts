@@ -17,7 +17,7 @@ Install and configure the following:
       * Microsoft Office 16.0 Object library (On by default).
       * OLE Automation (On by default).
   * Obtain server address and port number to access OM Web Viewer 14.0.
-      * The minimal supported OM Web Viewer build is 14.0.68. Ensure that PTF LU11643 is applied. 
+      * The minimal supported OM Web Viewer build is 14.0.83. Ensure that PTF LU14284 is applied.
   
 ## Dependencies
 
