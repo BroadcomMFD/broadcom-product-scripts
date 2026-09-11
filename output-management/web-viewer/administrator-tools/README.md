@@ -9,7 +9,7 @@ All the included scripts have been designed to be compatible with the following 
 
 - Linux
 - Windows using Git Bash.
-  Tested with Git for Windows 2.43.0: https://git-scm.com/download/win
+  Tested with Git for Windows 2.54.0: https://git-scm.com/download/win
 - macOS with GNU Bash 5, GNU date, and GNU grep installed.
   These prerequisites can be installed for example using Homebrew, see:
     - https://formulae.brew.sh/formula/bash
