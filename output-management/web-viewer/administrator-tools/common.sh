@@ -429,11 +429,11 @@ function loadServerRepositories() {
 
         local repositories=$(mktemp)
 
-        zowe caview list repositories \
-            --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
-            --username "${_CREDENTIALS[username]}" --password "${_CREDENTIALS[password]}" \
-            --output-format csv --header false \
-            -f Identifier -f Path -f Name>"${repositories}"
+        ZOWE_OPT_USER="${_CREDENTIALS[username]}" ZOWE_OPT_PASSWORD="${_CREDENTIALS[password]}" \
+            zowe caview list repositories \
+                --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
+                --output-format csv --header false \
+                -f Identifier -f Path -f Name>"${repositories}"
 
         while read -r repositoryMetadata; do
             addRepository "${server[name]},${repositoryMetadata}"
