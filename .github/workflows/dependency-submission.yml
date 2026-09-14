@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,13 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         project-dir:
-          - './output-management/web-viewer/favorites'
-          - './output-management/web-viewer/favorites/favorites'
-          - './output-management/web-viewer/downloader'
-          - './output-management/web-viewer/downloader/application'
-          - './output-management/web-viewer/api-basics/java'
-          - './share/2022_columbus/AtoZ/email-spring-boot'
-          
+          - 'output-management/web-viewer/favorites/favorites'
+          - 'output-management/web-viewer/downloader/application'
+          - 'output-management/web-viewer/api-basics/java'
+          - 'share/2022_columbus/AtoZ/email-spring-boot'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,8 +31,24 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # Avoid failure to sdk reference
+      - name: Create Temporary Gradle Init Script
+        run: |
+          mkdir -p ~/.gradle
+          cat << 'EOF' > ~/.gradle/init.gradle
+          gradle.settingsEvaluated { settings ->
+              if (!settings.findProject(':sdk')) {
+                  settings.include(':sdk')
+                  def dummySdkDir = new File(System.getProperty('java.io.tmpdir'), 'dummy-sdk')
+                  dummySdkDir.mkdirs()
+                  settings.project(':sdk').projectDir = dummySdkDir
+              }
+          }
+          EOF
+
       - name: Submit Dependency Graph for ${{ matrix.project-dir }}
         uses: gradle/actions/dependency-submission@v3
         with:
           gradle-version: '7.6.6'
-          build-root-directory: ${{ matrix.project-dir }}
+          build-root-directory: '${{ matrix.project-dir }}'
+          workflow-job-context: '${{ toJson(matrix) }}'
