@@ -1,5 +1,8 @@
-java/target
 java/.idea/
-java/.gradle/
-java/build
 java/*.iml
+java/target
+java/build
+java/.gradle/
+java/gradle/wrapper/
+java/gradlew
+java/gradlew.bat

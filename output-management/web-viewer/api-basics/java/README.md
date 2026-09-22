@@ -7,7 +7,7 @@ Install and configure the following:
   * Java version 8 or later.
   * One of the following build tools:
     * [Maven](https://maven.apache.org/download.cgi) version 3.
-    * [Gradle](https://gradle.org/releases) version 7.
+    * [Gradle](https://gradle.org/releases) version 8 or 9.
   * Any source code editor.
   * Server address and port number to access Web Viewer 14.0.
 
@@ -29,7 +29,7 @@ The following third-party dependencies are used by the sample code:
 ### Gradle
 
   * Navigate to source root and execute the command 'gradle build' from the command line.
-  * A fat jar file with all dependencies named 'Web-Viewer-JavaSamples.jar' is built in the /build/lib folder.
+  * A fat jar file with all dependencies named 'Web-Viewer-JavaSamples.jar' is built in the /build/libs folder.
 
 ## Execute
 

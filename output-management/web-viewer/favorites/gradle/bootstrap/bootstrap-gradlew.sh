@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
 
 DIR=gradle/wrapper
-GRADLE_WRAPPER_GITHUB_URL="https://raw.githubusercontent.com/gradle/gradle/refs/tags/v8.14.3/gradle/wrapper"
+GRADLE_VERSION=9.7.1
+GRADLE_WRAPPER_GITHUB_URL="https://raw.githubusercontent.com/gradle/gradle/refs/tags/v${GRADLE_VERSION}/gradle/wrapper"
+GRADLE_DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
 
 if [ ! -f ${DIR}/gradle-wrapper.jar ]; then
     echo "Gradle wrapper not found. Attempting to download..."
@@ -14,11 +16,7 @@ if [ ! -f ${DIR}/gradle-wrapper.jar ]; then
         exit 1
     fi
 
-    curl --silent --output ${DIR}/gradle-wrapper.properties ${GRADLE_WRAPPER_GITHUB_URL}/gradle-wrapper.properties
-    if [ $? != 0 ]; then
-        echo "Gradle wrapper properties download failed. Bootstrap failed."
-        exit 2
-    fi
+    echo "distributionUrl=${GRADLE_DISTRIBUTION_URL}" > ${DIR}/gradle-wrapper.properties
 
     echo "Gradle wrapper download success. Bootstrap complete."
     exit 0
