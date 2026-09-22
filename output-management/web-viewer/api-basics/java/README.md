@@ -6,7 +6,7 @@ Install and configure the following:
 
   * Java version 8 or later.
   * One of the following build tools:
-    * [Maven](https://maven.apache.org/download.cgi) version 3.
+    * [Maven](https://maven.apache.org/download.cgi) version 3.8 or 3.9.
     * [Gradle](https://gradle.org/releases) version 8 or 9.
   * Any source code editor.
   * Server address and port number to access Web Viewer 14.0.
