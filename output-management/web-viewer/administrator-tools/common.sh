@@ -41,26 +41,27 @@ function apiLogin() {
     local serverName="$1"
     local userName="$2"
     local userPassword="$3"
-    local responseHeaders="$(mktemp)"
     local cookieJar="$(mktemp)"
+    local httpStatus
     local -A server
 
     trap 'rm -f "${cookieJar}"' RETURN
 
     getServer "server" "$serverName"
 
-    curl --request POST \
+    httpStatus=$(curl --request POST \
         --silent --show-error \
-        --output /dev/null --dump-header "${responseHeaders}" \
+        --output /dev/null \
+        --write-out "%{http_code}" \
         --cookie-jar "${cookieJar}" \
         --basic --user "${userName}:${userPassword}" \
-        "${server[api]}/v1/view/login"
+        "${server[api]}/v1/view/login")
 
     if [ $? -ne 0 ]; then
         return 1
     fi
 
-    if ! isHttpSuccess "${responseHeaders}"; then
+    if ! isHttpSuccess "${httpStatus}"; then
         return 2
     fi
 
@@ -84,8 +85,8 @@ function apiRequest() {
     local -A server
     getServer "server" "${serverName}"
 
-    local responseHeaders=$(mktemp)
     local responseBody=$(mktemp)
+    local httpStatus
 
     if [ -n "${requestBodyFile}" ]; then
         local contentType="application/json"
@@ -97,26 +98,28 @@ function apiRequest() {
             fi
         fi
 
-        curl --request "${httpMethod}" \
+        httpStatus=$(curl --request "${httpMethod}" \
             --silent --show-error \
-            --output "${responseBody}" --dump-header "${responseHeaders}" \
+            --output "${responseBody}" \
+            --write-out "%{http_code}" \
             --cookie "$(getSession "${serverName}")" \
             --header "Content-Type: ${contentType}" \
             --data @"${requestBodyFile}" \
-            "${server[api]}/${apiEndpoint}"
+            "${server[api]}/${apiEndpoint}")
     else
-        curl --request "${httpMethod}" \
+        httpStatus=$(curl --request "${httpMethod}" \
             --silent --show-error \
-            --output "${responseBody}" --dump-header "${responseHeaders}" \
+            --output "${responseBody}" \
+            --write-out "%{http_code}" \
             --cookie "$(getSession "${serverName}")" \
-            "${server[api]}/${apiEndpoint}"
+            "${server[api]}/${apiEndpoint}")
     fi
 
     if [ $? -ne 0 ]; then
         return 1
     fi
 
-    if ! isHttpSuccess "${responseHeaders}"; then
+    if ! isHttpSuccess "${httpStatus}"; then
         return 2
     fi
 
@@ -125,11 +128,9 @@ function apiRequest() {
 }
 
 function isHttpSuccess() {
-    local responseHeaders="$1"
+    local httpStatus="$1"
 
-    ${gnugrep} --extended-regexp --quiet \
-        "HTTP/[[:digit:]]\.[[:digit:]] 2[[:digit:]]{2}" \
-        "${responseHeaders}"
+    [[ "${httpStatus}" =~ ^2[0-9][0-9]$ ]]
 }
 
 function addGroup() {
