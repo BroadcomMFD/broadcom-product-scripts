@@ -16,9 +16,9 @@ import java.util.Locale;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 
 /**
  * Utility class which parses user parameters and calls the following services:
@@ -86,9 +86,12 @@ public class Demo {
     CommandLine commandLine = parser.parse(options, args);
 
     if (commandLine.hasOption(HELP)) {
-      HelpFormatter formatter = new HelpFormatter();
-      formatter.setOptionComparator(null);
-      formatter.printHelp("CLITester", options);
+      HelpFormatter formatter = HelpFormatter.builder().setShowSince(false).get();
+      try {
+        formatter.printHelp("CLITester", null, options, null, false);
+      } catch (IOException e) {
+        System.out.println("Exception while printing help: " + e.getMessage());
+      }
       return;
     }
 
