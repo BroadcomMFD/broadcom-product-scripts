@@ -17,8 +17,8 @@ jar {
 }
 
 dependencies {
-    implementation group:'org.json', name: 'json', version: '20231013'
-    implementation group:'commons-cli', name: 'commons-cli', version: '1.5.0'
+    implementation 'org.json:json:20260814'
+    implementation 'commons-cli:commons-cli:1.11.0'
 }
 
 task javadocJar(type: Jar) {
