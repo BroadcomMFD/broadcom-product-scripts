@@ -26,6 +26,8 @@ task javadocJar(type: Jar) {
     from(javadoc.destinationDir)
 }
 
+assemble.dependsOn javadocJar
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     sourceCompatibility = 1.8

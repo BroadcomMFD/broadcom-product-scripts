@@ -30,6 +30,7 @@ The following third-party dependencies are used by the sample code:
 
   * Navigate to source root and execute the command 'gradle build' from the command line.
   * A fat jar file with all dependencies named 'Web-Viewer-JavaSamples.jar' is built in the /build/libs folder.
+  * Note: A Javadoc for the code is also built, which includes details for all functions and their parameters.
 
 ## Execute
 
