@@ -274,9 +274,13 @@ function printReportInformation() {
 
     maxDigits=${#maxLines}
 
+    local safeName=$(printf '%s' "${report[name]}" | sanitizeForDisplay)
+    local safeJobName=$(printf '%s' "${report[jobname]}" | sanitizeForDisplay)
+    local safeJobId=$(printf '%s' "${report[jobid]}" | sanitizeForDisplay)
+
     printf "%s(%s) %-10s [%8s:%8s] archived %s contains %${maxDigits}d lines.\n" \
-        "${prefix}" "${server[name]}" "${report[name]}" \
-        "${report[jobname]}" "${report[jobid]}" "${report[archived]}" "${report[lines]}"
+        "${prefix}" "${server[name]}" "${safeName}" \
+        "${safeJobName}" "${safeJobId}" "${report[archived]}" "${report[lines]}"
 }
 
 function printOperationSummary() {
@@ -389,7 +393,7 @@ for reportMetadata in "${smallReports[@]}"; do
 
         if ${print} && [ $? -eq 0 ]; then
             echo "${_SEPARATOR}"
-            cat "${filePath}"
+            cat "${filePath}" | sanitizeForDisplay
             echo "${_SEPARATOR}"
         fi
     fi | sed -e 's/^/    /'

@@ -191,6 +191,13 @@ function formatDateTime() {
     ${gdate} --date="${1}"
 }
 
+# Filters standard input before it reaches the terminal. Strips C0 control bytes (including the ESC
+# byte that triggers ANSI/OSC escape sequences) from report-related content, then normalizes the
+# remainder as UTF-8, silently discarding any invalid byte sequences.
+function sanitizeForDisplay() {
+    LC_ALL=C tr -d '\000-\010\013\014\016-\037' | iconv -f UTF-8 -t UTF-8 -c || true
+}
+
 # Returns a filename that should be safe across all supported platforms.
 function getSafeFileName() {
     echo "$@" | tr '<>:"/\\|?*"' _
@@ -340,8 +347,11 @@ zowe caview list reports \
 
     formattedDateTime=$(formatDateTime "${dateTime}")
 
+    safeJobName=$(printf '%s' "${jobName}" | sanitizeForDisplay)
+    safeJobId=$(printf '%s' "${jobId}" | sanitizeForDisplay)
+
     printf "Job %8s (%8s) failed with XCode %6s on %s.\n" \
-        "${jobName}" "${jobId}" "${xcode}" "${formattedDateTime}"
+        "${safeJobName}" "${safeJobId}" "${xcode}" "${formattedDateTime}"
 
     # Download job content if requested.
     if [ ${download} -eq 1 ]; then
@@ -365,7 +375,7 @@ zowe caview list reports \
             if [ $? -eq 0 ]; then
                 echo "The following content matches were found (also saved into ${searchFile}):"
                 echo "${SEPARATOR}"
-                cat ${searchFile}
+                cat "${searchFile}" | sanitizeForDisplay
                 echo "${SEPARATOR}"
             else
                 echo "No content matches found."

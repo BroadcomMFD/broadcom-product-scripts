@@ -499,6 +499,13 @@ function readableBoolean() {
     fi
 }
 
+# Filters standard input before it reaches the terminal. Strips C0 control bytes (including the ESC
+# byte that triggers ANSI/OSC escape sequences) from report-related content, then normalizes the
+# remainder as UTF-8, silently discarding any invalid byte sequences.
+function sanitizeForDisplay() {
+    LC_ALL=C tr -d '\000-\010\013\014\016-\037' | iconv -f UTF-8 -t UTF-8 -c || true
+}
+
 ####################
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
