@@ -32,9 +32,6 @@ public class Demo {
 
   // Command line arguments.
   private static final String HELP = "h";
-  private static final String USER_NAME = "u";
-  @SuppressWarnings("squid:S2068") // does not contain hardcoded credentials
-  private static final String USER_PASSWORD = "p";
   private static final String BASE_PATH = "b";
   private static final String OPERATION = "o";
   private static final String REPORT_ID_FILTER = "fr";
@@ -48,6 +45,12 @@ public class Demo {
   private static final int OPERATION_DISPLAY_FILTERED_REPORT = 3;
   private static final String MESSAGE_TERMINATING_OPERATION = "Terminating the operation.";
   private static final String HTTPS_SCHEME_PREFIX = "https://";
+
+  // Environment variables used to supply credentials. Credentials are read from the environment,
+  // rather than accepted as command-line arguments, so that they are not exposed in the process
+  // list or persisted in shell history.
+  private static final String ENV_USER_NAME = "WV_USERNAME";
+  private static final String ENV_USER_PASSWORD = "WV_PASSWORD";
 
   /**
    * Extract command line arguments and call the requested operation.
@@ -70,8 +73,6 @@ public class Demo {
                 + System.lineSeparator()
                 + "Default: Display report content without applying indexing filters.")
         .addOption(BASE_PATH, "basePath", true, "HTTPS address and port for the application server.")
-        .addOption(USER_NAME, "user", true, "User name to authenticate.")
-        .addOption(USER_PASSWORD, "pass", true, "User password to authenticate.")
         .addOption(REPORT_ID_FILTER, true, "Filter report based on report id.")
         .addOption(ARCHIVAL_FROM_DATE_FILTER, true,
             "Filter report based on archival from-date in milliseconds.")
@@ -88,40 +89,32 @@ public class Demo {
     if (commandLine.hasOption(HELP)) {
       HelpFormatter formatter = HelpFormatter.builder().setShowSince(false).get();
       try {
-        formatter.printHelp("CLITester", null, options, null, false);
+        formatter.printHelp("CLITester", "Credentials are read from the "
+                + ENV_USER_NAME + " and " + ENV_USER_PASSWORD + " environment variables.",
+            options, null, false);
       } catch (IOException e) {
         System.out.println("Exception while printing help: " + e.getMessage());
       }
       return;
     }
 
-    String userName = null;
-    String password = null;
-    String basePath = null;
+    String userName = System.getenv(ENV_USER_NAME);
+    String password = System.getenv(ENV_USER_PASSWORD);
 
-    // Check for each required parameter.
-    if (!(commandLine.hasOption(BASE_PATH) && commandLine.hasOption(USER_NAME) && commandLine
-        .hasOption(USER_PASSWORD))) {
+    // Check for each required parameter. A blank (unset or empty) environment variable is
+    // treated the same as a missing one.
+    if (!commandLine.hasOption(BASE_PATH) || isBlank(userName) || isBlank(password)) {
       System.out.println(
-          "Missing required parameters: " + BASE_PATH + "," + USER_NAME + "," + USER_PASSWORD);
+          "Missing required parameter(s). " + BASE_PATH + " must be passed on the command line,"
+              + " and the " + ENV_USER_NAME + " and " + ENV_USER_PASSWORD
+              + " environment variables must be set.");
       return;
     }
 
-    if (commandLine.hasOption(BASE_PATH)) {
-      basePath = commandLine.getOptionValue(BASE_PATH);
-
-      if (!basePath.toLowerCase(Locale.ROOT).startsWith(HTTPS_SCHEME_PREFIX)) {
-        System.out.println("The HTTP protocol is not secure. Use HTTPS only.");
-        return;
-      }
-    }
-
-    if (commandLine.hasOption(USER_NAME)) {
-      userName = commandLine.getOptionValue(USER_NAME);
-    }
-
-    if (commandLine.hasOption(USER_PASSWORD)) {
-      password = commandLine.getOptionValue(USER_PASSWORD);
+    String basePath = commandLine.getOptionValue(BASE_PATH);
+    if (!basePath.toLowerCase(Locale.ROOT).startsWith(HTTPS_SCHEME_PREFIX)) {
+      System.out.println("The HTTP protocol is not secure. Use HTTPS only.");
+      return;
     }
 
     // Default operation: List report content without applying indexing filters.
@@ -456,6 +449,16 @@ public class Demo {
     }
 
     return sessionToken;
+  }
+
+  /**
+   * Check if the value does not contain text.
+   *
+   * @param value Value to check.
+   * @return {@code true} if the value is {@code null}, empty, or contains only whitespace.
+   */
+  private static boolean isBlank(String value) {
+    return value == null || value.trim().isEmpty();
   }
 
   /**
