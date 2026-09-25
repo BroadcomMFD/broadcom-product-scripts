@@ -84,5 +84,7 @@ Other OS:
 ### Login
 
 1. Enter the URL and confirm with "OK" to activate the application wizard.
-   URL example: `http://<HOSTNAME>:<PORT>/web-viewer`
-2. Provide your login credential to launch **"Web Viewer - Favorites" Wizard.
+   URL example: `https://<HOSTNAME>:<PORT>/web-viewer`
+   > [!NOTE]
+   > The HTTP protocol is not secure. Use HTTPS only.
+2. Provide your login credentials to launch the "Web Viewer - Favorites" wizard.

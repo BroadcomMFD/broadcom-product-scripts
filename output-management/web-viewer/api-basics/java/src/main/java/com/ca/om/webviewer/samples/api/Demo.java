@@ -12,6 +12,7 @@ import com.ca.om.webviewer.samples.api.util.ApiQueryException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -46,6 +47,7 @@ public class Demo {
   private static final int OPERATION_DISPLAY_REPORT = 2;
   private static final int OPERATION_DISPLAY_FILTERED_REPORT = 3;
   private static final String MESSAGE_TERMINATING_OPERATION = "Terminating the operation.";
+  private static final String HTTPS_SCHEME_PREFIX = "https://";
 
   /**
    * Extract command line arguments and call the requested operation.
@@ -67,7 +69,7 @@ public class Demo {
                 + " to Display report content after applying for cross-report index names and values filter. "
                 + System.lineSeparator()
                 + "Default: Display report content without applying indexing filters.")
-        .addOption(BASE_PATH, "basePath", true, "Http address and port for the application server.")
+        .addOption(BASE_PATH, "basePath", true, "HTTPS address and port for the application server.")
         .addOption(USER_NAME, "user", true, "User name to authenticate.")
         .addOption(USER_PASSWORD, "pass", true, "User password to authenticate.")
         .addOption(REPORT_ID_FILTER, true, "Filter report based on report id.")
@@ -104,6 +106,11 @@ public class Demo {
 
     if (commandLine.hasOption(BASE_PATH)) {
       basePath = commandLine.getOptionValue(BASE_PATH);
+
+      if (!basePath.toLowerCase(Locale.ROOT).startsWith(HTTPS_SCHEME_PREFIX)) {
+        System.out.println("The HTTP protocol is not secure. Use HTTPS only.");
+        return;
+      }
     }
 
     if (commandLine.hasOption(USER_NAME)) {
@@ -142,7 +149,7 @@ public class Demo {
    * <li>Log out by invalidating the session token.</li>
    * </ul>
    *
-   * @param basePath Http address and port for the application server.
+   * @param basePath HTTPS address and port for the application server.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
    */
@@ -167,7 +174,7 @@ public class Demo {
    * <li>Log out by invalidating the session token.</li>
    * </ul>
    *
-   * @param basePath Http address and port for the application server.
+   * @param basePath HTTPS address and port for the application server.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
    * @param commandLine Command-line arguments.
@@ -267,7 +274,7 @@ public class Demo {
    * <li>Log out by invalidating the session token.</li>
    * </ul>
    *
-   * @param basePath Application server HTTP address and port.
+   * @param basePath Application server HTTPS address and port.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
    * @param commandLine Command line arguments.
@@ -427,7 +434,7 @@ public class Demo {
   /**
    * Authenticate with username and password and process any error occurred.
    *
-   * @param basePath Application server HTTP address and port.
+   * @param basePath Application server HTTPS address and port.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
    * @return Generated session token (guid) or null.
@@ -451,7 +458,7 @@ public class Demo {
   /**
    * Logout from the application and process errors which may have occurred.
    *
-   * @param basePath Application server HTTP address and port.
+   * @param basePath Application server HTTPS address and port.
    * @param sessionToken Session token to be invalidated.
    */
   private static void logout(String basePath, String sessionToken) {

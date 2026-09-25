@@ -24,7 +24,7 @@ The following third-party dependencies are used by the sample code:
 
   * Navigate to source root and execute the command 'mvn clean package' from the command line.
   * A fat jar file with all dependencies named 'Web-Viewer-JavaSamples.jar' is built in the /target folder.
-  * Note: A Javadoc for the code is also built which includes details for all functions and their parameters.
+  * Note: A Javadoc for the code is also built, which includes details for all functions and their parameters.
 
 ### Gradle
 
@@ -45,21 +45,24 @@ java -jar Web-Viewer-JavaSamples.jar -h
 Execute the following command to log in and log out. Note: You can use the command to test server connectivity.
 
 ```
-java -jar Web-Viewer-JavaSamples.jar -o 1 -b <server http address and port> -u <username> -p <password> 
+java -jar Web-Viewer-JavaSamples.jar -o 1 -b <server HTTPS address and port> -u <username> -p <password>
 ```    
 
 Execute the following command to print report content. See the REST API documentation for details on parameter syntax and semantics.
 
 ```
-java -jar Web-Viewer-JavaSamples.jar -o 2 -b <server http address and port> -u <username> -p <password> -fr <name filter> -ff <arcDateFrom filter> -ft <arcDateTo filter>
+java -jar Web-Viewer-JavaSamples.jar -o 2 -b <server HTTPS address and port> -u <username> -p <password> -fr <reportName filter> -ff <arcDateFrom filter> -ft <arcDateTo filter>
 ``` 
 
 Execute the following commands to print report content and apply index filters. See the REST API documentation for details on parameter syntax and semantics. 
 
 ```
-java -jar Web-Viewer-JavaSamples.jar -o 3 -b <server http address and port> -u <username> -p <password> -fr <reportName filter> -ff <arcDateFrom filter> -ft <arcDateTo filter> -fn <nameFilter separated by ",">
-java -jar Web-Viewer-JavaSamples.jar -o 3 -b <server http address and port> -u <username> -p <password> -fr <reportName filter> -ff <arcDateFrom filter> -ft <arcDateTo filter> -fn <nameFilter separated by ","> -fv <valueFilter separated by ",">
+java -jar Web-Viewer-JavaSamples.jar -o 3 -b <server HTTPS address and port> -u <username> -p <password> -fr <reportName filter> -ff <arcDateFrom filter> -ft <arcDateTo filter> -fn <nameFilter separated by ",">
+java -jar Web-Viewer-JavaSamples.jar -o 3 -b <server HTTPS address and port> -u <username> -p <password> -fr <reportName filter> -ff <arcDateFrom filter> -ft <arcDateTo filter> -fn <nameFilter separated by ","> -fv <valueFilter separated by ",">
 ```
+
+> [!NOTE]
+> The HTTP protocol is not secure. Use HTTPS only.
 
 ## Java Package Structure
 

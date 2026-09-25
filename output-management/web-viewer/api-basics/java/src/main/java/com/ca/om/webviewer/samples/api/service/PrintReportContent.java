@@ -15,7 +15,7 @@ public class PrintReportContent {
   /**
    * Get content from a report with or without index-value filters applied.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param sessionToken Sessiong token obtained previously.
    * @param repositoryId Repository Id.
    * @param reportHandle Report handle.

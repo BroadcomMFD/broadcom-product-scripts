@@ -30,6 +30,9 @@ The example scripts are designed to act upon any number of Web Viewer 14 instanc
 deployment. Before executing any script you must define them in the `servers.txt` file.
 The file contains embedded help describing its syntax along with examples.
 
+> [!NOTE]
+> The HTTP protocol is not secure. Use HTTPS only.
+
 ## Scripts Overview
 
 To get detailed usage help for each script run them with the `--help` argument.

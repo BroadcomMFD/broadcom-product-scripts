@@ -154,7 +154,7 @@ function parseServerMetadata() {
     _server[description]=${split[4]}
     _server[group]=${split[5]}
 
-    if ! [[ "${_server[protocol]}" =~ ^https?$ ]]; then
+    if [[ "${_server[protocol]}" != "https" ]]; then
         error "Unsupported protocol '${_server[protocol]}' specified for server ${_server[name]}."
     fi
 

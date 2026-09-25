@@ -21,7 +21,7 @@ public class ListRepositories {
   /**
    * List the repositories accessible to user.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param sessionToken Session token obtained previously.
    * @return List of each repository id.
    * @throws IOException For any error that occurs while the response is read.

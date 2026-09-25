@@ -35,6 +35,9 @@ The following third-party dependencies are used by the sample code:
 2. To perform an operation, double-click any cell that contains dynamically-generated product data.
 3. Select "Log out" on the API sheet or enter "Ctrl + Shift + L" to log out.
 4. You can save your progress and continue on the same Excel worksheet. You need to re-authenticate each time that you quit or log out.
+
+> [!NOTE]
+> The HTTP protocol is not secure. Use HTTPS only.
         
 ## VBA Code Structure
 

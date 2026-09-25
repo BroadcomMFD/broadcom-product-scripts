@@ -69,8 +69,8 @@ USAGE
         Refer to the following GNU manual pages for a description and examples of the
         supported date formats for the --from and --to arguments:
 
-            Examples: http://gnu.org/software/coreutils/manual/html_node/Examples-of-date.html
-            Formats:  http://gnu.org/software/coreutils/manual/html_node/Date-input-formats.html
+            Examples: https://gnu.org/software/coreutils/manual/html_node/Examples-of-date.html
+            Formats:  https://gnu.org/software/coreutils/manual/html_node/Date-input-formats.html
 
         Note that certain special characters that can appear in report names are not supported in
         filenames on certain platforms (e.g., '?' on Windows) therefore those special characters

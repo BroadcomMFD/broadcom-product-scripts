@@ -17,7 +17,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 @Singleton
 public class Endpoint extends Common implements Initializable {
 
-  private static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[]{"http", "https"});
+  private static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[]{"https"});
 
   @FXML
   private TextField urlControl;
