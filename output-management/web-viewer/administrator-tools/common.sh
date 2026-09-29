@@ -158,6 +158,9 @@ function parseServerMetadata() {
         error "Unsupported protocol '${_server[protocol]}' specified for server ${_server[name]}."
     fi
 
+    if ! [[ "${_server[host]}" =~ ^[A-Za-z0-9._:-]+$ ]]; then
+        error "Invalid hostname '${_server[host]}' specified for server ${_server[name]}."
+    fi
     if ! [[ ${_server[port]} =~ ^[0-9]+$ && ${_server[port]} -ge 1 && ${_server[port]} -le 65535 ]]; then
         error "Invalid port '${_server[port]}' specified for server ${_server[name]}."
     fi
@@ -312,9 +315,20 @@ function checkAvailability() {
     local -A server
     getServer "server" "$serverName"
 
-    bash -c "</dev/tcp/${server[host]}/${server[port]}" 2>/dev/null
-    if [ $? -ne 0 ]; then
-        return 1
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # On macOS, server availability is determined using the nc (netcat) command
+        # with a 3-second timeout.
+        if ! nc -z -w 3 "${server[host]}" "${server[port]}" &>/dev/null; then
+            return 1
+        fi
+    else
+        # For all other platforms, it is determined using the Bash /dev/tcp feature.
+        (
+            exec 3<>"/dev/tcp/${server[host]}/${server[port]}"
+        ) 2>/dev/null
+        if [ $? -ne 0 ]; then
+            return 1
+        fi
     fi
 
     if ! apiLogin "${serverName}" "${_CREDENTIALS[username]}" "${_CREDENTIALS[password]}"; then
@@ -415,11 +429,11 @@ function loadServerRepositories() {
 
         local repositories=$(mktemp)
 
-        zowe caview list repositories \
-            --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
-            --username "${_CREDENTIALS[username]}" --password "${_CREDENTIALS[password]}" \
-            --output-format csv --header false \
-            -f Identifier -f Path -f Name>"${repositories}"
+        ZOWE_OPT_USER="${_CREDENTIALS[username]}" ZOWE_OPT_PASSWORD="${_CREDENTIALS[password]}" \
+            zowe caview list repositories \
+                --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
+                --output-format csv --header false \
+                -f Identifier -f Path -f Name>"${repositories}"
 
         while read -r repositoryMetadata; do
             addRepository "${server[name]},${repositoryMetadata}"

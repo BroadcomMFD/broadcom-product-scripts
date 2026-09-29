@@ -212,14 +212,14 @@ function findSmallReports() {
 
     local reportList=$(mktemp)
 
-    zowe caview list reports \
-        "${repository[identifier]}" \
-        --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
-        --username "${_CREDENTIALS[username]}" --password "${_CREDENTIALS[password]}" \
-        --output-format csv --header false \
-        -f JobID -f ArchivalDate -f ReportHandle -f Status -f Lines -f JobName -f ReportName  \
-        --filter-name "${reportNameFilter}" \
-        --from "${dateFrom}" --to "${dateTo}" >"${reportList}" 2>/dev/null
+    ZOWE_OPT_USER="${_CREDENTIALS[username]}" ZOWE_OPT_PASSWORD="${_CREDENTIALS[password]}" \
+        zowe caview list reports \
+            "${repository[identifier]}" \
+            --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
+            --output-format csv --header false \
+            -f JobID -f ArchivalDate -f ReportHandle -f Status -f Lines -f JobName -f ReportName  \
+            --filter-name "${reportNameFilter}" \
+            --from "${dateFrom}" --to "${dateTo}" >"${reportList}" 2>/dev/null
 
     while read -r reportMetadata; do
         local fullMetadata="${repositoryUniqueId},${reportMetadata}"
@@ -253,10 +253,10 @@ function downloadReport() {
     local fileName=$(getReportFileName "${server[name]}" "${report[name]}" "${report[jobid]}")
     _filePath="${downloadDir}/${fileName}"
 
-    zowe caview download report \
-        "${repository[identifier]}" "${report[handle]}" "${_filePath}" \
-        --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}" \
-        --username "${_CREDENTIALS[username]}" --password "${_CREDENTIALS[password]}"
+    ZOWE_OPT_USER="${_CREDENTIALS[username]}" ZOWE_OPT_PASSWORD="${_CREDENTIALS[password]}" \
+        zowe caview download report \
+            "${repository[identifier]}" "${report[handle]}" "${_filePath}" \
+            --protocol "${server[protocol]}" --hostname "${server[host]}" --port "${server[port]}"
 }
 
 function printReportInformation() {
