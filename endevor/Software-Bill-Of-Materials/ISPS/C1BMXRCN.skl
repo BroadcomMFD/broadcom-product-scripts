@@ -90,11 +90,6 @@ $$
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
 )ENDDO                                                                          
 )ELSE )DO                                                                       
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
-//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
 )IF &XMETHOD EQ XCOM THEN )DO                                                   
 //SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
 //         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
@@ -126,11 +121,6 @@ $$
 //SYSUT2   DD SYSOUT=(A,INTRDR)                                                 
 )ENDDO                                                                          
 )ELSE )DO                                                                       
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
-//SYSUT2   DD DISP=(,PASS),DSN=&&CONFJCL,                                       
-//         UNIT=SYSDA,SPACE=(TRK,(2,1)),                                        
-//         DCB=(LRECL=80,DSORG=PS)                                              
-)ENDDO                                                                          
 )IF &XMETHOD EQ XCOM THEN )DO                                                   
 //SYSUT2   DD DISP=(NEW,CATLG,DELETE),                                          
 //         DSN=&&USER..D&&DATE..T&&TIME..CONFJCL,                               
@@ -161,35 +151,6 @@ $$
  LOCALIP = ipadd                                                                
  return                                                                         
 )ENDREXX                                                                        
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)CM  Transmission method selected FTP                                           
-)CM                                                                             
-)CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
-)CM                                                                             
-)IF &XMETHOD EQ NETVIEW_FTP THEN )DO                                            
-//* *----------------------------------------------* ISPSLIB(#NFTPRCN) *        
-//*                                                                             
-//* *==================================================================*        
-//* *  FTP CONFIRMATION JCL TO HOST LPAR                                        
-//* *==================================================================*        
-//*                                                                             
-//SUBFTP01 EXEC PGM=FTP,COND=((0,GT),EVEN)                 C1BMXRCN             
-//ABNLIGNR DD DUMMY                                                             
-//SYSPRINT DD SYSOUT=*                                                          
-//SYSABEND DD SYSOUT=*                                                          
-//NETRC    DD DISP=SHR,DSN=IBMUSER.ENDEVOR.NETRC(SHIPPING)                      
-//*NETRC    DD DISP=SHR,DSN=&SYSUID..ENDEVOR.NETRC(SHIPPING)                    
-//SYSOUT   DD SYSOUT=*                                                          
-//OUTPUT   DD SYSOUT=*                                                          
-//CONFJCL  DD DISP=(OLD,DELETE),DSN=&&CONFJCL                                   
-//INPUT    DD *                                                                 
-&LOCALIP                                                                        
-SITE FILETYPE=JES                                                               
-PUT //DD:CONFJCL                                                                
-STOP                                                                            
-QUIT                                                                            
-)ENDDO                                                                          
 )CM  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
 )CM                                                                             
 )CM  Transmission method selected XCOM                                          

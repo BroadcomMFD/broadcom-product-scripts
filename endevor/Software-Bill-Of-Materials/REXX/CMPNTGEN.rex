@@ -33,7 +33,10 @@ select
                                                                                 
                                                                                 
   when TransMethod = 'NETVIEW_FTP' then do                                      
-                                                                                
+
+    Say 'CMPGEN11E Insecure FTP is not allowed as a transmission method.'      
+    Return 12                                                                  
+                                                                            
     if ExistDDname('XFTC') Then Do                                              
                                                                                 
       "execio * diskr xftc (stem xftc. finis"                                   
