@@ -50,11 +50,6 @@ Other OS:
     npm ci
 
 ### Build
-> [!CAUTION]
-> There is a [Gradle 9.x compatibility issue](https://github.com/OpenAPITools/openapi-generator/issues/22084)
-in the OpenAPI Generator. Verify that the `distributionUrl` property in the
-`gradle\wrapper\gradle-wrapper.properties` file contains `gradle-8.14.2-bin.zip`.
-If not, delete the `gradle\wrapper` folder and perform the [First-time Initialization](#first-time-initialization).
 
 Use the following commands to build the application.
 
@@ -84,3 +79,11 @@ Other OS:
 
     npm run generate-sdk
     ./gradlew run
+
+### Login
+
+1. Enter the URL and confirm with "OK" to activate the application wizard.
+   URL example: `https://<HOSTNAME>:<PORT>/web-viewer`
+   > [!NOTE]
+   > The HTTP protocol is not secure. Use HTTPS only.
+2. Provide your login credentials to launch the "Web Viewer - Download" wizard.

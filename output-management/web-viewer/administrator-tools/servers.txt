@@ -24,7 +24,8 @@
 # semicolons in the following order:
 #
 # 1. Name - Single alphanumeric word uniquely identifying the instance.
-# 2. Protocol - The protocol used to access the instance: 'https' or 'http'
+# 2. Protocol - The protocol used to access the instance: 'https'.
+#    Note: The HTTP protocol is not secure. Use HTTPS only.
 # 3. Hostname - The fully qualified instance hostname or IP address.
 # 4. Port - The (TCP) port used by the instance.
 # 5. Description - Optional instance description (can contain spaces).

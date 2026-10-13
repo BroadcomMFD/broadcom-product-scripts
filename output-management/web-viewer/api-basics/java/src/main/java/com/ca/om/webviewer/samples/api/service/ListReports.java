@@ -22,7 +22,7 @@ public class ListReports {
   /**
    * List the report with some filters.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param sessionToken Session token obtained previously.
    * @param repositoryId Repository id.
    * @param reportListFilter Object for the Report list filter.

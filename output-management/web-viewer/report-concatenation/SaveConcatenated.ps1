@@ -1,5 +1,5 @@
 <#
- # Copyright (c) 2025 Broadcom.  All rights reserved.  The term "Broadcom"
+ # Copyright (c) 2026 Broadcom.  All rights reserved.  The term "Broadcom"
  # refers to Broadcom Inc. and/or its subsidiaries.
  #
  # This software and all information contained therein is confidential and
@@ -39,7 +39,7 @@ param (
 ## Define static configuration values.
 ##
 
-# Base URL for the Web Viewer 14 instance to be used.
+# Base URL for the Web Viewer 14 instance to be used. The https:// scheme must be used.
 # Example: https://production.example.com:8443/web-viewer
 $INSTANCE = ""
 
@@ -84,6 +84,10 @@ if ($INSTANCE -Eq "") {
     throw "You must set the value of the `$INSTANCE constant in this script before use."
 }
 
+if (-Not $INSTANCE.StartsWith("https://")) {
+    throw "The HTTP protocol is not secure. Use HTTPS only."
+}
+
 if (Test-Path -Path $OutputFile) {
     throw "Output file path '${OutputFile}' already exists. Specify a different file path or delete it first."
 }
@@ -102,8 +106,7 @@ Write-Output "Logging in ..."
 $Response = Invoke-RestMethod -Method "Post" -Uri "${INSTANCE}/api/v1/view/login" `
     -SkipHttpErrorCheck -StatusCodeVariable "HttpCode" `
     -Authentication Basic -Credential $Credential `
-    -SessionVariable "ApiSession" `
-    -AllowUnencryptedAuthentication
+    -SessionVariable "ApiSession"
 CheckApiResponse "Login" $HttpCode $Response
 
 ##

@@ -83,8 +83,8 @@ USAGE
         Refer to the following GNU manual pages for a description and examples of the
         supported date formats for the --from and --to arguments:
 
-            Examples: http://gnu.org/software/coreutils/manual/html_node/Examples-of-date.html
-            Formats:  http://gnu.org/software/coreutils/manual/html_node/Date-input-formats.html
+            Examples: https://gnu.org/software/coreutils/manual/html_node/Examples-of-date.html
+            Formats:  https://gnu.org/software/coreutils/manual/html_node/Date-input-formats.html
 
         Note that certain special characters that can appear in report names are not supported in
         filenames on certain platforms (e.g., '?' on Windows) therefore those special characters
@@ -189,6 +189,13 @@ function convertDateTime() {
 # Formats date using active locale settings.
 function formatDateTime() {
     ${gdate} --date="${1}"
+}
+
+# Filters standard input before it reaches the terminal. Strips C0 control bytes (including the ESC
+# byte that triggers ANSI/OSC escape sequences) from report-related content, then normalizes the
+# remainder as UTF-8, silently discarding any invalid byte sequences.
+function sanitizeForDisplay() {
+    LC_ALL=C tr -d '\000-\010\013\014\016-\037' | iconv -f UTF-8 -t UTF-8 -c || true
 }
 
 # Returns a filename that should be safe across all supported platforms.
@@ -340,8 +347,11 @@ zowe caview list reports \
 
     formattedDateTime=$(formatDateTime "${dateTime}")
 
+    safeJobName=$(printf '%s' "${jobName}" | sanitizeForDisplay)
+    safeJobId=$(printf '%s' "${jobId}" | sanitizeForDisplay)
+
     printf "Job %8s (%8s) failed with XCode %6s on %s.\n" \
-        "${jobName}" "${jobId}" "${xcode}" "${formattedDateTime}"
+        "${safeJobName}" "${safeJobId}" "${xcode}" "${formattedDateTime}"
 
     # Download job content if requested.
     if [ ${download} -eq 1 ]; then
@@ -365,7 +375,7 @@ zowe caview list reports \
             if [ $? -eq 0 ]; then
                 echo "The following content matches were found (also saved into ${searchFile}):"
                 echo "${SEPARATOR}"
-                cat ${searchFile}
+                cat "${searchFile}" | sanitizeForDisplay
                 echo "${SEPARATOR}"
             else
                 echo "No content matches found."

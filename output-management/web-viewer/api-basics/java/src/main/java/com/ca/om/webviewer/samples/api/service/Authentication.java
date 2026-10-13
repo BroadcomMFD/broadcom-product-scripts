@@ -20,7 +20,7 @@ public class Authentication {
   /**
    * Authenticate with a username and password.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
    * @return Generated session token (guid) or null.
@@ -85,7 +85,7 @@ public class Authentication {
   /**
    * Log out - Invalidate the session token.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param sessionToken Session token to be invalidated.
    * @throws IOException For any error that occurred while the response is read.
    * @throws ApiQueryException For any unsuccessful response.

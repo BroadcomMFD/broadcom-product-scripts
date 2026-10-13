@@ -23,7 +23,7 @@ public class ListCrossReportIndex {
   /**
    * List cross-report index names with some filters applied.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param sessionToken Session token that was obtained previously.
    * @param repositoryId Repository id.
    * @param crossReportIndexNamesFilter Object for the cross-report index names filter.
@@ -97,7 +97,7 @@ public class ListCrossReportIndex {
   /**
    * List cross-report index values with some filters applied.
    *
-   * @param baseUrl Http address and port for the application server.
+   * @param baseUrl HTTPS address and port for the application server.
    * @param sessionToken Session token obtained previously.
    * @param repositoryId Repository id.
    * @param nameHandle Cross-report index name handle.
@@ -178,7 +178,7 @@ public class ListCrossReportIndex {
   /**
    * List cross-report index value reports.
    *
-   * @param baseUrl The http address and port for the application server.
+   * @param baseUrl The HTTPS address and port for the application server.
    * @param sessionToken The session token obtained previously.
    * @param repositoryId Repository id.
    * @param nameHandle Cross-report index name handle.

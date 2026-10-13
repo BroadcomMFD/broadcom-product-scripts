@@ -1,9 +1,13 @@
 {
   "name": "sample-downloader",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "2.38.0"
+    "@openapitools/openapi-generator-cli": "2.41.0"
+  },
+  "overrides": {
+    "basic-ftp": "6.2.2",
+    "shell-quote": "1.12.0"
   },
   "scripts": {
     "generate-sdk": "openapi-generator-cli generate --generator-name java --config generator.yml --input-spec api-specification.json --output sdk",

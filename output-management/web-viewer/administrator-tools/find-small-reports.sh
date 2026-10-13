@@ -69,8 +69,8 @@ USAGE
         Refer to the following GNU manual pages for a description and examples of the
         supported date formats for the --from and --to arguments:
 
-            Examples: http://gnu.org/software/coreutils/manual/html_node/Examples-of-date.html
-            Formats:  http://gnu.org/software/coreutils/manual/html_node/Date-input-formats.html
+            Examples: https://gnu.org/software/coreutils/manual/html_node/Examples-of-date.html
+            Formats:  https://gnu.org/software/coreutils/manual/html_node/Date-input-formats.html
 
         Note that certain special characters that can appear in report names are not supported in
         filenames on certain platforms (e.g., '?' on Windows) therefore those special characters
@@ -274,9 +274,13 @@ function printReportInformation() {
 
     maxDigits=${#maxLines}
 
+    local safeName=$(printf '%s' "${report[name]}" | sanitizeForDisplay)
+    local safeJobName=$(printf '%s' "${report[jobname]}" | sanitizeForDisplay)
+    local safeJobId=$(printf '%s' "${report[jobid]}" | sanitizeForDisplay)
+
     printf "%s(%s) %-10s [%8s:%8s] archived %s contains %${maxDigits}d lines.\n" \
-        "${prefix}" "${server[name]}" "${report[name]}" \
-        "${report[jobname]}" "${report[jobid]}" "${report[archived]}" "${report[lines]}"
+        "${prefix}" "${server[name]}" "${safeName}" \
+        "${safeJobName}" "${safeJobId}" "${report[archived]}" "${report[lines]}"
 }
 
 function printOperationSummary() {
@@ -389,7 +393,7 @@ for reportMetadata in "${smallReports[@]}"; do
 
         if ${print} && [ $? -eq 0 ]; then
             echo "${_SEPARATOR}"
-            cat "${filePath}"
+            cat "${filePath}" | sanitizeForDisplay
             echo "${_SEPARATOR}"
         fi
     fi | sed -e 's/^/    /'
