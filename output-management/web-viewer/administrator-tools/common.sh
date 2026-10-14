@@ -32,7 +32,7 @@ declare -A _STATUS
 # Value is the repository metadata as supported by parseRepositoryMetadata().
 declare -A _REPOSITORIES
 # Authenticated session for each Server.
-# Key is server name. Value is the session cookie as a "name=value" string.
+# Key is server name. Value is the cookie jar received at login.
 declare -A _SESSIONS
 # User credentials (username and password).
 declare -A _CREDENTIALS
@@ -41,19 +41,17 @@ function apiLogin() {
     local serverName="$1"
     local userName="$2"
     local userPassword="$3"
-    local cookieJar="$(mktemp)"
-    local httpStatus
+    local response
     local -A server
-
-    trap 'rm -f "${cookieJar}"' RETURN
 
     getServer "server" "$serverName"
 
-    httpStatus=$(curl --request POST \
+    # The cookie jar is written to standard output, after the HTTP status and a | separator, to keep it off disk.
+    response=$(curl --request POST \
         --silent --show-error \
         --output /dev/null \
-        --write-out "%{http_code}" \
-        --cookie-jar "${cookieJar}" \
+        --write-out "%{http_code}|" \
+        --cookie-jar - \
         --basic --user "${userName}:${userPassword}" \
         "${server[api]}/v1/view/login")
 
@@ -61,18 +59,19 @@ function apiLogin() {
         return 1
     fi
 
+    local httpStatus="${response%%|*}"
+    local cookieJar="${response#*|}"
+
     if ! isHttpSuccess "${httpStatus}"; then
         return 2
     fi
 
-    local sessionCookie
-    sessionCookie=$(awk -F'\t' '$6 ~ /brcmwv_s_d[0-9]+$/ { print $6"="$7 }' "${cookieJar}")
-
-    if [ -z "${sessionCookie}" ]; then
+    # If there is no tab-separated cookie entry, the cookie jar is empty
+    if [[ "${cookieJar}" != *$'\t'* ]]; then
         return 3
     fi
 
-    saveSession "${serverName}" "${sessionCookie}"
+    saveSession "${serverName}" "${cookieJar}"
     return 0
 }
 
@@ -98,20 +97,20 @@ function apiRequest() {
             fi
         fi
 
-        httpStatus=$(curl --request "${httpMethod}" \
+        httpStatus=$(getSession "${serverName}" | curl --request "${httpMethod}" \
             --silent --show-error \
             --output "${responseBody}" \
             --write-out "%{http_code}" \
-            --cookie "$(getSession "${serverName}")" \
+            --cookie - \
             --header "Content-Type: ${contentType}" \
             --data @"${requestBodyFile}" \
             "${server[api]}/${apiEndpoint}")
     else
-        httpStatus=$(curl --request "${httpMethod}" \
+        httpStatus=$(getSession "${serverName}" | curl --request "${httpMethod}" \
             --silent --show-error \
             --output "${responseBody}" \
             --write-out "%{http_code}" \
-            --cookie "$(getSession "${serverName}")" \
+            --cookie - \
             "${server[api]}/${apiEndpoint}")
     fi
 
@@ -303,9 +302,9 @@ function isServerOld() {
 
 function saveSession() {
     local serverName="$1"
-    local sessionCookie="$2"
+    local cookieJar="$2"
 
-    _SESSIONS[${serverName}]="${sessionCookie}"
+    _SESSIONS[${serverName}]="${cookieJar}"
 }
 
 function getSession() {
