@@ -46,13 +46,17 @@ function apiLogin() {
 
     getServer "server" "$serverName"
 
+    local basicCredentials
+    basicCredentials=$(printf '%s' "${userName}:${userPassword}" | base64 | tr -d '\n')
+
     # The cookie jar is written to standard output, after the HTTP status and a | separator, to keep it off disk.
-    response=$(curl --request POST \
+    # The Basic credentials are sent on standard input, so that they do not show up in the process list.
+    response=$(printf 'Authorization: Basic %s\n' "${basicCredentials}" | curl --request POST \
         --silent --show-error \
         --output /dev/null \
         --write-out "%{http_code}|" \
         --cookie-jar - \
-        --basic --user "${userName}:${userPassword}" \
+        --header @- \
         "${server[api]}/v1/view/login")
 
     if [ $? -ne 0 ]; then
