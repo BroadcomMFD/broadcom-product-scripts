@@ -18,7 +18,7 @@ dependencies {
 
     implementation 'com.google.inject:guice:7.0.0'
     // override of the vulnerable transitive dependency of guice
-    implementation 'com.google.guava:guava:33.4.8-jre'
+    implementation 'com.google.guava:guava:33.7.1-jre'
 
     implementation 'commons-io:commons-io:2.22.0'
     implementation 'commons-validator:commons-validator:1.10.1'
