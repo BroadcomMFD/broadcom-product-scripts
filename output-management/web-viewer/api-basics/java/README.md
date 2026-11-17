@@ -51,9 +51,8 @@ sample from that same session:
 
 * Linux / macOS: `source credentials.env`
 * Windows (PowerShell): `. .\credentials.env.ps1`
-  > [!NOTE]
-  > The leading dot is required, and it must be followed by a space. Without it the variables are
-  > discarded, and the sample reports missing credentials.
+  > Note: The leading dot is required, and it must be followed by a space. Without it the variables
+  > are discarded, and the sample reports missing credentials.
 
 ## Execute
 

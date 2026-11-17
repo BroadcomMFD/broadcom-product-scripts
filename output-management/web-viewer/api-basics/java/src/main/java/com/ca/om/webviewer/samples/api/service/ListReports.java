@@ -23,19 +23,17 @@ public class ListReports {
    * List the report with some filters.
    *
    * @param baseUrl HTTPS address and port for the application server.
-   * @param sessionToken Session token obtained previously.
    * @param repositoryId Repository id.
    * @param reportListFilter Object for the Report list filter.
    * @return List of reports retrieved or an empty array list.
    * @throws IOException For any error that occurs while the response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static List<String> listReportsWithFilters(String baseUrl, String sessionToken,
+  public static List<String> listReportsWithFilters(String baseUrl,
       int repositoryId, ReportListFilter reportListFilter)
       throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
     assert repositoryId != 0;
     assert reportListFilter != null;
 
@@ -46,7 +44,7 @@ public class ListReports {
         .getQueryParameters();
 
     // Execute the GET request and process the response based on the http status.
-    RequestUtility.getListAndProcess(address, sessionToken, result -> {
+    RequestUtility.getListAndProcess(address, result -> {
       // Process successful response.
 
       // From the result, extract and print the report count.

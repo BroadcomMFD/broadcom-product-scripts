@@ -22,16 +22,14 @@ public class ListRepositories {
    * List the repositories accessible to user.
    *
    * @param baseUrl HTTPS address and port for the application server.
-   * @param sessionToken Session token obtained previously.
    * @return List of each repository id.
    * @throws IOException For any error that occurs while the response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static List<Integer> listRepository(String baseUrl, String sessionToken)
+  public static List<Integer> listRepository(String baseUrl)
       throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
 
     // Compose the address for the GET repository list operation.
     String address = baseUrl + ApiConstants.LIST_REPOSITORY;
@@ -39,7 +37,7 @@ public class ListRepositories {
     List<Integer> repositoryList = new ArrayList<>();
 
     // Execute the GET request and process the response based on the returned http status.
-    RequestUtility.getListAndProcess(address, sessionToken, result -> {
+    RequestUtility.getListAndProcess(address, result -> {
       // Process successful response.
 
       // From the result, extract and print the number of repositories.

@@ -49,6 +49,12 @@ Other OS:
     gradle/bootstrap/bootstrap-gradlew.sh
     npm ci
 
+> [!NOTE]
+> This sample's `.npmrc` sets `ignore-scripts=true`, so `npm ci` does not run any install
+> scripts (`preinstall`, `install`, `postinstall`, `prepare`) of the downloaded packages.
+> Scripts you start yourself, such as `npm run generate-sdk`, still run.
+> Do not turn this setting off unless you have reviewed the specific package script you need.
+
 ### Build
 
 Use the following commands to build the application.
@@ -84,6 +90,5 @@ Other OS:
 
 1. Enter the URL and confirm with "OK" to activate the application wizard.
    URL example: `https://<HOSTNAME>:<PORT>/web-viewer`
-   > [!NOTE]
-   > The HTTP protocol is not secure. Use HTTPS only.
+   > Note: The HTTP protocol is not secure. Use HTTPS only.
 2. Provide your login credentials to launch the "Web Viewer - Download" wizard.

@@ -87,8 +87,8 @@ public class Login extends Common implements Initializable {
    *
    * <p>If authentication fails the stage remains open and the user can retry.</p>
    *
-   * <p>On success the shared {@link org.openapitools.client.ApiClient} instance is configured
-   * with the resulting session token (guid).</p>
+   * <p>On success the shared {@link org.openapitools.client.ApiClient} instance's cookie jar
+   * captures the resulting session cookie automatically.</p>
    *
    * @param onAuthenticated Callback executed if the authentication is successful.
    */

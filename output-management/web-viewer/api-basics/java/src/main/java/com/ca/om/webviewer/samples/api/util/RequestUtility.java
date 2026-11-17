@@ -61,16 +61,17 @@ public class RequestUtility {
 
   /**
    * Set up an http connection for the requested address, and process the response based on the http
-   * status. For a Successful response, extract the JSON text, call the callBack function, and print
-   * each message. For any error, throw an ApiQueryException.
+   * status. For a successful response, extract the JSON text, call the callback function, and print
+   * each message. For any error, throw an {@link ApiQueryException}. The authentication is provided
+   * by session cookie (obtained during login), which is attached automatically by a cookie handler
+   * configured in {@link com.ca.om.webviewer.samples.api.service.Authentication}.
    *
    * @param address REST API request address.
-   * @param sessionToken Session token to authenticate.
    * @param successfulResponseProcessor Consumer object for the Successful response call-back.
    * @throws IOException For any error that occurs while the response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static void getListAndProcess(String address, String sessionToken,
+  public static void getListAndProcess(String address,
       Consumer<JSONObject> successfulResponseProcessor) throws IOException, ApiQueryException {
 
     // Set up the http connection for the requested address.
@@ -79,9 +80,6 @@ public class RequestUtility {
 
     // Set the request type to GET.
     connection.setRequestMethod("GET");
-
-    // Pass the session token to authenticate.
-    connection.setRequestProperty("guid", sessionToken);
 
     // Execute the request and get the response code.
     int httpStatus = connection.getResponseCode();
