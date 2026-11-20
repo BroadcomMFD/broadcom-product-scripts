@@ -6,7 +6,9 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+}
 
 // Overrides the vulnerable SnakeYAML version inherited by Spring Boot 2.7
 ext['snakeyaml.version'] = '2.0'
@@ -20,7 +22,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	
-	implementation "org.zowe.apiml.sdk:onboarding-enabler-spring:2.19.3"
+	implementation "org.zowe.apiml.sdk:onboarding-enabler-spring:3.6.6"
 	
 	// Upgraded to patch Guava and Jackson vulnerabilities
 	implementation "io.springfox:springfox-swagger2:2.9.2"
@@ -31,8 +33,10 @@ dependencies {
 	implementation "org.projectlombok:lombok:1.18.30"
 	annotationProcessor "org.projectlombok:lombok:1.18.30"
 
+	// Required by the onboarding-enabler logback-spring.xml (OpenTelemetry appender)
+	implementation "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.34.0-alpha"
+
 	implementation "com.google.guava:guava:33.7.2-jre"
-	implementation "commons-lang:commons-lang:3.18.0"
 	implementation "org.apache.commons:commons-lang3:3.18.0"
 }
 
