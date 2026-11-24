@@ -31,8 +31,8 @@ declare -A _STATUS
 # Key is concatenated server name and repository id.
 # Value is the repository metadata as supported by parseRepositoryMetadata().
 declare -A _REPOSITORIES
-# Authenticated session token for each Server.
-# Key is server name. Value is a session token.
+# Authenticated session for each Server.
+# Key is server name. Value is the cookie jar received at login.
 declare -A _SESSIONS
 # User credentials (username and password).
 declare -A _CREDENTIALS
@@ -41,33 +41,41 @@ function apiLogin() {
     local serverName="$1"
     local userName="$2"
     local userPassword="$3"
-    local responseHeaders="$(mktemp)"
+    local response
     local -A server
 
     getServer "server" "$serverName"
 
-    curl --request POST \
+    local basicCredentials
+    basicCredentials=$(printf '%s' "${userName}:${userPassword}" | base64 | tr -d '\n')
+
+    # The cookie jar is written to standard output, after the HTTP status and a | separator, to keep it off disk.
+    # The Basic credentials are sent on standard input, so that they do not show up in the process list.
+    response=$(printf 'Authorization: Basic %s\n' "${basicCredentials}" | curl --request POST \
         --silent --show-error \
-        --output /dev/null --dump-header "${responseHeaders}" \
-        --basic --user "${userName}:${userPassword}" \
-        "${server[api]}/v1/view/login" 
+        --output /dev/null \
+        --write-out "%{http_code}|" \
+        --cookie-jar - \
+        --header @- \
+        "${server[api]}/v1/view/login")
 
     if [ $? -ne 0 ]; then
         return 1
     fi
 
-    if ! isHttpSuccess "${responseHeaders}"; then
+    local httpStatus="${response%%|*}"
+    local cookieJar="${response#*|}"
+
+    if ! isHttpSuccess "${httpStatus}"; then
         return 2
     fi
 
-    local guid
-    guid=$(sed -nr 's/^guid: ([[:alnum:]]{64})[[:space:]]*$/\1/p' "${responseHeaders}" | tr -d '\r\n')
-
-    if [ -z "${guid}" ]; then
+    # If there is no tab-separated cookie entry, the cookie jar is empty
+    if [[ "${cookieJar}" != *$'\t'* ]]; then
         return 3
     fi
 
-    saveSession "${serverName}" "${guid}"
+    saveSession "${serverName}" "${cookieJar}"
     return 0
 }
 
@@ -80,8 +88,8 @@ function apiRequest() {
     local -A server
     getServer "server" "${serverName}"
 
-    local responseHeaders=$(mktemp)
     local responseBody=$(mktemp)
+    local httpStatus
 
     if [ -n "${requestBodyFile}" ]; then
         local contentType="application/json"
@@ -93,26 +101,28 @@ function apiRequest() {
             fi
         fi
 
-        curl --request "${httpMethod}" \
+        httpStatus=$(getSession "${serverName}" | curl --request "${httpMethod}" \
             --silent --show-error \
-            --output "${responseBody}" --dump-header "${responseHeaders}" \
-            --header "guid: $(getSession "${serverName}")" \
+            --output "${responseBody}" \
+            --write-out "%{http_code}" \
+            --cookie - \
             --header "Content-Type: ${contentType}" \
             --data @"${requestBodyFile}" \
-            "${server[api]}/${apiEndpoint}"
+            "${server[api]}/${apiEndpoint}")
     else
-        curl --request "${httpMethod}" \
+        httpStatus=$(getSession "${serverName}" | curl --request "${httpMethod}" \
             --silent --show-error \
-            --output "${responseBody}" --dump-header "${responseHeaders}" \
-            --header "guid: $(getSession "${serverName}")" \
-            "${server[api]}/${apiEndpoint}"
+            --output "${responseBody}" \
+            --write-out "%{http_code}" \
+            --cookie - \
+            "${server[api]}/${apiEndpoint}")
     fi
 
     if [ $? -ne 0 ]; then
         return 1
     fi
 
-    if ! isHttpSuccess "${responseHeaders}"; then
+    if ! isHttpSuccess "${httpStatus}"; then
         return 2
     fi
 
@@ -121,11 +131,9 @@ function apiRequest() {
 }
 
 function isHttpSuccess() {
-    local responseHeaders="$1"
+    local httpStatus="$1"
 
-    ${gnugrep} --extended-regexp --quiet \
-        "HTTP/[[:digit:]]\.[[:digit:]] 2[[:digit:]]{2}" \
-        "${responseHeaders}"
+    [[ "${httpStatus}" =~ ^2[0-9][0-9]$ ]]
 }
 
 function addGroup() {
@@ -298,9 +306,9 @@ function isServerOld() {
 
 function saveSession() {
     local serverName="$1"
-    local guid="$2"
+    local cookieJar="$2"
 
-    _SESSIONS[${serverName}]="${guid}"
+    _SESSIONS[${serverName}]="${cookieJar}"
 }
 
 function getSession() {

@@ -1,3 +1,5 @@
+credentials.env
+credentials.env.ps1
 java/.idea/
 java/*.iml
 java/target

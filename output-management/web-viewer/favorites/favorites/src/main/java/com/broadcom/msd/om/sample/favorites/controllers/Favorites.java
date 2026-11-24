@@ -26,6 +26,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import lombok.NonNull;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.model.Report;
 
@@ -137,6 +138,23 @@ public class Favorites extends Common implements Initializable {
     taskProgress.runTask(task);
   }
 
+  private Path sanitizeFileName(@NonNull String name) throws IOException {
+    StringBuilder fileName = new StringBuilder();
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!(Character.isISOControl(c) || "<>:\"/\\|?*".indexOf(c) >= 0)) {
+        fileName.append(c);
+      }
+    }
+
+    Path base = Paths.get("").toAbsolutePath().normalize();
+    Path target = base.resolve(fileName.toString()).normalize();
+    if (!target.startsWith(base) || base.equals(target)) {
+      throw new IOException("Invalid File Name");
+    }
+    return target;
+  }
+
   private void downloadReport(Favorite favorite, Report report) throws ApiException, IOException {
     final String reportName = report.getReportID();
     final String archivalDate = formatArchivalDate(report);
@@ -147,9 +165,9 @@ public class Favorites extends Common implements Initializable {
     final String extension = favorite.isPdf() ? PDF_EXTENSION : TEXT_EXTENSION;
     Path target;
     if (favorite.isCombine()) {
-      target = Paths.get(String.format("%s.%s", favorite.getName(), extension));
+      target = sanitizeFileName(String.format("%s.%s", favorite.getName(), extension));
     } else {
-      target = Paths.get(String.format("%s-%s.%s", reportName, archivalDate, extension));
+      target = sanitizeFileName(String.format("%s-%s.%s", reportName, archivalDate, extension));
     }
 
     if (favorite.isCombine()) {

@@ -7,6 +7,8 @@ import com.ca.om.webviewer.samples.api.util.ApiQueryException;
 import com.ca.om.webviewer.samples.api.util.RequestUtility;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
@@ -14,8 +16,16 @@ import org.json.JSONObject;
 
 /**
  * Log in and log out of the application.
+ * <p>
+ * The session is carried by an HttpOnly cookie. A default {@link CookieHandler} makes every
+ * {@link HttpURLConnection} in this process store the cookie from the login response and resend it
+ * automatically on subsequent requests, for the duration of the process lifetime.
  */
 public class Authentication {
+
+  static {
+    CookieHandler.setDefault(new CookieManager());
+  }
 
   /**
    * Authenticate with a username and password.
@@ -23,11 +33,10 @@ public class Authentication {
    * @param baseUrl HTTPS address and port for the application server.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
-   * @return Generated session token (guid) or null.
    * @throws IOException For any error that occurs while the response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static String loginWithUserName(String baseUrl, String username, String password)
+  public static void loginWithUserName(String baseUrl, String username, String password)
       throws ApiQueryException, IOException {
 
     assert baseUrl != null;
@@ -35,7 +44,6 @@ public class Authentication {
     assert password != null;
 
     String address = baseUrl + ApiConstants.LOGIN;
-    String sessionToken;
 
     // Set up the http connection.
     URL url = new URL(address);
@@ -57,14 +65,7 @@ public class Authentication {
       throw new ApiQueryException(connection);
     }
 
-    // Retrieve the session token (guid) from the response header.
-    sessionToken = connection.getHeaderField("guid");
-
-    // Each successful Login request generates a session token.
-    if (sessionToken != null) {
-      System.out.println("Login Successful");
-      System.out.println("Generated sessionToken: " + sessionToken);
-    }
+    System.out.println("Login Successful");
 
     // Read the Successful response body and convert it to JSON for processing.
     final JSONObject jsonObject = RequestUtility
@@ -78,23 +79,19 @@ public class Authentication {
 
     // Terminate the connection and release each resource.
     connection.disconnect();
-
-    return sessionToken;
   }
 
   /**
-   * Log out - Invalidate the session token.
+   * Log out - Invalidate the session.
    *
    * @param baseUrl HTTPS address and port for the application server.
-   * @param sessionToken Session token to be invalidated.
    * @throws IOException For any error that occurred while the response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static void logout(String baseUrl, String sessionToken)
+  public static void logout(String baseUrl)
       throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
 
     String address = baseUrl + ApiConstants.LOGOUT;
 
@@ -105,8 +102,7 @@ public class Authentication {
     // POST is the request type for the Logout operation.
     connection.setRequestMethod("POST");
 
-    // Pass the session token (guid) to be invalidated.
-    connection.setRequestProperty("guid", sessionToken);
+    // The session cookie is attached automatically by the default CookieHandler.
 
     // Execute the request and get the response code.
     int httpStatus = connection.getResponseCode();

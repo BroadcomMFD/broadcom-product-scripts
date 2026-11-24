@@ -14,6 +14,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
 import org.openapitools.client.*;
 import org.openapitools.client.api.*;
 import org.openapitools.client.model.*;
@@ -50,10 +53,33 @@ public class Api {
     }
     this.gson = gson;
 
+    apiClient.setHttpClient(apiClient.getHttpClient().newBuilder()
+        .cookieJar(new InMemoryCookieJar())
+        .build());
+
     reportActionsApi = new ReportActionsApi(apiClient);
     repositoriesApi = new RepositoriesApi(apiClient);
     reportsApi = new ReportsApi(apiClient);
     userApi = new RepositoryUsersApi(apiClient);
+  }
+
+  /**
+   * In-memory-only {@link CookieJar}: cookies live for as long as this object is referenced (i.e.
+   * one run of this application) and are never persisted to disk.
+   */
+  private static class InMemoryCookieJar implements CookieJar {
+
+    private final Map<String, List<Cookie>> cookies = new HashMap<>();
+
+    @Override
+    public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+      this.cookies.put(url.host(), cookies);
+    }
+
+    @Override
+    public List<Cookie> loadForRequest(HttpUrl url) {
+      return cookies.getOrDefault(url.host(), Collections.emptyList());
+    }
   }
 
   /**
@@ -185,8 +211,8 @@ public class Api {
   }
 
   /**
-   * Executes a login against the Web Viewer instance and configures the API client to use the
-   * resulting session token (guid).
+   * Executes a login against the Web Viewer instance. The resulting session cookie is captured
+   * and replayed automatically by the {@link ApiClient}'s {@link InMemoryCookieJar}.
    *
    * @param username Username.
    * @param password Password.
@@ -200,10 +226,7 @@ public class Api {
       log.debug("Logging in as user {}", username);
 
       final AuthenticationApi authenticationApi = new AuthenticationApi(apiClient);
-      ApiResponse<LoginResponse> result = authenticationApi.loginWithHttpInfo(null, null);
-
-      final String guid = result.getHeaders().get("guid").get(0);
-      apiClient.setApiKey(guid);
+      authenticationApi.loginWithHttpInfo(null, null);
     } finally {
       apiClient.setPassword(null);
     }

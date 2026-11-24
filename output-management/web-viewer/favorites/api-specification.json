@@ -151,7 +151,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -228,7 +228,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -336,7 +336,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -452,7 +452,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -558,7 +558,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -693,7 +693,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -768,7 +768,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -866,7 +866,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -1078,7 +1078,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -1320,7 +1320,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -1426,7 +1426,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -1561,7 +1561,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -1636,7 +1636,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -1734,7 +1734,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -1745,7 +1745,7 @@
           "Authentication"
         ],
         "summary": "Log out",
-        "description": "Log out a user. Log out should be the last call to the API as the session token (guid) is no longer valid after the user is logged out.\n\n**Note**: If a log out call is not made, the session token will time out if no API calls are made within the expiration period.",
+        "description": "Log out a user. Log out should be the last call to the API as the session is no longer valid after the user is logged out.\n\n**Note**: If a log out call is not made, the session token will time out if no API calls are made within the expiration period.",
         "operationId": "logout",
         "responses": {
           "200": {
@@ -1757,7 +1757,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -1768,7 +1768,7 @@
           "Authentication"
         ],
         "summary": "Log in",
-        "description": "Log in a user. Should be the first call to the API as the session token (guid) is required by most other API operations. When the session token is no longer needed, use the log out operation to end the session.\n\n**Note**: If a log out call is not made, the session token will time out if no API calls are made within the expiration period.",
+        "description": "Log in a user. Should be the first call to the API as an authenticated session is required by most other API operations. When the session is no longer needed, use the log out operation to invalidate it.\n\n**Note**: If a log out call is not made, the session token will time out if no API calls are made within the expiration period.",
         "operationId": "login",
         "parameters": [
           {
@@ -1801,15 +1801,6 @@
         "responses": {
           "200": {
             "description": "Log in completed successfully.",
-            "headers": {
-              "guid": {
-                "description": "Session token.",
-                "style": "simple",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1930,7 +1921,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       },
@@ -2025,7 +2016,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -2252,7 +2243,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -2403,7 +2394,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -2533,7 +2524,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -2636,7 +2627,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -2747,7 +2738,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -2866,7 +2857,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -3087,7 +3078,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -3288,7 +3279,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -3477,7 +3468,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -3534,7 +3525,7 @@
         },
         "security": [
           {
-            "guid": []
+            "cookie": []
           }
         ]
       }
@@ -6537,10 +6528,10 @@
         "type": "http",
         "scheme": "Basic"
       },
-      "guid": {
+      "cookie": {
         "type": "apiKey",
-        "name": "guid",
-        "in": "header"
+        "name": "SessionCookie",
+        "in": "cookie"
       }
     }
   }
