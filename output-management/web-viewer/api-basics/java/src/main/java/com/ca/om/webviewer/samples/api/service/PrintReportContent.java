@@ -16,17 +16,15 @@ public class PrintReportContent {
    * Get content from a report with or without index-value filters applied.
    *
    * @param baseUrl HTTPS address and port for the application server.
-   * @param sessionToken Sessiong token obtained previously.
    * @param repositoryId Repository Id.
    * @param reportHandle Report handle.
    * @throws IOException For any error that occurs while the response is read.
    * @throws ApiQueryException For any Unsuccessful response.
    */
-  public static void printReportContent(String baseUrl, String sessionToken, int repositoryId,
+  public static void printReportContent(String baseUrl, int repositoryId,
       String reportHandle) throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
     assert repositoryId != 0;
     assert reportHandle != null;
 
@@ -35,7 +33,7 @@ public class PrintReportContent {
         baseUrl + ApiConstants.PRINT_REPORT_DATA + "/" + repositoryId + "/" + reportHandle;
 
     // Execute the GET request and process the response based on the http status.
-    RequestUtility.getListAndProcess(address, sessionToken, result -> {
+    RequestUtility.getListAndProcess(address, result -> {
       // Process Successful response.
 
       // From the result, extract and print the number of report lines.

@@ -25,6 +25,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.13.1'
 
     implementation project(':sdk')
+    // cookie jar for usage with the generated API SDK
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 compileJava {

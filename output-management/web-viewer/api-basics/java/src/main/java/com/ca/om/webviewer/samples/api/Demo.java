@@ -32,9 +32,6 @@ public class Demo {
 
   // Command line arguments.
   private static final String HELP = "h";
-  private static final String USER_NAME = "u";
-  @SuppressWarnings("squid:S2068") // does not contain hardcoded credentials
-  private static final String USER_PASSWORD = "p";
   private static final String BASE_PATH = "b";
   private static final String OPERATION = "o";
   private static final String REPORT_ID_FILTER = "fr";
@@ -48,6 +45,12 @@ public class Demo {
   private static final int OPERATION_DISPLAY_FILTERED_REPORT = 3;
   private static final String MESSAGE_TERMINATING_OPERATION = "Terminating the operation.";
   private static final String HTTPS_SCHEME_PREFIX = "https://";
+
+  // Environment variables used to supply credentials. Credentials are read from the environment,
+  // rather than accepted as command-line arguments, so that they are not exposed in the process
+  // list or persisted in shell history.
+  private static final String ENV_USER_NAME = "WV_USERNAME";
+  private static final String ENV_USER_PASSWORD = "WV_PASSWORD";
 
   /**
    * Extract command line arguments and call the requested operation.
@@ -70,8 +73,6 @@ public class Demo {
                 + System.lineSeparator()
                 + "Default: Display report content without applying indexing filters.")
         .addOption(BASE_PATH, "basePath", true, "HTTPS address and port for the application server.")
-        .addOption(USER_NAME, "user", true, "User name to authenticate.")
-        .addOption(USER_PASSWORD, "pass", true, "User password to authenticate.")
         .addOption(REPORT_ID_FILTER, true, "Filter report based on report id.")
         .addOption(ARCHIVAL_FROM_DATE_FILTER, true,
             "Filter report based on archival from-date in milliseconds.")
@@ -88,40 +89,32 @@ public class Demo {
     if (commandLine.hasOption(HELP)) {
       HelpFormatter formatter = HelpFormatter.builder().setShowSince(false).get();
       try {
-        formatter.printHelp("CLITester", null, options, null, false);
+        formatter.printHelp("CLITester", "Credentials are read from the "
+                + ENV_USER_NAME + " and " + ENV_USER_PASSWORD + " environment variables.",
+            options, null, false);
       } catch (IOException e) {
         System.out.println("Exception while printing help: " + e.getMessage());
       }
       return;
     }
 
-    String userName = null;
-    String password = null;
-    String basePath = null;
+    String userName = System.getenv(ENV_USER_NAME);
+    String password = System.getenv(ENV_USER_PASSWORD);
 
-    // Check for each required parameter.
-    if (!(commandLine.hasOption(BASE_PATH) && commandLine.hasOption(USER_NAME) && commandLine
-        .hasOption(USER_PASSWORD))) {
+    // Check for each required parameter. A blank (unset or empty) environment variable is
+    // treated the same as a missing one.
+    if (!commandLine.hasOption(BASE_PATH) || isBlank(userName) || isBlank(password)) {
       System.out.println(
-          "Missing required parameters: " + BASE_PATH + "," + USER_NAME + "," + USER_PASSWORD);
+          "Missing required parameter(s). " + BASE_PATH + " must be passed on the command line,"
+              + " and the " + ENV_USER_NAME + " and " + ENV_USER_PASSWORD
+              + " environment variables must be set.");
       return;
     }
 
-    if (commandLine.hasOption(BASE_PATH)) {
-      basePath = commandLine.getOptionValue(BASE_PATH);
-
-      if (!basePath.toLowerCase(Locale.ROOT).startsWith(HTTPS_SCHEME_PREFIX)) {
-        System.out.println("The HTTP protocol is not secure. Use HTTPS only.");
-        return;
-      }
-    }
-
-    if (commandLine.hasOption(USER_NAME)) {
-      userName = commandLine.getOptionValue(USER_NAME);
-    }
-
-    if (commandLine.hasOption(USER_PASSWORD)) {
-      password = commandLine.getOptionValue(USER_PASSWORD);
+    String basePath = commandLine.getOptionValue(BASE_PATH);
+    if (!basePath.toLowerCase(Locale.ROOT).startsWith(HTTPS_SCHEME_PREFIX)) {
+      System.out.println("The HTTP protocol is not secure. Use HTTPS only.");
+      return;
     }
 
     // Default operation: List report content without applying indexing filters.
@@ -158,11 +151,11 @@ public class Demo {
    */
   private static void loginAndLogout(String basePath, String username, String password) {
     // Authenticate with username and password.
-    String sessionToken = login(basePath, username, password);
+    boolean authenticated = login(basePath, username, password);
 
-    // Log out by invalidating the session token.
-    if (sessionToken != null) {
-      logout(basePath, sessionToken);
+    // Log out by invalidating the session.
+    if (authenticated) {
+      logout(basePath);
     }
   }
 
@@ -203,10 +196,10 @@ public class Demo {
     }
 
     // Authenticate with username and password.
-    String sessionToken = login(basePath, username, password);
+    boolean authenticated = login(basePath, username, password);
 
     // If authentication is unsuccessful, then return.
-    if (sessionToken == null) {
+    if (!authenticated) {
       System.out.println("User not authenticated. " + MESSAGE_TERMINATING_OPERATION);
       return;
     }
@@ -214,7 +207,7 @@ public class Demo {
     try {
       // List the repositories which are accessible to the user.
       System.out.println(System.lineSeparator() + "Listing repositories.");
-      List<Integer> repositoryIds = ListRepositories.listRepository(basePath, sessionToken);
+      List<Integer> repositoryIds = ListRepositories.listRepository(basePath);
 
       // If no repository is found, then return.
       if (repositoryIds.isEmpty()) {
@@ -231,7 +224,7 @@ public class Demo {
         System.out
             .println(System.lineSeparator() + "Listing reports for repository id " + repositoryId);
         reportHandles = ListReports
-            .listReportsWithFilters(basePath, sessionToken, repositoryId, reportListFilter);
+            .listReportsWithFilters(basePath, repositoryId, reportListFilter);
         if (!reportHandles.isEmpty()) {
           selectedRepositoryId = repositoryId;
           break;
@@ -250,7 +243,7 @@ public class Demo {
           System.lineSeparator() + "Displaying the content of report for report handle "
               + reportHandle);
       PrintReportContent
-          .printReportContent(basePath, sessionToken, selectedRepositoryId, reportHandle);
+          .printReportContent(basePath, selectedRepositoryId, reportHandle);
 
     } catch (IOException e) {
       System.out.println("Exception during http processing: " + e.getMessage());
@@ -259,8 +252,8 @@ public class Demo {
           .getHttpStatus() + ". Error message: " + e.getApplicationErrorMessages());
     }
 
-    // Log out by invalidating the session token.
-    logout(basePath, sessionToken);
+    // Log out by invalidating the session.
+    logout(basePath);
   }
 
 
@@ -321,10 +314,10 @@ public class Demo {
     }
 
     // Authenticate with username and password.
-    String sessionToken = login(basePath, username, password);
+    boolean authenticated = login(basePath, username, password);
 
     // If authentication is not successful then return.
-    if (sessionToken == null) {
+    if (!authenticated) {
       System.out.println("User not authenticated. " + MESSAGE_TERMINATING_OPERATION);
       return;
     }
@@ -332,7 +325,7 @@ public class Demo {
     try {
       // List the repository accessible to the user.
       System.out.println(System.lineSeparator() + "Listing repositories.");
-      List<Integer> repositoryIds = ListRepositories.listRepository(basePath, sessionToken);
+      List<Integer> repositoryIds = ListRepositories.listRepository(basePath);
 
       // If no repository found then return.
       if (repositoryIds.isEmpty()) {
@@ -350,7 +343,7 @@ public class Demo {
             System.lineSeparator() + "Listing cross-report index names for repositoryId "
                 + repositoryId);
         crossReportIndexNamesHandles = ListCrossReportIndex
-            .listCrossReportIndexNames(basePath, sessionToken, repositoryId,
+            .listCrossReportIndexNames(basePath, repositoryId,
                 crossReportIndexNamesFilter);
 
         if (!crossReportIndexNamesHandles.isEmpty()) {
@@ -375,7 +368,7 @@ public class Demo {
             System.lineSeparator() + "Listing cross-report index values for nameHandle "
                 + crossReportIndexNamesHandle);
         crossReportIndexValuesHandles = ListCrossReportIndex
-            .listCrossReportIndexValues(basePath, sessionToken, selectedRepositoryId,
+            .listCrossReportIndexValues(basePath, selectedRepositoryId,
                 crossReportIndexNamesHandle, crossReportIndexValuesFilter);
 
         if (!crossReportIndexValuesHandles.isEmpty()) {
@@ -399,7 +392,7 @@ public class Demo {
             System.lineSeparator() + "Listing cross-report index values reports for valueHandle "
                 + crossReportIndexValuesHandle);
         crossReportIndexValueReportsHandles = ListCrossReportIndex
-            .listCrossReportIndexValueReports(basePath, sessionToken, selectedRepositoryId,
+            .listCrossReportIndexValueReports(basePath, selectedRepositoryId,
                 selectedCrossReportIndexNamesHandle, crossReportIndexValuesHandle);
 
         if (!crossReportIndexValueReportsHandles.isEmpty()) {
@@ -419,7 +412,7 @@ public class Demo {
       System.out.println(System.lineSeparator()
           + "Displaying the content of report for cross report index value reportHandle "
           + crossReportIndexValueReportHandle);
-      PrintReportContent.printReportContent(basePath, sessionToken, selectedRepositoryId,
+      PrintReportContent.printReportContent(basePath, selectedRepositoryId,
           crossReportIndexValueReportHandle);
 
     } catch (IOException e) {
@@ -430,8 +423,8 @@ public class Demo {
               .getHttpStatus() + ". Error message: " + e.getApplicationErrorMessages());
     }
 
-    // Log out by invalidating the session token.
-    logout(basePath, sessionToken);
+    // Log out by invalidating the session.
+    logout(basePath);
   }
 
   /**
@@ -440,13 +433,13 @@ public class Demo {
    * @param basePath Application server HTTPS address and port.
    * @param username User id to authenticate.
    * @param password User password to authenticate.
-   * @return Generated session token (guid) or null.
+   * @return {@code true} if authentication succeeded, {@code false} otherwise.
    */
-  private static String login(String basePath, String username, String password) {
+  private static boolean login(String basePath, String username, String password) {
     System.out.println("Authenticating with username and password." + System.lineSeparator());
-    String sessionToken = null;
     try {
-      sessionToken = Authentication.loginWithUserName(basePath, username, password);
+      Authentication.loginWithUserName(basePath, username, password);
+      return true;
     } catch (IOException e) {
       System.out.println("Exception during http processing: " + e.getMessage());
     } catch (ApiQueryException e) {
@@ -455,22 +448,28 @@ public class Demo {
               + ". Error message: " + e.getApplicationErrorMessages());
     }
 
-    return sessionToken;
+    return false;
+  }
+
+  /**
+   * Check if the value does not contain text.
+   *
+   * @param value Value to check.
+   * @return {@code true} if the value is {@code null}, empty, or contains only whitespace.
+   */
+  private static boolean isBlank(String value) {
+    return value == null || value.trim().isEmpty();
   }
 
   /**
    * Logout from the application and process errors which may have occurred.
    *
    * @param basePath Application server HTTPS address and port.
-   * @param sessionToken Session token to be invalidated.
    */
-  private static void logout(String basePath, String sessionToken) {
-
-    assert sessionToken != null;
-
-    System.out.println("Logging out - invalidating the session token." + System.lineSeparator());
+  private static void logout(String basePath) {
+    System.out.println("Logging out - invalidating the session." + System.lineSeparator());
     try {
-      Authentication.logout(basePath, sessionToken);
+      Authentication.logout(basePath);
     } catch (IOException e) {
       System.out.println("Exception during http processing: " + e.getMessage());
     } catch (ApiQueryException e) {

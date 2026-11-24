@@ -11,7 +11,7 @@ public class ApiConstants {
   // Authenticate with a username and password.
   public static final String LOGIN = CONTEXT_ROOT + "api/v1/view/login";
 
-  // Log out - invalidate the guid (session token).
+  // Log out - invalidate the session.
   public static final String LOGOUT = CONTEXT_ROOT + "api/v1/view/logout";
 
   // List repositories.

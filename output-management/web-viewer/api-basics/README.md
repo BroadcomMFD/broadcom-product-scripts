@@ -7,7 +7,7 @@ Web Viewer REST API:
 
   * Authentication
     * Authenticate with a username and password.
-    * Log out - invalidate the guid (session token).
+    * Log out - invalidate the session.
   * Search for Reports
     * List repositories.
     * List reports and apply a subset of filters.

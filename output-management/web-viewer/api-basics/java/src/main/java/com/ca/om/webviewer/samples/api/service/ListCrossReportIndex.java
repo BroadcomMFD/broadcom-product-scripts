@@ -24,19 +24,17 @@ public class ListCrossReportIndex {
    * List cross-report index names with some filters applied.
    *
    * @param baseUrl HTTPS address and port for the application server.
-   * @param sessionToken Session token that was obtained previously.
    * @param repositoryId Repository id.
    * @param crossReportIndexNamesFilter Object for the cross-report index names filter.
    * @return List of cross-report index names retrieved or an empty array list.
    * @throws IOException For any error that occurred while the response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static List<String> listCrossReportIndexNames(String baseUrl, String sessionToken,
+  public static List<String> listCrossReportIndexNames(String baseUrl,
       int repositoryId, CrossReportIndexNamesFilter crossReportIndexNamesFilter)
       throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
     assert repositoryId != 0;
     assert crossReportIndexNamesFilter != null;
 
@@ -48,7 +46,7 @@ public class ListCrossReportIndex {
     List<String> crossReportIndexNameHandles = new ArrayList<>();
 
     // Execute the GET request and process the response based on the http status.
-    RequestUtility.getListAndProcess(address, sessionToken, result -> {
+    RequestUtility.getListAndProcess(address, result -> {
       // Process a successful response.
 
       // From the result, extract and print the total number of cross-report index names.
@@ -98,7 +96,6 @@ public class ListCrossReportIndex {
    * List cross-report index values with some filters applied.
    *
    * @param baseUrl HTTPS address and port for the application server.
-   * @param sessionToken Session token obtained previously.
    * @param repositoryId Repository id.
    * @param nameHandle Cross-report index name handle.
    * @param crossReportIndexValuesFilter Filter object for cross-report index values.
@@ -106,13 +103,12 @@ public class ListCrossReportIndex {
    * @throws IOException For any error that occurred while response is read.
    * @throws ApiQueryException For any unsuccessful response.
    */
-  public static List<String> listCrossReportIndexValues(String baseUrl, String sessionToken,
+  public static List<String> listCrossReportIndexValues(String baseUrl,
       int repositoryId, String nameHandle,
       CrossReportIndexValuesFilter crossReportIndexValuesFilter)
       throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
     assert repositoryId != 0;
     assert nameHandle != null;
     assert crossReportIndexValuesFilter != null;
@@ -126,7 +122,7 @@ public class ListCrossReportIndex {
     List<String> crossReportIndexValueHandles = new ArrayList<>();
 
     // Execute the GET request and process the response based on the http status.
-    RequestUtility.getListAndProcess(address, sessionToken, result -> {
+    RequestUtility.getListAndProcess(address, result -> {
       // Process a Successful response.
 
       // From the result, extract and print the number of cross-report index values.
@@ -179,7 +175,6 @@ public class ListCrossReportIndex {
    * List cross-report index value reports.
    *
    * @param baseUrl The HTTPS address and port for the application server.
-   * @param sessionToken The session token obtained previously.
    * @param repositoryId Repository id.
    * @param nameHandle Cross-report index name handle.
    * @param valueHandle Cross-report index value handle.
@@ -188,11 +183,10 @@ public class ListCrossReportIndex {
    * @throws ApiQueryException For any Unsuccessful response.
    */
   public static List<String> listCrossReportIndexValueReports(String baseUrl,
-      String sessionToken, int repositoryId, String nameHandle, String valueHandle)
+      int repositoryId, String nameHandle, String valueHandle)
       throws IOException, ApiQueryException {
 
     assert baseUrl != null;
-    assert sessionToken != null;
     assert repositoryId != 0;
     assert nameHandle != null;
     assert valueHandle != null;
@@ -205,7 +199,7 @@ public class ListCrossReportIndex {
     List<String> crossReportIndexReportHandles = new ArrayList<>();
 
     // Execute the GET request and process the response based on the http status.
-    RequestUtility.getListAndProcess(address, sessionToken, result -> {
+    RequestUtility.getListAndProcess(address, result -> {
       // Process the Successful response.
 
       // From the result, extract and print the number of reports that contain a cross-report index value.

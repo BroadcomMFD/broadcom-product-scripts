@@ -63,6 +63,6 @@ Examples of some static content are available in the [examples](examples) direct
 
 ### Find Small Reports
 
-The `find-small-reports.sh` script allows you to search for reports that are shorter, in number of
-lines, than a specified threshold. This can be useful in identifying unused business report jobs
-that only contain headers/footers and could be decomissioned.
+The `find-small-reports.sh` script allows you to search for reports that are shorter, in terms of
+the number of lines, than a specified threshold. This can be useful in identifying unused business
+report jobs that only contain headers/footers and could be decommissioned.
